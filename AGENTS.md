@@ -75,6 +75,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - No mezclar decisiones de producto con decisiones tecnicas sin dejar claras las dependencias.
 - Priorizar documentos y entregables accionables frente a texto ambiguo o decorativo.
 - Hacer explicitos supuestos, riesgos, dependencias y preguntas abiertas.
+- Limitar lectura y escritura al directorio del proyecto `/opt/apps/podencoti`.
 
 ## Flujo de trabajo entre equipos
 

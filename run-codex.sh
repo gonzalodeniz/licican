@@ -18,4 +18,4 @@ if [ -z "${GITHUB_PAT:-}" ]; then
   exit 1
 fi
 
-exec codex "$@"
+exec codex --dangerously-bypass-approvals-and-sandbox "$@"
