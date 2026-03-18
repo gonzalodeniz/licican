@@ -1,35 +1,42 @@
 # Documentacion de `doc-teams`
 
 ## Objetivo
-Centralizar la documentacion oficial del proyecto `PodencoTI` diferenciando claramente entre audiencia usuaria, tecnica y de administracion.
+Centralizar la documentacion oficial de `PodencoTI` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
 Fecha de revision: `2026-03-18`.
 
-Esta carpeta documenta el estado real observable de la rama `main`. En esta revision se ha detectado que `main` conserva la vision de producto y artefactos funcionales, pero no contiene la implementacion fuente versionada que describian algunos manuales previos.
+Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision si existe una entrega minima ejecutable, pero su alcance es acotado:
+
+- Vista HTML de cobertura inicial del MVP (`PB-007`).
+- API JSON de cobertura de fuentes.
+- Vista HTML de clasificacion TI auditable (`PB-006`).
+- API JSON de reglas y ejemplos auditados de clasificacion TI.
+
+No existe todavia un catalogo de oportunidades, ficha de detalle, filtros, alertas ni pipeline de seguimiento.
 
 ## Audiencias cubiertas
 - Usuario final o stakeholder funcional: [manual-usuario.md](manual-usuario.md)
 - Equipo tecnico: [manual-tecnico.md](manual-tecnico.md)
 - Administracion u operacion: [manual-administracion.md](manual-administracion.md)
 - Preparacion local reproducible: [guia-instalacion.md](guia-instalacion.md)
-- Despliegue y publicacion operativa: [guia-despliegue.md](guia-despliegue.md)
+- Despliegue y limites de publicacion: [guia-despliegue.md](guia-despliegue.md)
 - Preguntas frecuentes y contradicciones: [faq.md](faq.md)
 - Terminologia transversal del proyecto: [glosario.md](glosario.md)
 
 ## Hallazgos principales de esta revision
-- `product-manager/` describe una vision y un backlog futuros validos como fuente funcional, pero esas capacidades no estan implementadas en `main`.
-- `main` no contiene ficheros fuente Python trazables bajo `src/podencoti/` ni pruebas versionadas bajo `tests/`; solo aparecen artefactos `__pycache__` no versionados en el arbol local.
-- `make run` falla con `No module named podencoti.app`.
-- `python3 -m unittest discover -s tests -v` no descubre pruebas y termina con `NO TESTS RAN`.
-- El paquete editable puede instalarse porque existe la configuracion minima en `pyproject.toml`, pero esa instalacion no habilita la aplicacion descrita en los manuales anteriores.
+- `main` contiene implementacion Python versionada en `src/podencoti/`, datos en `data/` y pruebas automatizadas en `tests/`.
+- `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 15 pruebas y finaliza correctamente.
+- `make test` tambien funciona en un entorno con `.venv` disponible.
+- `make run` arranca un servidor WSGI local en `http://127.0.0.1:8000`.
+- Las rutas verificables hoy son `/`, `/api/fuentes`, `/clasificacion-ti` y `/api/clasificacion-ti`.
 
 ## Dependencias y contradicciones abiertas
-- La descripcion de la entrega tecnica en `README.md` de raiz no coincide con el contenido actual observable de `main`.
-- `changelog/2026-03-17.md` y `changelog/2026-03-18.md` hablan de una implementacion y unas pruebas que no estan presentes en esta rama en el momento de la revision.
-- La vision del producto mantiene capacidades futuras como catalogo, filtros, alertas y pipeline, pero no deben documentarse como comportamiento disponible.
+- La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero esas capacidades aun no estan implementadas en `main`.
+- El `README.md` de raiz estaba desfasado al presentar la entrega como si solo cubriera `PB-007`; en esta revision se corrige para incluir tambien `PB-006`.
+- `changelog/2026-03-18.md` contiene entradas previas que afirman que `main` no tenia implementacion versionada y otras que hablan de un catalogo validado con rutas como `/api/oportunidades`; ninguna de esas afirmaciones coincide con el codigo actual revisado en esta rama.
 
 ## Criterio documental aplicado
 - Se documenta solo lo verificable en `main`.
-- Las contradicciones entre vision, historial y estado real se dejan explicitas.
-- Cuando una capacidad pertenece al backlog pero no al producto actual, se marca como pendiente o no disponible.
+- Las capacidades futuras se mantienen referenciadas como backlog, no como comportamiento disponible.
+- Las contradicciones entre documentacion funcional, historial operativo y estado tecnico actual se dejan explicitas.

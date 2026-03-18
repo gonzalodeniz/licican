@@ -79,7 +79,10 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 
 ## Entrega tecnica actual
 
-La primera entrega tecnica funcional implementa `PB-007` con una base minima en Python para hacer visible y verificable la cobertura inicial de fuentes del MVP.
+La entrega tecnica vigente en `main` cubre dos piezas previas al catalogo del MVP:
+
+- `PB-007`: cobertura inicial visible y verificable de fuentes del MVP.
+- `PB-006`: regla de clasificacion TI auditable con ejemplos verificables.
 
 ### Como ejecutar la vista de cobertura
 
@@ -91,6 +94,18 @@ Luego se puede abrir:
 
 - `http://127.0.0.1:8000/` para la vista HTML de cobertura
 - `http://127.0.0.1:8000/api/fuentes` para la salida JSON trazable a la configuracion
+- `http://127.0.0.1:8000/clasificacion-ti` para la vista HTML de clasificacion TI auditable
+- `http://127.0.0.1:8000/api/clasificacion-ti` para la salida JSON de reglas y ejemplos auditados
+
+## Capacidades aun no implementadas en `main`
+
+Aunque formen parte de la vision y del backlog, todavia no existen en esta rama:
+
+- catalogo de oportunidades TI
+- ficha de detalle de licitacion
+- filtros funcionales
+- alertas tempranas
+- pipeline de seguimiento
 
 ### Como ejecutar las pruebas tecnicas
 

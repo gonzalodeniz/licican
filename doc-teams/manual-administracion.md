@@ -1,48 +1,59 @@
 # Manual de administracion y operacion
 
 ## Publico objetivo
-Persona responsable de preparar el entorno local, verificar el estado operativo de `main` y mantener expectativas correctas sobre lo que realmente puede ponerse en marcha.
+Persona responsable de preparar el entorno local, arrancar la entrega minima actual y verificar que las superficies visibles responden como se espera.
 
 ## Alcance operativo actual
-En la revision actual de `main` no hay un servicio de aplicacion arrancable desde el repositorio. Este manual documenta la verificacion de esa limitacion y los controles minimos para no asumir una operacion inexistente.
+En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. Su alcance operativo es de validacion local y demostracion funcional temprana; no equivale a una operacion productiva completa.
 
 ## Prerequisitos
 - Acceso al arbol del proyecto en `/opt/apps/podencoti`.
 - `python3` compatible con `>=3.12`.
-- `make` si se quieren usar los objetivos definidos en `Makefile`.
+- Entorno virtual activo o directorio `.venv/` disponible si se va a usar `make`.
+- `make` para usar los objetivos definidos en `Makefile`.
 
-## Verificaciones reproducibles
+## Arranque local reproducible
 Desde la raiz del proyecto:
 
 ```bash
 cd /opt/apps/podencoti
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install -e .
-python3 -m unittest discover -s tests -v
-make run
 make test
+make run
 ```
 
 ## Resultado esperado en esta revision
-- La instalacion editable termina correctamente.
-- La ejecucion de pruebas devuelve `NO TESTS RAN`.
-- `make test` falla porque no hay pruebas descubiertas.
-- `make run` falla porque no existe el modulo `podencoti.app`.
+- `make test` ejecuta 15 pruebas y termina en verde.
+- `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:8000`.
+- Mientras el proceso esta levantado, las rutas `/`, `/api/fuentes`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
+
+## Verificaciones operativas minimas
+- Abrir `http://127.0.0.1:8000/` para revisar la cobertura inicial del MVP.
+- Abrir `http://127.0.0.1:8000/clasificacion-ti` para revisar la regla TI auditable.
+- Consultar las salidas JSON para integracion basica o soporte QA:
+  - `http://127.0.0.1:8000/api/fuentes`
+  - `http://127.0.0.1:8000/api/clasificacion-ti`
+
+## Parada controlada
+- Interrumpe el proceso con `Ctrl+C`.
+- La aplicacion imprime `Servidor detenido de forma controlada.`.
 
 ## Operacion no disponible
 No existe en `main`:
-- servicio HTTP arrancable
-- unidad `systemd`
-- supervisor de procesos
-- contenedor
-- healthcheck
-- procedimiento de despliegue reproducible
+- servicio gestionado con `systemd`
+- contenedor o `Dockerfile`
+- proxy inverso documentado
+- observabilidad o healthcheck dedicado
+- procedimiento de backup o rollback
+- despliegue productivo validado
 
 ## Riesgos operativos
-- Comunicar que el producto esta desplegable desde `main` induciria a error.
-- Usar como referencia manuales anteriores sin esta correccion puede provocar intentos fallidos de arranque, validacion o soporte.
-- La ausencia de fuentes y pruebas versionadas impide una administracion tecnica normal del producto.
+- Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
+- Comunicar que el producto ya ofrece catalogo, filtros o pipeline induciria a error.
+- El changelog contiene entradas contradictorias; para soporte operativo debe prevalecer el codigo y las verificaciones reproducibles de esta rama.
 
 ## Dependencias abiertas para administracion
-- Reintegracion de la aplicacion ejecutable en `main`.
-- Reposicion de pruebas versionadas y datos operativos si siguen formando parte de la entrega objetivo.
-- Alineacion posterior entre `README.md`, `Makefile` y los procedimientos de operacion cuando la implementacion vuelva a estar disponible.
+- Definir estrategia de despliegue productivo cuando exista una aplicacion mas alla del servidor local de demostracion.
+- Incorporar mecanismos de configuracion, supervision y observabilidad cuando el alcance operativo lo requiera.

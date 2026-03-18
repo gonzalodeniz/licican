@@ -1,15 +1,21 @@
 # Manual de usuario
 
 ## Publico objetivo
-Usuario final, stakeholder funcional o persona de negocio que necesita entender que puede utilizar hoy en la rama `main`.
+Stakeholder funcional, producto o persona usuaria interna que necesita entender que se puede consultar hoy en la rama `main`.
 
 ## Estado actual para usuario
-En la rama `main` no hay una interfaz de usuario ejecutable ni un catalogo navegable de oportunidades TI verificable desde el repositorio actual.
+La rama `main` expone una entrega minima navegable orientada a validacion funcional temprana, no un producto de uso final completo.
 
 ## Que si existe hoy
-- Vision de producto y alcance funcional en `product-manager/`.
-- Reglas de coordinacion del repositorio en `AGENTS.md`.
-- Documentacion operativa y tecnica en `doc-teams/`.
+- Una vista HTML de cobertura inicial del MVP en `/`.
+- Una salida JSON de esa cobertura en `/api/fuentes`.
+- Una vista HTML de clasificacion TI auditable en `/clasificacion-ti`.
+- Una salida JSON de reglas y ejemplos auditados en `/api/clasificacion-ti`.
+
+## Que permite validar esta entrega
+- Que la cobertura inicial del MVP esta acotada a fuentes `MVP`, `Posterior` y `Por definir`.
+- Que la comunicacion del producto no presenta cobertura total del ecosistema canario.
+- Que la regla de relevancia TI muestra inclusiones, exclusiones y casos frontera auditables antes del catalogo.
 
 ## Que no esta disponible hoy en `main`
 - Catalogo de oportunidades TI.
@@ -17,14 +23,14 @@ En la rama `main` no hay una interfaz de usuario ejecutable ni un catalogo naveg
 - Filtros por palabra clave, presupuesto, procedimiento o ubicacion.
 - Alertas tempranas.
 - Pipeline de seguimiento.
-- Vista HTML o API ejecutable de cobertura de fuentes.
+- Gestion de usuarios o autenticacion.
 
 ## Como interpretar la documentacion funcional
-Los documentos de `product-manager/` describen la vision, el backlog y el comportamiento esperado del producto a medio plazo. No deben interpretarse como funcionalidades ya disponibles para uso final en esta rama.
+Los documentos de `product-manager/` siguen siendo la fuente funcional para vision, backlog, historias y casos de uso. Deben leerse como alcance esperado del producto, no como evidencia de que esas funcionalidades ya esten disponibles en esta entrega.
 
 ## Limitaciones relevantes para usuario
-- `README.md` de raiz menciona una entrega tecnica minima y rutas HTTP locales, pero ese comportamiento no es reproducible en el estado actual de `main`.
-- Si se intenta arrancar la aplicacion con `make run`, el repositorio devuelve un error porque no existe el modulo `podencoti.app` en esta rama.
+- Las superficies actuales estan pensadas para validacion de cobertura y de regla TI, no para operar licitaciones reales extremo a extremo.
+- Algunas entradas historicas del repositorio hablan de un catalogo ya validado, pero ese comportamiento no aparece en el codigo actual de `main`.
 
 ## Recomendacion de uso
-Hasta que `developer-teams` vuelva a integrar una entrega ejecutable en `main`, la documentacion util para usuario o stakeholder es la de vision, backlog y roadmap, no un manual de operacion del producto.
+Para demos o revision funcional temprana, utiliza las dos vistas HTML actuales. Para capacidades de negocio pendientes, toma como referencia `product-manager/roadmap.md` y `product-manager/product-backlog.md`.

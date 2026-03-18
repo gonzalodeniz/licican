@@ -1,43 +1,45 @@
 # Guia de despliegue
 
 ## Publico objetivo
-Persona responsable de publicar, exponer o poner en servicio `PodencoTI` en un entorno distinto al local.
+Persona responsable de publicar o exponer `PodencoTI` fuera de un entorno local de desarrollo.
 
 ## Estado actual del despliegue
-En la rama `main` no existe una aplicacion desplegable de forma reproducible. Esta guia documenta esa limitacion para evitar procedimientos de despliegue ficticios o no verificables.
+La rama `main` si contiene una aplicacion arrancable, pero solo existe un mecanismo de ejecucion local con `wsgiref.simple_server`. No hay artefactos suficientes para documentar un despliegue productivo reproducible sin caer en especulacion.
 
 ## Verificacion previa obligatoria
-Antes de intentar cualquier despliegue, confirma desde la raiz del proyecto:
+Antes de plantear cualquier publicacion, confirma desde la raiz del proyecto:
 
 ```bash
 cd /opt/apps/podencoti
+source .venv/bin/activate
 python3 -m pip install -e .
-make run
 make test
+timeout 2s make run
 ```
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
-- `make run` falla con `No module named podencoti.app`.
-- `make test` falla porque no se descubren pruebas y termina con `NO TESTS RAN`.
+- `make test` ejecuta 15 pruebas en verde.
+- `make run` arranca el servidor local y queda a la escucha hasta que se interrumpe el proceso.
 
 ## Conclusion operativa
-No debe intentarse un despliegue en servidor, contenedor, servicio gestionado o entorno de preproduccion con el contenido actual de `main`, porque falta la aplicacion versionada que deberia exponerse.
+Solo debe considerarse soportado el arranque local de validacion. No hay base documental suficiente para prometer despliegue en servidor, contenedor o plataforma gestionada.
 
 ## Elementos de despliegue no disponibles
-- comando de arranque funcional
+- servidor WSGI de produccion
 - fichero de configuracion de entorno
 - servicio `systemd`
 - definicion de contenedor
-- proxy inverso o configuracion de publicacion
+- proxy inverso documentado
+- healthcheck dedicado
 - procedimiento de rollback
-- healthcheck
 
-## Dependencias abiertas para habilitar despliegue
-- Reintegrar en `main` la aplicacion ejecutable que el `README.md` de raiz describe.
-- Reincorporar pruebas versionadas para validar una entrega antes de publicarla.
-- Alinear `README.md`, `Makefile` y esta guia cuando exista una superficie de ejecucion real.
+## Dependencias abiertas para habilitar despliegue real
+- Definir la topologia de publicacion objetivo.
+- Externalizar configuracion si aparecen puertos, credenciales o integraciones.
+- Incorporar operativa de proceso, observabilidad y recuperacion.
+- Revisar de nuevo esta guia cuando el alcance supere la demo local actual.
 
 ## Riesgos
-- Cualquier intento de documentar despliegue real hoy seria especulativo.
-- Prometer una publicacion operativa con el estado actual de `main` generaria una expectativa falsa frente a producto, QA y administracion.
+- Documentar hoy un despliegue real seria inventar decisiones tecnicas no presentes en el repositorio.
+- Comunicar la entrega actual como lista para produccion desalinearia a documentacion, QA y producto.

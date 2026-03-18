@@ -1,10 +1,10 @@
 # Guia de instalacion
 
 ## Publico objetivo
-Equipo tecnico o persona de soporte que necesita preparar el repositorio en local y comprobar de forma reproducible el estado actual de `main`.
+Equipo tecnico, QA o soporte que necesita preparar el proyecto en local de forma reproducible.
 
 ## Objetivo real de esta guia
-Esta guia no instala una aplicacion funcional completa de `PodencoTI` porque esa implementacion no esta presente en la rama revisada. Su objetivo es dejar preparado el entorno y verificar exactamente hasta donde llega hoy el repositorio.
+Instalar la entrega minima actual de `PodencoTI`, dejar operativo el entorno local y verificar sus rutas visibles y su suite tecnica.
 
 ## Prerequisitos
 - Sistema con `python3`.
@@ -12,13 +12,13 @@ Esta guia no instala una aplicacion funcional completa de `PodencoTI` porque esa
 - Acceso local al repositorio en `/opt/apps/podencoti`.
 
 ## Preparacion local
-1. Situa la terminal en la raiz del proyecto:
+1. Situate en la raiz del proyecto:
 
 ```bash
 cd /opt/apps/podencoti
 ```
 
-2. Crea un entorno virtual si quieres aislar la instalacion:
+2. Crea el entorno virtual recomendado:
 
 ```bash
 python3 -m venv .venv
@@ -32,14 +32,14 @@ python3 -m pip install -e .
 ```
 
 ## Verificaciones posteriores
-1. Comprueba el descubrimiento de pruebas:
+1. Ejecuta la suite tecnica:
 
 ```bash
-python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
 Resultado esperado en esta revision:
-- `NO TESTS RAN`
+- 15 pruebas en verde
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 
@@ -48,27 +48,37 @@ make test
 ```
 
 Resultado esperado en esta revision:
-- fallo por ausencia de pruebas descubiertas
+- ejecucion correcta de la misma suite automatizada
 
-3. Comprueba el objetivo de arranque:
+3. Arranca la aplicacion local:
 
 ```bash
 make run
 ```
 
 Resultado esperado en esta revision:
-- error `No module named podencoti.app`
+- mensaje `Servidor disponible en http://127.0.0.1:8000`
+
+4. Verifica las rutas principales:
+
+```bash
+curl -i http://127.0.0.1:8000/
+curl -i http://127.0.0.1:8000/api/fuentes
+curl -i http://127.0.0.1:8000/clasificacion-ti
+curl -i http://127.0.0.1:8000/api/clasificacion-ti
+```
 
 ## Que queda instalado realmente
-- Metadatos del paquete `podencoti`.
-- Enlace editable al repositorio local.
+- Paquete `podencoti` en modo editable.
+- Aplicacion WSGI local para cobertura y clasificacion TI auditables.
+- Acceso a datos versionados en `data/` y a la suite automatizada en `tests/`.
 
 ## Que no queda disponible
-- Aplicacion HTTP ejecutable.
-- API local.
-- Datos de cobertura versionados dentro de `data/`.
-- Suite de pruebas versionada y ejecutable.
+- Catalogo real de oportunidades.
+- Detalle de licitaciones.
+- Filtros, alertas o pipeline.
+- Componentes de despliegue productivo.
 
 ## Limitaciones y dependencias abiertas
-- El `Makefile` y el `README.md` describen una aplicacion que no esta presente en `main`.
-- Si se recupera la implementacion tecnica en una revision posterior, esta guia debe actualizarse para reflejar los comandos reales de arranque, prueba y verificacion manual.
+- La instalacion deja operativa una entrega minima de validacion, no el MVP completo descrito en backlog.
+- Algunas entradas del historial operativo del repositorio no reflejan el estado actual del codigo; verifica siempre contra esta guia y contra las pruebas.

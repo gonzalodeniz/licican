@@ -1,38 +1,58 @@
 # Manual tecnico
 
 ## Publico objetivo
-Equipo tecnico que necesita conocer el estado real de `main`, sus limites y las contradicciones documentales detectadas.
+Equipo tecnico que necesita conocer la implementacion actual de `main`, sus rutas verificables y los limites funcionales todavia abiertos.
 
 ## Resumen tecnico verificable
-El repositorio contiene configuracion minima de paquete Python y documentacion de roles, pero no expone en `main` una implementacion fuente versionada de la aplicacion que describian versiones previas de este manual.
+`PodencoTI` expone en `main` una aplicacion WSGI minima en Python centrada en dos superficies funcionales previas al catalogo:
+
+- `PB-007`: cobertura inicial visible y verificable de fuentes.
+- `PB-006`: regla de clasificacion TI auditable con ejemplos trazables.
 
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
-- Automatizacion minima local: `Makefile`
-- Estructura de codigo esperada pero sin fuentes versionadas: `src/podencoti/`
-- Estructura de pruebas esperada pero sin pruebas versionadas: `tests/`
+- Automatizacion local: `Makefile`
+- Aplicacion WSGI: `src/podencoti/app.py`
+- Carga de cobertura de fuentes: `src/podencoti/source_coverage.py`
+- Carga y evaluacion de reglas TI: `src/podencoti/ti_classification.py`
+- Datos versionados: `data/source_coverage.json`, `data/ti_classification_rules.json`
+- Suite tecnica: `tests/test_app.py`, `tests/test_source_coverage.py`, `tests/test_ti_classification.py`
 
-## Evidencia observada en esta revision
-- `git ls-files src tests` no devuelve ficheros versionados.
-- `src/podencoti/` contiene solo artefactos `__pycache__` en el arbol local.
-- No existe `data/source_coverage.json` en la rama revisada.
-- `python3 -m pip install -e .` finaliza correctamente.
-- `python3 - <<'PY' ... import podencoti ... PY` permite importar el paquete de espacio de nombres `podencoti`, pero `import podencoti.app` falla con `ModuleNotFoundError`.
-- `python3 -m unittest discover -s tests -v` termina con `NO TESTS RAN`.
-- `make test` falla por ese mismo motivo.
-- `make run` falla con `No module named podencoti.app`.
+## Superficie HTTP vigente
+- `/`: vista HTML de cobertura inicial del MVP.
+- `/api/fuentes`: JSON con fuentes y resumen por estado.
+- `/clasificacion-ti`: vista HTML de la regla TI auditable.
+- `/api/clasificacion-ti`: JSON con reglas y ejemplos auditados.
+
+La aplicacion devuelve `404 Not Found` para cualquier otra ruta no declarada.
+
+## Estructura tecnica
+- [app.py](/opt/apps/podencoti/src/podencoti/app.py) centraliza el router WSGI, el renderizado HTML y las respuestas JSON.
+- [source_coverage.py](/opt/apps/podencoti/src/podencoti/source_coverage.py) valida estados de cobertura permitidos (`MVP`, `Posterior`, `Por definir`) y resume conteos.
+- [ti_classification.py](/opt/apps/podencoti/src/podencoti/ti_classification.py) normaliza texto, aplica reglas funcionales y audita ejemplos con tres salidas posibles: `TI`, `No TI` y `Caso frontera`.
+
+## Verificacion reproducible
+Desde la raiz del proyecto:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m podencoti.app
+```
+
+Resultado verificado en esta revision:
+- 15 pruebas automatizadas en verde.
+- Servidor local disponible en `http://127.0.0.1:8000`.
 
 ## Contradicciones explicitadas
-- El `README.md` de raiz describe una aplicacion HTTP local y una API JSON que no pueden ejecutarse en `main`.
-- La version anterior de este manual tecnico describia archivos como `src/podencoti/app.py`, `src/podencoti/source_coverage.py` y `data/source_coverage.json`; esos artefactos no estan presentes en la revision actual.
-- `changelog/2026-03-17.md` y `changelog/2026-03-18.md` mencionan una implementacion inicial visible del MVP y una validacion funcional rehecha, pero esa implementacion no es trazable desde el contenido actual de la rama revisada.
+- Parte del historial en `changelog/2026-03-18.md` afirma que `main` no contenia implementacion fuente ni pruebas versionadas; eso contradice el arbol actual.
+- Otras entradas del mismo changelog hablan de un catalogo validado con rutas como `/api/oportunidades`; esa superficie no existe en el codigo actual revisado.
+- La documentacion funcional de `product-manager/` describe backlog posterior valido, pero no debe leerse como contrato tecnico ya implementado.
 
-## Implicaciones tecnicas
-- No es posible documentar contrato HTTP, arquitectura WSGI, modelo de datos ni pruebas funcionales como comportamiento vigente.
-- La rama `main` conserva la definicion funcional del producto, pero no la materializacion tecnica necesaria para ejecucion local o validacion de QA.
-- La instalacion editable del paquete no debe confundirse con disponibilidad de una aplicacion runnable.
+## Limitaciones tecnicas actuales
+- No existe persistencia de oportunidades ni ingestion real de licitaciones.
+- No hay autenticacion, base de datos, tareas programadas ni integracion externa.
+- No hay contrato de despliegue productivo versionado, mas alla del arranque local con `wsgiref`.
 
 ## Dependencias abiertas
-- Recuperar o reintegrar en `main` la implementacion fuente correspondiente a la entrega mencionada en `README.md` y `changelog/`.
-- Reincorporar pruebas versionadas para que `make test` y `python3 -m unittest` sean reproducibles.
-- Revisar y alinear `README.md` de raiz cuando exista una fuente tecnica confirmada o, en su defecto, cuando se decida que la referencia a la app ya no debe mantenerse.
+- Implementar `PB-001`, `PB-002` y `PB-003` para pasar de superficies de validacion a un MVP de descubrimiento navegable.
+- Resolver documentalmente o administrativamente la contradiccion entre el changelog y el codigo actual cuando corresponda.
