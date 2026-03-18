@@ -25,11 +25,13 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 - Debe usar como referencia el contenido del issue, los criterios de aceptacion y la documentacion funcional disponible.
 - Puede crear una rama temporal de integracion para preparar o ejecutar las pruebas si la validacion lo requiere.
 - La rama temporal de integracion de `qa-teams` no cuenta dentro del limite de dos ramas tecnicas del proyecto, pero debe borrarse al finalizar la revision.
+- Si detecta que la rama entregada no integra limpia con `main`, debe registrarlo como bloqueo operativo o riesgo relevante segun el impacto en el flujo.
 
 ## Resultado obligatorio en la issue
 
 - Debe escribir en la issue el resultado de las pruebas realizadas.
 - El comentario de validacion debe terminar con un estado explicito de `validado` o `no validado`.
+- El comentario de validacion debe incluir de forma explicita `Rama revisada:`, `Pruebas realizadas:`, `Resultados observados:`, `Defectos bloqueantes:`, `Observaciones:`, `Riesgos:` y `Estado operativo: validado|no validado`.
 - Si el resultado es `no validado`, debe explicar con claridad la razon, el comportamiento observado, el impacto y lo que debe resolver `developer-teams`.
 - Debe confirmar expresamente si la issue puede considerarse concluida segun los criterios de aceptacion.
 

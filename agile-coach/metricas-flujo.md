@@ -25,6 +25,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: porcentaje de entregas de desarrollo que marcan `Impacto documental: si`.
 - Senal que aporta: ayuda a dimensionar la carga real de `doc-teams`.
 
+## 6. Entregas que llegan a QA con conflicto contra `main`
+- Definicion: numero o porcentaje de entregas revisadas por QA que presentan conflictos de integracion con `main`.
+- Senal que aporta: detecta fallos de sincronizacion entre la rama tecnica y la rama de referencia del repositorio.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.

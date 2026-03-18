@@ -41,6 +41,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Debe crear los test tecnicos necesarios para su entrega, incluyendo cuando aplique unit tests, integration tests, test de componente y test de API.
 - Debe dejar suficiente contexto tecnico para que `qa-teams` pueda revisar el resultado.
 - Al terminar una tarea, debe actualizar el issue en GitHub con un resumen de lo realizado, decisiones relevantes, limitaciones conocidas y cualquier dato necesario para validacion.
+- El comentario de entrega a `qa-teams` debe incluir de forma explicita los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental: si|no` y `Estado operativo: listo para qa`.
+- Antes de declarar `estado operativo: listo para qa`, debe sincronizar su rama con `main` y comprobar que la entrega integra limpia sin conflictos evitables.
 
 ## Relacion con qa-teams
 
@@ -68,6 +70,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Al finalizar sus tareas del dia, debe registrar un resumen de trabajo en la carpeta `changelog/`.
 - Cualquier actualizacion de `changelog/` debe realizarse siempre sobre la rama `main`, no sobre la rama tecnica del issue.
 - Cada actualizacion de `changelog/` debe registrarse con `git commit` y `git push` al remoto sobre `main`.
+- El `changelog/` no debe arrastrarse en la rama tecnica del issue ni formar parte de la entrega a `qa-teams`.
+- Si actualiza `changelog/` en `main` mientras su rama tecnica sigue abierta, debe sincronizar despues la rama tecnica con `main` antes de volver a pedir revision.
 - Debe usar un fichero con la fecha actual en formato `yyyy-mm-dd.md`.
 - Si el fichero del dia no existe, debe crearlo.
 - Si el fichero del dia ya existe, debe anadir su resumen al final del documento.
@@ -96,11 +100,12 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 5. Escribir en la issue el nombre exacto de la rama creada y actualizar `estado operativo: en desarrollo`.
 6. Implementar la solucion, preferiblemente en Python.
 7. Verificar localmente lo necesario para no entregar cambios rotos.
-8. Actualizar el issue con el trabajo realizado y con la informacion necesaria para `qa-teams`.
-9. Hacer commit en espanol.
-10. Hacer `git push` de la rama remota.
-11. Cambiar a `main` o coordinar la actualizacion necesaria para registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
-12. Esperar validacion de `qa-teams`.
+8. Sincronizar la rama con `main` y resolver conflictos evitables antes del handoff.
+9. Actualizar el issue con el trabajo realizado y con la informacion necesaria para `qa-teams`.
+10. Hacer commit en espanol.
+11. Hacer `git push` de la rama remota.
+12. Cambiar a `main` o coordinar la actualizacion necesaria para registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
+13. Esperar validacion de `qa-teams`.
 
 ## Restricciones
 

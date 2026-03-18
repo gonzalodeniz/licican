@@ -42,6 +42,11 @@ Si QA deja `Estado operativo: no validado`:
 
 Si el alcance cambia de forma material, `product-manager` debe decidir si corresponde una nueva issue.
 
+## Regla de sincronizacion entre ramas y `main`
+- `changelog/` se actualiza solo en `main` y no forma parte de la entrega tecnica del issue.
+- Si `developer-teams` o `qa-teams` registran actividad en `changelog/` mientras mantienen una rama abierta, deben sincronizar despues esa rama con `main` antes del siguiente handoff o nueva validacion.
+- Antes de declarar `Estado operativo: listo para qa`, `developer-teams` debe comprobar que la rama integra limpia con `main`.
+
 ## Disparador operativo de `doc-teams`
 `doc-teams` debe priorizar una iteracion cuando concurran estas condiciones:
 1. Existe `Estado operativo: validado` en la issue.
@@ -53,7 +58,8 @@ Si el impacto documental es `no`, la documentacion puede esperar salvo instrucci
 Tras `Estado operativo: validado`, `product-manager` debe:
 1. verificar que la trazabilidad funcional sigue siendo correcta
 2. cerrar la issue o dejar constancia explicita del motivo por el que sigue abierta
-3. promover el merge segun el flujo del repositorio
+3. si sigue abierta, indicar bloqueo actual, siguiente responsable y siguiente paso operativo
+4. promover el merge segun el flujo del repositorio
 
 ## Regla de simplicidad
 Estos acuerdos existen para reducir esperas y reprocesos. No deben usarse para introducir estados adicionales ni ceremonias no justificadas.

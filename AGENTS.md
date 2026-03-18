@@ -102,6 +102,8 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Mantener `main` como rama de referencia para trabajo funcional, documental y de coordinacion no tecnica.
 - Mantener `main` como rama obligatoria para cualquier actualizacion de ficheros dentro de `changelog/`, independientemente del rol que la realice.
 - Cada actualizacion de `changelog/` debe terminar con `git commit` y `git push` al repositorio remoto sobre la rama `main`.
+- Los cambios de `changelog/` no forman parte de la entrega tecnica de una issue y no deben permanecer en ramas tecnicas ni en ramas temporales de integracion.
+- Si un rol mantiene una rama abierta y registra actividad en `changelog/` sobre `main`, debe sincronizar despues su rama abierta con `main` antes del siguiente handoff a QA o integracion.
 - Limitar el numero de ramas abiertas para facilitar el seguimiento operativo del proyecto.
 - Todos los commits del repositorio deben comenzar con el prefijo del rol que los ejecuta en formato `[rol]`, por ejemplo `[developer-teams] Implementa clasificacion TI`.
 - Si para ejecutar o desarrollar el proyecto en Python fuese necesaria la instalacion de librerias adicionales en el sistema o en el entorno de trabajo, debe existir y mantenerse un fichero `requirements.txt` en la raiz del repositorio con dichas dependencias.
@@ -122,14 +124,16 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Cuando `developer-teams` tome una issue debe dejar constancia de `estado operativo: en desarrollo`.
 - `developer-teams` es responsable de los test tecnicos, como unit tests, integration tests, test de componente y test de API.
 - Una vez implementada la tarea, `developer-teams` debe actualizar el issue correspondiente con el trabajo realizado para que `qa-teams` pueda revisarlo, incluyendo como minimo rama, resumen, decisiones relevantes, limitaciones conocidas, verificacion tecnica ejecutada, impacto documental y `estado operativo: listo para qa`.
+- Antes de pedir revision a `qa-teams`, `developer-teams` debe comprobar que su rama integra limpia con `main` y resolver los conflictos evitables de sincronizacion.
 - Cada cambio implementado por `developer-teams` debe terminar con `git commit` en espanol y `git push` de la rama remota.
 - `qa-teams` revisa y valida el trabajo sobre la rama de la tarea desde la perspectiva del usuario y de los criterios de aceptacion.
 - `qa-teams` puede crear una rama temporal de integracion para ejecutar pruebas o preparar la validacion cuando lo necesite. Esa rama de integracion es adicional a las dos ramas tecnicas permitidas, debe usarse solo para validacion y debe borrarse al terminar la revision.
 - `qa-teams` es responsable de los tests de validacion, como pruebas funcionales, end-to-end, exploratorias y contra criterios de aceptacion.
-- `qa-teams` debe dejar en la issue el resultado de la revision, las pruebas realizadas, los hallazgos y finalizar con `estado operativo: validado` o `estado operativo: no validado`.
+- `qa-teams` debe dejar en la issue el resultado de la revision, incluyendo como minimo rama revisada, pruebas realizadas, resultados observados, defectos bloqueantes, observaciones, riesgos y `estado operativo: validado` o `estado operativo: no validado`.
 - `qa-teams` debe verificar que la issue ha concluido realmente segun sus criterios de aceptacion y revisar si existe deuda tecnica relevante o si procede abrir una tarea tecnica de refactorizacion o mejora de codigo.
 - Si el resultado es `no validado`, `qa-teams` debe explicar la razon para que `developer-teams` pueda resolverla en la misma issue y, mientras el alcance sea el mismo, en la misma rama.
 - Solo tras la validacion de `qa-teams`, `product-manager` debe fusionar en `main` la rama tecnica correspondiente, cerrar el issue o dejar constancia explicita del motivo por el que sigue abierta, y borrar la rama tecnica una vez completado el merge si ya no existe una razon clara para conservarla.
+- Si una issue permanece abierta tras `estado operativo: validado`, `product-manager` debe dejar explicitamente bloqueo actual, siguiente responsable y siguiente paso operativo para evitar que siga abierta sin contexto.
 - `doc-teams` debe intervenir cuando una entrega validada tenga `impacto documental: si`, salvo que se indique expresamente otra prioridad.
 - Si existen ya dos ramas tecnicas abiertas, el proyecto debe concluir o desbloquear al menos una issue antes de iniciar una nueva implementacion tecnica.
 

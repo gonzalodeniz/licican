@@ -115,3 +115,44 @@ Seguir de forma ligera estas metricas:
 
 ### Riesgos y dependencias
 - Sin estados operativos comunes, estas metricas pierden calidad.
+
+## Mejora 6: separar la trazabilidad del `changelog/` de la entrega tecnica del issue
+### Problema detectado
+El `changelog/` debe actualizarse en `main`, pero no existia una regla operativa suficiente para evitar que esa actividad contaminara ramas tecnicas o generara conflictos de integracion.
+
+### Propuesta
+- Mantener el `changelog/` solo en `main` y dejar explicito que nunca forma parte de la entrega tecnica a QA.
+- Si `developer-teams` o `qa-teams` actualizan `changelog/` mientras mantienen una rama abierta, deben sincronizar despues esa rama con `main` antes del siguiente handoff.
+
+### Impacto esperado
+- Reduce conflictos evitables en validacion e integracion.
+- Evita que QA invierta tiempo en incidencias administrativas derivadas del registro diario.
+- Mantiene la trazabilidad diaria sin mezclarla con el alcance tecnico del issue.
+
+### Tradeoffs
+- Obliga a un paso adicional de sincronizacion cuando una rama permanece abierta mas de un bloque de trabajo.
+
+### Riesgos y dependencias
+- Si los equipos olvidan resincronizar la rama tras actualizar `main`, el conflicto reaparecera.
+- Requiere que la secuencia operativa de `developer-teams` explicite esa comprobacion antes de QA.
+
+## Mejora 7: reforzar el checkpoint posterior a `validado`
+### Problema detectado
+Una issue puede quedar abierta tras `validado` sin dejar claro si el bloqueo es integracion, cierre administrativo o dependencia documental.
+
+### Propuesta
+Si `product-manager` mantiene abierta una issue ya `validado`, debe dejar en la propia issue:
+- bloqueo actual
+- siguiente responsable
+- siguiente paso operativo
+
+### Impacto esperado
+- Evita que una issue validada siga abierta sin contexto accionable.
+- Mejora la lectura real del backlog y del trabajo pendiente.
+- Facilita a `agile-coach` y al resto de equipos detectar bloqueos de cierre en lugar de confundirlos con trabajo aun no aceptado.
+
+### Tradeoffs
+- Introduce una pequena disciplina administrativa adicional en el cierre.
+
+### Riesgos y dependencias
+- Si el comentario se vuelve ambiguo, reaparecera el mismo problema con mas texto pero sin mas claridad.

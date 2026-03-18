@@ -56,5 +56,24 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - Se acumulan issues que tecnicamente ya han pasado QA pero siguen aparentando trabajo en curso.
 - Se distorsiona la lectura del backlog y la priorizacion de nuevas iteraciones.
 
+## Problema 6: el uso del `changelog/` genera conflictos evitables con las ramas tecnicas
+### Evidencia
+- El repositorio obliga a registrar actividad diaria en `changelog/` sobre `main`, pero no fijaba una regla explicita para resincronizar despues las ramas tecnicas abiertas.
+- En la issue `#2`, `qa-teams` documento el 2026-03-18 un conflicto de integracion en `changelog/2026-03-18.md` al intentar validar la rama `feat/pb-006-clasificacion-ti-auditable`.
+
+### Impacto observado
+- QA recibe entregas que funcionalmente ya estan en revision pero operativamente no integran limpias con `main`.
+- Se invierte tiempo de validacion en resolver o diagnosticar conflictos administrativos en lugar de revisar comportamiento.
+- El propio `changelog/` pasa de ser un mecanismo de trazabilidad a convertirse en una fuente de friccion entre equipos.
+
+## Problema 7: falta un checkpoint explicito de sincronizacion antes del handoff a QA
+### Evidencia
+- `developer-teams` debe dejar contexto para QA, pero no existia una regla comun que obligara a comprobar integracion limpia con `main` antes de declarar `listo para qa`.
+- La revision de `qa-teams` en la issue `#2` detecto a la vez una entrega funcional incompleta y una rama desalineada con `main`, mezclando dos tipos de problemas en el mismo handoff.
+
+### Impacto observado
+- QA asume parte del coste de descubrir si el problema esta en el comportamiento entregado o en la sincronizacion de ramas.
+- Aumenta el riesgo de ciclos de `no validado` por causas evitables antes de empezar la validacion funcional real.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs. La mejora prioritaria consiste en estandarizar estados, contenido minimo de entrega y reglas de reentrada para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs. La mejora prioritaria consiste en estandarizar estados, contenido minimo de entrega, sincronizacion con `main` y reglas de reentrada para reducir esperas, reprocesos y ambiguedad.
