@@ -1,24 +1,28 @@
 # Refinamiento Funcional de PodencoTI
 
 ## Estado actual
-La vision es consistente con la propuesta de valor general, pero faltaban definiciones operativas para que `developer-teams` pueda implementar sin ambiguedad innecesaria.
+La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad de acotar mejor el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
 
-## Huecos funcionales detectados
-- No estaba delimitada la cobertura inicial de fuentes oficiales para el MVP.
-- No existia una regla funcional verificable para clasificar una licitacion como TI.
-- No estaban definidos los estados minimos del pipeline.
-- No estaba aclarado el conjunto minimo de campos obligatorios en listado y detalle.
-- No existia una traduccion directa de la vision a backlog, historias, casos de uso y roadmap.
-- No habia issues ejecutables para comenzar trabajo en `developer-teams`.
+## Estado funcional confirmado en el repositorio
+- `PB-007` dispone de entrega visible en producto y validacion explicita de `qa-teams` en la issue #1.
+- La entrega actual cubre delimitacion de fuentes, no ingestion real ni catalogo de licitaciones.
+- El siguiente trabajo funcional recomendado es `PB-006` para fijar reglas auditables de relevancia TI.
 
-## Decisiones funcionales adoptadas en esta iteracion
-- El MVP se centra primero en descubrimiento: catalogo, detalle y filtros.
-- Alertas y pipeline pasan a una segunda release funcional, manteniendo coherencia con la vision.
-- Se define un conjunto minimo de estados del pipeline: `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada`, `Descartada`.
-- Se establece que cada oportunidad debe preservar trazabilidad a su fuente oficial.
-- Se separa explicitamente la definicion funcional de la implementacion tecnica.
+## Huecos funcionales detectados en esta revision
+- El backlog no reflejaba el estado real de `PB-007` ni su validacion por QA.
+- Faltaban casos de uso para la delimitacion de cobertura y para la revision de KPIs.
+- No existian issues remotas para `PB-004`, `PB-005` y `PB-008`.
+- Seguian abiertas decisiones funcionales sobre casos frontera TI, alertas y alcance del pipeline.
 
-## Reglas funcionales iniciales de clasificacion TI
+## Decisiones funcionales vigentes
+- El MVP de negocio se compone de dos escalones:
+  - escalon 1: cobertura acotada, regla de relevancia TI, catalogo, detalle y filtros
+  - escalon 2: alertas y pipeline
+- La comunicacion del producto debe hablar de cobertura inicial priorizada, no de cobertura total.
+- La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implícitas.
+- El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
+
+## Reglas funcionales vigentes de clasificacion TI
 - Se considera candidata TI una oportunidad que cumpla al menos uno de estos criterios:
   - menciona software, desarrollo, sistemas, soporte TI, ciberseguridad, redes, licencias, cloud, datos o hardware tecnologico
   - incluye CPVs alineados con servicios o suministros tecnologicos
@@ -27,12 +31,12 @@ La vision es consistente con la propuesta de valor general, pero faltaban defini
   - obra civil sin componente tecnologico relevante
   - suministros generales de mobiliario o material no tecnologico
   - servicios administrativos o de consultoria no vinculados a tecnologia
-- Casos frontera que requieren validacion de negocio o QA:
+- Casos frontera que requieren criterio verificable adicional:
   - contratos mixtos donde TI sea una parte menor
   - servicios de telecomunicaciones no claramente ligados a sistemas o redes
   - expedientes de digitalizacion formulados con lenguaje demasiado generico
 
-## Cobertura funcional inicial propuesta para MVP
+## Cobertura funcional vigente para MVP
 - Estado `MVP`:
   - Plataforma de Contratacion del Sector Publico filtrada por organos de contratacion de Canarias
   - Gobierno de Canarias
@@ -44,13 +48,13 @@ La vision es consistente con la propuesta de valor general, pero faltaban defini
   - Fuentes con acceso inconsistente, formatos no estandar o baja frecuencia de oportunidades TI
 
 ## Dependencias abiertas
-- Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera release.
+- Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera release o si permanecen fuera de la promesa comercial inicial.
 - Confirmar si la primera version de alertas debe contemplar solo registro interno o tambien envio externo inmediato.
 - Confirmar si el pipeline sera individual por usuario o compartido por empresa en fases posteriores.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.
-- Riesgo de falsos positivos si la clasificacion TI no queda suficientemente definida.
+- Riesgo de falsos positivos si la clasificacion TI no queda suficientemente definida antes del catalogo.
 - Riesgo de baja adopcion si el MVP entrega solo agregacion pero no relevancia util.
 - Riesgo de frustracion si faltan datos criticos en fichas sin indicarse claramente su ausencia.
 
@@ -59,13 +63,18 @@ La vision es consistente con la propuesta de valor general, pero faltaban defini
 - La cobertura total del ecosistema canario se abordara de forma incremental.
 - `qa-teams` validara primero comportamiento funcional observable, no exhaustividad total de fuentes.
 
-## Preguntas abiertas
-- Que criterio comercial definira "alerta temprana" en el MVP: inmediatez, frecuencia o mera deteccion antes de fecha limite.
-- Que nivel minimo de detalle debe exigirse cuando la fuente oficial no publica claramente solvencia o criterios de adjudicacion.
+## Preguntas abiertas para siguiente refinamiento
+- Que umbral funcional convierte un expediente mixto en oportunidad TI relevante.
+- Que se considerara "alerta temprana" en el MVP: deteccion registrada, aviso en producto o notificacion saliente.
 - Como debe tratarse una oportunidad anulada, desierta o modificada dentro del pipeline del usuario.
 
+## Recomendacion operativa para `developer-teams`
+- Tomar la issue #2 correspondiente a `PB-006` como siguiente trabajo.
+- No iniciar implementacion de catalogo visible de `PB-001` sin incorporar una regla TI validable por QA.
+
 ## Trazabilidad operativa
-- PB-007 y HU-07 resuelven cobertura inicial de fuentes.
-- PB-006 y HU-06 resuelven definicion de relevancia TI.
-- PB-001, PB-002 y PB-003 forman el MVP de Release 1.
-- PB-004 y PB-005 quedan listos para Release 2 tras validacion del MVP de descubrimiento.
+- `PB-007` y `HU-07` quedan cubiertos por la issue #1 y su validacion ya registrada.
+- `PB-006` y `HU-06` resuelven la definicion de relevancia TI antes del catalogo.
+- `PB-001`, `PB-002` y `PB-003` forman el MVP de descubrimiento de Release 1.
+- `PB-004` y `PB-005` quedan listos para Release 2 tras validar el MVP de descubrimiento.
+- `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

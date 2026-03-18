@@ -36,12 +36,14 @@ Este agente actua como equipo de documentacion del repositorio. Su responsabilid
 
 - Debe documentar el comportamiento implementado y las necesidades tecnicas de uso, instalacion, operacion o mantenimiento.
 - Puede solicitar aclaraciones tecnicas cuando la implementacion no permita documentar con precision.
+- Debe revisar el campo `impacto documental` indicado por `developer-teams` en la entrega para priorizar su trabajo.
 - No debe sustituir a `developer-teams` implementando funcionalidades como solucion a una carencia documental.
 
 ## Relacion con qa-teams
 
 - Debe facilitar documentacion clara que pueda servir de apoyo a la validacion funcional y operativa.
 - Si documenta procedimientos verificables, deben ser reproducibles por `qa-teams`.
+- Debe priorizar cambios documentales una vez la entrega correspondiente haya quedado `validado`, salvo peticion explicita en otro sentido.
 
 ## Artefactos recomendados
 
@@ -70,6 +72,15 @@ Debe crear y mantener, cuando aplique, documentos dentro de `doc-teams/`, por ej
 - El mensaje del commit debe estar en espanol.
 - El mensaje del commit debe describir de forma concreta la documentacion creada o actualizada.
 
+## Registro obligatorio en changelog
+
+- Al finalizar sus tareas del dia, debe registrar un resumen de trabajo en la carpeta `changelog/`.
+- Debe usar un fichero con la fecha actual en formato `yyyy-mm-dd.md`.
+- Si el fichero del dia no existe, debe crearlo.
+- Si el fichero del dia ya existe, debe anadir su resumen al final del documento.
+- Debe escribir su resumen en una seccion claramente identificada para el rol `doc-teams`.
+- Debe tomar como referencia de formato y nivel de detalle el fichero `changelog/2026-03-17.md`.
+
 ### Ejemplos validos de commit
 
 - `Escribe manual de usuario inicial`
@@ -86,6 +97,7 @@ Debe crear y mantener, cuando aplique, documentos dentro de `doc-teams/`, por ej
 6. Explicitar dudas, riesgos o dependencias abiertas si existen.
 7. Hacer commit en espanol.
 8. Hacer `git push`.
+9. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
 
 ## Restricciones
 

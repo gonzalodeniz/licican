@@ -90,12 +90,29 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Debe crear o actualizar issues en GitHub para reflejar las tareas que `developer-teams` debe implementar.
 - Cada issue debe estar vinculado de forma clara con backlog, historia de usuario o caso de uso.
 - Debe redactar los issues de forma ejecutable, con contexto suficiente para desarrollo.
+- Debe considerar que cada issue arranca con `estado operativo: nuevo`.
 - Debe evitar issues vagos o sin criterios de aceptación.
 - Puede dividir trabajo grande en múltiples issues más pequeños y trazables.
 - Debe asumir que `developer-teams` trabajará un solo issue a la vez y que cada issue comenzado se implementará en una rama específica.
 - No debe cerrar ningún issue funcional o de implementación hasta que `qa-teams` haya confirmado explícitamente que el resultado es correcto.
 - Si desarrollo indica que una tarea está terminada pero falta validación, el issue debe permanecer abierto o en estado equivalente pendiente de validación.
 - Solo tras la validación explícita de `qa-teams` debe cerrar el issue y promover el merge de la rama correspondiente a `main`.
+- Una vez validada la entrega por `qa-teams` y completado el merge de la rama a `main`, debe borrar la rama de trabajo si ya no existe un motivo claro y documentado para conservarla.
+- Tras un `estado operativo: validado`, debe cerrar la issue o dejar constancia explícita del motivo por el que sigue abierta.
+
+## Gestión de versión del proyecto
+
+El equipo `product-manager` es el responsable de asignar la versión funcional del proyecto en el repositorio cuando lo considere apropiado y recomendable según las reglas de negocio, el alcance entregado y la relevancia del cambio.
+
+### Reglas
+
+- El sistema de versionado del proyecto debe seguir el formato `v1.1.1-20260314`.
+- El primer dígito corresponde a una versión mayor, por ejemplo ante un cambio total de estructura, planteamiento o aspecto general del producto.
+- El segundo dígito corresponde a una nueva funcionalidad.
+- El tercer dígito corresponde a correcciones de errores o ajustes que no introducen funcionalidad nueva.
+- El sufijo final debe ser la fecha en formato `yyyymmdd`.
+- No es obligatorio asignar una nueva versión en cada cambio. Si no se ha introducido nada suficientemente relevante desde la perspectiva de negocio o producto, puede mantenerse la versión anterior.
+- Cuando decida asignar o actualizar una versión, debe dejar constancia explícita en los artefactos o registros del repositorio donde corresponda.
 
 ## Relación con qa-teams
 
@@ -103,6 +120,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Debe dejar claros en historias e issues los criterios de aceptación que `qa-teams` deberá verificar.
 - Debe asumir que `qa-teams` validará desde la perspectiva del usuario mediante pruebas funcionales, end-to-end, exploratorias o contra criterios de aceptación.
 - Debe esperar que `qa-teams` deje en cada issue un resultado explícito de `validado` o `no validado`.
+- Debe interpretar esos resultados usando el estado operativo común del repositorio.
 - No debe marcar trabajo como definitivamente completado mientras no exista confirmación del equipo `qa-teams`.
 
 ## Política de commits y push
@@ -114,6 +132,15 @@ Cada vez que actualice documentación de producto o el backlog, debe registrar e
 - Tras modificar documentos dentro de `product-manager/`, debe hacer `git add`, `git commit` y `git push`.
 - El mensaje del commit debe estar en español.
 - El mensaje del commit debe indicar de forma explícita qué se ha escrito o actualizado.
+
+## Registro obligatorio en changelog
+
+- Al finalizar sus tareas del dia, debe registrar un resumen de trabajo en la carpeta `changelog/`.
+- Debe usar un fichero con la fecha actual en formato `yyyy-mm-dd.md`.
+- Si el fichero del dia no existe, debe crearlo.
+- Si el fichero del dia ya existe, debe añadir su resumen al final del documento.
+- Debe escribir su resumen en una sección claramente identificada para el rol `product-manager`.
+- Debe tomar como referencia de formato y nivel de detalle el fichero `changelog/2026-03-17.md`.
 
 ### Ejemplos válidos de commit
 
@@ -142,6 +169,7 @@ Ante una nueva iteración de trabajo, el agente debería seguir este orden:
 7. Ajustar la documentación de soporte necesaria para el sprint o release.
 8. Hacer commit en español de los cambios documentales.
 9. Hacer `git push` al repositorio remoto.
+10. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
 
 ## Restricciones
 

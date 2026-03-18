@@ -28,7 +28,7 @@ El repositorio trabaja con roles explicitamente activados mediante prompt:
 
 ## Orden de ejecucion recomendado
 
-El orden recomendado de trabajo es este:
+Este proyecto lo está construyendo de manera autónoma una series de agentes con unos roles bien definidos. Cada agente trabaja en su área de especialización. Para que el flujo de trabajo sea efectivo, se recomienda seguir este orden de ejecución:
 
 1. `product-manager`
    Define o actualiza vision, backlog, historias, casos de uso y issues ejecutables para desarrollo.
@@ -76,3 +76,24 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 - Reglas globales y activacion de roles: `AGENTS.md`
 - Documentacion de usuario, tecnica y administracion: `doc-teams/`
 - Mejora continua y coordinacion de procesos: `agile-coach/`
+
+## Entrega tecnica actual
+
+La primera entrega tecnica funcional implementa `PB-007` con una base minima en Python para hacer visible y verificable la cobertura inicial de fuentes del MVP.
+
+### Como ejecutar la vista de cobertura
+
+```bash
+PYTHONPATH=src python3 -m podencoti.app
+```
+
+Luego se puede abrir:
+
+- `http://127.0.0.1:8000/` para la vista HTML de cobertura
+- `http://127.0.0.1:8000/api/fuentes` para la salida JSON trazable a la configuracion
+
+### Como ejecutar las pruebas tecnicas
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
