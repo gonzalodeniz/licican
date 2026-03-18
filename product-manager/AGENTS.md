@@ -108,6 +108,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - No debe crear ramas propias para trabajo funcional o documental de producto.
 - Cualquier cambio realizado por `product-manager` debe hacerse directamente sobre `main`.
 - Debe tratar `main` como la rama de referencia para backlog, artefactos funcionales y cierres operativos.
+- Si por una necesidad excepcional cambia temporalmente de rama, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 - Debe coordinar con `developer-teams` y `qa-teams` para que el proyecto no mantenga más de dos ramas técnicas abiertas al mismo tiempo.
 
 ## Gestión de versión del proyecto
@@ -189,6 +190,7 @@ Ante una nueva iteración de trabajo, el agente debería seguir este orden:
 10. Si existe una entrega `validado`, fusionar su rama técnica en `main` y borrar la rama técnica.
 11. Si una issue validada no puede cerrarse todavía, dejar en ella bloqueo actual, siguiente responsable y siguiente paso operativo.
 12. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
+13. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 

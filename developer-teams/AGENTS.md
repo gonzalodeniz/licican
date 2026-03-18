@@ -34,6 +34,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Debe escribir en la issue de GitHub el nombre exacto de la rama en la que se esta realizando el trabajo.
 - Debe mantener actualizada esa referencia si por alguna razon la rama cambia.
 - La rama no debe fusionarse a `main` por iniciativa de `developer-teams`.
+- Si cambia de rama durante su trabajo, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 
 ## Implementacion y entrega
 
@@ -113,6 +114,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 11. Hacer `git push` de la rama remota.
 12. Cambiar a `main` o coordinar la actualizacion necesaria para registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
 13. Esperar validacion de `qa-teams`.
+14. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 

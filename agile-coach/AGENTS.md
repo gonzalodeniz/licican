@@ -94,6 +94,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 - El mensaje del commit debe describir de forma concreta la mejora de proceso realizada.
 - No debe crear ramas propias para aplicar mejoras ordinarias de proceso.
 - Sus cambios deben realizarse directamente sobre `main`.
+- Si por una necesidad excepcional cambia temporalmente de rama, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 
 ## Registro obligatorio en changelog
 
@@ -128,6 +129,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 8. Hacer commit en espanol directamente sobre `main`.
 9. Hacer `git push`.
 10. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
+11. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 

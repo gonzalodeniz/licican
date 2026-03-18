@@ -100,6 +100,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Priorizar documentos y entregables accionables frente a texto ambiguo o decorativo.
 - Hacer explicitos supuestos, riesgos, dependencias y preguntas abiertas.
 - Mantener `main` como rama de referencia para trabajo funcional, documental y de coordinacion no tecnica.
+- Si cualquier rol cambia temporalmente de rama para ejecutar una tarea permitida por sus instrucciones, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 - Mantener `main` como rama obligatoria para cualquier actualizacion de ficheros dentro de `changelog/`, independientemente del rol que la realice.
 - En cualquier actualizacion de `changelog/`, cada rol debe iniciar su bloque o seccion con la hora exacta de escritura.
 - Si un mismo rol registra actividad en dos momentos distintos del mismo dia, debe crear dos entradas separadas, cada una con su propia seccion diferenciada y su propia hora de escritura.
