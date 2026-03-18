@@ -18,4 +18,6 @@ if [ -z "${GITHUB_PAT:-}" ]; then
   exit 1
 fi
 
+source "${SCRIPT_DIR}/.venv/bin/activate"
+
 exec codex --dangerously-bypass-approvals-and-sandbox "$@"
