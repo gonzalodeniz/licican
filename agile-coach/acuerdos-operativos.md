@@ -23,6 +23,22 @@ El comentario final de entrega de `developer-teams` debe incluir como minimo:
 - `Impacto documental: si|no`
 - `Estado operativo: listo para qa`
 
+Plantilla minima recomendada:
+
+```text
+Rama: <nombre-rama>
+Resumen:
+- ...
+Decisiones relevantes:
+- ...
+Limitaciones conocidas:
+- ...
+Verificacion tecnica ejecutada:
+- <comando o evidencia>
+Impacto documental: si|no
+Estado operativo: listo para qa
+```
+
 ## Handoff minimo de `qa-teams`
 El comentario de revision de `qa-teams` debe incluir como minimo:
 - `Rama revisada:`
@@ -32,6 +48,23 @@ El comentario de revision de `qa-teams` debe incluir como minimo:
 - `Observaciones:`
 - `Riesgos:`
 - `Estado operativo: validado|no validado`
+
+Plantilla minima recomendada:
+
+```text
+Rama revisada: <nombre-rama>
+Pruebas realizadas:
+- ...
+Resultados observados:
+- ...
+Defectos bloqueantes:
+- ...
+Observaciones:
+- ...
+Riesgos:
+- ...
+Estado operativo: validado|no validado
+```
 
 ## Regla de revalidacion
 Si QA deja `Estado operativo: no validado`:
@@ -60,6 +93,15 @@ Tras `Estado operativo: validado`, `product-manager` debe:
 2. cerrar la issue o dejar constancia explicita del motivo por el que sigue abierta
 3. si sigue abierta, indicar bloqueo actual, siguiente responsable y siguiente paso operativo
 4. promover el merge segun el flujo del repositorio
+
+Si la issue sigue abierta, usar esta plantilla minima:
+
+```text
+Bloqueo actual: <motivo concreto>
+Siguiente responsable: product-manager|developer-teams|qa-teams|doc-teams
+Siguiente paso operativo: <accion verificable>
+Estado de integracion: pendiente|hecho|no aplica
+```
 
 ## Regla de simplicidad
 Estos acuerdos existen para reducir esperas y reprocesos. No deben usarse para introducir estados adicionales ni ceremonias no justificadas.

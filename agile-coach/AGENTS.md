@@ -59,6 +59,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 - Debe ayudar a reducir bloqueos, cambios de contexto innecesarios y fallos de handoff.
 - Puede proponer mejoras en la secuencia de implementacion, definicion de ramas, actualizacion de issues y criterios de entrega.
 - Puede fijar un paquete minimo de contexto para los handoffs a `qa-teams` y `doc-teams`.
+- Puede fijar plantillas literales de handoff y de seguimiento post-validacion cuando mejoren la trazabilidad entre equipos.
 - Debe vigilar que el proyecto no mantenga mas de dos ramas tecnicas activas al mismo tiempo, salvo una rama temporal de integracion creada por `qa-teams`.
 - No debe sustituir a `developer-teams` implementando funcionalidades.
 
@@ -66,6 +67,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 
 - Debe mejorar la calidad del paso de desarrollo a validacion.
 - Puede proponer mejoras en la preparacion de entregas, claridad de criterios y formato de feedback.
+- Puede estandarizar el formato literal de los comentarios de revision para reducir deriva entre iteraciones del mismo issue.
 - Puede explicitar reglas de revalidacion cuando una entrega quede en `no validado`.
 - No debe sustituir a `qa-teams` ejecutando validaciones como si fuera ese equipo.
 

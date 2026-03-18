@@ -42,6 +42,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Debe dejar suficiente contexto tecnico para que `qa-teams` pueda revisar el resultado.
 - Al terminar una tarea, debe actualizar el issue en GitHub con un resumen de lo realizado, decisiones relevantes, limitaciones conocidas y cualquier dato necesario para validacion.
 - El comentario de entrega a `qa-teams` debe incluir de forma explicita los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental: si|no` y `Estado operativo: listo para qa`.
+- Debe usar esos nombres de campo de forma literal y en ese mismo orden para reducir ambiguedad entre iteraciones y facilitar revalidaciones.
 - Antes de declarar `estado operativo: listo para qa`, debe sincronizar su rama con `main` y comprobar que la entrega integra limpia sin conflictos evitables.
 
 ## Relacion con qa-teams

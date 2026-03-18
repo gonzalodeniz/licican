@@ -75,5 +75,25 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - QA asume parte del coste de descubrir si el problema esta en el comportamiento entregado o en la sincronizacion de ramas.
 - Aumenta el riesgo de ciclos de `no validado` por causas evitables antes de empezar la validacion funcional real.
 
+## Problema 8: la issue puede quedar `validado` y abierta con contexto administrativo insuficiente
+### Evidencia
+- La issue `#1` permanece abierta tras `Estado operativo: validado`.
+- El comentario administrativo explica por que sigue abierta, pero no deja de forma estructurada el siguiente responsable, el siguiente paso operativo ni el estado real de integracion.
+
+### Impacto observado
+- Una issue aceptada por QA sigue pareciendo trabajo en curso si no queda claro si falta merge, cierre administrativo o borrado de rama.
+- `developer-teams` y `agile-coach` pierden visibilidad sobre si el bloqueo es real o solo una tarea administrativa pendiente.
+- El backlog abierto mezcla trabajo no validado con trabajo ya aceptado pero no cerrado.
+
+## Problema 9: las plantillas de handoff siguen siendo interpretables en lugar de literales
+### Evidencia
+- Los comentarios historicos de desarrollo y QA en las issues `#1` y `#2` contienen la informacion esencial, pero no siempre reutilizan las mismas claves ni el mismo orden.
+- Esto obliga a re-interpretar comentarios para localizar el estado operativo, la rama revisada o el contexto minimo de entrega.
+
+### Impacto observado
+- La trazabilidad entre iteraciones del mismo issue depende de lectura manual.
+- Se dificulta revisar metricas de flujo o auditar el cumplimiento de handoffs minimos.
+- La revalidacion es mas costosa porque la informacion no queda siempre en un formato comparable.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs. La mejora prioritaria consiste en estandarizar estados, contenido minimo de entrega, sincronizacion con `main` y reglas de reentrada para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, contenido minimo de entrega, sincronizacion con `main`, cierre post-validacion y formato literal de comentarios para reducir esperas, reprocesos y ambiguedad.

@@ -156,3 +156,23 @@ Si `product-manager` mantiene abierta una issue ya `validado`, debe dejar en la 
 
 ### Riesgos y dependencias
 - Si el comentario se vuelve ambiguo, reaparecera el mismo problema con mas texto pero sin mas claridad.
+
+## Mejora 8: fijar una plantilla literal para comentarios de handoff
+### Problema detectado
+Los equipos ya comparten que informacion debe aparecer en las issues, pero no una plantilla literal estable que facilite localizarla y compararla entre iteraciones.
+
+### Propuesta
+- Exigir a `developer-teams` y `qa-teams` que reutilicen siempre las mismas claves literales y en el mismo orden para sus comentarios de handoff.
+- Exigir a `product-manager` una plantilla administrativa minima cuando una issue siga abierta tras `validado`.
+
+### Impacto esperado
+- Reduce tiempo de lectura y reinterpretacion entre equipos.
+- Mejora la trazabilidad de revalidaciones y cierres administrativos.
+- Hace mas viable medir cumplimiento de handoffs y tiempos de espera por estado.
+
+### Tradeoffs
+- Introduce mas disciplina formal en los comentarios de issue.
+
+### Riesgos y dependencias
+- Si las plantillas se vuelven demasiado largas, los equipos pueden tender a rellenarlas de forma mecanica.
+- Conviene mantener solo los campos necesarios para decidir el siguiente paso operativo.

@@ -126,16 +126,18 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Cuando `developer-teams` tome una issue debe dejar constancia de `estado operativo: en desarrollo`.
 - `developer-teams` es responsable de los test tecnicos, como unit tests, integration tests, test de componente y test de API.
 - Una vez implementada la tarea, `developer-teams` debe actualizar el issue correspondiente con el trabajo realizado para que `qa-teams` pueda revisarlo, incluyendo como minimo rama, resumen, decisiones relevantes, limitaciones conocidas, verificacion tecnica ejecutada, impacto documental y `estado operativo: listo para qa`.
+- En ese handoff a `qa-teams`, `developer-teams` debe usar de forma literal los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental:` y `Estado operativo: listo para qa`.
 - Antes de pedir revision a `qa-teams`, `developer-teams` debe comprobar que su rama integra limpia con `main` y resolver los conflictos evitables de sincronizacion.
 - Cada cambio implementado por `developer-teams` debe terminar con `git commit` en espanol y `git push` de la rama remota.
 - `qa-teams` revisa y valida el trabajo sobre la rama de la tarea desde la perspectiva del usuario y de los criterios de aceptacion.
 - `qa-teams` puede crear una rama temporal de integracion para ejecutar pruebas o preparar la validacion cuando lo necesite. Esa rama de integracion es adicional a las dos ramas tecnicas permitidas, debe usarse solo para validacion y debe borrarse al terminar la revision.
 - `qa-teams` es responsable de los tests de validacion, como pruebas funcionales, end-to-end, exploratorias y contra criterios de aceptacion.
 - `qa-teams` debe dejar en la issue el resultado de la revision, incluyendo como minimo rama revisada, pruebas realizadas, resultados observados, defectos bloqueantes, observaciones, riesgos y `estado operativo: validado` o `estado operativo: no validado`.
+- En ese comentario de revision, `qa-teams` debe usar de forma literal los campos `Rama revisada:`, `Pruebas realizadas:`, `Resultados observados:`, `Defectos bloqueantes:`, `Observaciones:`, `Riesgos:` y `Estado operativo: validado|no validado`.
 - `qa-teams` debe verificar que la issue ha concluido realmente segun sus criterios de aceptacion y revisar si existe deuda tecnica relevante o si procede abrir una tarea tecnica de refactorizacion o mejora de codigo.
 - Si el resultado es `no validado`, `qa-teams` debe explicar la razon para que `developer-teams` pueda resolverla en la misma issue y, mientras el alcance sea el mismo, en la misma rama.
 - Solo tras la validacion de `qa-teams`, `product-manager` debe fusionar en `main` la rama tecnica correspondiente, cerrar el issue o dejar constancia explicita del motivo por el que sigue abierta, y borrar la rama tecnica una vez completado el merge si ya no existe una razon clara para conservarla.
-- Si una issue permanece abierta tras `estado operativo: validado`, `product-manager` debe dejar explicitamente bloqueo actual, siguiente responsable y siguiente paso operativo para evitar que siga abierta sin contexto.
+- Si una issue permanece abierta tras `estado operativo: validado`, `product-manager` debe dejar un comentario administrativo con los campos literales `Bloqueo actual:`, `Siguiente responsable:`, `Siguiente paso operativo:` y `Estado de integracion: pendiente|hecho|no aplica` para evitar que siga abierta sin contexto.
 - `doc-teams` debe intervenir cuando una entrega validada tenga `impacto documental: si`, salvo que se indique expresamente otra prioridad.
 - Si existen ya dos ramas tecnicas abiertas, el proyecto debe concluir o desbloquear al menos una issue antes de iniciar una nueva implementacion tecnica.
 

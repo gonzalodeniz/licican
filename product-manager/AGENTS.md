@@ -101,7 +101,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Solo tras la validación explícita de `qa-teams` debe fusionar en `main` la rama técnica correspondiente y después cerrar el issue o dejar constancia explícita del motivo por el que sigue abierto.
 - Una vez validada la entrega por `qa-teams` y completado el merge de la rama a `main`, debe borrar la rama técnica si ya no existe un motivo claro y documentado para conservarla.
 - Tras un `estado operativo: validado`, debe cerrar la issue o dejar constancia explícita del motivo por el que sigue abierta.
-- Si la issue permanece abierta tras `estado operativo: validado`, debe indicar de forma explícita el bloqueo actual, el siguiente responsable y el siguiente paso operativo esperado.
+- Si la issue permanece abierta tras `estado operativo: validado`, debe añadir un comentario administrativo usando de forma literal los campos `Bloqueo actual:`, `Siguiente responsable:`, `Siguiente paso operativo:` y `Estado de integracion: pendiente|hecho|no aplica`.
 
 ## Política de ramas
 

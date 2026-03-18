@@ -32,6 +32,7 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 - Debe escribir en la issue el resultado de las pruebas realizadas.
 - El comentario de validacion debe terminar con un estado explicito de `validado` o `no validado`.
 - El comentario de validacion debe incluir de forma explicita `Rama revisada:`, `Pruebas realizadas:`, `Resultados observados:`, `Defectos bloqueantes:`, `Observaciones:`, `Riesgos:` y `Estado operativo: validado|no validado`.
+- Debe usar esos nombres de campo de forma literal y mantener el estado final en la clave `Estado operativo:` para que la trazabilidad sea homogena entre revisiones.
 - Si el resultado es `no validado`, debe explicar con claridad la razon, el comportamiento observado, el impacto y lo que debe resolver `developer-teams`.
 - Debe confirmar expresamente si la issue puede considerarse concluida segun los criterios de aceptacion.
 
