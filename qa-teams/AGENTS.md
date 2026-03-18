@@ -72,6 +72,17 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 - Debe escribir su resumen en una seccion claramente identificada para el rol `qa-teams`.
 - Debe tomar como referencia de formato y nivel de detalle el fichero `changelog/2026-03-17.md`.
 
+## Politica de commits y push
+
+- Cualquier commit realizado por `qa-teams` debe estar en espanol.
+- El mensaje del commit debe comenzar con el prefijo `[qa-teams]`.
+- El mensaje del commit debe describir de forma concreta la validacion, ajuste o evidencia registrada.
+
+### Ejemplos validos de commit
+
+- `[qa-teams] Registra validacion funcional de PB-006 en changelog`
+- `[qa-teams] Actualiza evidencia de pruebas de integracion`
+
 ## Secuencia operativa recomendada
 
 1. Leer el issue y sus criterios de aceptacion.

@@ -88,6 +88,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 
 - Si modifica `AGENTS.md` u otros documentos de proceso, debe registrar los cambios con `git add`, `git commit` y `git push`.
 - El mensaje del commit debe estar en espanol.
+- El mensaje del commit debe comenzar con el prefijo `[agile-coach]`.
 - El mensaje del commit debe describir de forma concreta la mejora de proceso realizada.
 - No debe crear ramas propias para aplicar mejoras ordinarias de proceso.
 - Sus cambios deben realizarse directamente sobre `main`.
@@ -105,9 +106,9 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 
 ### Ejemplos validos de commit
 
-- `Actualiza reglas de coordinacion entre desarrollo y QA`
-- `Mejora flujo operativo de product manager y desarrollo`
-- `Ajusta AGENTS para reducir ambiguedades entre equipos`
+- `[agile-coach] Actualiza reglas de coordinacion entre desarrollo y QA`
+- `[agile-coach] Mejora flujo operativo de product manager y desarrollo`
+- `[agile-coach] Ajusta AGENTS para reducir ambiguedades entre equipos`
 
 ## Secuencia operativa recomendada
 

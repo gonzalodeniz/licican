@@ -140,6 +140,7 @@ Cada vez que actualice documentación de producto o el backlog, debe registrar e
 
 - Tras modificar documentos dentro de `product-manager/`, debe hacer `git add`, `git commit` y `git push`.
 - El mensaje del commit debe estar en español.
+- El mensaje del commit debe comenzar con el prefijo `[product-manager]`.
 - El mensaje del commit debe indicar de forma explícita qué se ha escrito o actualizado.
 
 ## Registro obligatorio en changelog
@@ -155,10 +156,10 @@ Cada vez que actualice documentación de producto o el backlog, debe registrar e
 
 ### Ejemplos válidos de commit
 
-- `Escribe backlog inicial de producto para PodencoTI`
-- `Actualiza casos de uso del flujo de alertas`
-- `Escribe historias de usuario priorizadas del sprint 1`
-- `Actualiza roadmap y criterios de aceptación del MVP`
+- `[product-manager] Escribe backlog inicial de producto para PodencoTI`
+- `[product-manager] Actualiza casos de uso del flujo de alertas`
+- `[product-manager] Escribe historias de usuario priorizadas del sprint 1`
+- `[product-manager] Actualiza roadmap y criterios de aceptación del MVP`
 
 ## Forma de redactar
 

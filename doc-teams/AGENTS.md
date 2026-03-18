@@ -71,6 +71,7 @@ Debe crear y mantener, cuando aplique, documentos dentro de `doc-teams/`, por ej
 
 - Cada cambio documental debe registrarse con `git add`, `git commit` y `git push`.
 - El mensaje del commit debe estar en espanol.
+- El mensaje del commit debe comenzar con el prefijo `[doc-teams]`.
 - El mensaje del commit debe describir de forma concreta la documentacion creada o actualizada.
 - No debe crear ramas de trabajo propias para cambios documentales salvo instruccion explicita que contradiga esta regla.
 - Sus cambios deben hacerse directamente sobre `main`.
@@ -88,9 +89,9 @@ Debe crear y mantener, cuando aplique, documentos dentro de `doc-teams/`, por ej
 
 ### Ejemplos validos de commit
 
-- `Escribe manual de usuario inicial`
-- `Actualiza manual tecnico de arquitectura y despliegue`
-- `Añade guia de administracion y operacion`
+- `[doc-teams] Escribe manual de usuario inicial`
+- `[doc-teams] Actualiza manual tecnico de arquitectura y despliegue`
+- `[doc-teams] Añade guia de administracion y operacion`
 
 ## Secuencia operativa recomendada
 

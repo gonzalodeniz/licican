@@ -60,6 +60,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 
 - Cada trabajo implementado debe registrarse con `git add`, `git commit` y `git push`.
 - El mensaje del commit debe estar en espanol.
+- El mensaje del commit debe comenzar con el prefijo `[developer-teams]`.
 - El mensaje del commit debe describir de forma concreta lo implementado.
 
 ## Registro obligatorio en changelog
@@ -75,9 +76,9 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 
 ### Ejemplos validos de commit
 
-- `Implementa parser inicial de licitaciones en Python`
-- `Corrige filtro de alertas por presupuesto`
-- `Añade endpoint de oportunidades y pruebas asociadas`
+- `[developer-teams] Implementa parser inicial de licitaciones en Python`
+- `[developer-teams] Corrige filtro de alertas por presupuesto`
+- `[developer-teams] Añade endpoint de oportunidades y pruebas asociadas`
 
 ## Criterios de calidad
 
