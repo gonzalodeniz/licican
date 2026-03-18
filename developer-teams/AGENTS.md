@@ -68,7 +68,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 
 ## Registro obligatorio en changelog
 
-- Al finalizar sus tareas del dia, debe registrar un resumen de trabajo en la carpeta `changelog/`.
+- Debe registrar en la rama `main`, en el fichero correspondiente de la carpeta `changelog/`, un resumen de sus acciones por cada trabajo realizado.
+- Ese resumen en `changelog/` es obligatorio y forma parte del cierre operativo del trabajo de `developer-teams`.
 - Cualquier actualizacion de `changelog/` debe realizarse siempre sobre la rama `main`, no sobre la rama tecnica del issue.
 - Cada actualizacion de `changelog/` debe registrarse con `git commit` y `git push` al remoto sobre `main`.
 - El `changelog/` no debe arrastrarse en la rama tecnica del issue ni formar parte de la entrega a `qa-teams`.
@@ -77,6 +78,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Si el fichero del dia no existe, debe crearlo.
 - Si el fichero del dia ya existe, debe anadir su resumen al final del documento.
 - Debe escribir su resumen en una seccion claramente identificada para el rol `developer-teams`.
+- El resumen debe describir de forma breve y concreta las acciones realizadas, no solo el estado general de la tarea.
 - Al comienzo de su seccion debe indicar la hora exacta de escritura.
 - Si registra actividad en dos momentos distintos del mismo dia, debe crear dos entradas separadas para `developer-teams`, cada una con su propia seccion diferenciada y su propia hora.
 - Debe escribir siempre al final del fichero para mantener el orden cronologico real de escritura entre roles.

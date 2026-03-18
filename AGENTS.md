@@ -131,6 +131,8 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - En ese handoff a `qa-teams`, `developer-teams` debe usar de forma literal los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental:` y `Estado operativo: listo para qa`.
 - Antes de pedir revision a `qa-teams`, `developer-teams` debe comprobar que su rama integra limpia con `main` y resolver los conflictos evitables de sincronizacion.
 - Cada cambio implementado por `developer-teams` debe terminar con `git commit` en espanol y `git push` de la rama remota.
+- Ademas de los commits de su rama tecnica, `developer-teams` debe registrar en la rama `main` un resumen de sus acciones en el fichero correspondiente de `changelog/`.
+- Ese registro en `changelog/` es obligatorio para cada trabajo realizado por `developer-teams`, debe escribirse siempre sobre `main` y no puede omitirse aunque la entrega tecnica se haya hecho en una rama del issue.
 - `qa-teams` revisa y valida el trabajo sobre la rama de la tarea desde la perspectiva del usuario y de los criterios de aceptacion.
 - `qa-teams` puede crear una rama temporal de integracion para ejecutar pruebas o preparar la validacion cuando lo necesite. Esa rama de integracion es adicional a las dos ramas tecnicas permitidas, debe usarse solo para validacion y debe borrarse al terminar la revision.
 - `qa-teams` es responsable de los tests de validacion, como pruebas funcionales, end-to-end, exploratorias y contra criterios de aceptacion.
