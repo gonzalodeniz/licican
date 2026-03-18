@@ -5,12 +5,12 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 
 ## Estado funcional confirmado en el repositorio
 - `PB-007` dispone de entrega visible en producto y validacion explicita de `qa-teams` en la issue #1.
-- La entrega actual cubre delimitacion de fuentes, no ingestion real ni catalogo de licitaciones.
-- `PB-006` no quedo validado por `qa-teams` en la issue #2 y debe corregirse antes de abrir el catalogo de `PB-001`.
+- La entrega de `PB-007` cubre delimitacion de fuentes, no ingestion real ni catalogo de licitaciones.
+- `PB-006` ya quedo validado por `qa-teams` en la issue #2 y deja una superficie funcional auditable previa al catalogo de `PB-001`.
 
 ## Huecos funcionales detectados en esta revision
-- La issue `PB-006` quedo `no validada` porque la entrega no expuso las superficies declaradas para QA y no integraba limpia con `main`.
 - Sigue abierto el umbral funcional para expedientes mixtos donde TI es una parte secundaria.
+- Falta decidir como se representa en producto una oportunidad anulada, desierta o modificada sin romper el seguimiento del usuario.
 - Sigue siendo necesario asegurar que cualquier futura entrega funcional declare solo superficies realmente accesibles por QA.
 
 ## Decisiones funcionales vigentes
@@ -18,7 +18,8 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
   - escalon 1: cobertura acotada, regla de relevancia TI, catalogo, detalle y filtros
   - escalon 2: alertas y pipeline
 - La comunicacion del producto debe hablar de cobertura inicial priorizada, no de cobertura total.
-- La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implícitas.
+- La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implicitas.
+- La regla TI ya puede validarse de forma observable antes de construir el catalogo, pero su casuistica seguira refinandose con ejemplos reales.
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
@@ -51,7 +52,7 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 ## Dependencias abiertas
 - Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera release o si permanecen fuera de la promesa comercial inicial.
 - Definir el umbral funcional para expedientes mixtos donde TI no sea el componente principal.
-- Resolver la correccion de `PB-006` con evidencia funcional accesible para QA y con rama limpia frente a `main`.
+- Definir el tratamiento funcional de oportunidades anuladas, desiertas o modificadas antes de escalar el pipeline.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.
@@ -70,12 +71,13 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - Como debe tratarse una oportunidad anulada, desierta o modificada dentro del pipeline del usuario.
 
 ## Recomendacion operativa para `developer-teams`
-- Mantener la correccion de la issue #2 correspondiente a `PB-006` en la rama `feat/pb-006-clasificacion-ti-auditable` mientras el alcance no cambie.
-- No iniciar implementacion de catalogo visible de `PB-001` sin incorporar una regla TI validable por QA y sin haber resuelto la integracion limpia con `main`.
+- Iniciar la issue #3 correspondiente a `PB-001` como siguiente paso del Release 1.
+- Reutilizar la cobertura validada de `PB-007` y la regla auditable de `PB-006` sin reabrirlas salvo cambio de alcance.
+- Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 
 ## Trazabilidad operativa
 - `PB-007` y `HU-07` quedan cubiertos por la issue #1 y su validacion ya registrada.
-- `PB-006` y `HU-06` resuelven la definicion de relevancia TI antes del catalogo.
+- `PB-006`, `HU-06` y `CU-08` resuelven la definicion de relevancia TI antes del catalogo.
 - `PB-001`, `PB-002` y `PB-003` forman el MVP de descubrimiento de Release 1.
 - `PB-004` y `PB-005` quedan listos para Release 2 tras validar el MVP de descubrimiento.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

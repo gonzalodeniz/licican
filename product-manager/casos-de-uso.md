@@ -5,8 +5,8 @@
 - Las reglas de negocio `RB-*` sirven como base de verificacion funcional para `qa-teams`.
 
 ## CU-01 Consultar catalogo de oportunidades TI
-- Backlog relacionado: PB-001, PB-006
-- Historias relacionadas: HU-01, HU-06
+- Backlog relacionado: PB-001
+- Historias relacionadas: HU-01
 - Actor principal: Usuario registrado de PodencoTI.
 - Objetivo: Descubrir en un solo lugar oportunidades de contratacion publica TI relevantes en Canarias.
 - Disparador: El usuario accede al modulo principal de oportunidades.
@@ -164,3 +164,26 @@
 - Reglas de negocio relacionadas:
   - RB-14 Ningun KPI debe bloquear por si solo la salida del MVP de descubrimiento.
   - RB-15 Los KPIs deben servir para decidir, no solo para informar.
+
+## CU-08 Revisar reglas auditables de relevancia TI
+- Backlog relacionado: PB-006
+- Historias relacionadas: HU-06
+- Actor principal: Responsable de producto o `qa-teams`.
+- Objetivo: Verificar de forma observable que la regla funcional de relevancia TI distingue inclusiones, exclusiones y casos frontera antes de construir el catalogo.
+- Disparador: Se necesita validar o revisar la regla TI vigente del MVP.
+- Precondiciones:
+  - Existe una definicion funcional vigente de inclusion, exclusion y casos frontera.
+  - La aplicacion expone una superficie verificable para revisar reglas y ejemplos auditados.
+- Flujo principal:
+  1. El actor accede a la vista o salida verificable de clasificacion TI.
+  2. El sistema muestra criterios de inclusion, exclusion y casos frontera.
+  3. El actor revisa ejemplos representativos con clasificacion esperada y obtenida.
+  4. El actor confirma si la regla funcional es suficiente para habilitar el catalogo.
+- Flujos alternativos:
+  - A1. Si un ejemplo no coincide con la clasificacion esperada, el sistema deja visible la discrepancia para su correccion.
+  - A2. Si un caso sigue siendo ambiguo, se mantiene identificado como frontera y se eleva a refinamiento funcional posterior.
+- Postcondiciones:
+  - La regla TI queda validable o sujeta a ajustes antes de aplicarse sobre el catalogo.
+- Reglas de negocio relacionadas:
+  - RB-18 La regla TI debe ser auditable por producto y `qa-teams` antes de depender de ella en el catalogo.
+  - RB-19 Los casos frontera no deben presentarse como inclusion inequivoca si requieren criterio adicional.

@@ -95,7 +95,7 @@
 
 ## HU-06 Disponer de reglas auditables de relevancia TI
 - Backlog relacionado: PB-006
-- Caso de uso relacionado: CU-01
+- Caso de uso relacionado: CU-08
 - Issue relacionado: #2
 - Historia:
   Como responsable de producto y validacion,
@@ -104,12 +104,12 @@
 - Criterios de aceptacion:
   1. Existe un documento funcional con criterios de inclusion y exclusion.
   2. Los criterios incluyen CPVs, palabras clave y casos frontera.
-  3. `qa-teams` puede validar una muestra de ejemplos con esos criterios.
+  3. `qa-teams` puede validar una muestra de ejemplos con esos criterios desde una superficie funcional verificable.
   4. El backlog y los issues hacen referencia a estas reglas.
 - Dependencias funcionales: PB-007
 - Prioridad: P0
-- Estado: `no validado`
-- Nota de estado: `qa-teams` dejo la issue #2 en `no validado` el 2026-03-18 por falta de superficie funcional verificable y por no integrar limpia con `main`; debe corregirse en la misma issue y rama mientras no cambie el alcance.
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la nueva entrega de la issue #2 el 2026-03-18 y la rama `feat/pb-006-clasificacion-ti-auditable` ya se integro en `main`; queda cerrada administrativamente salvo reapertura por cambio de alcance.
 
 ## HU-07 Delimitar la cobertura inicial de fuentes
 - Backlog relacionado: PB-007
@@ -126,8 +126,8 @@
   4. La entrega no comunica cobertura total cuando no existe.
 - Dependencias funcionales: ninguna
 - Prioridad: P0
-- Estado: `validado`
-- Nota de estado: validado por `qa-teams` en la issue #1; pendiente de cierre administrativo cuando se resuelva su integracion final.
+- Estado: `cerrado`
+- Nota de estado: validado previamente por `qa-teams` en la issue #1 e integrado en `main`; queda cerrado administrativamente salvo reapertura por cambio de alcance.
 
 ## HU-08 Medir cobertura y uso inicial del producto
 - Backlog relacionado: PB-008

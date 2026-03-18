@@ -7,9 +7,9 @@
 
 ## Estado de referencia de la iteracion
 - Fecha de corte documental: 2026-03-18.
-- Estado confirmado: `PB-007` validado por `qa-teams` en la issue #1.
-- Estado actual de trabajo tecnico: `PB-006` esta `no validado` en la issue #2 y debe corregirse en la rama `feat/pb-006-clasificacion-ti-auditable`.
-- Siguiente recomendacion para `developer-teams`: resolver `PB-006` antes de construir `PB-001`.
+- Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
+- Estado actual de trabajo tecnico: no hay otra rama tecnica abierta en remoto en este momento.
+- Siguiente recomendacion para `developer-teams`: iniciar `PB-001` en la issue #3 como siguiente paso del Release 1.
 
 ## Release 0: Delimitacion funcional del MVP
 - Objetivo: Cerrar ambiguedades criticas antes de la implementacion del catalogo.
@@ -19,8 +19,7 @@
   - Existe una lista visible y verificable de fuentes `MVP`, `Posterior` y `Por definir`.
   - La interfaz o configuracion no induce a pensar que existe cobertura total.
 - Estado actual:
-  - `PB-007` validado por `qa-teams`.
-  - Permanece pendiente de cierre administrativo en GitHub hasta resolver su integracion final y seguimiento de rama.
+  - `PB-007` completado, validado e integrado en `main`.
 
 ## Release 1: Regla de relevancia y descubrimiento
 - Objetivo: Permitir descubrir y evaluar oportunidades TI con criterio funcional consistente.
@@ -34,10 +33,11 @@
   - El usuario puede localizar, revisar y filtrar oportunidades sin recorrer varios portales.
   - `qa-teams` puede verificar una muestra de inclusiones, exclusiones y campos visibles.
 - Riesgo principal:
-  - Que el equipo implemente un catalogo visible sin haber cerrado suficientemente los casos frontera de relevancia TI.
+  - Que el equipo implemente un catalogo visible sin tratar de forma suficientemente clara los expedientes mixtos y el ciclo de vida de oportunidades cambiantes.
 - Estado operativo actual:
-  - `PB-006` no supero la validacion funcional de `qa-teams` porque la entrega no expuso las superficies prometidas para QA y la rama no integraba limpia con `main`.
-  - `PB-001`, `PB-002` y `PB-003` no deben activarse mientras este bloqueo siga abierto.
+  - `PB-006` ya esta validado e integrado en `main` como prerequisito del catalogo.
+  - `PB-001` pasa a ser la siguiente pieza activa del Release 1.
+  - `PB-002` y `PB-003` deben mantenerse dependientes del catalogo para no romper la secuencia funcional del MVP.
 
 ## Release 2: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -64,9 +64,9 @@
 
 ## Dependencias abiertas de roadmap
 - Confirmar el tratamiento funcional de expedientes mixtos donde TI no es el componente principal.
-- Revalidar `PB-006` con una superficie funcional observable y una rama sincronizada con `main` antes de iniciar el catalogo del Release 1.
+- Definir el comportamiento del producto ante oportunidades anuladas, desiertas o modificadas antes de abrir plenamente el pipeline de usuario.
 
 ## Decision operativa para la siguiente iteracion
-- La issue activa que debe continuar `developer-teams` es la #2, asociada a `PB-006`.
-- La correccion debe mantenerse en la misma rama `feat/pb-006-clasificacion-ti-auditable` mientras el alcance siga siendo el mismo.
-- No se recomienda abrir implementacion de `PB-001` sin haber fijado antes la regla funcional auditable de relevancia TI y sin haber superado validacion funcional de QA.
+- La issue que debe tomar `developer-teams` a continuacion es la #3, asociada a `PB-001`.
+- La implementacion debe reutilizar la cobertura validada de `PB-007` y la regla auditable validada de `PB-006`.
+- No se recomienda iniciar `PB-002` ni `PB-003` antes de que exista una primera superficie estable del catalogo visible de `PB-001`.
