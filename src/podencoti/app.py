@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 from html import escape
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote
 from wsgiref.simple_server import make_server
 
-from podencoti.opportunity_catalog import build_catalog, build_opportunity_detail
+from podencoti.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail
 from podencoti.source_coverage import load_source_coverage, summary_by_status
 from podencoti.ti_classification import audit_examples, load_rule_set
 
@@ -118,6 +118,53 @@ def _page_template(
       .badge.risk {{
         background: #f8ddd7;
         color: var(--risk);
+      }}
+      .filters {{
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        align-items: end;
+      }}
+      .filters label {{
+        display: block;
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }}
+      .filters input, .filters select {{
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.7rem 0.8rem;
+        font: inherit;
+        background: white;
+        color: var(--ink);
+      }}
+      .filter-actions {{
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }}
+      .button-link, button {{
+        display: inline-block;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.8rem 1.2rem;
+        font: inherit;
+        text-decoration: none;
+        cursor: pointer;
+      }}
+      button {{
+        background: var(--accent);
+        color: white;
+      }}
+      .button-link {{
+        background: #efe4d4;
+        color: var(--ink);
+      }}
+      .active-filters {{
+        margin-top: 1rem;
       }}
       table {{
         width: 100%;
@@ -253,9 +300,110 @@ def _detail_url(opportunity_id: str) -> str:
     return f"/oportunidades/{quote(opportunity_id)}"
 
 
-def _catalog_html_response() -> str:
-    catalog = build_catalog()
+def _parse_catalog_filters(environ) -> CatalogFilters:
+    query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
+
+    def first(name: str) -> str | None:
+        values = query.get(name)
+        if not values:
+            return None
+        value = values[0].strip()
+        return value or None
+
+    def integer(name: str) -> int | None:
+        value = first(name)
+        if value is None:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+    return CatalogFilters(
+        palabra_clave=first("palabra_clave"),
+        presupuesto_min=integer("presupuesto_min"),
+        presupuesto_max=integer("presupuesto_max"),
+        procedimiento=first("procedimiento"),
+        ubicacion=first("ubicacion"),
+    )
+
+
+def _active_filter_badges(filters: dict[str, object]) -> str:
+    labels = {
+        "palabra_clave": "Palabra clave",
+        "presupuesto_min": "Presupuesto mínimo",
+        "presupuesto_max": "Presupuesto máximo",
+        "procedimiento": "Procedimiento",
+        "ubicacion": "Ubicación",
+    }
+    if not filters:
+        return ""
+
+    badges = "".join(
+        f'<span class="badge">{escape(labels[key])}: {escape(str(value))}</span>'
+        for key, value in filters.items()
+    )
+    return f"""
+      <div class="active-filters">
+        <p><strong>Filtros activos</strong></p>
+        <div>{badges}</div>
+      </div>
+    """
+
+
+def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
+    catalog = build_catalog(filters=filters)
     opportunities = catalog["oportunidades"]
+    active_filters = catalog["filtros_activos"]
+    available_filters = catalog["filtros_disponibles"]
+    filter_form = f"""
+      <section class="panel">
+        <div class="panel-body">
+          <h2>Filtros funcionales</h2>
+          <form method="get" action="/">
+            <div class="filters">
+              <div>
+                <label for="palabra_clave">Palabra clave</label>
+                <input id="palabra_clave" name="palabra_clave" type="text" value="{escape(str(active_filters.get("palabra_clave", "")))}" placeholder="backup, licencias, redes..." />
+              </div>
+              <div>
+                <label for="presupuesto_min">Presupuesto mínimo</label>
+                <input id="presupuesto_min" name="presupuesto_min" type="number" min="0" step="1" value="{escape(str(active_filters.get("presupuesto_min", "")))}" />
+              </div>
+              <div>
+                <label for="presupuesto_max">Presupuesto máximo</label>
+                <input id="presupuesto_max" name="presupuesto_max" type="number" min="0" step="1" value="{escape(str(active_filters.get("presupuesto_max", "")))}" />
+              </div>
+              <div>
+                <label for="procedimiento">Procedimiento</label>
+                <select id="procedimiento" name="procedimiento">
+                  <option value="">Todos</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if active_filters.get("procedimiento") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["procedimientos"]
+                  )}
+                </select>
+              </div>
+              <div>
+                <label for="ubicacion">Ubicación</label>
+                <select id="ubicacion" name="ubicacion">
+                  <option value="">Todas</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if active_filters.get("ubicacion") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["ubicaciones"]
+                  )}
+                </select>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button type="submit">Aplicar filtros</button>
+              <a class="button-link" href="/">Limpiar filtros</a>
+            </div>
+          </form>
+          {_active_filter_badges(active_filters)}
+        </div>
+      </section>
+    """
 
     if opportunities:
         rows = "\n".join(
@@ -279,7 +427,7 @@ def _catalog_html_response() -> str:
           <div class="summary">
             <article class="metric"><strong>{catalog["total_oportunidades_catalogo"]}</strong>Oportunidades TI visibles</article>
             <article class="metric"><strong>{len(catalog["cobertura_aplicada"])}</strong>Fuentes oficiales MVP aplicadas</article>
-            <article class="metric"><strong>{catalog["total_registros_origen"]}</strong>Registros evaluados en origen</article>
+            <article class="metric"><strong>{catalog["total_oportunidades_visibles"]}</strong>Oportunidades TI antes de filtrar</article>
           </div>
           <p class="muted">
             El catálogo reutiliza la cobertura MVP de <code>PB-007</code> y la clasificación auditable de <code>PB-006</code>.
@@ -306,13 +454,19 @@ def _catalog_html_response() -> str:
       </section>
         """
     else:
-        catalog_panel = """
+        message = (
+            "No hay resultados con los filtros activos."
+            if active_filters
+            else "No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento."
+        )
+        catalog_panel = f"""
       <section class="note">
-        No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento.
+        {escape(message)}
       </section>
         """
 
     content = f"""
+      {filter_form}
       {catalog_panel}
 
       <p class="note">
@@ -524,6 +678,7 @@ def _respond(start_response, status: str, content_type: str, body: bytes) -> lis
 
 def application(environ, start_response):
     path = environ.get("PATH_INFO", "/")
+    filters = _parse_catalog_filters(environ)
 
     if path.startswith("/api/oportunidades/"):
         opportunity_id = path.removeprefix("/api/oportunidades/")
@@ -535,7 +690,7 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/oportunidades":
-        body = b"".join(_json_response(build_catalog()))
+        body = b"".join(_json_response(build_catalog(filters=filters)))
         return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/fuentes":
@@ -581,7 +736,7 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/":
-        body = b"".join(_html_response(_catalog_html_response()))
+        body = b"".join(_html_response(_catalog_html_response(filters)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     body = b"No encontrado"

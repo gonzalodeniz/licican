@@ -9,14 +9,14 @@ from unittest.mock import patch
 from podencoti.app import application, main
 
 
-def invoke_app(path: str) -> tuple[str, dict[str, str], bytes]:
+def invoke_app(path: str, query_string: str = "") -> tuple[str, dict[str, str], bytes]:
     captured: dict[str, object] = {}
 
     def start_response(status: str, headers: list[tuple[str, str]]) -> None:
         captured["status"] = status
         captured["headers"] = dict(headers)
 
-    body = b"".join(application({"PATH_INFO": path}, start_response))
+    body = b"".join(application({"PATH_INFO": path, "QUERY_STRING": query_string}, start_response))
     return captured["status"], captured["headers"], body
 
 
@@ -42,6 +42,19 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(5, payload["total_registros_origen"])
         self.assertEqual(97000, payload["oportunidades"][0]["presupuesto"])
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in payload["oportunidades"]))
+
+    def test_api_applies_functional_filters_from_query_string(self) -> None:
+        status, headers, body = invoke_app(
+            "/api/oportunidades",
+            "palabra_clave=licencias&presupuesto_min=90000&presupuesto_max=120000&procedimiento=Abierto+simplificado&ubicacion=Santa+Cruz+de+Tenerife",
+        )
+        payload = json.loads(body)
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
+        self.assertEqual(1, payload["total_oportunidades_catalogo"])
+        self.assertEqual(["pcsp-cabildo-licencias-2026"], [item["id"] for item in payload["oportunidades"]])
+        self.assertEqual("licencias", payload["filtros_activos"]["palabra_clave"])
 
     def test_detail_page_renders_critical_fields_and_latest_visible_update(self) -> None:
         status, headers, body = invoke_app("/oportunidades/pcsp-cabildo-licencias-2026")
@@ -138,7 +151,10 @@ class ApplicationTests(unittest.TestCase):
             "referencia_funcional": "PB-001",
             "cobertura_aplicada": ["Gobierno de Canarias"],
             "total_registros_origen": 0,
+            "total_oportunidades_visibles": 0,
             "total_oportunidades_catalogo": 0,
+            "filtros_activos": {},
+            "filtros_disponibles": {"procedimientos": [], "ubicaciones": []},
             "oportunidades": [],
         }
 
@@ -149,3 +165,14 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento.", html)
+
+    def test_root_renders_active_filters_and_empty_state_for_filtered_catalog(self) -> None:
+        status, headers, body = invoke_app("/", "palabra_clave=inexistente")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Filtros activos", html)
+        self.assertIn("Palabra clave: inexistente", html)
+        self.assertIn("No hay resultados con los filtros activos.", html)
+        self.assertIn("Limpiar filtros", html)

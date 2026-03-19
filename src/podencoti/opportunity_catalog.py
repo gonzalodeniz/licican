@@ -67,6 +67,37 @@ class OpportunityDetail:
     historial_actualizaciones: tuple[dict[str, object], ...]
 
 
+@dataclass(frozen=True)
+class CatalogFilters:
+    palabra_clave: str | None = None
+    presupuesto_min: int | None = None
+    presupuesto_max: int | None = None
+    procedimiento: str | None = None
+    ubicacion: str | None = None
+
+    def normalized(self) -> "CatalogFilters":
+        return CatalogFilters(
+            palabra_clave=_normalize_text(self.palabra_clave),
+            presupuesto_min=self.presupuesto_min,
+            presupuesto_max=self.presupuesto_max,
+            procedimiento=_normalize_text(self.procedimiento),
+            ubicacion=_normalize_text(self.ubicacion),
+        )
+
+    def active_filters(self) -> dict[str, object]:
+        return {
+            key: value
+            for key, value in {
+                "palabra_clave": self.palabra_clave,
+                "presupuesto_min": self.presupuesto_min,
+                "presupuesto_max": self.presupuesto_max,
+                "procedimiento": self.procedimiento,
+                "ubicacion": self.ubicacion,
+            }.items()
+            if value not in (None, "")
+        }
+
+
 def load_opportunity_records(path: Path = DEFAULT_DATA_PATH) -> tuple[str, list[OpportunityRecord]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     records = [
@@ -140,6 +171,51 @@ def _classify_record(record: OpportunityRecord, rules) -> str:
     return decision.clasificacion
 
 
+def _normalize_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
+def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], filters: CatalogFilters) -> bool:
+    normalized_filters = filters.normalized()
+
+    if normalized_filters.palabra_clave is not None:
+        haystack = " ".join(
+            (
+                record.titulo,
+                record.descripcion,
+                record.organismo,
+                record.ubicacion,
+                snapshot["procedimiento"] or "",
+            )
+        ).lower()
+        if normalized_filters.palabra_clave.lower() not in haystack:
+            return False
+
+    presupuesto = snapshot["presupuesto"]
+    if normalized_filters.presupuesto_min is not None:
+        if presupuesto is None or int(presupuesto) < normalized_filters.presupuesto_min:
+            return False
+
+    if normalized_filters.presupuesto_max is not None:
+        if presupuesto is None or int(presupuesto) > normalized_filters.presupuesto_max:
+            return False
+
+    if normalized_filters.procedimiento is not None:
+        procedimiento = _normalize_text(str(snapshot["procedimiento"] or ""))
+        if procedimiento is None or procedimiento.lower() != normalized_filters.procedimiento.lower():
+            return False
+
+    if normalized_filters.ubicacion is not None:
+        ubicacion = _normalize_text(record.ubicacion)
+        if ubicacion is None or ubicacion.lower() != normalized_filters.ubicacion.lower():
+            return False
+
+    return True
+
+
 def build_opportunity_detail(
     opportunity_id: str,
     path: Path = DEFAULT_DATA_PATH,
@@ -184,12 +260,19 @@ def build_opportunity_detail(
     return None
 
 
-def build_catalog(path: Path = DEFAULT_DATA_PATH) -> dict[str, object]:
+def build_catalog(
+    path: Path = DEFAULT_DATA_PATH,
+    filters: CatalogFilters | None = None,
+) -> dict[str, object]:
     reference, records = load_opportunity_records(path)
     rules = load_rule_set()
     mvp_sources = {source.nombre for source in load_source_coverage() if source.estado == "MVP"}
+    active_filters = (filters or CatalogFilters()).normalized()
 
     opportunities: list[CatalogOpportunity] = []
+    available_locations: set[str] = set()
+    available_procedures: set[str] = set()
+    total_visible_before_filters = 0
     for record in records:
         if record.fuente_oficial not in mvp_sources:
             continue
@@ -198,6 +281,13 @@ def build_catalog(path: Path = DEFAULT_DATA_PATH) -> dict[str, object]:
         if classification != "TI":
             continue
         snapshot = _resolve_latest_visible_snapshot(record)
+        total_visible_before_filters += 1
+        available_locations.add(record.ubicacion)
+        if snapshot["procedimiento"]:
+            available_procedures.add(str(snapshot["procedimiento"]))
+
+        if not _matches_filters(record, snapshot, active_filters):
+            continue
 
         opportunities.append(
             CatalogOpportunity(
@@ -220,6 +310,12 @@ def build_catalog(path: Path = DEFAULT_DATA_PATH) -> dict[str, object]:
         "referencia_funcional": reference,
         "cobertura_aplicada": sorted(mvp_sources),
         "total_registros_origen": len(records),
+        "total_oportunidades_visibles": total_visible_before_filters,
         "total_oportunidades_catalogo": len(opportunities),
+        "filtros_activos": active_filters.active_filters(),
+        "filtros_disponibles": {
+            "procedimientos": sorted(available_procedures),
+            "ubicaciones": sorted(available_locations),
+        },
         "oportunidades": [opportunity.__dict__ for opportunity in opportunities],
     }
