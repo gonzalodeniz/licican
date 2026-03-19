@@ -19,7 +19,10 @@ Existe una entrega minima centrada en cobertura inicial del MVP y clasificacion 
 No en `main`. Esas capacidades siguen en backlog y roadmap de `product-manager/`.
 
 ## El historial operativo del 2026-03-18 no dice cosas distintas?
-Si. Hay entradas que afirman que no existia implementacion fuente y otras que hablan de un catalogo ya validado. Ninguna de esas afirmaciones coincide con el codigo actual revisado. Como `doc-teams`, la referencia documental valida para comportamiento actual es lo reproducible desde la rama.
+Si. Hay entradas que afirman que no existia implementacion fuente y otras que hablan de un catalogo ya validado. Ademas, `changelog/2026-03-19.md` habla de fichas de detalle validadas para `PB-002`. Ninguna de esas afirmaciones coincide con el codigo actual revisado. Como `doc-teams`, la referencia documental valida para comportamiento actual es lo reproducible desde la rama.
+
+## Por que la metadata del paquete no menciona la clasificacion TI?
+Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicial de fuentes. Esa descripcion ha quedado por detras del estado real de `main`, que ya incluye tambien la superficie auditable de `PB-006`.
 
 ## Se puede instalar algo util con `pip install -e .`?
 Si. La instalacion editable deja operativa la aplicacion local y permite ejecutar las pruebas.

@@ -9,6 +9,8 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `PB-007`: cobertura inicial visible y verificable de fuentes.
 - `PB-006`: regla de clasificacion TI auditable con ejemplos trazables.
 
+La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
+
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
 - Automatizacion local: `Makefile`
@@ -25,6 +27,11 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `/api/clasificacion-ti`: JSON con reglas y ejemplos auditados.
 
 La aplicacion devuelve `404 Not Found` para cualquier otra ruta no declarada.
+
+### Campos visibles por superficie
+- `/api/fuentes`: devuelve `sources` y `summary`.
+- `/api/clasificacion-ti`: devuelve `referencia_funcional`, `reglas` y `ejemplos_auditados`.
+- Las rutas `/oportunidades` y `/api/oportunidades` no existen en esta revision y responden `404 Not Found`.
 
 ## Estructura tecnica
 - [app.py](/opt/apps/podencoti/src/podencoti/app.py) centraliza el router WSGI, el renderizado HTML y las respuestas JSON.
@@ -45,7 +52,7 @@ Resultado verificado en esta revision:
 
 ## Contradicciones explicitadas
 - Parte del historial en `changelog/2026-03-18.md` afirma que `main` no contenia implementacion fuente ni pruebas versionadas; eso contradice el arbol actual.
-- Otras entradas del mismo changelog hablan de un catalogo validado con rutas como `/api/oportunidades`; esa superficie no existe en el codigo actual revisado.
+- Otras entradas de `changelog/2026-03-18.md` y `changelog/2026-03-19.md` hablan de un catalogo validado y de fichas de detalle con rutas como `/api/oportunidades`; esa superficie no existe en el codigo actual revisado.
 - La documentacion funcional de `product-manager/` describe backlog posterior valido, pero no debe leerse como contrato tecnico ya implementado.
 
 ## Limitaciones tecnicas actuales
