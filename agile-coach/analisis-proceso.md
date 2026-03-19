@@ -135,5 +135,15 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - Se mezclan defectos funcionales con fallos de preparacion de entrega en la misma revision.
 - La disciplina del handoff depende de buena voluntad y no de un control verificable entre equipos.
 
+## Problema 14: el estado visible de la issue queda desfasado respecto al flujo real
+### Evidencia
+- La issue `#5` mantiene en el cuerpo `Estado operativo: nuevo` aunque ya tiene comentarios estructurados de `developer-teams` y `qa-teams` con `en desarrollo`, `listo para qa` y `no validado`.
+- La consulta del backlog abierto en GitHub muestra el cuerpo de la issue, pero no expone de forma inmediata el ultimo comentario operativo.
+
+### Impacto observado
+- La lectura rapida del backlog puede inducir a error sobre que trabajo esta realmente nuevo, en curso o bloqueado por QA.
+- `developer-teams` y `product-manager` necesitan abrir cada issue o leer comentarios para reconstruir el estado vigente.
+- Se debilita la utilidad del campo `Estado operativo:` como referencia comun entre equipos si queda congelado en el alta inicial.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, cierre post-validacion y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA, de visibilidad real del estado de cada issue y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, actualizacion del `Estado operativo:` visible en GitHub, revalidacion tras `no validado`, cierre post-validacion y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.

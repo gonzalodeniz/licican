@@ -42,3 +42,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: la revision funcional empieza aunque falte la plantilla minima de handoff o existan conflictos evitables con `main`.
 - Impacto: QA invierte capacidad en reconstruir contexto o diagnosticar integracion antes de validar comportamiento.
 - Mitigacion acordada: comprobacion previa obligatoria y cierre con `Estado operativo: no validado` cuando el handoff no sea operable.
+
+## Riesgo 9: backlog visible con estados operativos desfasados
+- Senal observable: el cuerpo de la issue sigue mostrando `Estado operativo: nuevo` aunque existan comentarios posteriores con `en desarrollo`, `listo para qa`, `no validado` o `validado`.
+- Impacto: la priorizacion y la lectura rapida del backlog se apoyan en un estado engañoso o incompleto.
+- Mitigacion acordada: actualizar el `Estado operativo:` del cuerpo de la issue en cada transicion operativa relevante.

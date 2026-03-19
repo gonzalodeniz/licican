@@ -13,6 +13,8 @@ Todos los equipos deben reutilizar estos estados operativos en sus comentarios y
 - `validado`: QA confirma que la entrega cumple el alcance revisado.
 - `cerrado`: `product-manager` cierra la issue tras validacion y promueve el siguiente paso de integracion.
 
+Ademas, el campo `Estado operativo:` del cuerpo de la issue debe reflejar siempre el ultimo estado real visible en el flujo. El rol que produzca la transicion debe actualizarlo en GitHub junto con su comentario estructurado.
+
 ## Paquete minimo para iniciar una issue
 Antes de que `developer-teams` abra una rama, la issue debe incluir como minimo y de forma literal:
 - `Backlog:`
@@ -33,6 +35,7 @@ Estado operativo: en desarrollo
 ```
 
 Este comentario fija que rama esta activa, permite auditar el limite de ramas abiertas y evita que el estado `en desarrollo` quede escondido en texto libre.
+Al publicar este arranque, `developer-teams` debe actualizar tambien el `Estado operativo:` del cuerpo de la issue a `en desarrollo`.
 
 ## Handoff minimo de `developer-teams` a `qa-teams`
 El comentario final de entrega de `developer-teams` debe incluir como minimo:
@@ -59,6 +62,8 @@ Verificacion tecnica ejecutada:
 Impacto documental: si|no
 Estado operativo: listo para qa
 ```
+
+Al publicar este handoff, `developer-teams` debe actualizar tambien el `Estado operativo:` del cuerpo de la issue a `listo para qa`.
 
 ## Handoff minimo de `qa-teams`
 El comentario de revision de `qa-teams` debe incluir como minimo:
@@ -87,6 +92,8 @@ Riesgos:
 Estado operativo: validado|no validado
 ```
 
+Al publicar este resultado, `qa-teams` debe actualizar tambien el `Estado operativo:` del cuerpo de la issue a `validado` o `no validado` segun corresponda.
+
 ## Gate previo de `qa-teams`
 Antes de ejecutar la validacion funcional, `qa-teams` debe comprobar dos condiciones:
 1. La entrega de `developer-teams` usa la plantilla minima de handoff.
@@ -98,8 +105,10 @@ Si alguna de estas condiciones falla, `qa-teams` debe registrar el problema como
 Si QA deja `Estado operativo: no validado`:
 1. La issue sigue abierta.
 2. `developer-teams` mantiene la misma rama mientras el alcance siga siendo el mismo.
-3. `developer-teams` publica un nuevo comentario de entrega con las correcciones y una nueva evidencia.
-4. `qa-teams` vuelve a revisar esa misma issue.
+3. `developer-teams` prioriza esa misma issue frente a nuevas issues.
+4. `developer-teams` publica un nuevo comentario de entrega con la plantilla completa, las correcciones y una nueva evidencia.
+5. `developer-teams` vuelve a actualizar el `Estado operativo:` del cuerpo de la issue a `listo para qa`.
+6. `qa-teams` vuelve a revisar esa misma issue.
 
 Si el alcance cambia de forma material, `product-manager` debe decidir si corresponde una nueva issue.
 

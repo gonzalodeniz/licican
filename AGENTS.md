@@ -119,6 +119,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - El equipo `product-manager` es quien crea y mantiene los issues funcionales en el repositorio remoto de GitHub.
 - Cada issue creada por `product-manager` y lista para ser tomada por `developer-teams` debe incluir de forma literal los campos `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`.
 - Los issues deben usar un estado operativo comun entre equipos para reducir ambiguedad: `nuevo`, `en desarrollo`, `listo para qa`, `no validado`, `validado` y `cerrado`.
+- El campo `Estado operativo:` del cuerpo de la issue debe mantenerse sincronizado con el ultimo estado real del flujo; el rol que produzca la transicion debe actualizar ese campo en GitHub ademas de dejar su comentario estructurado.
 - Los roles `product-manager`, `doc-teams` y `agile-coach` trabajan directamente sobre `main` y no deben crear ramas de trabajo propias.
 - El equipo `developer-teams` debe leer los issues abiertos antes de empezar a implementar.
 - Si una issue no incluye el paquete minimo de contexto operativo, `developer-teams` no debe iniciar implementacion sobre ella hasta que `product-manager` la aclare.
@@ -145,6 +146,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - En ese comentario de revision, `qa-teams` debe usar de forma literal los campos `Rama revisada:`, `Pruebas realizadas:`, `Resultados observados:`, `Defectos bloqueantes:`, `Observaciones:`, `Riesgos:` y `Estado operativo: validado|no validado`.
 - `qa-teams` debe verificar que la issue ha concluido realmente segun sus criterios de aceptacion y revisar si existe deuda tecnica relevante o si procede abrir una tarea tecnica de refactorizacion o mejora de codigo.
 - Si el resultado es `no validado`, `qa-teams` debe explicar la razon para que `developer-teams` pueda resolverla en la misma issue y, mientras el alcance sea el mismo, en la misma rama.
+- Tras un `Estado operativo: no validado`, `developer-teams` debe priorizar esa misma issue frente a nuevas issues, corregir en la misma rama mientras el alcance no cambie y publicar un nuevo handoff completo antes de volver a QA.
 - Solo tras la validacion de `qa-teams`, `product-manager` debe fusionar en `main` la rama tecnica correspondiente, cerrar el issue o dejar constancia explicita del motivo por el que sigue abierta, y borrar la rama tecnica una vez completado el merge si ya no existe una razon clara para conservarla.
 - Si una issue permanece abierta tras `estado operativo: validado`, `product-manager` debe dejar un comentario administrativo con los campos literales `Bloqueo actual:`, `Siguiente responsable:`, `Siguiente paso operativo:` y `Estado de integracion: pendiente|hecho|no aplica` para evitar que siga abierta sin contexto.
 - `doc-teams` debe intervenir cuando una entrega validada tenga `impacto documental: si`, salvo que se indique expresamente otra prioridad.

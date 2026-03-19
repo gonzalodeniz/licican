@@ -33,6 +33,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Cada rama debe estar asociada a un unico issue o tarea.
 - No debe mezclar en una misma rama trabajo de varios issues distintos.
 - Al tomar una issue debe escribir en la issue de GitHub un comentario de arranque usando de forma literal `Rama:` y `Estado operativo: en desarrollo`.
+- Al pasar una issue a `en desarrollo` o `listo para qa`, debe actualizar tambien en GitHub el campo `Estado operativo:` del cuerpo de la issue para que el backlog visible no quede desfasado.
 - Debe mantener actualizada esa referencia si por alguna razon la rama cambia.
 - La rama no debe fusionarse a `main` por iniciativa de `developer-teams`.
 - Si cambia de rama durante su trabajo, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
@@ -46,6 +47,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - El comentario de entrega a `qa-teams` debe incluir de forma explicita los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental: si|no` y `Estado operativo: listo para qa`.
 - Debe usar esos nombres de campo de forma literal y en ese mismo orden para reducir ambiguedad entre iteraciones y facilitar revalidaciones.
 - Antes de declarar `estado operativo: listo para qa`, debe sincronizar su rama con `main` y comprobar que la entrega integra limpia sin conflictos evitables.
+- Si QA deja la issue en `no validado`, debe priorizar esa misma issue frente a trabajo nuevo, corregir en la misma rama mientras el alcance siga siendo el mismo y publicar un nuevo comentario de entrega con la plantilla completa antes de pedir revalidacion.
 
 ## Relacion con qa-teams
 

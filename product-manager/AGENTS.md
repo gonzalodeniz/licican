@@ -91,6 +91,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Cada issue debe estar vinculado de forma clara con backlog, historia de usuario o caso de uso.
 - Debe redactar los issues de forma ejecutable, con contexto suficiente para desarrollo.
 - Cada issue lista para desarrollo debe incluir de forma literal y en este orden `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`.
+- Debe mantener sincronizado en el cuerpo de la issue el campo `Estado operativo:` con el ultimo estado real conocido cuando le corresponda hacer una transicion o cierre administrativo.
 - Debe considerar que cada issue arranca con `estado operativo: nuevo`.
 - Debe evitar issues vagos o sin criterios de aceptación.
 - Puede dividir trabajo grande en múltiples issues más pequeños y trazables.

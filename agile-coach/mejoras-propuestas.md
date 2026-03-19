@@ -238,6 +238,48 @@ Obligar a que el arranque de una issue use al menos:
 - Mejora la lectura del tiempo real hasta inicio de desarrollo.
 
 ### Tradeoffs
+
+## Mejora 12: mantener sincronizado el `Estado operativo:` visible en la issue
+### Problema detectado
+El cuerpo de la issue puede seguir mostrando `Estado operativo: nuevo` aunque el trabajo real ya este en desarrollo, en QA o incluso `no validado`.
+
+### Propuesta
+Exigir que el rol que produzca cada transicion operativa actualice tambien el campo `Estado operativo:` del cuerpo de la issue en GitHub, ademas de dejar su comentario estructurado.
+
+### Impacto esperado
+- Mejora la lectura rapida del backlog abierto sin obligar a inspeccionar comentarios.
+- Reduce errores de priorizacion sobre issues aparentemente `nuevo` que en realidad ya estan en curso o devueltas por QA.
+- Hace mas util el estado operativo como fuente de verdad compartida.
+
+### Tradeoffs
+- Introduce una accion adicional de mantenimiento en GitHub para los roles que ya comentan la issue.
+
+### Riesgos y dependencias
+- Si la actualizacion del cuerpo se olvida, reaparece la divergencia entre backlog visible y flujo real.
+- Conviene limitar la edicion al campo `Estado operativo:` para no reescribir contexto funcional por error.
+
+## Mejora 13: reforzar la reentrega tras `no validado`
+### Problema detectado
+La regla de revalidacion existe, pero `developer-teams` aun podia interpretar que bastaba con corregir codigo sin reemitir un handoff completo ni reflejar el nuevo estado visible en la issue.
+
+### Propuesta
+Tras un `no validado`, exigir a `developer-teams` que:
+- priorice esa misma issue frente a nuevas issues
+- mantenga la misma rama mientras el alcance no cambie
+- publique un nuevo comentario de entrega con la plantilla completa
+- vuelva a actualizar el `Estado operativo:` del cuerpo de la issue a `listo para qa`
+
+### Impacto esperado
+- Reduce revalidaciones ambiguas o sin contexto incremental claro.
+- Mantiene trazabilidad comparable entre la primera entrega y las reentregas.
+- Evita que QA tenga que deducir si ya existe una nueva entrega realmente revisable.
+
+### Tradeoffs
+- La iteracion de correccion gana algo de disciplina documental.
+
+### Riesgos y dependencias
+- Si el alcance cambia materialmente y se mantiene la misma issue, la reentrega seguira siendo confusa.
+- Requiere que `product-manager` abra una nueva issue cuando la correccion deje de ser el mismo alcance.
 - Introduce un comentario adicional muy corto al comienzo del trabajo tecnico.
 
 ### Riesgos y dependencias
