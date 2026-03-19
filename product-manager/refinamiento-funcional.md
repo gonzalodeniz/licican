@@ -1,17 +1,17 @@
 # Refinamiento Funcional de PodencoTI
 
 ## Estado actual
-La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad de acotar mejor el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
+La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
 
 ## Estado funcional confirmado en el repositorio
 - `PB-007` dispone de entrega visible en producto y validacion explicita de `qa-teams` en la issue #1.
 - La entrega de `PB-007` cubre delimitacion de fuentes, no ingestion real ni catalogo de licitaciones.
 - `PB-006` ya quedo validado por `qa-teams` en la issue #2 y deja una superficie funcional auditable previa al catalogo de `PB-001`.
 
-## Huecos funcionales detectados en esta revision
-- Sigue abierto el umbral funcional para expedientes mixtos donde TI es una parte secundaria.
-- Falta decidir como se representa en producto una oportunidad anulada, desierta o modificada sin romper el seguimiento del usuario.
-- Sigue siendo necesario asegurar que cualquier futura entrega funcional declare solo superficies realmente accesibles por QA.
+## Huecos funcionales cerrados en esta revision
+- Queda definida la regla funcional para expedientes mixtos donde TI no es el unico componente.
+- Queda definido el tratamiento minimo de oportunidades anuladas, desiertas, desistidas o modificadas.
+- Queda identificado como deuda de trazabilidad el formato incompleto de varios issues abiertos, que debe corregirse para cumplir las reglas del repositorio.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -23,6 +23,23 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
+
+## Regla funcional vigente para expedientes mixtos
+- Un expediente mixto debe considerarse TI en el MVP cuando se cumpla al menos una de estas condiciones:
+  - el objeto principal o entregable dominante menciona de forma explicita software, sistemas, ciberseguridad, redes, cloud, datos, licencias o infraestructura TIC
+  - el CPV principal es tecnologico
+  - la parte TI es sustancial para el valor esperado del contrato y resulta indispensable para cumplir su objeto
+- Un expediente mixto no debe considerarse TI cuando:
+  - la parte tecnologica es accesoria o secundaria respecto al objeto principal
+  - la evidencia funcional disponible no permite afirmar que la necesidad TI sea sustancial
+- Si la informacion de origen no permite decidir con seguridad, el expediente debe tratarse como caso frontera y quedar fuera del catalogo visible del MVP hasta nuevo refinamiento.
+
+## Tratamiento funcional vigente del ciclo de vida de oportunidades
+- Si una oportunidad pasa a estado oficial `anulada`, `desierta` o `desistida`, debe seguir siendo visible con ese estado para preservar contexto historico.
+- Una oportunidad con esos estados oficiales no debe presentarse como nueva oportunidad accionable ni generar nuevas alertas accionables.
+- Si la oportunidad ya estaba guardada en pipeline, el sistema debe conservar el estado de trabajo del usuario y mostrar el estado oficial como advertencia visible.
+- Si la fuente publica una modificacion o rectificacion del mismo expediente, el producto debe mantener la misma referencia funcional y mostrar el ultimo dato oficial disponible en campos criticos como fecha limite o presupuesto.
+- El historial detallado de cambios oficiales queda fuera del MVP; por ahora basta con exponer el ultimo dato oficial visible.
 
 ## Reglas funcionales vigentes de clasificacion TI
 - Se considera candidata TI una oportunidad que cumpla al menos uno de estos criterios:
@@ -50,13 +67,12 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
   - Fuentes con acceso inconsistente, formatos no estandar o baja frecuencia de oportunidades TI
 
 ## Dependencias abiertas
-- Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera release o si permanecen fuera de la promesa comercial inicial.
-- Definir el umbral funcional para expedientes mixtos donde TI no sea el componente principal.
-- Definir el tratamiento funcional de oportunidades anuladas, desiertas o modificadas antes de escalar el pipeline.
+- Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera promesa comercial o si permanecen fuera de la comunicacion inicial.
+- Definir mas adelante si las modificaciones oficiales del expediente requieren un historial visible de cambios en lugar de mostrar solo el ultimo dato disponible.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.
-- Riesgo de falsos positivos si la clasificacion TI no queda suficientemente definida antes del catalogo.
+- Riesgo de falsos positivos si desarrollo interpreta de forma laxa que una parte TI es "sustancial" en expedientes mixtos.
 - Riesgo de baja adopcion si el MVP entrega solo agregacion pero no relevancia util.
 - Riesgo de frustracion si faltan datos criticos en fichas sin indicarse claramente su ausencia.
 - Riesgo operativo si desarrollo declara rutas o superficies de validacion no expuestas realmente en la entrega revisable.
@@ -67,13 +83,14 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - `qa-teams` validara primero comportamiento funcional observable, no exhaustividad total de fuentes.
 
 ## Preguntas abiertas para siguiente refinamiento
-- Que umbral funcional convierte un expediente mixto en oportunidad TI relevante.
-- Como debe tratarse una oportunidad anulada, desierta o modificada dentro del pipeline del usuario.
+- Que umbral comercial debe exigirse para considerar suficiente la cobertura MVP antes de ampliar a ayuntamientos.
+- Que datos minimos deben gobernar una futura decision de monetizacion o plan de pago.
 
 ## Recomendacion operativa para `developer-teams`
 - Iniciar la issue #3 correspondiente a `PB-001` como siguiente paso del Release 1.
 - Reutilizar la cobertura validada de `PB-007` y la regla auditable de `PB-006` sin reabrirlas salvo cambio de alcance.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
+- Tratar los expedientes mixtos dudosos como caso frontera fuera del catalogo hasta que exista evidencia funcional suficiente.
 
 ## Trazabilidad operativa
 - `PB-007` y `HU-07` quedan cubiertos por la issue #1 y su validacion ya registrada.

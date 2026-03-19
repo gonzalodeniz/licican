@@ -22,12 +22,14 @@
 - Flujos alternativos:
   - A1. Si no hay oportunidades disponibles, el sistema muestra un estado vacio explicando la situacion.
   - A2. Si una oportunidad carece de algun dato no obligatorio, el sistema lo indica sin ocultar el resto de informacion disponible.
+  - A3. Si la fuente informa que la oportunidad esta anulada, desierta o desistida, el sistema mantiene la referencia visible con su estado oficial y no la presenta como nueva activa.
 - Postcondiciones:
   - El usuario ha identificado una o varias oportunidades potencialmente relevantes.
 - Reglas de negocio relacionadas:
   - RB-01 Solo deben mostrarse oportunidades clasificadas como TI.
   - RB-02 Cada oportunidad debe conservar referencia a la fuente oficial.
   - RB-03 Solo deben aparecer oportunidades cuya fuente este dentro del alcance funcional vigente.
+  - RB-20 El estado oficial del expediente debe mostrarse cuando la fuente lo informe.
 
 ## CU-02 Revisar el detalle de una licitacion
 - Backlog relacionado: PB-002
@@ -45,11 +47,13 @@
 - Flujos alternativos:
   - A1. Si algun dato critico no esta disponible en origen, el sistema lo marca como no informado.
   - A2. Si la fuente oficial no es accesible temporalmente, el sistema mantiene el ultimo resumen estructurado disponible e informa de ello.
+  - A3. Si la fuente publica una modificacion o rectificacion del mismo expediente, el sistema mantiene la referencia funcional y muestra el ultimo dato oficial disponible.
 - Postcondiciones:
   - El usuario dispone de informacion suficiente para una decision inicial.
 - Reglas de negocio relacionadas:
   - RB-04 La fecha limite debe ser visible de forma prioritaria.
   - RB-05 El enlace a la fuente oficial debe estar disponible siempre que exista.
+  - RB-21 La ficha debe reflejar el ultimo estado y la ultima fecha oficial visible del expediente cuando existan rectificaciones.
 
 ## CU-03 Filtrar oportunidades
 - Backlog relacionado: PB-003
@@ -90,12 +94,14 @@
 - Flujos alternativos:
   - A1. Si el usuario intenta guardar una alerta sin criterios minimos, el sistema solicita completarlos.
   - A2. Si existen varias alertas solapadas, el sistema permite mantenerlas sin duplicar el mensaje de configuracion.
+  - A3. Si una oportunidad compatible pasa a estado oficial `anulada`, `desierta` o `desistida`, deja de tratarse como coincidencia nueva accionable.
 - Postcondiciones:
   - El usuario dispone de al menos una alerta activa.
 - Reglas de negocio relacionadas:
   - RB-08 Una alerta puede activarse, editarse o desactivarse.
   - RB-09 La configuracion de alertas debe reutilizar los mismos criterios funcionales que el filtrado del catalogo.
   - RB-16 En el MVP la alerta debe registrar coincidencias funcionales aunque no exista todavia notificacion saliente.
+  - RB-22 Una oportunidad cerrada oficialmente no debe generar una nueva alerta accionable.
 
 ## CU-05 Gestionar pipeline de oportunidades
 - Backlog relacionado: PB-005
@@ -114,12 +120,14 @@
 - Flujos alternativos:
   - A1. Si la oportunidad ya estaba guardada, el sistema evita duplicados y permite actualizar su estado.
   - A2. Si el usuario decide descartarla, el sistema conserva el registro en estado `Descartada`.
+  - A3. Si la oportunidad pasa a `anulada`, `desierta` o `desistida`, el sistema conserva el estado de trabajo del usuario y muestra el estado oficial como advertencia visible.
 - Postcondiciones:
   - La oportunidad queda gestionada en el pipeline del usuario.
 - Reglas de negocio relacionadas:
   - RB-10 Los estados minimos del pipeline son `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
   - RB-11 Una misma oportunidad no debe duplicarse en el pipeline del mismo usuario.
   - RB-17 La primera release del pipeline no incluye colaboracion compartida por empresa.
+  - RB-23 El estado oficial del expediente no elimina el historico del pipeline del usuario.
 
 ## CU-06 Delimitar cobertura funcional inicial
 - Backlog relacionado: PB-007

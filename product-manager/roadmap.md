@@ -6,10 +6,11 @@
 - Cada release debe dejar un resultado verificable por `qa-teams` y trazable a backlog e issues.
 
 ## Estado de referencia de la iteracion
-- Fecha de corte documental: 2026-03-18.
+- Fecha de corte documental: 2026-03-19.
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
-- Estado actual de trabajo tecnico: no hay otra rama tecnica abierta en remoto en este momento.
+- Estado actual de trabajo tecnico: no hay ramas tecnicas abiertas en remoto en este momento.
 - Siguiente recomendacion para `developer-teams`: iniciar `PB-001` en la issue #3 como siguiente paso del Release 1.
+- Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 
 ## Release 0: Delimitacion funcional del MVP
 - Objetivo: Cerrar ambiguedades criticas antes de la implementacion del catalogo.
@@ -25,15 +26,16 @@
 - Objetivo: Permitir descubrir y evaluar oportunidades TI con criterio funcional consistente.
 - Alcance:
   - PB-006 Reglas funcionales de clasificacion TI.
-  - PB-001 Catalogo inicial de oportunidades TI de Canarias.
+  - PB-001 Catalogo inicial de oportunidades TI.
   - PB-002 Ficha de detalle de licitacion.
   - PB-003 Filtros funcionales de busqueda.
 - Criterios de salida:
   - El catalogo solo muestra oportunidades alineadas con la cobertura y la regla TI.
   - El usuario puede localizar, revisar y filtrar oportunidades sin recorrer varios portales.
+  - El catalogo y la ficha muestran el estado oficial del expediente cuando la fuente lo informe.
   - `qa-teams` puede verificar una muestra de inclusiones, exclusiones y campos visibles.
 - Riesgo principal:
-  - Que el equipo implemente un catalogo visible sin tratar de forma suficientemente clara los expedientes mixtos y el ciclo de vida de oportunidades cambiantes.
+  - Que el equipo implemente un catalogo visible pero comunique cobertura o relevancia con mas seguridad de la que la release realmente soporta.
 - Estado operativo actual:
   - `PB-006` ya esta validado e integrado en `main` como prerequisito del catalogo.
   - `PB-001` pasa a ser la siguiente pieza activa del Release 1.
@@ -47,6 +49,7 @@
 - Criterios de salida:
   - El usuario puede dejar configurados criterios persistentes de interes.
   - El usuario puede seguir oportunidades guardadas sin duplicados y con estados consistentes.
+  - Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas alertas accionables y siguen siendo visibles en pipeline con advertencia.
 - Dependencia clave:
   - Requiere que Release 1 haya validado el valor del catalogo y de los filtros.
 - Decision funcional vigente:
@@ -63,8 +66,8 @@
   - El roadmap posterior puede justificarse con evidencia y no solo con intuicion.
 
 ## Dependencias abiertas de roadmap
-- Confirmar el tratamiento funcional de expedientes mixtos donde TI no es el componente principal.
-- Definir el comportamiento del producto ante oportunidades anuladas, desiertas o modificadas antes de abrir plenamente el pipeline de usuario.
+- Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
+- Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
 
 ## Decision operativa para la siguiente iteracion
 - La issue que debe tomar `developer-teams` a continuacion es la #3, asociada a `PB-001`.

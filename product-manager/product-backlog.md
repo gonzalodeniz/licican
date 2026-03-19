@@ -17,23 +17,35 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - `cerrado`: item validado, integrado y cerrado administrativamente por `product-manager`.
 
 ## Estado de referencia de backlog
-- Fecha de corte funcional: 2026-03-18.
-- `PB-007` queda listo para cierre administrativo: su alcance ya fue validado por `qa-teams` y esta integrado en `main`.
-- `PB-006` queda listo para cierre administrativo: `qa-teams` lo revalido en la issue #2 y la rama `feat/pb-006-clasificacion-ti-auditable` ya esta integrada en `main`.
-- La siguiente prioridad ejecutable para `developer-teams` pasa a ser `PB-001` en la issue #3.
+- Fecha de corte funcional: 2026-03-19.
+- `PB-007` queda cerrado administrativamente: su alcance fue validado por `qa-teams` y esta integrado en `main`.
+- `PB-006` queda cerrado administrativamente: `qa-teams` lo revalido en la issue #2 y la rama `feat/pb-006-clasificacion-ti-auditable` ya esta integrada en `main`.
+- La siguiente prioridad ejecutable para `developer-teams` sigue siendo `PB-001` en la issue #3.
+- En esta revision quedan cerradas dos decisiones de producto que ya no deben tratarse como preguntas abiertas:
+  - Regla funcional para expedientes mixtos TI.
+  - Tratamiento funcional minimo de oportunidades anuladas, desiertas, desistidas o modificadas.
 
 ## Backlog priorizado
 
 | ID | Titulo | Descripcion | Prioridad | Valor de negocio | Criterios de aceptacion | Dependencias | Estado | Trazabilidad |
 |---|---|---|---|---|---|---|---|---|
-| PB-001 | Catalogo inicial de oportunidades TI de Canarias | El usuario debe poder consultar en un unico listado las licitaciones TI detectadas dentro de la cobertura MVP ya delimitada. | P0 | Permite validar la propuesta central de centralizacion y descubrimiento temprano. | 1. Existe un listado consultable de oportunidades TI. 2. Cada oportunidad muestra al menos titulo, organismo, ubicacion, presupuesto si existe, fecha limite y estado. 3. Solo se muestran oportunidades etiquetadas como TI segun reglas funcionales vigentes. 4. El usuario puede distinguir la fuente oficial de cada registro. 5. Si no hay oportunidades disponibles, se muestra un estado vacio claro. | PB-007, PB-006 | `nuevo` | HU-01, CU-01, issue #3 |
-| PB-002 | Ficha de detalle de licitacion | El usuario debe acceder a una vista con la informacion critica de cada oportunidad para decidir si merece seguimiento. | P0 | Reduce tiempo de analisis y evita revisar manualmente el pliego completo para un primer filtro. | 1. Desde el catalogo se accede al detalle. 2. La ficha muestra presupuesto, plazo, procedimiento, criterios de adjudicacion, solvencia tecnica si esta disponible y enlace a la fuente oficial. 3. El usuario puede identificar la fecha limite y el organismo convocante sin ambiguedad. 4. Si un dato no esta disponible en origen, se muestra como no informado. | PB-001 | `nuevo` | HU-02, CU-02, issue #4 |
+| PB-001 | Catalogo inicial de oportunidades TI de Canarias | El usuario debe poder consultar en un unico listado las licitaciones TI detectadas dentro de la cobertura MVP ya delimitada. | P0 | Permite validar la propuesta central de centralizacion y descubrimiento temprano. | 1. Existe un listado consultable de oportunidades TI. 2. Cada oportunidad muestra al menos titulo, organismo, ubicacion, presupuesto si existe, fecha limite y estado oficial del expediente si la fuente lo informa. 3. Solo se muestran oportunidades etiquetadas como TI segun reglas funcionales vigentes. 4. El usuario puede distinguir la fuente oficial de cada registro. 5. Si no hay oportunidades disponibles, se muestra un estado vacio claro. | PB-007, PB-006 | `nuevo` | HU-01, CU-01, issue #3 |
+| PB-002 | Ficha de detalle de licitacion | El usuario debe acceder a una vista con la informacion critica de cada oportunidad para decidir si merece seguimiento. | P0 | Reduce tiempo de analisis y evita revisar manualmente el pliego completo para un primer filtro. | 1. Desde el catalogo se accede al detalle. 2. La ficha muestra presupuesto, plazo, procedimiento, criterios de adjudicacion, solvencia tecnica si esta disponible y enlace a la fuente oficial. 3. El usuario puede identificar la fecha limite, el organismo convocante y el estado oficial del expediente sin ambiguedad. 4. Si un dato no esta disponible en origen, se muestra como no informado. 5. Si la oportunidad fue modificada y la fuente publica nueva fecha limite u otra variable critica, la ficha muestra el ultimo dato oficial disponible. | PB-001 | `nuevo` | HU-02, CU-02, issue #4 |
 | PB-003 | Filtros funcionales de busqueda | El usuario debe poder filtrar oportunidades por palabras clave, presupuesto, procedimiento y ubicacion. | P0 | Aumenta relevancia y hace util el volumen de datos agregado. | 1. El usuario puede aplicar filtros por palabra clave, rango de presupuesto, procedimiento y ubicacion. 2. El listado refleja los filtros activos. 3. El usuario puede limpiar los filtros. 4. Si no hay resultados, se muestra un estado vacio comprensible. | PB-001 | `nuevo` | HU-03, CU-03, issue #5 |
 | PB-006 | Reglas funcionales de clasificacion TI | El producto debe establecer reglas verificables para decidir si una oportunidad es relevante para tecnologia antes de ampliar el catalogo. | P0 | Reduce falsos positivos, evita debates posteriores con QA y protege la utilidad del catalogo. | 1. Existe un criterio funcional documentado de inclusion TI. 2. El criterio contempla CPVs, palabras clave y casos frontera. 3. Las exclusiones relevantes quedan explicitadas. 4. `qa-teams` puede contrastar una muestra representativa con estas reglas desde una superficie funcional verificable. | PB-007 | `cerrado` | HU-06, CU-08, issue #2 |
 | PB-007 | Cobertura inicial de fuentes prioritarias | El MVP debe delimitar que fuentes oficiales entran en la primera entrega para evitar ambiguedad de alcance y expectativas incorrectas. | P0 | Permite planificar entrega incremental y medir cobertura real. | 1. Existe una lista priorizada de fuentes objetivo para la primera release. 2. Cada fuente tiene estado de inclusion objetivo: `MVP`, `Posterior` o `Por definir`. 3. La definicion queda alineada con roadmap y backlog. 4. La entrega no induce a pensar que existe cobertura total del ecosistema canario. | Ninguna | `cerrado` | HU-07, CU-06, issue #1 |
-| PB-004 | Configuracion de alertas tempranas | El usuario debe poder definir alertas para recibir nuevas oportunidades relevantes sin busqueda manual recurrente. | P1 | Materializa la promesa diferencial de anticipacion y refuerza la recurrencia de uso. | 1. El usuario puede crear al menos una alerta con criterios de palabra clave, presupuesto, procedimiento y ubicacion. 2. El sistema deja visible que la alerta esta activa. 3. Cuando aparece una oportunidad que cumple los criterios, queda registrada para notificacion. 4. El usuario puede editar o desactivar la alerta. | PB-001, PB-003 | `nuevo` | HU-04, CU-04, issue #6 |
-| PB-005 | Pipeline de seguimiento de oportunidades | El usuario debe poder guardar oportunidades y moverlas por estados de trabajo para coordinar su respuesta comercial o tecnica. | P1 | Favorece retencion y gestion del trabajo sobre oportunidades detectadas. | 1. El usuario puede guardar una oportunidad en su pipeline. 2. Puede asignar un estado entre `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`. 3. Puede consultar su pipeline con el estado actual de cada oportunidad. 4. El cambio de estado queda reflejado de forma consistente y sin duplicados. | PB-001, PB-002 | `nuevo` | HU-05, CU-05, issue #7 |
+| PB-004 | Configuracion de alertas tempranas | El usuario debe poder definir alertas para recibir nuevas oportunidades relevantes sin busqueda manual recurrente. | P1 | Materializa la promesa diferencial de anticipacion y refuerza la recurrencia de uso. | 1. El usuario puede crear al menos una alerta con criterios de palabra clave, presupuesto, procedimiento y ubicacion. 2. El sistema deja visible que la alerta esta activa. 3. Cuando aparece una oportunidad que cumple los criterios, queda registrada para notificacion. 4. El usuario puede editar o desactivar la alerta. 5. Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no deben registrarse como nuevas coincidencias accionables. | PB-001, PB-003 | `nuevo` | HU-04, CU-04, issue #6 |
+| PB-005 | Pipeline de seguimiento de oportunidades | El usuario debe poder guardar oportunidades y moverlas por estados de trabajo para coordinar su respuesta comercial o tecnica. | P1 | Favorece retencion y gestion del trabajo sobre oportunidades detectadas. | 1. El usuario puede guardar una oportunidad en su pipeline. 2. Puede asignar un estado entre `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`. 3. Puede consultar su pipeline con el estado actual de cada oportunidad. 4. El cambio de estado queda reflejado de forma consistente y sin duplicados. 5. Si la fuente oficial marca la oportunidad como `anulada`, `desierta` o `desistida`, el pipeline conserva el registro del usuario y muestra una advertencia visible de estado oficial. | PB-001, PB-002 | `nuevo` | HU-05, CU-05, issue #7 |
 | PB-008 | Medicion basica de valor del producto | El producto debe definir como medir cobertura, adopcion y uso de alertas desde las primeras releases. | P2 | Permite evaluar si el producto confirma la vision y orientar iteraciones posteriores. | 1. Existen KPIs basicos definidos por release. 2. Cada KPI tiene definicion, formula y decision asociada. 3. Los KPIs no bloquean el MVP funcional. | PB-001, PB-004 | `nuevo` | HU-08, CU-07, issue #8 |
+
+## Decisiones funcionales vigentes que impactan backlog
+- Un expediente mixto se considera TI para el MVP cuando cumple al menos una de estas condiciones:
+  - el objeto principal o el entregable dominante menciona de forma explicita software, sistemas, ciberseguridad, redes, cloud, datos, licencias o infraestructura TIC
+  - el CPV principal es tecnologico
+  - la parte TI representa una porcion sustancial del valor esperado y es indispensable para cumplir el objeto del contrato
+- Si un expediente mixto solo contiene TI accesoria o secundaria y la fuente no aporta evidencia suficiente para considerarla sustancial, debe quedar fuera del catalogo del MVP o tratarse como caso frontera pendiente de refinamiento.
+- Cuando una oportunidad pase a `anulada`, `desierta` o `desistida`, el producto debe conservar la referencia historica y mostrar el estado oficial visible; no debe seguir tratandola como oportunidad nueva activa.
+- Cuando una oportunidad sea modificada o rectificada, el producto debe mantener la misma referencia funcional si el expediente sigue siendo el mismo y exponer el ultimo dato oficial disponible en variables criticas.
 
 ## Orden recomendado para `developer-teams`
 1. PB-001
@@ -44,14 +56,16 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 6. PB-008
 
 ## Notas de priorizacion
-- `PB-007` ya cumplio su objetivo y queda cerrado administrativamente tras su validacion e integracion previa en `main`.
-- `PB-006` ya cumplio su objetivo y queda cerrado administrativamente tras su validacion final e integracion en `main`.
+- `PB-007` y `PB-006` ya cumplieron su objetivo y quedan cerrados administrativamente tras validacion e integracion en `main`.
 - `PB-001`, `PB-002` y `PB-003` conforman el MVP navegable minimo para validar descubrimiento y primera evaluacion.
 - `PB-004` y `PB-005` extienden el valor diferencial y la retencion tras validar descubrimiento.
 - `PB-008` queda fuera del camino critico del MVP, pero debe prepararse antes de una ampliacion comercial o de cobertura.
 
-## Huecos funcionales pendientes de cerrar
-- Aun no esta fijado el umbral operativo que convierte un expediente mixto en oportunidad TI priorizable dentro del catalogo.
-- La primera iteracion de alertas queda acotada a registro interno de coincidencias; la notificacion saliente queda para refinamiento posterior.
-- El pipeline del MVP queda acotado a gestion individual por usuario; la colaboracion por empresa queda fuera de esta release.
-- Sigue pendiente definir el tratamiento funcional de oportunidades anuladas, desiertas o modificadas una vez entren en el pipeline del usuario.
+## Riesgos y dependencias abiertas
+- Sigue abierta la dependencia de negocio sobre si los ayuntamientos deben entrar en la promesa comercial de primera release o mantenerse en fase posterior.
+- Existe riesgo de falsa expectativa si la comunicacion comercial usa lenguaje de cobertura total en lugar de cobertura inicial priorizada.
+- Existe riesgo de falsos positivos si desarrollo interpreta de forma demasiado laxa el criterio de "porcion sustancial" en expedientes mixtos.
+
+## Preguntas abiertas para siguiente iteracion
+- Que umbral comercial debe exigirse para considerar suficiente la cobertura MVP antes de ampliar a ayuntamientos.
+- Que indicadores minimos deben fijarse como puerta de inversion posterior en alertas salientes y monetizacion.

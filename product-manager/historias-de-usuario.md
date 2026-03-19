@@ -14,7 +14,7 @@
   para detectar licitaciones a tiempo sin revisar manualmente multiples portales.
 - Criterios de aceptacion:
   1. El catalogo muestra solo oportunidades clasificadas como TI.
-  2. Cada oportunidad muestra titulo, organismo, ubicacion, procedimiento si existe, presupuesto si existe y fecha limite.
+  2. Cada oportunidad muestra titulo, organismo, ubicacion, procedimiento si existe, presupuesto si existe, fecha limite y estado oficial del expediente si la fuente lo informa.
   3. El usuario puede identificar la fuente oficial de cada oportunidad.
   4. Si no hay oportunidades disponibles, se muestra un mensaje claro de estado vacio.
 - Dependencias funcionales: PB-007, PB-006
@@ -31,9 +31,10 @@
   para decidir rapido si debo incorporarla a mi proceso comercial o tecnico.
 - Criterios de aceptacion:
   1. Desde el catalogo se puede acceder al detalle de una oportunidad.
-  2. La ficha muestra como minimo presupuesto, fecha limite, procedimiento, organismo convocante y enlace a la fuente oficial.
+  2. La ficha muestra como minimo presupuesto, fecha limite, procedimiento, organismo convocante, estado oficial del expediente y enlace a la fuente oficial.
   3. Si hay datos de solvencia tecnica o criterios de adjudicacion, se muestran de forma diferenciada.
   4. Si un dato no esta disponible en la fuente, se indica como no informado.
+  5. Si la fuente publica una rectificacion o modificacion del mismo expediente, la ficha refleja el ultimo dato oficial visible.
 - Dependencias funcionales: PB-001
 - Prioridad: P0
 - Estado: `nuevo`
@@ -69,6 +70,7 @@
   2. El sistema permite editar y desactivar la alerta.
   3. La alerta queda visible como activa tras guardarse.
   4. Las nuevas oportunidades compatibles quedan asociadas a la alerta para su registro interno en el MVP.
+  5. Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas coincidencias accionables.
 - Dependencias funcionales: PB-001, PB-003
 - Prioridad: P1
 - Estado: `nuevo`
@@ -89,6 +91,7 @@
   2. La oportunidad guardada recibe un estado inicial.
   3. El usuario puede cambiarla a `Evaluando`, `Preparando oferta`, `Presentada` o `Descartada`.
   4. Una oportunidad no se duplica en el pipeline del mismo usuario.
+  5. Si la oportunidad pasa a estado oficial `anulada`, `desierta` o `desistida`, el pipeline mantiene el registro del usuario y muestra una advertencia visible.
 - Dependencias funcionales: PB-001, PB-002
 - Prioridad: P1
 - Estado: `nuevo`
