@@ -32,3 +32,13 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: nuevas entradas sin hora exacta o con estructura copiada de ficheros anteriores a la regla vigente.
 - Impacto: baja la calidad de la trazabilidad diaria y aumenta la interpretacion manual entre roles.
 - Mitigacion acordada: usar `changelog/README.md` como referencia vigente de formato y tratar los ficheros historicos solo como contexto del nivel de detalle.
+
+## Riesgo 7: arranque ambiguo de issues en desarrollo
+- Senal observable: la issue pasa a trabajo activo sin comentario minimo con `Rama:` y `Estado operativo: en desarrollo`.
+- Impacto: se pierde visibilidad rapida sobre que rama esta activa y se debilita el control del limite de ramas tecnicas.
+- Mitigacion acordada: comentario de arranque obligatorio y literal al tomar la issue.
+
+## Riesgo 8: QA consume tiempo en entregas sin gate previo superado
+- Senal observable: la revision funcional empieza aunque falte la plantilla minima de handoff o existan conflictos evitables con `main`.
+- Impacto: QA invierte capacidad en reconstruir contexto o diagnosticar integracion antes de validar comportamiento.
+- Mitigacion acordada: comprobacion previa obligatoria y cierre con `Estado operativo: no validado` cuando el handoff no sea operable.

@@ -33,6 +33,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de issues que `developer-teams` no puede iniciar porque faltan campos obligatorios de contexto operativo.
 - Senal que aporta: detecta si el cuello de botella real esta en refinamiento funcional antes de abrir trabajo tecnico.
 
+## 8. Entregas rechazadas por handoff incompleto o sin integracion limpia
+- Definicion: numero o porcentaje de revisiones que QA cierra en `no validado` porque falta la plantilla minima de entrega o porque la rama no integra limpia con `main`.
+- Senal que aporta: detecta si el problema esta en la preparacion operativa del handoff antes de revisar funcionalidad.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.

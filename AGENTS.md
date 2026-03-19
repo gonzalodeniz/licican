@@ -128,7 +128,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Solo `developer-teams` debe crear ramas tecnicas para implementar issues.
 - Antes de comenzar cualquier issue tecnico, `developer-teams` debe comprobar cuantas ramas tecnicas activas existen y no debe abrir una nueva si ya hay dos ramas tecnicas abiertas en el proyecto.
 - Cada issue tecnico debe indicar explicitamente la rama donde se esta realizando el trabajo para que el resto de equipos pueda localizarla sin ambiguedad.
-- Cuando `developer-teams` tome una issue debe dejar constancia de `estado operativo: en desarrollo`.
+- Cuando `developer-teams` tome una issue debe dejar un comentario de arranque en la propia issue usando de forma literal los campos `Rama:` y `Estado operativo: en desarrollo`.
 - `developer-teams` es responsable de los test tecnicos, como unit tests, integration tests, test de componente y test de API.
 - Una vez implementada la tarea, `developer-teams` debe actualizar el issue correspondiente con el trabajo realizado para que `qa-teams` pueda revisarlo, incluyendo como minimo rama, resumen, decisiones relevantes, limitaciones conocidas, verificacion tecnica ejecutada, impacto documental y `estado operativo: listo para qa`.
 - En ese handoff a `qa-teams`, `developer-teams` debe usar de forma literal los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Limitaciones conocidas:`, `Verificacion tecnica ejecutada:`, `Impacto documental:` y `Estado operativo: listo para qa`.
@@ -139,6 +139,8 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - `qa-teams` revisa y valida el trabajo sobre la rama de la tarea desde la perspectiva del usuario y de los criterios de aceptacion.
 - `qa-teams` puede crear una rama temporal de integracion para ejecutar pruebas o preparar la validacion cuando lo necesite. Esa rama de integracion es adicional a las dos ramas tecnicas permitidas, debe usarse solo para validacion y debe borrarse al terminar la revision.
 - `qa-teams` es responsable de los tests de validacion, como pruebas funcionales, end-to-end, exploratorias y contra criterios de aceptacion.
+- Antes de validar funcionalmente, `qa-teams` debe comprobar que la entrega incluye el paquete minimo de handoff de `developer-teams` y que la rama revisada integra limpia con `main`.
+- Si falta el paquete minimo de handoff o la rama presenta conflictos evitables con `main`, `qa-teams` debe registrarlo como defecto bloqueante u operativo y cerrar la revision con `Estado operativo: no validado`.
 - `qa-teams` debe dejar en la issue el resultado de la revision, incluyendo como minimo rama revisada, pruebas realizadas, resultados observados, defectos bloqueantes, observaciones, riesgos y `estado operativo: validado` o `estado operativo: no validado`.
 - En ese comentario de revision, `qa-teams` debe usar de forma literal los campos `Rama revisada:`, `Pruebas realizadas:`, `Resultados observados:`, `Defectos bloqueantes:`, `Observaciones:`, `Riesgos:` y `Estado operativo: validado|no validado`.
 - `qa-teams` debe verificar que la issue ha concluido realmente segun sus criterios de aceptacion y revisar si existe deuda tecnica relevante o si procede abrir una tarea tecnica de refactorizacion o mejora de codigo.

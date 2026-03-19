@@ -222,3 +222,47 @@ Crear `changelog/README.md` como referencia estable de formato, con plantilla mi
 ### Riesgos y dependencias
 - Si los roles siguen copiando formatos antiguos por inercia, la mejora tardara en consolidarse.
 - Conviene actualizar tambien las referencias en todos los `AGENTS.md` afectados.
+
+## Mejora 11: fijar un comentario minimo de arranque para `developer-teams`
+### Problema detectado
+El inicio de una issue exige informar rama y estado, pero no quedaba anclado a una plantilla literal unica.
+
+### Propuesta
+Obligar a que el arranque de una issue use al menos:
+- `Rama:`
+- `Estado operativo: en desarrollo`
+
+### Impacto esperado
+- Hace visible de inmediato que rama esta activa en cada issue.
+- Facilita vigilar el limite de dos ramas tecnicas abiertas.
+- Mejora la lectura del tiempo real hasta inicio de desarrollo.
+
+### Tradeoffs
+- Introduce un comentario adicional muy corto al comienzo del trabajo tecnico.
+
+### Riesgos y dependencias
+- Si el comentario se publica tarde, la metrica de arranque seguira distorsionada.
+- Requiere que `developer-teams` mantenga actualizada la referencia si cambia de rama.
+
+## Mejora 12: convertir el paquete minimo de handoff en gate explicito de QA
+### Problema detectado
+La plantilla de entrega existia, pero QA no tenia una regla suficientemente clara para rechazar desde el inicio una entrega incompleta o desalineada con `main`.
+
+### Propuesta
+Antes de validar funcionalmente, `qa-teams` debe comprobar que:
+- el comentario de `developer-teams` incluye la plantilla minima de handoff
+- la rama integra limpia con `main`
+
+Si alguna condicion falla, QA debe cerrar la revision como `Estado operativo: no validado`.
+
+### Impacto esperado
+- Evita que QA asuma trabajo de reconstruccion del contexto.
+- Separa defectos de proceso de defectos funcionales.
+- Refuerza el cumplimiento real de las reglas de handoff.
+
+### Tradeoffs
+- Puede aumentar el numero de `no validado` por causas operativas en el corto plazo.
+
+### Riesgos y dependencias
+- Si QA aplica la regla de forma mecanica sin describir bien el bloqueo, desarrollo no tendra feedback accionable.
+- Requiere que `developer-teams` siga tratando la sincronizacion con `main` como paso previo real y no solo declarado.

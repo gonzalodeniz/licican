@@ -24,6 +24,16 @@ Antes de que `developer-teams` abra una rama, la issue debe incluir como minimo 
 
 Si falta alguno de estos campos, la issue no debe considerarse lista para desarrollo y `product-manager` debe completarla antes del inicio tecnico.
 
+## Arranque minimo de `developer-teams`
+Cuando `developer-teams` tome una issue debe publicar un comentario de arranque con esta plantilla minima:
+
+```text
+Rama: <nombre-rama>
+Estado operativo: en desarrollo
+```
+
+Este comentario fija que rama esta activa, permite auditar el limite de ramas abiertas y evita que el estado `en desarrollo` quede escondido en texto libre.
+
 ## Handoff minimo de `developer-teams` a `qa-teams`
 El comentario final de entrega de `developer-teams` debe incluir como minimo:
 - `Rama:`
@@ -76,6 +86,13 @@ Riesgos:
 - ...
 Estado operativo: validado|no validado
 ```
+
+## Gate previo de `qa-teams`
+Antes de ejecutar la validacion funcional, `qa-teams` debe comprobar dos condiciones:
+1. La entrega de `developer-teams` usa la plantilla minima de handoff.
+2. La rama revisada integra limpia con `main`.
+
+Si alguna de estas condiciones falla, `qa-teams` debe registrar el problema como defecto bloqueante u operativo y cerrar la revision con `Estado operativo: no validado` sin dar por buena la entrega.
 
 ## Regla de revalidacion
 Si QA deja `Estado operativo: no validado`:

@@ -115,5 +115,25 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - Cada rol debe decidir por interpretacion propia si prioriza la norma actual o el ejemplo antiguo.
 - La calidad del registro diario queda expuesta a deriva incluso cuando la regla de fondo ya esta clara.
 
+## Problema 12: el inicio de una issue no deja una huella operativa suficientemente estable
+### Evidencia
+- El flujo exige que `developer-teams` indique la rama y deje constancia de `estado operativo: en desarrollo`, pero no fijaba una plantilla literal minima para ese arranque.
+- Sin una forma comun, la informacion puede quedar repartida entre comentarios libres y actualizaciones parciales de la issue.
+
+### Impacto observado
+- Cuesta localizar rapidamente que rama esta activa en cada issue.
+- Se debilita la comprobacion del limite de dos ramas tecnicas abiertas.
+- La metrica de tiempo hasta inicio de desarrollo depende de interpretacion manual en lugar de un comentario comparable.
+
+## Problema 13: QA no tenia una puerta de entrada explicita para rechazar handoffs incompletos
+### Evidencia
+- `developer-teams` debe usar una plantilla minima para entregar a QA, pero `qa-teams` no tenia una regla igual de explicita para detener la revision cuando faltaba ese paquete o la rama no integraba limpia con `main`.
+- La norma permitia registrar el riesgo, pero no convertia ese defecto de handoff en un criterio operativo claro de `no validado`.
+
+### Impacto observado
+- QA puede perder tiempo reconstruyendo contexto antes de empezar la validacion funcional.
+- Se mezclan defectos funcionales con fallos de preparacion de entrega en la misma revision.
+- La disciplina del handoff depende de buena voluntad y no de un control verificable entre equipos.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, cierre post-validacion y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, cierre post-validacion y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.

@@ -32,7 +32,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Antes de comenzar cualquier issue, debe crear una rama nueva en git.
 - Cada rama debe estar asociada a un unico issue o tarea.
 - No debe mezclar en una misma rama trabajo de varios issues distintos.
-- Debe escribir en la issue de GitHub el nombre exacto de la rama en la que se esta realizando el trabajo.
+- Al tomar una issue debe escribir en la issue de GitHub un comentario de arranque usando de forma literal `Rama:` y `Estado operativo: en desarrollo`.
 - Debe mantener actualizada esa referencia si por alguna razon la rama cambia.
 - La rama no debe fusionarse a `main` por iniciativa de `developer-teams`.
 - Si cambia de rama durante su trabajo, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
@@ -107,7 +107,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 3. Confirmar que la issue tiene el paquete minimo de contexto operativo antes de abrir trabajo tecnico.
 4. Comprobar que el proyecto no supera el limite de dos ramas tecnicas abiertas.
 5. Crear una rama nueva para ese issue.
-6. Escribir en la issue el nombre exacto de la rama creada y actualizar `estado operativo: en desarrollo`.
+6. Escribir en la issue un comentario de arranque con `Rama: <nombre-rama>` y `Estado operativo: en desarrollo`.
 7. Implementar la solucion, preferiblemente en Python.
 8. Verificar localmente lo necesario para no entregar cambios rotos.
 9. Sincronizar la rama con `main` y resolver conflictos evitables antes del handoff.

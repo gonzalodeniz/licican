@@ -27,6 +27,8 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 - La rama temporal de integracion de `qa-teams` no cuenta dentro del limite de dos ramas tecnicas del proyecto, pero debe borrarse al finalizar la revision.
 - Si durante la validacion cambia de rama, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 - Si detecta que la rama entregada no integra limpia con `main`, debe registrarlo como bloqueo operativo o riesgo relevante segun el impacto en el flujo.
+- Antes de entrar en validacion funcional, debe comprobar que la entrega de `developer-teams` usa la plantilla minima de handoff y que la rama revisada integra limpia con `main`.
+- Si falta ese paquete minimo o la rama tiene conflictos evitables con `main`, debe documentarlo como defecto bloqueante u operativo y cerrar la revision con `Estado operativo: no validado`.
 
 ## Resultado obligatorio en la issue
 
@@ -95,15 +97,16 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 
 1. Leer el issue y sus criterios de aceptacion.
 2. Revisar la rama y la entrega realizada por `developer-teams`.
-3. Crear, solo si hace falta, una rama temporal de integracion para ejecutar la validacion.
-4. Ejecutar o definir las pruebas de validacion necesarias.
-5. Revisar criterios de aceptacion, cierre funcional de la issue y posible deuda tecnica.
-6. Documentar en la issue los resultados de las pruebas y las issues tecnicas derivadas si aplica.
-7. Finalizar la revision con `validado` o `no validado`.
-8. Si no esta validado, explicar exactamente que debe corregirse.
-9. Borrar la rama temporal de integracion si se ha creado.
-10. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
-11. Terminar la tarea dejando el repositorio situado en la rama `main`.
+3. Comprobar antes de validar que el handoff incluye la plantilla minima y que la rama integra limpia con `main`.
+4. Crear, solo si hace falta, una rama temporal de integracion para ejecutar la validacion.
+5. Ejecutar o definir las pruebas de validacion necesarias.
+6. Revisar criterios de aceptacion, cierre funcional de la issue y posible deuda tecnica.
+7. Documentar en la issue los resultados de las pruebas y las issues tecnicas derivadas si aplica.
+8. Finalizar la revision con `validado` o `no validado`.
+9. Si no esta validado, explicar exactamente que debe corregirse.
+10. Borrar la rama temporal de integracion si se ha creado.
+11. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
+12. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 
