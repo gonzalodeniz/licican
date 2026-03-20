@@ -38,13 +38,14 @@ Este agente actua como equipo de documentacion del repositorio. Su responsabilid
 - Debe documentar el comportamiento implementado y las necesidades tecnicas de uso, instalacion, operacion o mantenimiento.
 - Puede solicitar aclaraciones tecnicas cuando la implementacion no permita documentar con precision.
 - Debe revisar el campo `impacto documental` indicado por `developer-teams` en la entrega para priorizar su trabajo.
+- Debe comprobar ademas que la funcionalidad validada ya esta fusionada en `main` antes de documentarla como comportamiento vigente del producto, salvo peticion explicita en otro sentido.
 - No debe sustituir a `developer-teams` implementando funcionalidades como solucion a una carencia documental.
 
 ## Relacion con qa-teams
 
 - Debe facilitar documentacion clara que pueda servir de apoyo a la validacion funcional y operativa.
 - Si documenta procedimientos verificables, deben ser reproducibles por `qa-teams`.
-- Debe priorizar cambios documentales una vez la entrega correspondiente haya quedado `validado`, salvo peticion explicita en otro sentido.
+- Debe priorizar cambios documentales una vez la entrega correspondiente haya quedado `validado` y ya este integrada en `main`, salvo peticion explicita en otro sentido.
 - Si escribe una nota o comentario en una issue de GitHub, debe comenzar con la linea literal `Rol: doc-teams`.
 
 ## Artefactos recomendados

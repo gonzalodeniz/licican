@@ -127,6 +127,11 @@ Si QA deja `Estado operativo: no validado`:
 
 Si el alcance cambia de forma material, `product-manager` debe decidir si corresponde una nueva issue.
 
+## Regla de integracion tras `validado`
+- Tras `Estado operativo: validado`, `developer-teams` debe priorizar la fusion de la rama tecnica en `main` y su borrado antes de iniciar una nueva issue, salvo bloqueo operativo documentado en la propia issue.
+- Si la integracion no puede hacerse de inmediato, `product-manager` debe dejar visible el motivo en su comentario administrativo usando `Bloqueo actual:` y `Estado de integracion: pendiente`.
+- Hasta que la fusion no exista, la funcionalidad aceptada por QA no debe tratarse como comportamiento vigente en la documentacion oficial mantenida sobre `main`.
+
 ## Regla de sincronizacion entre ramas y `main`
 - `changelog/` se actualiza solo en `main` y no forma parte de la entrega tecnica del issue.
 - Si `developer-teams` o `qa-teams` registran actividad en `changelog/` mientras mantienen una rama abierta, deben sincronizar despues esa rama con `main` antes del siguiente handoff o nueva validacion.
@@ -136,8 +141,9 @@ Si el alcance cambia de forma material, `product-manager` debe decidir si corres
 `doc-teams` debe priorizar una iteracion cuando concurran estas condiciones:
 1. Existe `Estado operativo: validado` en la issue.
 2. La entrega de desarrollo indica `Impacto documental: si`.
+3. La rama tecnica correspondiente ya ha sido fusionada en `main`.
 
-Si el impacto documental es `no`, la documentacion puede esperar salvo instruccion explicita.
+Si el impacto documental es `no`, o si la entrega sigue validada pero todavia no integrada en `main`, la documentacion puede esperar salvo instruccion explicita.
 
 ## Checkpoint de cierre de `product-manager`
 Tras `Estado operativo: validado`, `product-manager` debe:

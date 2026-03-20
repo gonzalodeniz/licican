@@ -21,6 +21,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: tiempo desde `Estado operativo: validado` hasta cierre de la issue por `product-manager`.
 - Senal que aporta: detecta acumulacion de trabajo ya aceptado pero no cerrado.
 
+## 4 bis. Tiempo de integracion tras validacion
+- Definicion: tiempo desde `Estado operativo: validado` hasta que la rama tecnica queda fusionada en `main`.
+- Senal que aporta: detecta limbo post-QA antes de merge, borrado de rama y activacion de documentacion dependiente.
+
 ## 5. Tasa de impacto documental declarado
 - Definicion: porcentaje de entregas de desarrollo que marcan `Impacto documental: si`.
 - Senal que aporta: ayuda a dimensionar la carga real de `doc-teams`.

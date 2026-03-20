@@ -145,5 +145,16 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - `developer-teams` y `product-manager` necesitan abrir cada issue o leer comentarios para reconstruir el estado vigente.
 - Se debilita la utilidad del campo `Estado operativo:` como referencia comun entre equipos si queda congelado en el alta inicial.
 
+## Problema 15: `doc-teams` puede activarse antes de que la entrega validada exista realmente en `main`
+### Evidencia
+- `doc-teams` trabaja directamente sobre `main` y debe documentar comportamiento verificable del producto, pero el disparador operativo vigente solo miraba `Estado operativo: validado` e `Impacto documental: si`.
+- El `changelog/2026-03-20.md` ya refleja la necesidad de distinguir entre trabajo validado en una rama tecnica y comportamiento realmente integrado en `main`, señal de que el flujo actual permite esa confusion.
+- La issue `#5` aparece `validado` en GitHub mientras la rama tecnica `developer-teams/issue-5-pb-003-filtros-catalogo` sigue abierta y aun no se ha fusionado en `main`.
+
+### Impacto observado
+- `doc-teams` puede verse obligado a redactar sobre una capacidad aun no disponible en la rama de referencia del repositorio.
+- La documentacion oficial corre el riesgo de adelantarse al merge real y generar una fuente de verdad incoherente con `main`.
+- El tramo post-QA queda en un limbo operativo: la entrega esta aceptada, pero no queda suficientemente priorizada su integracion antes de activar trabajo dependiente.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA, de visibilidad real del estado de cada issue y de cierre administrativo tras validacion. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, actualizacion del `Estado operativo:` visible en GitHub, revalidacion tras `no validado`, cierre post-validacion y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA, de visibilidad real del estado de cada issue, de integracion efectiva tras `validado` y de cierre administrativo posterior. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, actualizacion del `Estado operativo:` visible en GitHub, revalidacion tras `no validado`, integracion prioritaria despues de QA, activacion documental solo sobre `main` y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.

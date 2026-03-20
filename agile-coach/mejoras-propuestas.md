@@ -223,7 +223,27 @@ Crear `changelog/README.md` como referencia estable de formato, con plantilla mi
 - Si los roles siguen copiando formatos antiguos por inercia, la mejora tardara en consolidarse.
 - Conviene actualizar tambien las referencias en todos los `AGENTS.md` afectados.
 
-## Mejora 11: fijar un comentario minimo de arranque para `developer-teams`
+## Mejora 11: activar documentacion solo tras integracion real en `main`
+### Problema detectado
+`doc-teams` trabaja sobre `main`, pero podia activarse con una entrega `validado` todavia no fusionada, lo que fuerza a distinguir manualmente entre trabajo aceptado y comportamiento realmente disponible.
+
+### Propuesta
+- Cambiar el disparador de `doc-teams` para exigir simultaneamente `Estado operativo: validado`, `Impacto documental: si` y rama tecnica ya fusionada en `main`.
+- Reforzar que `developer-teams` priorice el merge y el borrado de rama tras QA antes de iniciar una nueva issue, salvo bloqueo operativo documentado.
+
+### Impacto esperado
+- Evita que la documentacion oficial se adelante a la realidad integrada del producto.
+- Reduce el tiempo en que una issue queda `validado` pero sin cierre operativo claro.
+- Hace mas lineal la secuencia `validado -> merge -> documentacion -> cierre administrativo`.
+
+### Tradeoffs
+- `doc-teams` puede entrar un poco mas tarde en algunas iteraciones si el merge no se ejecuta con disciplina.
+
+### Riesgos y dependencias
+- Si `developer-teams` retrasa el merge sin dejar bloqueo explicito, la cola documental seguira esperando aunque QA ya haya aceptado la entrega.
+- Requiere que `product-manager` mantenga visible el bloqueo cuando una issue validada no pueda cerrarse aun.
+
+## Mejora 12: fijar un comentario minimo de arranque para `developer-teams`
 ### Problema detectado
 El inicio de una issue exige informar rama y estado, pero no quedaba anclado a una plantilla literal unica.
 
@@ -238,8 +258,13 @@ Obligar a que el arranque de una issue use al menos:
 - Mejora la lectura del tiempo real hasta inicio de desarrollo.
 
 ### Tradeoffs
+- Introduce un comentario adicional muy corto al comienzo del trabajo tecnico.
 
-## Mejora 12: mantener sincronizado el `Estado operativo:` visible en la issue
+### Riesgos y dependencias
+- Si el comentario se publica tarde, la metrica de arranque seguira distorsionada.
+- Requiere que `developer-teams` mantenga actualizada la referencia si cambia de rama.
+
+## Mejora 13: mantener sincronizado el `Estado operativo:` visible en la issue
 ### Problema detectado
 El cuerpo de la issue puede seguir mostrando `Estado operativo: nuevo` aunque el trabajo real ya este en desarrollo, en QA o incluso `no validado`.
 
@@ -258,7 +283,7 @@ Exigir que el rol que produzca cada transicion operativa actualice tambien el ca
 - Si la actualizacion del cuerpo se olvida, reaparece la divergencia entre backlog visible y flujo real.
 - Conviene limitar la edicion al campo `Estado operativo:` para no reescribir contexto funcional por error.
 
-## Mejora 13: reforzar la reentrega tras `no validado`
+## Mejora 14: reforzar la reentrega tras `no validado`
 ### Problema detectado
 La regla de revalidacion existe, pero `developer-teams` aun podia interpretar que bastaba con corregir codigo sin reemitir un handoff completo ni reflejar el nuevo estado visible en la issue.
 
@@ -280,13 +305,8 @@ Tras un `no validado`, exigir a `developer-teams` que:
 ### Riesgos y dependencias
 - Si el alcance cambia materialmente y se mantiene la misma issue, la reentrega seguira siendo confusa.
 - Requiere que `product-manager` abra una nueva issue cuando la correccion deje de ser el mismo alcance.
-- Introduce un comentario adicional muy corto al comienzo del trabajo tecnico.
 
-### Riesgos y dependencias
-- Si el comentario se publica tarde, la metrica de arranque seguira distorsionada.
-- Requiere que `developer-teams` mantenga actualizada la referencia si cambia de rama.
-
-## Mejora 12: convertir el paquete minimo de handoff en gate explicito de QA
+## Mejora 15: convertir el paquete minimo de handoff en gate explicito de QA
 ### Problema detectado
 La plantilla de entrega existia, pero QA no tenia una regla suficientemente clara para rechazar desde el inicio una entrega incompleta o desalineada con `main`.
 

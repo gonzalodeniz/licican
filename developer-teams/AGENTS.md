@@ -37,6 +37,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Al pasar una issue a `en desarrollo` o `listo para qa`, debe actualizar tambien en GitHub el campo `Estado operativo:` del cuerpo de la issue para que el backlog visible no quede desfasado.
 - Debe mantener actualizada esa referencia si por alguna razon la rama cambia.
 - Solo tras la validacion explicita de `qa-teams`, `developer-teams` debe decidir y ejecutar la fusion de su rama tecnica a `main`.
+- Tras `Estado operativo: validado`, debe priorizar esa fusion y el borrado de la rama por encima del inicio de una nueva issue, salvo bloqueo operativo documentado en la propia issue.
 - Tras completar el merge a `main`, debe borrar de inmediato la rama tecnica correspondiente para no mantener ramas abiertas sin necesidad operativa.
 - Si cambia de rama durante su trabajo, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 
@@ -127,7 +128,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 14. Hacer `git push` de la rama remota.
 15. Cambiar a `main` o coordinar la actualizacion necesaria para registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
 16. Esperar validacion de `qa-teams`.
-17. Si la issue queda validada, fusionar la rama tecnica en `main`.
+17. Si la issue queda validada, fusionar la rama tecnica en `main` antes de iniciar una nueva issue salvo bloqueo operativo documentado.
 18. Borrar inmediatamente la rama tecnica tras completar el merge.
 19. Terminar la tarea dejando el repositorio situado en la rama `main`.
 

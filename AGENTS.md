@@ -153,10 +153,11 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Si el resultado es `no validado`, `qa-teams` debe explicar la razon para que `developer-teams` pueda resolverla en la misma issue y, mientras el alcance sea el mismo, en la misma rama.
 - Tras un `Estado operativo: no validado`, `developer-teams` debe priorizar esa misma issue frente a nuevas issues, corregir en la misma rama mientras el alcance no cambie y publicar un nuevo handoff completo antes de volver a QA.
 - Solo tras la validacion de `qa-teams`, `developer-teams` debe decidir y ejecutar la fusion en `main` de la rama tecnica correspondiente.
+- Tras la validacion de `qa-teams`, `developer-teams` debe priorizar la fusion en `main` y el borrado de la rama tecnica antes de iniciar una nueva issue, salvo que exista un bloqueo explicito documentado en la propia issue.
 - El borrado de la rama tecnica debe realizarlo `developer-teams` inmediatamente despues de completar el merge con `main`.
 - Tras la fusion a `main` realizada por `developer-teams`, `product-manager` debe cerrar el issue o dejar constancia explicita del motivo por el que sigue abierta.
 - Si una issue permanece abierta tras `estado operativo: validado`, `product-manager` debe dejar un comentario administrativo con los campos literales `Bloqueo actual:`, `Siguiente responsable:`, `Siguiente paso operativo:` y `Estado de integracion: pendiente|hecho|no aplica` para evitar que siga abierta sin contexto.
-- `doc-teams` debe intervenir cuando una entrega validada tenga `impacto documental: si`, salvo que se indique expresamente otra prioridad.
+- `doc-teams` debe intervenir cuando una entrega tenga `Estado operativo: validado`, `impacto documental: si` y la rama tecnica correspondiente ya haya sido fusionada en `main`, salvo que se indique expresamente otra prioridad.
 - Si existen ya dos ramas tecnicas abiertas, el proyecto debe concluir o desbloquear al menos una issue antes de iniciar una nueva implementacion tecnica.
 
 ## Recomendaciones para evolucionar el repositorio

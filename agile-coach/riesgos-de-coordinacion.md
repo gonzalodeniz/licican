@@ -47,3 +47,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: el cuerpo de la issue sigue mostrando `Estado operativo: nuevo` aunque existan comentarios posteriores con `en desarrollo`, `listo para qa`, `no validado` o `validado`.
 - Impacto: la priorizacion y la lectura rapida del backlog se apoyan en un estado engañoso o incompleto.
 - Mitigacion acordada: actualizar el `Estado operativo:` del cuerpo de la issue en cada transicion operativa relevante.
+
+## Riesgo 10: documentacion adelantada respecto a la integracion real
+- Senal observable: una issue queda `validado` con `Impacto documental: si`, pero la rama tecnica sigue abierta o la capacidad aun no existe en `main`.
+- Impacto: la documentacion oficial puede describir un comportamiento todavia no integrado y crear incoherencia entre manuales, backlog visible y producto real.
+- Mitigacion acordada: activar a `doc-teams` solo cuando la entrega validada ya este fusionada en `main` y reforzar la prioridad de merge tras QA.

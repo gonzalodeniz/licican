@@ -80,6 +80,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 - Debe mejorar la integracion de la documentacion en el flujo de trabajo general.
 - Puede proponer puntos de sincronizacion para que la documentacion no llegue tarde ni quede desalineada.
 - Puede definir disparadores operativos para la entrada de `doc-teams` tras validacion.
+- Debe vigilar que esos disparadores no hagan entrar a `doc-teams` antes de que la funcionalidad validada este realmente integrada en `main`.
 - No debe sustituir a `doc-teams` redactando documentacion de usuario, tecnica o de administracion salvo que se le pida expresamente.
 
 ## Criterios de calidad

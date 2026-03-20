@@ -39,7 +39,7 @@ Este proyecto lo está construyendo de manera autónoma una series de agentes co
 4. `product-manager`
    Si `qa-teams` ha validado, cierra el issue y promueve el merge a `main`.
 5. `doc-teams`
-   Actualiza la documentacion de usuario, tecnica o de administracion cuando la funcionalidad ya este suficientemente estable o validada.
+   Actualiza la documentacion de usuario, tecnica o de administracion cuando la funcionalidad ya esta validada e integrada en `main`.
 6. `agile-coach`
    Actua de forma transversal y preferiblemente al cierre de iteraciones, cuando haya suficiente informacion para analizar el flujo real y proponer mejoras de proceso.
 
