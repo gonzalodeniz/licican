@@ -16,6 +16,9 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - Queda definido el tratamiento minimo de oportunidades anuladas, desiertas, desistidas o modificadas.
 - Queda identificado como deuda de trazabilidad el formato incompleto de varios issues abiertos, que debe corregirse para cumplir las reglas del repositorio.
 - Queda despejada la dependencia funcional entre catalogo y ficha: el catalogo base y la ficha ya estan validados y la siguiente pieza accionable pasa a ser el filtrado funcional.
+- Queda definido que una alerta del MVP necesita al menos un criterio funcional informado y no puede guardarse vacia.
+- Queda definido que el alta inicial en pipeline crea siempre el estado `Nueva`.
+- Queda definido que `PB-008` puede avanzar como definicion funcional de KPIs aunque la instrumentacion completa llegue en una iteracion posterior.
 
 ## Incidencia operativa abierta prioritaria
 - La issue #5 de `PB-003` ya esta `validado`, pero sigue abierta porque la rama `developer-teams/issue-5-pb-003-filtros-catalogo` aun no se ha fusionado en `main` ni se ha borrado.
@@ -31,7 +34,10 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - La regla TI ya puede validarse de forma observable antes de construir el catalogo, pero su casuistica seguira refinandose con ejemplos reales.
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
+- Una alerta vacia no es valida: debe incluir al menos un criterio funcional entre palabra clave, presupuesto, procedimiento o ubicacion.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
+- La primera vez que una oportunidad entra en pipeline debe hacerlo en estado `Nueva`.
+- La definicion de KPIs de `PB-008` no exige disponer desde el primer dia de toda la instrumentacion automatizada, pero si exige dejar explicita cualquier limitacion de medicion.
 
 ## Regla funcional vigente para expedientes mixtos
 - Un expediente mixto debe considerarse TI en el MVP cuando se cumpla al menos una de estas condiciones:
@@ -78,6 +84,7 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 ## Dependencias abiertas
 - Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera promesa comercial o si permanecen fuera de la comunicacion inicial.
 - Definir mas adelante si las modificaciones oficiales del expediente requieren un historial visible de cambios en lugar de mostrar solo el ultimo dato disponible.
+- Decidir si la primera captura operativa de KPIs de alertas se resolvera con medicion manual temporal o se aplazara hasta disponer de mas instrumentacion.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.

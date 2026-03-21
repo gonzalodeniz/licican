@@ -11,6 +11,10 @@
 - Estado actual de trabajo tecnico: solo permanece abierta en remoto la rama `developer-teams/issue-5-pb-003-filtros-catalogo`.
 - Siguiente recomendacion para `developer-teams`: fusionar en `main` la rama validada de `PB-003`, borrar la rama tecnica y cerrar la issue #5 antes de tomar una nueva implementacion.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
+- En esta revision tambien quedan cerradas tres aclaraciones de release para reducir ambiguedad de implementacion:
+  - una alerta del MVP requiere al menos un criterio funcional informado
+  - el alta inicial en pipeline crea siempre el estado `Nueva`
+  - `PB-008` puede refinarse documentalmente antes de disponer de instrumentacion completa
 
 ## Release 0: Delimitacion funcional del MVP
 - Objetivo: Cerrar ambiguedades criticas antes de la implementacion del catalogo.
@@ -54,7 +58,9 @@
   - Requiere que Release 1 haya validado e integrado en `main` el valor del catalogo y de los filtros.
 - Decision funcional vigente:
   - Las alertas del MVP registran coincidencias de forma interna; la notificacion saliente queda fuera de esta release.
+  - Una alerta del MVP solo es valida si contiene al menos un criterio funcional; no se permiten alertas vacias.
   - El pipeline del MVP es individual por usuario; la colaboracion por empresa queda para una release posterior.
+  - El alta inicial de una oportunidad en pipeline debe crear el estado `Nueva`.
 
 ## Release 3: Medicion y aprendizaje
 - Objetivo: Mejorar precision, cobertura y priorizacion apoyandose en indicadores.
@@ -68,6 +74,7 @@
 ## Dependencias abiertas de roadmap
 - Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
 - Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
+- Decidir en una iteracion posterior si los KPIs de alertas deben exigirse ya con dato real o pueden arrancar con definicion documental y recogida manual temporal.
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de `developer-teams` es completar merge y borrado de rama de la issue #5, asociada a `PB-003`.

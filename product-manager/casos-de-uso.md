@@ -92,7 +92,7 @@
   3. Cuando aparecen nuevas oportunidades compatibles, el sistema registra la coincidencia y la asocia a la alerta.
   4. El usuario consulta o modifica la alerta cuando lo necesita.
 - Flujos alternativos:
-  - A1. Si el usuario intenta guardar una alerta sin criterios minimos, el sistema solicita completarlos.
+  - A1. Si el usuario intenta guardar una alerta sin criterios minimos, el sistema solicita completarlos y no guarda una alerta vacia.
   - A2. Si existen varias alertas solapadas, el sistema permite mantenerlas sin duplicar el mensaje de configuracion.
   - A3. Si una oportunidad compatible pasa a estado oficial `anulada`, `desierta` o `desistida`, deja de tratarse como coincidencia nueva accionable.
 - Postcondiciones:
@@ -102,6 +102,7 @@
   - RB-09 La configuracion de alertas debe reutilizar los mismos criterios funcionales que el filtrado del catalogo.
   - RB-16 En el MVP la alerta debe registrar coincidencias funcionales aunque no exista todavia notificacion saliente.
   - RB-22 Una oportunidad cerrada oficialmente no debe generar una nueva alerta accionable.
+  - RB-24 Una alerta no puede guardarse vacia; debe incluir al menos un criterio funcional informado.
 
 ## CU-05 Gestionar pipeline de oportunidades
 - Backlog relacionado: PB-005
@@ -114,7 +115,7 @@
   - El alcance del pipeline MVP es individual por usuario.
 - Flujo principal:
   1. El usuario guarda una oportunidad en su pipeline.
-  2. El sistema la asigna a un estado inicial.
+  2. El sistema la asigna al estado inicial `Nueva`.
   3. El usuario cambia el estado segun avanza su proceso interno.
   4. El usuario consulta el pipeline para conocer el estado de sus oportunidades.
 - Flujos alternativos:
@@ -128,6 +129,7 @@
   - RB-11 Una misma oportunidad no debe duplicarse en el pipeline del mismo usuario.
   - RB-17 La primera release del pipeline no incluye colaboracion compartida por empresa.
   - RB-23 El estado oficial del expediente no elimina el historico del pipeline del usuario.
+  - RB-25 El alta inicial de una oportunidad en pipeline debe crearla en estado `Nueva`.
 
 ## CU-06 Delimitar cobertura funcional inicial
 - Backlog relacionado: PB-007
@@ -172,6 +174,7 @@
 - Reglas de negocio relacionadas:
   - RB-14 Ningun KPI debe bloquear por si solo la salida del MVP de descubrimiento.
   - RB-15 Los KPIs deben servir para decidir, no solo para informar.
+  - RB-26 La definicion funcional de KPIs puede adelantarse a la instrumentacion completa siempre que deje explicita la limitacion de medicion.
 
 ## CU-08 Revisar reglas auditables de relevancia TI
 - Backlog relacionado: PB-006

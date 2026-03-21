@@ -70,11 +70,12 @@
   quiero configurar alertas sobre nuevos contratos relevantes,
   para enterarme antes y preparar mejor una oferta.
 - Criterios de aceptacion:
-  1. El usuario puede crear una alerta con al menos un criterio funcional.
-  2. El sistema permite editar y desactivar la alerta.
-  3. La alerta queda visible como activa tras guardarse.
-  4. Las nuevas oportunidades compatibles quedan asociadas a la alerta para su registro interno en el MVP.
-  5. Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas coincidencias accionables.
+  1. El usuario puede crear una alerta con al menos un criterio funcional valido.
+  2. El sistema impide guardar una alerta vacia y solicita completar al menos un criterio.
+  3. El sistema permite editar y desactivar la alerta.
+  4. La alerta queda visible como activa tras guardarse.
+  5. Las nuevas oportunidades compatibles quedan asociadas a la alerta para su registro interno en el MVP.
+  6. Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas coincidencias accionables.
 - Dependencias funcionales: PB-001, PB-003
 - Prioridad: P1
 - Estado: `nuevo`
@@ -92,7 +93,7 @@
   - La colaboracion por empresa queda fuera de esta historia.
 - Criterios de aceptacion:
   1. El usuario puede guardar una oportunidad en su pipeline.
-  2. La oportunidad guardada recibe un estado inicial.
+  2. La oportunidad guardada entra en estado inicial `Nueva`.
   3. El usuario puede cambiarla a `Evaluando`, `Preparando oferta`, `Presentada` o `Descartada`.
   4. Una oportunidad no se duplica en el pipeline del mismo usuario.
   5. Si la oportunidad pasa a estado oficial `anulada`, `desierta` o `desistida`, el pipeline mantiene el registro del usuario y muestra una advertencia visible.
@@ -146,8 +147,9 @@
   para evaluar si el producto esta aportando valor real.
 - Criterios de aceptacion:
   1. Se define al menos un KPI de cobertura, uno de adopcion y uno de uso.
-  2. Cada KPI tiene formula, umbral inicial y decision asociada.
-  3. El equipo puede revisar estos KPIs sin bloquear el MVP funcional.
+  2. Cada KPI tiene definicion, formula, umbral inicial y decision asociada.
+  3. La definicion documental de KPIs puede revisarse aunque la instrumentacion completa aun no exista, siempre que se explicite la limitacion.
+  4. El equipo puede revisar estos KPIs sin bloquear el MVP funcional.
 - Dependencias funcionales: PB-001, PB-004
 - Prioridad: P2
 - Estado: `nuevo`
