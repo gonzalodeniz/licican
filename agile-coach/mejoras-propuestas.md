@@ -328,3 +328,43 @@ Si alguna condicion falla, QA debe cerrar la revision como `Estado operativo: no
 ### Riesgos y dependencias
 - Si QA aplica la regla de forma mecanica sin describir bien el bloqueo, desarrollo no tendra feedback accionable.
 - Requiere que `developer-teams` siga tratando la sincronizacion con `main` como paso previo real y no solo declarado.
+
+## Mejora 16: incorporar `Rol:` dentro de todas las plantillas operativas de issue
+### Problema detectado
+Las reglas globales exigen que cualquier comentario en una issue empiece con `Rol: <nombre-del-rol>`, pero varias plantillas de arranque, entrega y revision seguian empezando directamente por los campos funcionales.
+
+### Propuesta
+- Hacer que todas las plantillas minimas copien la linea `Rol: ...` como primer campo.
+- Ajustar los `AGENTS.md` de raiz y de los roles que usan esas plantillas para que la regla no quede separada del ejemplo.
+
+### Impacto esperado
+- Reduce incumplimientos por olvido de una regla que hoy esta fuera de la plantilla.
+- Mejora la lectura rapida de las issues y la trazabilidad por rol.
+- Facilita automatizar o auditar comentarios estructurados sin inferencias adicionales.
+
+### Tradeoffs
+- Anade una linea fija mas a cada comentario estructurado.
+
+### Riesgos y dependencias
+- Si algun equipo sigue reutilizando ejemplos historicos antiguos, la mejora tardara unas iteraciones en consolidarse.
+- Conviene actualizar a la vez acuerdos operativos y `AGENTS.md` para no dejar dos plantillas competidoras.
+
+## Mejora 17: hacer explicito que el cierre administrativo sincroniza la issue a `cerrado`
+### Problema detectado
+El repositorio ya exige que el cuerpo de la issue refleje el ultimo estado real, pero el cierre administrativo no remarcaba con suficiente claridad que esa sincronizacion final debe dejar `Estado operativo: cerrado`.
+
+### Propuesta
+- Exigir de forma literal que `product-manager`, al cerrar una issue, actualice tambien su cuerpo a `Estado operativo: cerrado`.
+- Reflejar la misma regla en acuerdos operativos y en las instrucciones del propio rol.
+
+### Impacto esperado
+- Evita que una issue cerrada siga mostrando `validado` en el cuerpo.
+- Mejora la consistencia historica del backlog y de las metricas de flujo.
+- Reduce trabajo correctivo posterior sobre issues ya cerradas.
+
+### Tradeoffs
+- Introduce un ultimo paso administrativo mas en el cierre, aunque de bajo coste.
+
+### Riesgos y dependencias
+- Si el cierre se hace con prisa y sin editar el cuerpo, el problema seguira existiendo aunque la regla sea clara.
+- Requiere disciplina de `product-manager` en el mismo momento del cierre, no en una correccion posterior.

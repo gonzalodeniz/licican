@@ -108,6 +108,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Una vez validada la entrega por `qa-teams`, `developer-teams` debe borrar la rama técnica inmediatamente después de completar el merge a `main`.
 - Tras esa integración, `product-manager` debe cerrar el issue o dejar constancia explícita del motivo por el que sigue abierto.
 - Tras un `estado operativo: validado`, debe cerrar la issue o dejar constancia explícita del motivo por el que sigue abierta.
+- Cuando cierre definitivamente una issue, debe actualizar tambien el cuerpo de la issue para dejar `Estado operativo: cerrado`.
 - Si la issue permanece abierta tras `estado operativo: validado`, debe añadir un comentario administrativo usando de forma literal los campos `Bloqueo actual:`, `Siguiente responsable:`, `Siguiente paso operativo:` y `Estado de integracion: pendiente|hecho|no aplica`.
 - Ese comentario administrativo debe comenzar con la linea literal `Rol: product-manager`.
 
@@ -200,8 +201,9 @@ Ante una nueva iteración de trabajo, el agente debería seguir este orden:
 10. Hacer `git push` al repositorio remoto.
 11. Si existe una entrega `validado`, comprobar que `developer-teams` haya fusionado la rama técnica en `main` y la haya borrado.
 12. Si una issue validada no puede cerrarse todavía, dejar en ella bloqueo actual, siguiente responsable y siguiente paso operativo.
-13. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
-14. Terminar la tarea dejando el repositorio situado en la rama `main`.
+13. Si la issue se cierra, actualizar en GitHub el cuerpo a `Estado operativo: cerrado` en el mismo cierre administrativo.
+14. Registrar el resumen diario en `changelog/` usando el fichero de la fecha actual.
+15. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 

@@ -52,3 +52,13 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: una issue queda `validado` con `Impacto documental: si`, pero la rama tecnica sigue abierta o la capacidad aun no existe en `main`.
 - Impacto: la documentacion oficial puede describir un comportamiento todavia no integrado y crear incoherencia entre manuales, backlog visible y producto real.
 - Mitigacion acordada: activar a `doc-teams` solo cuando la entrega validada ya este fusionada en `main` y reforzar la prioridad de merge tras QA.
+
+## Riesgo 11: comentarios estructurados sin `Rol:` al inicio
+- Senal observable: un comentario de arranque, handoff o validacion empieza directamente por `Rama:` o `Rama revisada:`.
+- Impacto: baja la visibilidad de autoria, se incumple la norma global del repositorio y se complica la auditoria ligera por rol.
+- Mitigacion acordada: incluir `Rol: <nombre-del-rol>` como primera linea de todas las plantillas operativas de issue.
+
+## Riesgo 12: issue cerrada con cuerpo todavia en `validado`
+- Senal observable: la issue aparece cerrada en GitHub pero el cuerpo sigue mostrando `Estado operativo: validado`.
+- Impacto: el historico mezcla dos estados finales distintos y degrada la fiabilidad del backlog ya cerrado.
+- Mitigacion acordada: exigir que `product-manager` actualice el cuerpo a `Estado operativo: cerrado` en el mismo cierre administrativo.

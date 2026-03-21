@@ -156,5 +156,26 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - La documentacion oficial corre el riesgo de adelantarse al merge real y generar una fuente de verdad incoherente con `main`.
 - El tramo post-QA queda en un limbo operativo: la entrega esta aceptada, pero no queda suficientemente priorizada su integracion antes de activar trabajo dependiente.
 
+## Problema 16: las plantillas de comentarios no fijan de forma visible el prefijo obligatorio `Rol:`
+### Evidencia
+- Las reglas globales ya exigen que cualquier comentario en una issue comience con `Rol: <nombre-del-rol>`.
+- Sin embargo, varias plantillas y ejemplos operativos de arranque, handoff y revision siguen empezando directamente por `Rama:` o `Rama revisada:`, lo que deja al equipo la carga de recordar una regla externa antes de comentar.
+- El historial de las issues `#3`, `#4` y `#5` muestra comentarios operativos tempranos sin linea inicial `Rol: ...`, señal de que la plantilla copiable seguia incompleta.
+
+### Impacto observado
+- La autoria operativa queda menos visible al leer rapido una issue.
+- Se debilita la trazabilidad si mas adelante se quieren auditar handoffs por rol o automatizar metricas sobre comentarios.
+- Los equipos pueden cumplir parcialmente la plantilla pero incumplir la norma global sin detectar la incoherencia.
+
+## Problema 17: el cierre administrativo no hacia explicita la sincronizacion final a `Estado operativo: cerrado`
+### Evidencia
+- Las reglas ya exigian mantener sincronizado el campo `Estado operativo:` del cuerpo de la issue con el estado real, pero el cierre administrativo de `product-manager` no remarcaba de forma suficientemente directa que, al cerrar, el cuerpo debe quedar en `cerrado`.
+- El `changelog/2026-03-21.md` ya recoge una correccion posterior en las issues `#3` y `#4` para alinear ese campo con su cierre real, prueba de que la expectativa existia pero no estaba anclada con suficiente fuerza en el ultimo tramo del flujo.
+
+### Impacto observado
+- Una issue puede quedar cerrada en GitHub mientras su cuerpo sigue mostrando `validado`, generando una segunda fuente de verdad sobre el estado final.
+- El backlog historico pierde consistencia al revisar issues cerradas o al medir tiempos de cierre real.
+- `product-manager` asume trabajo correctivo posterior en lugar de cerrar bien a la primera.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema no es de definicion de roles, sino de contrato operativo entre handoffs, de preparacion minima antes de iniciar desarrollo, de control de entrada en QA, de visibilidad real del estado de cada issue, de integracion efectiva tras `validado` y de cierre administrativo posterior. La mejora prioritaria consiste en estandarizar estados, arranque de issue, contenido minimo de issue, contenido minimo de entrega, sincronizacion con `main`, puerta previa de QA, actualizacion del `Estado operativo:` visible en GitHub, revalidacion tras `no validado`, integracion prioritaria despues de QA, activacion documental solo sobre `main` y una referencia vigente de `changelog/` para reducir esperas, reprocesos y ambiguedad.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados y en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado`, para reducir incumplimientos por memoria, facilitar auditoria ligera y evitar estados historicos desalineados.

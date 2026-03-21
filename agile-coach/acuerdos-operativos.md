@@ -32,6 +32,7 @@ Ademas, `product-manager` debe vigilar que la deuda tecnica relevante detectada 
 Cuando `developer-teams` tome una issue debe publicar un comentario de arranque con esta plantilla minima:
 
 ```text
+Rol: developer-teams
 Rama: <nombre-rama>
 Estado operativo: en desarrollo
 ```
@@ -55,6 +56,7 @@ El comentario final de entrega de `developer-teams` debe incluir como minimo:
 Plantilla minima recomendada:
 
 ```text
+Rol: developer-teams
 Rama: <nombre-rama>
 Resumen:
 - ...
@@ -90,6 +92,7 @@ El comentario de revision de `qa-teams` debe incluir como minimo:
 Plantilla minima recomendada:
 
 ```text
+Rol: qa-teams
 Rama revisada: <nombre-rama>
 Pruebas realizadas:
 - ...
@@ -155,11 +158,14 @@ Tras `Estado operativo: validado`, `product-manager` debe:
 Si la issue sigue abierta, usar esta plantilla minima:
 
 ```text
+Rol: product-manager
 Bloqueo actual: <motivo concreto>
 Siguiente responsable: product-manager|developer-teams|qa-teams|doc-teams
 Siguiente paso operativo: <accion verificable>
 Estado de integracion: pendiente|hecho|no aplica
 ```
+
+Al cerrar definitivamente la issue, `product-manager` debe actualizar tambien el cuerpo de la issue a `Estado operativo: cerrado` para que el estado visible coincida con el cierre real en GitHub.
 
 ## Regla de simplicidad
 Estos acuerdos existen para reducir esperas y reprocesos. No deben usarse para introducir estados adicionales ni ceremonias no justificadas.
