@@ -16,4 +16,4 @@ fi
 
 PROMPT_CONTENT="$(cat "${PROMPT_FILE}")"
 
-exec "${RUN_CODEX}" exec -C "${SCRIPT_DIR}" "${PROMPT_CONTENT}" "$@"
+exec "${RUN_CODEX}" exec -m "gpt-5.4" -C "${SCRIPT_DIR}" "${PROMPT_CONTENT}" "$@"
