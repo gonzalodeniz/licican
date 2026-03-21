@@ -6,10 +6,10 @@
 - Cada release debe dejar un resultado verificable por `qa-teams` y trazable a backlog e issues.
 
 ## Estado de referencia de la iteracion
-- Fecha de corte documental: 2026-03-20.
+- Fecha de corte documental: 2026-03-21.
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: solo permanece abierta en remoto la rama `developer-teams/issue-5-pb-003-filtros-catalogo`.
-- Siguiente recomendacion para `developer-teams`: corregir `PB-003` en la issue #5 dentro de la misma rama hasta obtener validacion explicita de `qa-teams`.
+- Siguiente recomendacion para `developer-teams`: fusionar en `main` la rama validada de `PB-003`, borrar la rama tecnica y cerrar la issue #5 antes de tomar una nueva implementacion.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 
 ## Release 0: Delimitacion funcional del MVP
@@ -39,7 +39,7 @@
 - Estado operativo actual:
   - `PB-006` ya esta validado e integrado en `main` como prerequisito del catalogo.
   - `PB-001` y `PB-002` ya fueron validados por `qa-teams` y estan integrados administrativamente en `main`.
-  - `PB-003` sigue siendo la pieza activa del Release 1, pero su ultimo handoff fue `no validado` por `qa-teams` al no solicitar correccion cuando el rango de presupuesto es invalido.
+  - `PB-003` ya fue validado por `qa-teams` el 2026-03-20 en la issue #5. Release 1 queda funcionalmente completada y pendiente solo de integracion final en `main` por `developer-teams`.
 
 ## Release 2: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -51,7 +51,7 @@
   - El usuario puede seguir oportunidades guardadas sin duplicados y con estados consistentes.
   - Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas alertas accionables y siguen siendo visibles en pipeline con advertencia.
 - Dependencia clave:
-  - Requiere que Release 1 haya validado el valor del catalogo y de los filtros.
+  - Requiere que Release 1 haya validado e integrado en `main` el valor del catalogo y de los filtros.
 - Decision funcional vigente:
   - Las alertas del MVP registran coincidencias de forma interna; la notificacion saliente queda fuera de esta release.
   - El pipeline del MVP es individual por usuario; la colaboracion por empresa queda para una release posterior.
@@ -70,7 +70,7 @@
 - Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
 
 ## Decision operativa para la siguiente iteracion
-- La issue que debe tomar `developer-teams` a continuacion es la #5, asociada a `PB-003`.
-- La implementacion debe corregir en la misma rama el manejo del rango de presupuesto invalido y publicar un nuevo handoff completo antes de volver a QA.
-- La correccion debe reutilizar la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo y detalle.
-- No se recomienda iniciar `PB-004` ni `PB-005` antes de que `PB-003` quede `validado`.
+- El siguiente paso operativo de `developer-teams` es completar merge y borrado de rama de la issue #5, asociada a `PB-003`.
+- Tras esa integracion, la siguiente issue recomendada para iniciar es la #6, asociada a `PB-004`.
+- `PB-004` debe reutilizar la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
+- No se recomienda iniciar `PB-004` ni `PB-005` mientras la rama validada de `PB-003` siga abierta sin integrar.

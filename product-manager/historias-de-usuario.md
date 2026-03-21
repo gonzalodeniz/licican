@@ -58,8 +58,8 @@
   6. Si el usuario introduce un rango de presupuesto minimo mayor que el maximo, el sistema solicita corregirlo y no presenta ese caso como una busqueda valida sin coincidencias.
 - Dependencias funcionales: PB-001
 - Prioridad: P0
-- Estado: `no validado`
-- Nota de estado: `qa-teams` dejo la issue #5 en `no validado` el 2026-03-19 porque el tratamiento actual del rango de presupuesto invalido incumple el flujo alternativo de `CU-03`. `developer-teams` debe corregirlo en la misma rama antes de retomar trabajo nuevo.
+- Estado: `validado`
+- Nota de estado: `qa-teams` valido la reentrega de la issue #5 el 2026-03-20 tras comprobar la correccion del rango de presupuesto invalido en HTML y API. La historia queda funcionalmente aceptada y pendiente solo de merge en `main`, borrado de rama tecnica y cierre administrativo.
 
 ## HU-04 Recibir alertas tempranas
 - Backlog relacionado: PB-004
