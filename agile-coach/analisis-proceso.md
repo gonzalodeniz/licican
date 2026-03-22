@@ -177,5 +177,15 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - El backlog historico pierde consistencia al revisar issues cerradas o al medir tiempos de cierre real.
 - `product-manager` asume trabajo correctivo posterior en lugar de cerrar bien a la primera.
 
+## Problema 18: el backlog funcional y la issue activa pueden mostrar estados distintos
+### Evidencia
+- `product-manager/product-backlog.md` mantiene `PB-009` como `nuevo`, mientras la issue #9 ya refleja `Estado operativo: no validado` tras la revision de `qa-teams`.
+- La pagina de issues de GitHub muestra el estado operativo real de la issue, pero el backlog priorizado sigue exponiendo una fotografia de planificacion que no se ha actualizado con la reentrada operativa.
+
+### Impacto observado
+- `product-manager` puede interpretar una pieza en re-trabajo como si siguiera pendiente de arrancar.
+- `developer-teams` y `qa-teams` ven el estado real en la issue, pero el backlog visible no ayuda a priorizar reentregas ni a detectar de un vistazo trabajo ya iniciado.
+- Las metricas de flujo y la lectura del backlog mezclan planificacion y ejecucion si el estado no se sincroniza en cada transicion relevante.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados y en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado`, para reducir incumplimientos por memoria, facilitar auditoria ligera y evitar estados historicos desalineados.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado` y en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion, reduciendo incumplimientos por memoria, facilitando auditoria ligera y evitando estados historicos desalineados.

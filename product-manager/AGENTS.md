@@ -66,6 +66,7 @@ Si hace falta documentación técnica orientativa para `developer-teams`, debe p
   - estado
 - Debe priorizar el backlog siguiendo valor de negocio, reducción de riesgo y desbloqueo de entregas.
 - Debe mantener el backlog refinado para que `developer-teams` pueda tomar items implementables sin ambigüedad innecesaria.
+- Cuando un item tenga issue de GitHub activa, el estado del backlog debe sincronizarse con el estado operativo real de esa issue y no permanecer en `nuevo` por inercia si ya paso a `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`.
 - Debe mantener visibles y priorizadas las necesidades de refactorizacion, optimizacion, endurecimiento tecnico y reduccion de deuda tecnica cuando hayan sido detectadas por `developer-teams` o `qa-teams`.
 - Debe mantener visibles y priorizadas tambien las necesidades detectadas por `quality-auditor`, diferenciando severidad, impacto y dependencia con trabajo funcional activo.
 - Debe mantener visibles y priorizadas tambien las necesidades detectadas por `security-auditor`, diferenciando severidad, impacto, riesgo de explotacion y dependencia con trabajo funcional activo.

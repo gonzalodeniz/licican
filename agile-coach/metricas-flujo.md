@@ -45,6 +45,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de issues abiertas cuyo cuerpo no refleja el mismo `Estado operativo:` que la ultima transicion operativa registrada en comentarios.
 - Senal que aporta: detecta perdida de fiabilidad del backlog visible y deriva entre fuente resumida y flujo real.
 
+## 10. Items de backlog desalineados con la issue activa
+- Definicion: numero o porcentaje de items con issue activa cuyo `Estado` en `product-manager/product-backlog.md` no coincide con el ultimo `Estado operativo:` visible en la issue asociada.
+- Senal que aporta: detecta cuando el documento de producto se queda como fotografia de planificacion y deja de representar el trabajo real que ya esta en curso o en revalidacion.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.

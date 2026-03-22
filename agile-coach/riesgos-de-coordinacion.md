@@ -62,3 +62,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: la issue aparece cerrada en GitHub pero el cuerpo sigue mostrando `Estado operativo: validado`.
 - Impacto: el historico mezcla dos estados finales distintos y degrada la fiabilidad del backlog ya cerrado.
 - Mitigacion acordada: exigir que `product-manager` actualice el cuerpo a `Estado operativo: cerrado` en el mismo cierre administrativo.
+
+## Riesgo 13: backlog visible desalineado respecto a la issue activa
+- Senal observable: el item del backlog sigue en `nuevo` mientras la issue asociada ya figura como `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`.
+- Impacto: la lectura rapida del backlog oculta re-trabajo, dificulta priorizar reentregas y puede hacer que `product-manager` interprete mal la carga real del equipo.
+- Mitigacion acordada: sincronizar el campo `Estado` del backlog con la transicion operativa de la issue en la misma actualizacion documental.

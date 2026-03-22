@@ -140,6 +140,11 @@ Si el alcance cambia de forma material, `product-manager` debe decidir si corres
 - Si `developer-teams` o `qa-teams` registran actividad en `changelog/` mientras mantienen una rama abierta, deben sincronizar despues esa rama con `main` antes del siguiente handoff o nueva validacion.
 - Antes de declarar `Estado operativo: listo para qa`, `developer-teams` debe comprobar que la rama integra limpia con `main`.
 
+## Sincronizacion entre backlog y issue activa
+Cuando un item del backlog tenga issue GitHub activa, el campo `Estado` del backlog debe reflejar el mismo estado operativo visible de esa issue. Mientras la issue avance por `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`, el backlog no debe conservar `nuevo` por inercia.
+
+Esta sincronizacion debe ejecutarse junto con la transicion operativa que la provoca, para que el backlog siga siendo una fotografia util del trabajo real y no solo un registro de planificacion inicial.
+
 ## Disparador operativo de `doc-teams`
 `doc-teams` debe priorizar una iteracion cuando concurran estas condiciones:
 1. Existe `Estado operativo: validado` en la issue.

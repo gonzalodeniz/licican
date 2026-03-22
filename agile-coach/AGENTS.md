@@ -56,6 +56,7 @@ Si detecta problemas recurrentes de handoff, debe priorizar artefactos que fijen
 - Debe ayudar a que el trabajo funcional llegue a desarrollo con menor ambiguedad.
 - Puede proponer mejoras en backlog, definicion de issues y criterios de aceptacion desde la perspectiva del proceso.
 - Puede fijar un paquete minimo de contexto para que una issue sea operable antes de pasar a `developer-teams`.
+- Puede fijar reglas para que el estado del backlog de producto se sincronice con el estado operativo de la issue activa y no quede desfasado por inercia.
 - No debe sustituir a `product-manager` en decisiones de negocio o priorizacion funcional.
 
 ## Relacion con developer-teams
