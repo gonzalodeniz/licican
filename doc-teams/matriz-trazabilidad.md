@@ -7,7 +7,7 @@ Equipo documental, stakeholders funcionales, equipo tecnico y administracion que
 Dejar una referencia unica y accionable sobre que capacidades estan disponibles hoy en `main`, que evidencia las respalda y que puntos siguen siendo backlog o contradiccion documental abierta.
 
 ## Estado de referencia
-- Fecha de revision: `2026-03-21`
+- Fecha de revision: `2026-03-22`
 - Rama revisada: `main`
 - Verificacion ejecutada:
   - `PYTHONPATH=src python3 -m unittest discover -s tests -v`
@@ -22,6 +22,7 @@ Dejar una referencia unica y accionable sobre que capacidades estan disponibles 
 | Ficha de detalle de licitacion | `PB-002`, `HU-02`, `CU-02` | `data/opportunities.json`, `src/podencoti/opportunity_catalog.py`, `src/podencoti/app.py`, `tests/test_opportunity_catalog.py`, `tests/test_app.py` | Disponible | Usuario, producto, tecnico | Visible en `/oportunidades/<id>` y `/api/oportunidades/<id>`; aplica el ultimo dato oficial visible cuando hay rectificacion o modificacion. |
 | Cobertura inicial de fuentes | `PB-007`, `HU-07`, `CU-06`, `product-manager/refinamiento-funcional.md` | `data/source_coverage.json`, `src/podencoti/source_coverage.py`, `src/podencoti/app.py`, `tests/test_source_coverage.py`, `tests/test_app.py` | Disponible | Usuario, tecnico, administracion | Visible en `/cobertura-fuentes` y `/api/fuentes`. |
 | Clasificacion TI auditable | `PB-006`, `HU-06`, `CU-08`, `product-manager/refinamiento-funcional.md` | `data/ti_classification_rules.json`, `src/podencoti/ti_classification.py`, `src/podencoti/app.py`, `tests/test_ti_classification.py`, `tests/test_app.py` | Disponible | Usuario, tecnico, QA, producto | Visible en `/clasificacion-ti` y `/api/clasificacion-ti`. |
+| Priorizacion de recopilacion desde fuentes reales oficiales | `PB-009`, `HU-09`, `CU-09`, `product-manager/refinamiento-funcional.md` | Issue #9 en desarrollo; no hay evidencia integrada en `main` | No disponible en `main` | Producto, tecnico | La prioridad existe en backlog, pero su reentrega sigue sin formar parte de la rama principal. |
 | Alertas tempranas | `PB-004`, `HU-04`, `CU-04` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2. |
 | Pipeline de seguimiento | `PB-005`, `HU-05`, `CU-05` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2. |
 | Instalacion local reproducible | `README.md`, `Makefile`, `pyproject.toml` | `pyproject.toml`, `Makefile`, paquete `src/podencoti/`, suite `tests/` | Disponible | Tecnico, administracion, QA | Requiere `python3 >= 3.12`; no hay dependencias externas adicionales versionadas. |
@@ -32,5 +33,5 @@ Dejar una referencia unica y accionable sobre que capacidades estan disponibles 
 - La documentacion funcional mantiene capacidades futuras validas como alertas, pipeline y recopilacion real desde nuevas fuentes oficiales, pero no hay evidencia tecnica visible de esas capacidades en `main`.
 
 ## Dependencias abiertas para siguiente revision documental
-- Revisar de nuevo esta matriz cuando `developer-teams` entregue una implementacion observable de `PB-004`, `PB-005` o `PB-009`.
+- Revisar de nuevo esta matriz cuando `developer-teams` entregue una implementacion observable de `PB-004`, `PB-005` o `PB-009` y su validacion quede integrada en `main`.
 - Sincronizar la metadata tecnica del paquete si se quiere reducir la brecha entre descripcion y comportamiento observable.
