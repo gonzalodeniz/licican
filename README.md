@@ -86,6 +86,8 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 
 - Vision y artefactos funcionales: `product-manager/`
 - Reglas globales y activacion de roles: `AGENTS.md`
+- Acuerdos operativos compartidos, estados comunes y plantillas de handoff: `agile-coach/acuerdos-operativos.md`
+- Formato vigente del changelog diario: `changelog/README.md`
 - Documentacion de usuario, tecnica y administracion: `doc-teams/`
 - Mejora continua y coordinacion de procesos: `agile-coach/`
 - Auditoria de calidad de codigo y evidencias: `quality-auditor/`

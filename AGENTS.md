@@ -118,6 +118,8 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Cada actualizacion de `changelog/` debe terminar con `git commit` y `git push` al repositorio remoto sobre la rama `main`.
 - Los cambios de `changelog/` no forman parte de la entrega tecnica de una issue y no deben permanecer en ramas tecnicas ni en ramas temporales de integracion.
 - Si un rol mantiene una rama abierta y registra actividad en `changelog/` sobre `main`, debe sincronizar despues su rama abierta con `main` antes del siguiente handoff a QA o integracion.
+- `agile-coach/acuerdos-operativos.md` es la referencia canónica para estados operativos comunes, plantillas literales de handoff y checkpoints de cierre; cualquier ajuste compartido debe partir de ahi antes de propagarse al resto de documentos.
+- `changelog/README.md` es la referencia canónica para el formato diario del changelog y sustituye a cualquier ejemplo historico que pueda quedar desfasado.
 - Limitar el numero de ramas abiertas para facilitar el seguimiento operativo del proyecto.
 - Todos los commits del repositorio deben comenzar con el prefijo del rol que los ejecuta en formato `[rol]`, por ejemplo `[developer-teams] Implementa clasificacion TI`.
 - Si para ejecutar o desarrollar el proyecto en Python fuese necesaria la instalacion de librerias adicionales en el sistema o en el entorno de trabajo, debe existir y mantenerse un fichero `requirements.txt` en la raiz del repositorio con dichas dependencias.

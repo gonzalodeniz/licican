@@ -67,3 +67,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: el item del backlog sigue en `nuevo` mientras la issue asociada ya figura como `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`.
 - Impacto: la lectura rapida del backlog oculta re-trabajo, dificulta priorizar reentregas y puede hacer que `product-manager` interprete mal la carga real del equipo.
 - Mitigacion acordada: sincronizar el campo `Estado` del backlog con la transicion operativa de la issue en la misma actualizacion documental.
+
+## Riesgo 14: deriva por duplicacion de reglas compartidas en varios documentos
+- Senal observable: una misma regla de handoff, cierre o estado operativo aparece redactada en varios documentos sin indicar cual es la referencia primaria.
+- Impacto: cada cambio de proceso debe replicarse manualmente, aumenta la probabilidad de que una copia quede desactualizada y se multiplican las interpretaciones de una misma norma.
+- Mitigacion acordada: tomar `agile-coach/acuerdos-operativos.md` como referencia canónica para las reglas compartidas y usar `changelog/README.md` como referencia canónica del formato de registro diario.

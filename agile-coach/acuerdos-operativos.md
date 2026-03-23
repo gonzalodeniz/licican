@@ -3,6 +3,16 @@
 ## Objetivo
 Reducir ambiguedades en los handoffs entre `product-manager`, `developer-teams`, `qa-teams` y `doc-teams` sin alterar la separacion de responsabilidades ya definida en el repositorio.
 
+## Referencia canónica de coordinacion
+Este documento es la referencia canónica para las reglas compartidas de coordinacion entre equipos. Cuando exista una duda sobre estados operativos, plantillas literales de handoff o checkpoints de cierre, debe tomarse como fuente primaria esta guia y no una copia dispersa en otro documento.
+
+Las demas referencias del proyecto tienen este uso:
+- `AGENTS.md` de raiz y de cada rol: instruccion operativa del rol, con las reglas compartidas reflejadas aqui solo en la medida necesaria para cada equipo.
+- `README.md`: resumen general del flujo y orientacion inicial para personas o agentes nuevos.
+- `changelog/README.md`: referencia canónica del formato del changelog diario.
+
+Si una regla compartida cambia, primero debe actualizarse este documento y despues sincronizarse la redaccion equivalente en los documentos que la consumen.
+
 ## Estados operativos comunes
 Todos los equipos deben reutilizar estos estados operativos en sus comentarios y transiciones de trabajo:
 

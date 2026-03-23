@@ -187,5 +187,16 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - `developer-teams` y `qa-teams` ven el estado real en la issue, pero el backlog visible no ayuda a priorizar reentregas ni a detectar de un vistazo trabajo ya iniciado.
 - Las metricas de flujo y la lectura del backlog mezclan planificacion y ejecucion si el estado no se sincroniza en cada transicion relevante.
 
+## Problema 19: las reglas compartidas siguen duplicadas en varios documentos y facilitan la deriva
+### Evidencia
+- Las mismas reglas operativas aparecen repetidas en `AGENTS.md`, en los `AGENTS.md` de cada rol y en `agile-coach/acuerdos-operativos.md`, con el mismo contenido literal en varios puntos.
+- `changelog/README.md` tuvo que nacer precisamente para sustituir una referencia historica desfasada que seguia apareciendo en varios documentos, lo que confirma el coste de mantener texto repetido.
+- La guia principal del proyecto tambien resume parte del flujo, pero no explicita con suficiente claridad que los estados, plantillas y checkpoints compartidos deben tomar su redaccion canónica de un unico sitio.
+
+### Impacto observado
+- Cada ajuste de proceso exige editar varias fuentes a la vez y aumenta el riesgo de que una quede desalineada.
+- Los equipos pueden leer una version distinta de la misma regla segun el documento que consulten primero.
+- La trazabilidad de cambios de proceso se vuelve mas costosa porque no queda claro cual es la referencia primaria y cuales son solo copias de apoyo.
+
 ## Conclusion
 El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado` y en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion, reduciendo incumplimientos por memoria, facilitando auditoria ligera y evitando estados historicos desalineados.

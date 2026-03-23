@@ -387,3 +387,29 @@ Cuando un item tenga issue activa, el campo `Estado` del backlog debe reflejar e
 ### Riesgos y dependencias
 - Si se actualiza solo la issue y no el backlog, la mejora pierde valor.
 - Conviene que la regla quede anclada tambien en el `AGENTS.md` de `product-manager` para que no dependa de memoria.
+
+## Mejora 19: definir una referencia canónica para las reglas compartidas de coordinacion
+### Problema detectado
+Las reglas comunes de estados, handoffs y cierre estan repartidas entre varios `AGENTS.md`, `README.md` y `changelog/README.md`, lo que obliga a mantener varias copias del mismo criterio y abre la puerta a versiones divergentes.
+
+### Propuesta
+Declarar `agile-coach/acuerdos-operativos.md` como referencia canónica para:
+- estados operativos comunes
+- plantillas literales de handoff
+- checkpoints de sincronizacion entre equipos
+- reglas de cierre administrativo y revalidacion
+
+Mantener `AGENTS.md` y `README.md` como superficies de consulta y resumen, pero indicando de forma explicita que cualquier cambio de redaccion compartida debe nacer primero en `agile-coach/acuerdos-operativos.md` y luego propagarse a las copias necesarias.
+
+### Impacto esperado
+- Reduce el coste de mantenimiento de las reglas de coordinacion.
+- Disminuye el riesgo de que dos equipos trabajen con una version distinta de la misma norma.
+- Hace mas claro donde revisar la redaccion vigente antes de modificar una plantilla o un estado.
+
+### Tradeoffs
+- Introduce una capa mas de referencia documental que hay que conocer al principio.
+- Requiere disciplina para actualizar la fuente canónica antes que las copias derivadas.
+
+### Riesgos y dependencias
+- Si el equipo ignora la referencia canónica y edita solo las copias, la deriva reaparecera.
+- Conviene mantener esta regla visible tambien en `AGENTS.md` de raiz y en la guia principal del proyecto.

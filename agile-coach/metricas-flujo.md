@@ -49,6 +49,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de items con issue activa cuyo `Estado` en `product-manager/product-backlog.md` no coincide con el ultimo `Estado operativo:` visible en la issue asociada.
 - Senal que aporta: detecta cuando el documento de producto se queda como fotografia de planificacion y deja de representar el trabajo real que ya esta en curso o en revalidacion.
 
+## 11. Documentos operativos sin referencia canónica explicita
+- Definicion: numero de documentos de proceso consultados en una iteracion que reproducen una regla compartida sin enlazar o remitir a `agile-coach/acuerdos-operativos.md` o `changelog/README.md` como fuente primaria.
+- Senal que aporta: detecta riesgo de deriva documental y mide si la referencia canónica de las reglas comunes se esta adoptando de forma consistente.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.
