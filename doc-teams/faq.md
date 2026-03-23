@@ -31,6 +31,10 @@ Si `presupuesto_min` es mayor que `presupuesto_max`, la vista HTML mantiene el c
 ## Sigue habiendo contradicciones documentales relevantes?
 Si. La principal contradiccion vigente es `pyproject.toml`, que sigue describiendo el paquete como si solo cubriera cobertura de fuentes, cuando `main` ya expone catalogo, filtros, detalle y clasificacion TI auditable.
 
+## Existe ya la priorizacion de fuentes reales de `PB-009` en `main`?
+No. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `404 Not Found`.
+Si un `changelog` la describe como validada, esa nota debe tratarse como desalineada hasta que exista evidencia reproducible en `main`.
+
 ## La ficha de detalle aplica rectificaciones o modificaciones oficiales?
 Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas en `data/opportunities.json`.
 

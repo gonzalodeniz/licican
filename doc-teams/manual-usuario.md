@@ -37,6 +37,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 ## Que no esta disponible hoy en `main`
 - Alertas tempranas.
 - Pipeline de seguimiento.
+- Priorizacion de fuentes reales como superficie navegable independiente.
 - Gestion de usuarios o autenticacion.
 
 ## Como interpretar la documentacion funcional
@@ -48,6 +49,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.
 - La metadata tecnica del paquete sigue describiendo una release anterior mas limitada que la visible hoy en `main`.
 - `product-manager/` ya prioriza nuevas fuentes reales oficiales (`PB-009`), pero esa recopilacion todavia no forma parte del comportamiento visible actual.
+- Si una nota de trazabilidad o un changelog describe `PB-009` como validado, debe contrastarse con la evidencia reproducible de `main` antes de tratarlo como comportamiento disponible.
 
 ## Recomendacion de uso
 Para demos o revision funcional temprana, utiliza el catalogo en `/`, la ficha de detalle de una oportunidad visible y, como apoyo, las vistas de cobertura y clasificacion TI. Para capacidades de negocio pendientes, toma como referencia `product-manager/roadmap.md` y `product-manager/product-backlog.md`.

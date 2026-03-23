@@ -70,6 +70,8 @@ Resultado verificado en esta revision:
 - No existe persistencia de usuario ni ingestion automatizada real de licitaciones; el catalogo se alimenta desde `data/opportunities.json`.
 - No hay autenticacion, base de datos, tareas programadas ni integracion externa.
 - No hay contrato de despliegue productivo versionado, mas alla del arranque local con `wsgiref`.
+- La priorizacion de fuentes reales de `PB-009` no esta expuesta en la app verificada: `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `404 Not Found`.
+- Si una entrada de `changelog/` afirma que `PB-009` ya esta validada, esa afirmacion no debe tomarse como evidencia tecnica hasta que la ruta sea reproducible en `main`.
 
 ## Dependencias abiertas
 - Implementar `PB-004`, `PB-005` y `PB-009` para evolucionar desde el descubrimiento inicial filtrable a un MVP mas operativo y con fuentes reales adicionales.

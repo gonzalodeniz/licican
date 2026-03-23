@@ -55,12 +55,14 @@ No existe en `main`:
 - observabilidad o healthcheck dedicado
 - procedimiento de backup o rollback
 - despliegue productivo validado
+- superficies operativas de priorizacion de fuentes reales (`/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`)
 
 ## Riesgos operativos
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
 - Comunicar que el producto ya ofrece alertas o pipeline induciria a error.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
 - La priorizacion funcional de nuevas fuentes reales oficiales ya existe en `product-manager/`, pero no debe confundirse con una ingestión ya disponible en la operacion actual.
+- Aunque un changelog reciente pueda describir `PB-009` como validado, la operacion revisada en `main` no expone todavia superficies funcionales para esa priorizacion.
 
 ## Dependencias abiertas para administracion
 - Definir estrategia de despliegue productivo cuando exista una aplicacion mas alla del servidor local de demostracion.
