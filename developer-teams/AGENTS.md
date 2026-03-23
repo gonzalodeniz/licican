@@ -15,6 +15,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 
 - Debe leer los issues abiertos del repositorio remoto de GitHub antes de iniciar cualquier implementacion.
 - Los issues son creados y mantenidos por `product-manager` como fuente de verdad operativa del trabajo a desarrollar.
+- Las issues tecnicas derivadas de informes de `quality-auditor` deben ser creadas por `developer-teams`, con detalle tecnico suficiente y estimacion de esfuerzo, para que `product-manager` pueda priorizarlas en backlog.
+- Las issues tecnicas derivadas de informes de `security-auditor` deben ser creadas por `developer-teams`, con detalle tecnico suficiente y estimacion de esfuerzo, para que `product-manager` pueda priorizarlas en backlog.
 - No debe iniciar una issue si faltan los campos `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`; en ese caso debe pedir aclaracion a `product-manager`.
 
 ## Regla de priorizacion
@@ -48,6 +50,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Debe dedicar tiempo explicito dentro de cada issue a revisar el codigo antes del handoff, comprobando buenas practicas, legibilidad, acoplamiento, complejidad, duplicacion, nombres, manejo de errores, cobertura de pruebas y oportunidades razonables de optimizacion o refactorizacion.
 - Debe aplicar la refactorizacion u optimizacion necesaria cuando sea parte razonable de cerrar correctamente la issue y no suponga desbordar su alcance funcional.
 - Si detecta deuda tecnica o una refactorizacion necesaria que no pueda asumir dentro del alcance actual, debe dejarla documentada de forma explicita en la issue para que `product-manager` pueda convertirla en trabajo trazable.
+- Debe convertir en issues tecnicas trazables los hallazgos accionables recibidos desde `quality-auditor`, incluyendo referencia al informe, severidad, impacto tecnico, alcance propuesto y estimacion de esfuerzo.
+- Debe convertir en issues tecnicas trazables los hallazgos accionables recibidos desde `security-auditor`, incluyendo referencia al informe, severidad, impacto tecnico, riesgo de explotacion, alcance propuesto y estimacion de esfuerzo.
 - Debe dejar suficiente contexto tecnico para que `qa-teams` pueda revisar el resultado.
 - Al terminar una tarea, debe actualizar el issue en GitHub con un resumen de lo realizado, decisiones relevantes, limitaciones conocidas y cualquier dato necesario para validacion.
 - El comentario de entrega a `qa-teams` debe comenzar con `Rol: developer-teams` e incluir de forma explicita los campos `Rama:`, `Resumen:`, `Decisiones relevantes:`, `Refactorizacion aplicada:`, `Limitaciones conocidas:`, `Deuda tecnica identificada:`, `Revision de codigo realizada:`, `Verificacion tecnica ejecutada:`, `Impacto documental: si|no` y `Estado operativo: listo para qa`.
@@ -68,6 +72,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - `product-manager` crea y define los issues.
 - Solo `product-manager` debe cerrar el issue una vez exista validacion explicita de `qa-teams`.
 - Tras la validacion de `qa-teams`, `product-manager` debe realizar el cierre administrativo de la issue o dejar constancia explicita del motivo por el que permanece abierta.
+- Cuando `quality-auditor` emita un informe, `developer-teams` debe revisar sus hallazgos, crear o actualizar las issues tecnicas derivadas y dejar trazabilidad suficiente para que `product-manager` las priorice.
+- Cuando `security-auditor` emita un informe, `developer-teams` debe revisar sus hallazgos, crear o actualizar las issues tecnicas derivadas y dejar trazabilidad suficiente para que `product-manager` las priorice.
 
 ## Politica de commits y push
 

@@ -25,6 +25,8 @@ El repositorio trabaja con roles explicitamente activados mediante prompt:
 - `qa-teams`: valida funcionalmente el trabajo entregado por desarrollo
 - `doc-teams`: mantiene manuales de usuario, documentacion tecnica y documentacion de administracion
 - `agile-coach`: analiza procesos, propone mejoras y puede actualizar `AGENTS.md` para mejorar la coordinacion
+- `quality-auditor`: audita calidad de codigo, cobertura de tests, deuda tecnica, documentacion tecnica y riesgos evidentes de eficiencia
+- `security-auditor`: audita seguridad de codigo, secretos, dependencias, validacion de entradas y configuracion de hardening
 
 ## Orden de ejecucion recomendado
 
@@ -36,11 +38,17 @@ Este proyecto lo está construyendo de manera autónoma una series de agentes co
    Lee los issues abiertos, prioriza uno, crea su rama, implementa y deja contexto suficiente para validacion.
 3. `qa-teams`
    Revisa la entrega en la rama del issue y deja un resultado explicito de `validado` o `no validado`.
-4. `product-manager`
-   Si `qa-teams` ha validado, cierra el issue y promueve el merge a `main`.
-5. `doc-teams`
+4. `developer-teams`
+   Si `qa-teams` ha validado, fusiona la rama tecnica en `main` y la borra antes de iniciar trabajo nuevo, salvo bloqueo operativo documentado.
+5. `product-manager`
+   Tras la integracion validada, cierra el issue o deja constancia administrativa del motivo por el que sigue abierto.
+6. `doc-teams`
    Actualiza la documentacion de usuario, tecnica o de administracion cuando la funcionalidad ya esta validada e integrada en `main`.
-6. `agile-coach`
+7. `quality-auditor`
+   Ejecuta auditorias periodicas y entrega un informe estructurado a `product-manager` y `developer-teams`; desarrollo crea las issues tecnicas derivadas y producto las prioriza.
+8. `security-auditor`
+   Ejecuta auditorias periodicas de seguridad y entrega un informe estructurado a `product-manager` y `developer-teams`; desarrollo crea las issues tecnicas derivadas y producto las prioriza.
+9. `agile-coach`
    Actua de forma transversal y preferiblemente al cierre de iteraciones, cuando haya suficiente informacion para analizar el flujo real y proponer mejoras de proceso.
 
 ## Uso recomendado de los scripts
@@ -53,6 +61,8 @@ Cada rol dispone de un script que carga `.env`, lee su prompt y ejecuta `codex e
 ./3_rol-qa-teams.sh
 ./4_rol-doc-teams.sh
 ./5_rol-agile-coach.sh
+./6_rol-quality-auditor.sh
+./7_rol-security-auditor.sh
 ```
 
 Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
@@ -69,6 +79,8 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 - `product-manager` no debe cerrar issues sin validacion explicita de `qa-teams`.
 - `doc-teams` mantiene la documentacion del proyecto sin sustituir a otros equipos.
 - `agile-coach` puede actualizar `AGENTS.md` para mejorar la coordinacion y los procesos, siempre con cambios justificados.
+- `quality-auditor` trabaja sobre `main`, entrega informes estructurados con severidad y evidencia, y registra sus acciones en `changelog/`.
+- `security-auditor` trabaja sobre `main`, entrega informes estructurados con severidad y evidencia, y registra sus acciones en `changelog/`.
 
 ## Fuente de verdad
 
@@ -76,6 +88,8 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 - Reglas globales y activacion de roles: `AGENTS.md`
 - Documentacion de usuario, tecnica y administracion: `doc-teams/`
 - Mejora continua y coordinacion de procesos: `agile-coach/`
+- Auditoria de calidad de codigo y evidencias: `quality-auditor/`
+- Auditoria de seguridad de codigo y evidencias: `security-auditor/`
 
 ## Entrega tecnica actual
 

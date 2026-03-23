@@ -2,6 +2,7 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
+La prioridad funcional vigente sigue siendo `PB-009`, aunque su issue activa (#9) esta en `no validado` por una incidencia operativa de rama que debe corregirse sin cambiar el alcance de producto.
 
 ## Huecos de definicion detectados en esta revision
 - La prioridad funcional de `PB-009` ya existia, pero faltaba fijar el orden de ejecucion entre fuentes reales oficiales para evitar una implementacion demasiado amplia en un solo salto.
@@ -30,6 +31,8 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - La nueva prioridad abierta para `developer-teams` pasa a ser `PB-009`.
 - La secuencia de trabajo ya no tiene bloqueos administrativos previos asociados a `PB-003`.
 - La validacion e integracion previas permiten reordenar la siguiente iteracion sin reabrir entregas ya aceptadas.
+- `qa-teams` no cuestiona el alcance funcional de `PB-009`, pero si bloquea la entrega actual porque la rama `developer-teams/issue-9-pb-009-fuentes-reales` arrastra borrados de archivos de gobierno del repositorio ajenos a la issue.
+- Mientras el alcance siga siendo el mismo, la correccion debe hacerse en la misma issue #9 y en la misma rama tecnica, tras resincronizar con `main`.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -120,6 +123,7 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 - Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera promesa comercial o si permanecen fuera de la comunicacion inicial.
 - Definir mas adelante si las modificaciones oficiales del expediente requieren un historial visible de cambios en lugar de mostrar solo el ultimo dato disponible.
 - Decidir si la primera captura operativa de KPIs de alertas se resolvera con medicion manual temporal o se aplazara hasta disponer de mas instrumentacion.
+- Confirmar tras la siguiente reentrega de `PB-009` que la rama tecnica elimina los borrados ajenos al alcance y vuelve a integrar limpia con `main` antes del nuevo handoff a `qa-teams`.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.
@@ -141,17 +145,19 @@ La vision sigue siendo consistente con la propuesta de valor central. No se dete
 
 ## Recomendacion operativa para `developer-teams`
 - Tomar `PB-009` como siguiente pieza funcional prioritaria para reforzar recopilacion sobre fuentes reales oficiales nominadas.
+- Corregir `PB-009` sobre la issue #9 ya abierta y sobre la rama `developer-teams/issue-9-pb-009-fuentes-reales`, sin abrir una nueva issue funcional mientras el alcance no cambie.
 - Reutilizar la cobertura validada de `PB-007`, la regla auditable de `PB-006` y la superficie ya validada de `PB-001`, `PB-002` y `PB-003` sin reabrirlas salvo cambio de alcance.
 - Tratar `BOC`, `BOP Las Palmas` y `BOE` como fuentes reales de referencia para la siguiente iteracion, en ese orden por olas.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
 - Aplicar el filtrado solo sobre oportunidades ya visibles dentro de cobertura MVP y clasificacion final `TI`.
 - Tratar los expedientes mixtos dudosos como caso frontera fuera del catalogo hasta que exista evidencia funcional suficiente.
+- Resincronizar la rama con `main` antes de volver a pedir revision a `qa-teams` para evitar un segundo rechazo por arrastre de cambios ajenos.
 
 ## Trazabilidad operativa
 - `PB-007` y `HU-07` quedan cubiertos por la issue #1 y su validacion ya registrada.
 - `PB-006`, `HU-06` y `CU-08` resuelven la definicion de relevancia TI antes del catalogo.
 - `PB-001`, `PB-002` y `PB-003` ya quedaron validados por `qa-teams` y cerrados administrativamente; Release 1 queda funcionalmente completa.
-- `PB-009` pasa a ser la siguiente pieza prioritaria tras el MVP de descubrimiento para reforzar recopilacion real.
+- `PB-009` sigue siendo la siguiente pieza prioritaria tras el MVP de descubrimiento para reforzar recopilacion real, pero su estado actual es `no validado` en la issue #9 por incidencia operativa de rama.
 - `PB-004` y `PB-005` quedan desplazados a la release posterior de retencion.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

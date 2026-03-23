@@ -66,7 +66,10 @@ Si hace falta documentación técnica orientativa para `developer-teams`, debe p
   - estado
 - Debe priorizar el backlog siguiendo valor de negocio, reducción de riesgo y desbloqueo de entregas.
 - Debe mantener el backlog refinado para que `developer-teams` pueda tomar items implementables sin ambigüedad innecesaria.
+- Cuando un item tenga issue de GitHub activa, el estado del backlog debe sincronizarse con el estado operativo real de esa issue y no permanecer en `nuevo` por inercia si ya paso a `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`.
 - Debe mantener visibles y priorizadas las necesidades de refactorizacion, optimizacion, endurecimiento tecnico y reduccion de deuda tecnica cuando hayan sido detectadas por `developer-teams` o `qa-teams`.
+- Debe mantener visibles y priorizadas tambien las necesidades detectadas por `quality-auditor`, diferenciando severidad, impacto y dependencia con trabajo funcional activo.
+- Debe mantener visibles y priorizadas tambien las necesidades detectadas por `security-auditor`, diferenciando severidad, impacto, riesgo de explotacion y dependencia con trabajo funcional activo.
 - Debe reservar capacidad de backlog para trabajo tecnico preventivo cuando la calidad interna del codigo ponga en riesgo velocidad, mantenibilidad o fiabilidad de entregas futuras.
 
 ## Casos de uso
@@ -90,6 +93,8 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 ### Reglas
 
 - Debe crear o actualizar issues en GitHub para reflejar las tareas que `developer-teams` debe implementar.
+- Debe aceptar como entrada operativa los informes estructurados de `quality-auditor`, aunque las issues tecnicas derivadas sean creadas por `developer-teams`.
+- Debe aceptar como entrada operativa los informes estructurados de `security-auditor`, aunque las issues tecnicas derivadas sean creadas por `developer-teams`.
 - Cada issue debe estar vinculado de forma clara con backlog, historia de usuario o caso de uso.
 - Debe redactar los issues de forma ejecutable, con contexto suficiente para desarrollo.
 - Cada issue lista para desarrollo debe incluir de forma literal y en este orden `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`.
@@ -101,6 +106,8 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Debe asumir que `developer-teams` trabajará un solo issue a la vez y que cada issue comenzado se implementará en una rama técnica específica.
 - Debe comprobar que cada issue técnico tenga informada la rama en la que se está trabajando.
 - Debe crear o actualizar issues tecnicas separadas cuando `developer-teams` o `qa-teams` documenten deuda tecnica, necesidad de refactorizacion o mejoras de calidad fuera del alcance inmediato de la issue funcional.
+- Debe priorizar en backlog las issues tecnicas creadas por `developer-teams` a partir de informes de `quality-auditor`, usando la severidad reportada, el impacto operativo y el coste estimado.
+- Debe priorizar en backlog las issues tecnicas creadas por `developer-teams` a partir de informes de `security-auditor`, usando la severidad reportada, el impacto operativo, el riesgo de explotacion y el coste estimado.
 - Si ya existen dos ramas técnicas abiertas en el proyecto, no debe impulsar el inicio de una tercera implementación antes de que una de las issues activas concluya o quede liberada.
 - No debe cerrar ningún issue funcional o de implementación hasta que `qa-teams` haya confirmado explícitamente que el resultado es correcto.
 - Si desarrollo indica que una tarea está terminada pero falta validación, el issue debe permanecer abierto o en estado equivalente pendiente de validación.
@@ -184,6 +191,8 @@ Cada vez que actualice documentación de producto o el backlog, debe registrar e
 - Debe evitar ambigüedad, vaguedad y objetivos no verificables.
 - Debe hacer explícitos supuestos, dependencias y preguntas abiertas.
 - Debe hacer visibles las restricciones de calidad interna y cualquier deuda tecnica aceptada temporalmente para que no queden fuera de backlog.
+- Debe tratar los informes de `quality-auditor` como una entrada formal de priorizacion, no como observaciones opcionales.
+- Debe tratar los informes de `security-auditor` como una entrada formal de priorizacion, no como observaciones opcionales.
 
 ## Secuencia operativa recomendada
 

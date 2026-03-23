@@ -4,7 +4,7 @@
 Centralizar la documentacion oficial de `PodencoTI` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-03-21`.
+Fecha de revision: `2026-03-22`.
 
 Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision existe una entrega minima ejecutable de descubrimiento, pero su alcance sigue siendo acotado:
 
@@ -17,6 +17,7 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - API JSON de cobertura de fuentes en `/api/fuentes`.
 - Vista HTML de clasificacion TI auditable (`PB-006`) en `/clasificacion-ti`.
 - API JSON de reglas y ejemplos auditados de clasificacion TI en `/api/clasificacion-ti`.
+- `PB-009` sigue priorizado en backlog e issue #9, pero su reentrega todavia no forma parte de `main`.
 
 No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni componentes de despliegue productivo.
 
@@ -39,12 +40,13 @@ No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni 
 - El catalogo visible publica 3 oportunidades TI a partir de 5 registros de origen dentro de la cobertura MVP actual.
 - El catalogo permite filtrar por `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
+- La prioridad `PB-009` esta definida en producto y en la issue #9, pero sigue fuera de la rama `main` hasta que `developer-teams` la reentregue y `qa-teams` la valide.
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero esas capacidades aun no estan implementadas en `main`.
 - `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de PodencoTI.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`) y superficie auditable de `PB-006`.
 - Alertas (`PB-004`) y pipeline (`PB-005`) siguen definidos funcionalmente, pero no tienen evidencia tecnica visible en `main`.
-- `PB-009` ya existe como prioridad funcional en `product-manager/`, pero aun no hay implementacion visible de recopilacion desde fuentes reales oficiales en la rama principal.
+- `PB-009` ya existe como prioridad funcional en `product-manager/`, pero aun no hay implementacion integrada y validada en la rama principal.
 
 ## Criterio documental aplicado
 - Se documenta solo lo verificable en `main`.

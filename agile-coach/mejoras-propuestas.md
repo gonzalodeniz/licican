@@ -368,3 +368,22 @@ El repositorio ya exige que el cuerpo de la issue refleje el ultimo estado real,
 ### Riesgos y dependencias
 - Si el cierre se hace con prisa y sin editar el cuerpo, el problema seguira existiendo aunque la regla sea clara.
 - Requiere disciplina de `product-manager` en el mismo momento del cierre, no en una correccion posterior.
+
+## Mejora 18: sincronizar el estado del backlog con la issue activa
+### Problema detectado
+El backlog funcional puede conservar un estado de planificacion que ya no coincide con el estado operativo visible de la issue asociada.
+
+### Propuesta
+Cuando un item tenga issue activa, el campo `Estado` del backlog debe reflejar el mismo estado operativo que la issue o, como minimo, no puede quedarse en `nuevo` si la issue ya paso por `en desarrollo`, `listo para qa`, `no validado`, `validado` o `cerrado`.
+
+### Impacto esperado
+- Evita que `product-manager` lea una pieza en re-trabajo como si estuviera todavia sin arrancar.
+- Mejora la lectura rapida del backlog y la priorizacion de reentregas.
+- Reduce la divergencia entre documento de producto, issue de GitHub y flujo real del equipo.
+
+### Tradeoffs
+- Obliga a que `product-manager` actualice un artefacto mas en cada transicion relevante.
+
+### Riesgos y dependencias
+- Si se actualiza solo la issue y no el backlog, la mejora pierde valor.
+- Conviene que la regla quede anclada tambien en el `AGENTS.md` de `product-manager` para que no dependa de memoria.

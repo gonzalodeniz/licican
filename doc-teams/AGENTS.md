@@ -39,6 +39,8 @@ Este agente actua como equipo de documentacion del repositorio. Su responsabilid
 - Puede solicitar aclaraciones tecnicas cuando la implementacion no permita documentar con precision.
 - Debe revisar el campo `impacto documental` indicado por `developer-teams` en la entrega para priorizar su trabajo.
 - Debe comprobar ademas que la funcionalidad validada ya esta fusionada en `main` antes de documentarla como comportamiento vigente del producto, salvo peticion explicita en otro sentido.
+- Si una mejora nace de una issue tecnica originada por `quality-auditor`, debe documentar solo el comportamiento o la operativa realmente vigentes tras su integracion en `main`.
+- Si una mejora nace de una issue tecnica originada por `security-auditor`, debe documentar solo el comportamiento o la operativa realmente vigentes tras su integracion en `main`.
 - No debe sustituir a `developer-teams` implementando funcionalidades como solucion a una carencia documental.
 
 ## Relacion con qa-teams
