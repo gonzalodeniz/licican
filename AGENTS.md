@@ -23,6 +23,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 1. Este `AGENTS.md` de raiz define las reglas generales del repositorio.
 2. Los archivos `AGENTS.md` de cada area definen instrucciones especificas de ese rol.
 3. Las instrucciones de area solo complementan a las de raiz cuando el rol ha sido activado expresamente en el prompt.
+4. Para reglas compartidas de coordinacion, estados operativos, handoffs y cierres, la referencia canónica es `agile-coach/acuerdos-operativos.md`. Los demas `AGENTS.md` y resumenes solo deben remitir a esa guia o copiar el minimo necesario; si hay divergencia, prevalece la guia canónica hasta que se sincronice.
 
 ## Estructura actual del proyecto
 
@@ -108,6 +109,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Tratar la calidad interna del codigo como parte del flujo normal de entrega, incluyendo revision de codigo, cumplimiento de buenas practicas, optimizacion razonable y refactorizacion preventiva cuando el cambio lo requiera.
 - Priorizar documentos y entregables accionables frente a texto ambiguo o decorativo.
 - Hacer explicitos supuestos, riesgos, dependencias y preguntas abiertas.
+- Cuando una regla compartida cambie, actualizar primero `agile-coach/acuerdos-operativos.md` y despues las copias derivadas de `AGENTS.md` o `README.md`.
 - Mantener `main` como rama de referencia para trabajo funcional, documental y de coordinacion no tecnica.
 - Si cualquier rol cambia temporalmente de rama para ejecutar una tarea permitida por sus instrucciones, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
 - Mantener `main` como rama obligatoria para cualquier actualizacion de ficheros dentro de `changelog/`, independientemente del rol que la realice.

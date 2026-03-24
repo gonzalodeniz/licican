@@ -13,6 +13,11 @@ Las demas referencias del proyecto tienen este uso:
 
 Si una regla compartida cambia, primero debe actualizarse este documento y despues sincronizarse la redaccion equivalente en los documentos que la consumen.
 
+## Mantenimiento de la fuente canónica
+- Cualquier regla compartida nueva o modificada sobre estados operativos, handoffs, sincronizacion o cierres debe redactarse primero en este documento.
+- Los `AGENTS.md` de raiz y de rol pueden resumir la regla, pero no deben convertirse en la fuente primaria ni introducir una redaccion distinta sin actualizar esta guia en el mismo cambio.
+- Si existe divergencia entre una copia y esta guia, prevalece esta guia hasta que la copia quede sincronizada.
+
 ## Estados operativos comunes
 Todos los equipos deben reutilizar estos estados operativos en sus comentarios y transiciones de trabajo:
 
@@ -181,6 +186,11 @@ Estado de integracion: pendiente|hecho|no aplica
 ```
 
 Al cerrar definitivamente la issue, `product-manager` debe actualizar tambien el cuerpo de la issue a `Estado operativo: cerrado` para que el estado visible coincida con el cierre real en GitHub.
+
+## Sincronizacion documental tras integracion
+- Cuando una issue validada se fusiona en `main`, `product-manager` debe reconciliar el backlog, el refinamiento funcional y el roadmap afectados antes de iniciar una nueva issue funcional.
+- Si la issue sigue abierta por cierre administrativo o seguimiento, el comentario debe indicar tambien si la documentacion de producto ya quedo sincronizada o sigue pendiente.
+- No debe permanecer una version de backlog que sugiera `nuevo` o pendiente de trabajo cuando la entrega ya esta integrada en `main`.
 
 ## Regla de simplicidad
 Estos acuerdos existen para reducir esperas y reprocesos. No deben usarse para introducir estados adicionales ni ceremonias no justificadas.

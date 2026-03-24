@@ -198,5 +198,16 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - Los equipos pueden leer una version distinta de la misma regla segun el documento que consulten primero.
 - La trazabilidad de cambios de proceso se vuelve mas costosa porque no queda claro cual es la referencia primaria y cuales son solo copias de apoyo.
 
+## Problema 20: la sincronizacion documental tras el merge no tiene un checkpoint operativo unico
+### Evidencia
+- `doc-teams/README.md` ya describe `PB-009` como integrado en `main`.
+- `product-manager/product-backlog.md` y `product-manager/refinamiento-funcional.md` siguen reflejando que `PB-009` queda pendiente de integracion o cierre administrativo.
+- La secuencia de trabajo obliga a cerrar o dejar constancia administrativa tras `validado`, pero no fija expresamente que el bloque de producto afectado deba reconciliarse antes de abrir la siguiente pieza funcional.
+
+### Impacto observado
+- La documentacion de producto puede quedar una iteracion atrasada respecto a la rama principal.
+- `product-manager` y `doc-teams` leen fuentes distintas sobre el mismo estado operativo.
+- Se dificulta decidir si el siguiente bloqueo es de cierre administrativo o de sincronizacion documental.
+
 ## Conclusion
 El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado` y en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion, reduciendo incumplimientos por memoria, facilitando auditoria ligera y evitando estados historicos desalineados.

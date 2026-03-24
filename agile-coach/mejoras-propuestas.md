@@ -413,3 +413,22 @@ Mantener `AGENTS.md` y `README.md` como superficies de consulta y resumen, pero 
 ### Riesgos y dependencias
 - Si el equipo ignora la referencia canónica y edita solo las copias, la deriva reaparecera.
 - Conviene mantener esta regla visible tambien en `AGENTS.md` de raiz y en la guia principal del proyecto.
+
+## Mejora 20: introducir un checkpoint de sincronizacion documental despues del merge
+### Problema detectado
+La issue validada puede quedar integrada en `main` mientras backlog, refinamiento o roadmap siguen mostrando un estado previo.
+
+### Propuesta
+Tras cada merge de una entrega validada, `product-manager` debe reconciliar el backlog, el refinamiento funcional y el roadmap afectados antes de iniciar una nueva issue funcional. Si la issue sigue abierta por cierre administrativo, el comentario debe indicar tambien si la documentacion de producto ya quedo sincronizada o sigue pendiente.
+
+### Impacto esperado
+- Reduce desfase entre `main` y los artefactos funcionales.
+- Hace visible si el bloqueo restante es solo administrativo.
+- Evita que el siguiente arranque use un mapa de producto desactualizado.
+
+### Tradeoffs
+- Añade un paso documental mas al cierre de iteracion.
+
+### Riesgos y dependencias
+- Si `product-manager` no actualiza los artefactos en el mismo ciclo, reaparece el desfase.
+- Requiere que la regla quede reflejada tambien en `AGENTS.md` de `product-manager` y en los acuerdos operativos.

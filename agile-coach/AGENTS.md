@@ -19,6 +19,7 @@ Este agente actua como responsable de mejora continua del repositorio. Su funcio
 - Cualquier cambio en `AGENTS.md` debe estar justificado, ser explicito y mejorar la operativa del repositorio.
 - No debe usar esa autoridad para redefinir el alcance funcional del producto ni para imponer decisiones tecnicas que correspondan a otros roles.
 - Debe aplicar sus cambios de proceso directamente sobre `main` y no abrir ramas propias para trabajo ordinario del rol.
+- Si detecta deriva entre copias de una regla compartida, debe corregir primero `agile-coach/acuerdos-operativos.md` y luego propagar solo el minimo necesario a las copias. No debe introducir redacciones distintas en varios documentos cuando una referencia canónica sea suficiente.
 
 ## Fuente de analisis
 

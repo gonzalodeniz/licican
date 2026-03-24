@@ -72,3 +72,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: una misma regla de handoff, cierre o estado operativo aparece redactada en varios documentos sin indicar cual es la referencia primaria.
 - Impacto: cada cambio de proceso debe replicarse manualmente, aumenta la probabilidad de que una copia quede desactualizada y se multiplican las interpretaciones de una misma norma.
 - Mitigacion acordada: tomar `agile-coach/acuerdos-operativos.md` como referencia canónica para las reglas compartidas y usar `changelog/README.md` como referencia canónica del formato de registro diario.
+
+## Riesgo 15: el backlog y el refinamiento de producto se quedan atras tras un merge validado
+- Senal observable: una entrega ya integrada en `main` convive con documentos de producto que siguen describiendo el estado previo.
+- Impacto: `product-manager` puede planificar la siguiente iteracion sobre una fotografia desfasada y `doc-teams` puede mantener una version distinta del producto.
+- Mitigacion acordada: reconciliar backlog, refinamiento y roadmap afectados antes de abrir la siguiente issue funcional y, si la issue sigue abierta, dejar visible si la documentacion ya quedo sincronizada.
