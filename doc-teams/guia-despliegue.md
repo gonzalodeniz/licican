@@ -22,7 +22,7 @@ Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En con
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
-- `make test` ejecuta 35 pruebas en verde.
+- `make test` ejecuta 41 pruebas en verde.
 - `make run` arranca el servidor local usando `PORT` desde `.env` y queda a la escucha hasta que se interrumpe el proceso.
 - `docker compose up -d --build` publica la misma aplicacion en un contenedor y monta `data/` como volumen persistente.
 
@@ -43,6 +43,7 @@ Solo debe considerarse soportado el arranque local de validacion y el despliegue
 - Incorporar operativa de proceso, observabilidad y recuperacion.
 - Revisar de nuevo esta guia cuando el alcance supere la demo local actual.
 - Si se quiere pasar de contenedor local a produccion, endurecer la imagen, definir usuario/volumenes finales y documentar supervision, observabilidad y rollback.
+- La priorizacion de fuentes reales ya puede desplegarse junto con el resto de la entrega minima, pero sigue siendo una funcionalidad de recopilacion, no una capa operativa completa.
 
 ## Riesgos
 - Documentar hoy un despliegue real seria inventar decisiones tecnicas no presentes en el repositorio.

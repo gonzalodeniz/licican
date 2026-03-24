@@ -7,7 +7,7 @@ Personas usuarias internas, equipo tecnico y administracion que necesitan aclara
 Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
-Existe una entrega minima de descubrimiento con catalogo inicial de oportunidades TI, filtros funcionales sobre ese catalogo, ficha de detalle, cobertura inicial del MVP y clasificacion TI auditable.
+Existe una entrega minima de descubrimiento con catalogo inicial de oportunidades TI, filtros funcionales sobre ese catalogo, ficha de detalle, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
 
 ## Que rutas estan verificadas?
 - `/`
@@ -16,11 +16,13 @@ Existe una entrega minima de descubrimiento con catalogo inicial de oportunidade
 - `/api/oportunidades/<id>`
 - `/cobertura-fuentes`
 - `/api/fuentes`
+- `/priorizacion-fuentes-reales`
+- `/api/fuentes-prioritarias`
 - `/clasificacion-ti`
 - `/api/clasificacion-ti`
 
 ## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
-En `main` ya existen catalogo inicial, filtros funcionales y ficha de detalle. No existen todavia alertas ni pipeline, que siguen en backlog y roadmap de `product-manager/`.
+En `main` ya existen catalogo inicial, filtros funcionales, ficha de detalle y priorizacion de fuentes reales oficiales por olas. No existen todavia alertas ni pipeline, que siguen en backlog y roadmap de `product-manager/`.
 
 ## Que filtros existen hoy?
 Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion` tanto en `/` como en `/api/oportunidades`.
@@ -29,11 +31,11 @@ Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `proced
 Si `presupuesto_min` es mayor que `presupuesto_max`, la vista HTML mantiene el catalogo y muestra un mensaje de correccion. La API responde `400 Bad Request` con el campo `error_validacion`.
 
 ## Sigue habiendo contradicciones documentales relevantes?
-Si. La principal contradiccion vigente es `pyproject.toml`, que sigue describiendo el paquete como si solo cubriera cobertura de fuentes, cuando `main` ya expone catalogo, filtros, detalle y clasificacion TI auditable.
+Si. La principal contradiccion vigente es doble: `pyproject.toml` sigue describiendo el paquete como si solo cubriera cobertura de fuentes, y algunos documentos de `product-manager/` todavia conservan el estado anterior a la fusion de `PB-009`, aunque `main` ya expone esa superficie.
 
 ## Existe ya la priorizacion de fuentes reales de `PB-009` en `main`?
-No. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `404 Not Found`.
-Si un `changelog` la describe como validada, esa nota debe tratarse como desalineada hasta que exista evidencia reproducible en `main`.
+Si. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `200 OK` y muestran `BOC`, `BOP Las Palmas` y `BOE` agrupadas por olas.
+Si algun documento de producto sigue describiendo `PB-009` como pendiente de fusion, esa nota debe considerarse desactualizada frente a `main`.
 
 ## La ficha de detalle aplica rectificaciones o modificaciones oficiales?
 Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas en `data/opportunities.json`.
@@ -45,7 +47,7 @@ Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicia
 Si. La instalacion editable deja operativa la aplicacion local y permite ejecutar las pruebas.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 35 pruebas en esta revision.
+Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 41 pruebas en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.
@@ -56,6 +58,6 @@ No hay base documental suficiente para afirmarlo. Solo esta verificado el arranq
 - Para el estado tecnico realmente observable en `main`: los manuales actuales de `doc-teams/` y el codigo versionado
 
 ## Que dependencias siguen abiertas?
-- Implementar `PB-004`, `PB-005` y `PB-009`.
+- Implementar `PB-004` y `PB-005`.
 - Definir una estrategia de despliegue real cuando el alcance tecnico lo requiera.
 - Actualizar la metadata del paquete si se quiere alinearla con la superficie visible actual.

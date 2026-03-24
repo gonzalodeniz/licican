@@ -95,18 +95,15 @@ Tambien pueden recibir opciones adicionales de `codex exec`, por ejemplo:
 
 ## Entrega tecnica actual
 
-La rama `main` ya integra seis piezas funcionales y operativas verificables del MVP inicial:
+La rama `main` ya integra siete piezas funcionales y operativas verificables del MVP inicial:
 
 - `PB-007`: cobertura inicial visible y verificable de fuentes del MVP.
 - `PB-006`: regla de clasificacion TI auditable con ejemplos verificables.
 - `PB-001`: catalogo inicial de oportunidades TI consultable desde una app WSGI minima en Python.
 - `PB-002`: ficha de detalle navegable desde el catalogo, con tratamiento explicito de campos no informados y aplicacion del ultimo dato oficial visible cuando el expediente publica una rectificacion o modificacion.
 - `PB-003`: filtros funcionales sobre el catalogo y su API por palabra clave, rango de presupuesto, procedimiento y ubicacion, incluyendo validacion explicita de rangos invalidos.
-- Despliegue local en contenedor Docker con `Dockerfile`, `docker-compose.yml` y persistencia de `data/`.
-
-La siguiente entrega tecnica en curso amplía esa base con una sexta superficie verificable:
-
 - `PB-009`: priorizacion visible de fuentes reales oficiales por olas (`BOC`, `BOP Las Palmas`, `BOE`) y refuerzo de la trazabilidad minima al origen oficial en cada oportunidad publicada.
+- Despliegue local en contenedor Docker con `Dockerfile`, `docker-compose.yml` y persistencia de `data/`.
 
 ### Como ejecutar las vistas actuales
 

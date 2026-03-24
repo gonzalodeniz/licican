@@ -17,7 +17,9 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - API JSON de cobertura de fuentes en `/api/fuentes`.
 - Vista HTML de clasificacion TI auditable (`PB-006`) en `/clasificacion-ti`.
 - API JSON de reglas y ejemplos auditados de clasificacion TI en `/api/clasificacion-ti`.
-- `PB-009` sigue priorizado en backlog e issue #9, pero su reentrega todavia no forma parte de `main`.
+- Vista HTML de priorizacion de fuentes reales oficiales (`PB-009`) en `/priorizacion-fuentes-reales`.
+- API JSON de priorizacion de fuentes reales oficiales en `/api/fuentes-prioritarias`.
+- `PB-009` ya forma parte de `main` y su trazabilidad visible cubre `BOC`, `BOP Las Palmas` y `BOE` por olas.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/` y configuracion de `PORT` via `.env`.
 
 No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni un despliegue productivo endurecido.
@@ -34,23 +36,22 @@ No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni 
 
 ## Hallazgos principales de esta revision
 - `main` contiene implementacion Python versionada en `src/podencoti/`, datos en `data/` y pruebas automatizadas en `tests/`.
-- `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 35 pruebas y finaliza correctamente.
+- `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 41 pruebas y finaliza correctamente.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - `docker compose up -d --build` levanta la misma aplicacion en contenedor, publica el puerto configurado en `PORT` y monta `data/` como volumen persistente.
 - Las rutas verificables hoy son `/`, `/api/oportunidades`, `/oportunidades/<id>`, `/api/oportunidades/<id>`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti` y `/api/clasificacion-ti`.
+- Las rutas verificables de `PB-009` hoy son `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - El catalogo visible publica 3 oportunidades TI a partir de 5 registros de origen dentro de la cobertura MVP actual.
 - El catalogo permite filtrar por `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
-- La priorizacion de fuentes reales de `PB-009` sigue sin estar expuesta como superficie navegable en `main`; las rutas `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `404 Not Found`.
-- Existe una contradiccion documental abierta: `changelog/2026-03-23.md` describe `PB-009` como validado, pero la evidencia tecnica actual de `main` no expone esa superficie.
+- Existe una contradiccion documental residual en `product-manager/`: varios documentos siguen describiendo `PB-009` como pendiente de fusion y borrado de rama, pero la evidencia tecnica y el changelog de `2026-03-24` ya muestran esa entrega integrada en `main`.
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero esas capacidades aun no estan implementadas en `main`.
-- `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de PodencoTI.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`) y superficie auditable de `PB-006`.
+- `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de PodencoTI.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`), superficie auditable de `PB-006` y priorizacion de fuentes reales oficiales (`PB-009`).
 - Alertas (`PB-004`) y pipeline (`PB-005`) siguen definidos funcionalmente, pero no tienen evidencia tecnica visible en `main`.
-- `PB-009` ya existe como prioridad funcional en `product-manager/`, pero aun no hay implementacion integrada y validada en la rama principal.
-- La entrada de `changelog/2026-03-23.md` que presenta `PB-009` como validado no coincide con la evidencia tecnica revisada en `main`; esta discrepancia debe resolverse antes de documentar la priorizacion de fuentes como comportamiento vigente.
+- `PB-009` ya existe como prioridad funcional en `product-manager/` y ahora tambien tiene evidencia integrada en `main`; lo que sigue desalineado es parte del texto de producto, que todavia conserva el estado operativo previo a la fusion.
 
 ## Criterio documental aplicado
 - Se documenta solo lo verificable en `main`.

@@ -49,7 +49,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
 Resultado esperado en esta revision:
-- 35 pruebas en verde
+- 41 pruebas en verde
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 
@@ -93,13 +93,15 @@ curl -i http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026
 curl -i http://127.0.0.1:<PORT>/api/oportunidades/pcsp-cabildo-licencias-2026
 curl -i http://127.0.0.1:<PORT>/cobertura-fuentes
 curl -i http://127.0.0.1:<PORT>/api/fuentes
+curl -i http://127.0.0.1:<PORT>/priorizacion-fuentes-reales
+curl -i http://127.0.0.1:<PORT>/api/fuentes-prioritarias
 curl -i http://127.0.0.1:<PORT>/clasificacion-ti
 curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 ```
 
 ## Que queda instalado realmente
 - Paquete `podencoti` en modo editable.
-- Aplicacion WSGI local para catalogo inicial, filtros funcionales, ficha de detalle, cobertura y clasificacion TI auditables.
+- Aplicacion WSGI local para catalogo inicial, filtros funcionales, ficha de detalle, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
 - Acceso a datos versionados en `data/` y a la suite automatizada en `tests/`.
 - Imagen Docker minima con la misma superficie funcional, apta para despliegue local en contenedor.
 
@@ -111,3 +113,4 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 - La instalacion deja operativa una entrega minima de descubrimiento, no el MVP completo descrito en backlog.
 - Los datos del catalogo son versionados y estaticos; no existe todavia rastreo automatizado en ejecucion local.
 - `pyproject.toml` sigue describiendo una release mas limitada que la realmente visible; verifica siempre contra esta guia, el codigo y las pruebas.
+- La priorizacion de fuentes reales ya forma parte de la instalacion utilizable, pero no activa alertas ni pipeline.

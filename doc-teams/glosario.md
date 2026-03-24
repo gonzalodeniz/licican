@@ -24,9 +24,9 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Estado real observable`: comportamiento que puede comprobarse en la rama revisada mediante ficheros versionados y comandos reproducibles.
 - `Contradiccion documental`: diferencia entre lo que una fuente del repositorio afirma y lo que puede verificarse realmente en `main`.
 - `No disponible en main`: capacidad descrita por vision o backlog que no debe documentarse como funcionalidad utilizable hoy.
-- `Entrega minima ejecutable`: estado actual de `main` con servidor local, catalogo inicial, filtros funcionales, ficha de detalle, rutas de cobertura y rutas de clasificacion TI auditables, ademas de un despliegue local en contenedor, pero sin alertas, pipeline ni despliegue productivo endurecido.
-- `Trabajo validado no integrado`: entrega que puede aparecer en `changelog/` o en una issue como validada por `qa-teams`, pero que aun no forma parte del comportamiento observable de `main` hasta su integracion efectiva.
+- `Entrega minima ejecutable`: estado actual de `main` con servidor local, catalogo inicial, filtros funcionales, ficha de detalle, rutas de cobertura, rutas de priorizacion de fuentes reales y rutas de clasificacion TI auditables, ademas de un despliegue local en contenedor, pero sin alertas, pipeline ni despliegue productivo endurecido.
+- `Trabajo validado no integrado`: entrega que puede aparecer en `changelog/` o en una issue como validada por `qa-teams`, pero que aun no forma parte del comportamiento observable de `main` hasta su integracion efectiva; esta expresion ya no aplica a `PB-009`, que si forma parte de `main`.
 
 ## Contradicciones clave asociadas al glosario
-- `Catalogo validado`: expresion historica que hoy si coincide con las rutas y modulos presentes en `main`, porque el catalogo y la ficha de detalle ya forman parte de la rama principal.
+- `Catalogo validado`: expresion historica que hoy si coincide con las rutas y modulos presentes en `main`, porque el catalogo, la ficha de detalle y la priorizacion de fuentes reales ya forman parte de la rama principal.
 - `Validado`: estado que puede referirse a una rama tecnica concreta y no necesariamente a funcionalidad ya integrada en `main`; debe interpretarse junto con la rama y la evidencia observable.

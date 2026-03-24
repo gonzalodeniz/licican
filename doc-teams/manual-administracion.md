@@ -41,10 +41,10 @@ Resultado esperado:
 - dentro del contenedor la aplicacion escucha en `HOST=0.0.0.0`
 
 ## Resultado esperado en esta revision
-- `make test` ejecuta 35 pruebas y termina en verde.
+- `make test` ejecuta 41 pruebas y termina en verde.
 - `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`.
 - `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT`.
-- Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
+- Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/cobertura-fuentes`, `/api/fuentes`, `/priorizacion-fuentes-reales`, `/api/fuentes-prioritarias`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
 
 ## Verificaciones operativas minimas
 - Abrir `http://127.0.0.1:<PORT>/` para revisar el catalogo inicial de oportunidades TI.
@@ -53,11 +53,13 @@ Resultado esperado:
 - Consultar `http://127.0.0.1:<PORT>/api/oportunidades?presupuesto_min=120000&presupuesto_max=90000` para verificar que la API devuelve `400` con validacion explicita de rango.
 - Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible.
 - Abrir `http://127.0.0.1:<PORT>/cobertura-fuentes` para revisar la cobertura inicial del MVP.
+- Abrir `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen.
 - Abrir `http://127.0.0.1:<PORT>/clasificacion-ti` para revisar la regla TI auditable.
 - Consultar las salidas JSON para integracion basica o soporte QA:
   - `http://127.0.0.1:<PORT>/api/oportunidades`
   - `http://127.0.0.1:<PORT>/api/oportunidades/pcsp-cabildo-licencias-2026`
   - `http://127.0.0.1:<PORT>/api/fuentes`
+  - `http://127.0.0.1:<PORT>/api/fuentes-prioritarias`
   - `http://127.0.0.1:<PORT>/api/clasificacion-ti`
 
 ## Parada controlada
@@ -77,8 +79,8 @@ No existe en `main`:
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
 - Comunicar que el producto ya ofrece alertas o pipeline induciria a error.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
-- La priorizacion funcional de nuevas fuentes reales oficiales ya existe en `product-manager/`, pero no debe confundirse con una ingestión ya disponible en la operacion actual.
-- Aunque un changelog reciente pueda describir `PB-009` como validado, la operacion revisada en `main` no expone todavia superficies funcionales para esa priorizacion.
+- La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con alertas, pipeline ni otras capacidades de seguimiento.
+- Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.
 
 ## Dependencias abiertas para administracion
 - Definir estrategia de despliegue productivo cuando exista una aplicacion mas alla del servidor local de demostracion.
