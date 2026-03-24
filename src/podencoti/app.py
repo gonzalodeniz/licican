@@ -288,6 +288,50 @@ def _page_template(
 </html>"""
 
 
+def _normalize_base_path(raw_base_path: str | None) -> str:
+    if raw_base_path is None:
+        return ""
+
+    base_path = raw_base_path.strip()
+    if not base_path or base_path == "/":
+        return ""
+
+    if not base_path.startswith("/"):
+        base_path = f"/{base_path}"
+
+    if len(base_path) > 1:
+        base_path = base_path.rstrip("/")
+
+    return base_path or ""
+
+
+def _resolve_base_path() -> str:
+    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
+    return _normalize_base_path(os.environ.get("BASE_PATH", "/podencoti"))
+
+
+def _app_url(base_path: str, path: str) -> str:
+    normalized_path = path if path.startswith("/") else f"/{path}"
+    if not base_path:
+        return normalized_path
+    if normalized_path == "/":
+        return base_path
+    return f"{base_path}{normalized_path}"
+
+
+def _resolve_request_path(environ, base_path: str) -> str:
+    raw_path = environ.get("PATH_INFO", "/") or "/"
+    script_name = _normalize_base_path(environ.get("SCRIPT_NAME")) or base_path
+
+    if script_name and raw_path.startswith(script_name):
+        raw_path = raw_path[len(script_name) :] or "/"
+
+    if not raw_path.startswith("/"):
+        raw_path = f"/{raw_path}"
+
+    return raw_path or "/"
+
+
 def _coverage_html_response() -> str:
     sources = load_source_coverage()
     summary = summary_by_status(sources)
@@ -495,7 +539,7 @@ def _validation_note_html(message: str | None) -> str:
     """
 
 
-def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
+def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str = "") -> str:
     catalog = build_catalog(filters=filters)
     opportunities = catalog["oportunidades"]
     active_filters = catalog["filtros_activos"]
@@ -505,7 +549,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
       <section class="panel">
         <div class="panel-body">
           <h2>Filtros funcionales</h2>
-          <form method="get" action="/">
+          <form method="get" action="{escape(_app_url(base_path, '/'))}">
             <div class="filters">
               <div>
                 <label for="palabra_clave">Palabra clave</label>
@@ -542,7 +586,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
             </div>
             <div class="filter-actions">
               <button type="submit">Aplicar filtros</button>
-              <a class="button-link" href="/">Limpiar filtros</a>
+              <a class="button-link" href="{escape(_app_url(base_path, '/'))}">Limpiar filtros</a>
             </div>
           </form>
           {_active_filter_badges(active_filters)}
@@ -555,7 +599,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
         rows = "\n".join(
             (
                 "<tr>"
-                f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(_detail_url(item["id"]))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(_detail_url(item["id"]))}">Ver oferta concreta</a></div></td>'
+                f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(_app_url(base_path, _detail_url(item["id"])))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(_app_url(base_path, _detail_url(item["id"])))}">Ver oferta concreta</a></div></td>'
                 f'<td data-label="Organismo">{escape(item["organismo"])}</td>'
                 f'<td data-label="Ubicación">{escape(item["ubicacion"])}</td>'
                 f'<td data-label="Procedimiento">{escape(item["procedimiento"] or "No informado")}</td>'
@@ -637,7 +681,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None) -> str:
     )
 
 
-def _detail_html_response(opportunity_id: str) -> str | None:
+def _detail_html_response(opportunity_id: str, base_path: str = "") -> str | None:
     detail = build_opportunity_detail(opportunity_id)
     if detail is None:
         return None
@@ -665,7 +709,7 @@ def _detail_html_response(opportunity_id: str) -> str | None:
     latest_fields = f"""
       <section class="panel">
         <div class="panel-body">
-          <p><a href="/">Volver al catalogo</a></p>
+          <p><a href="{escape(_app_url(base_path, '/'))}">Volver al catalogo</a></p>
           <div class="summary">
             <article class="metric"><strong>{escape(str(detail["estado"]))}</strong>Estado oficial visible</article>
             <article class="metric"><strong>{escape(str(detail["fecha_limite"]))}</strong>Fecha limite visible</article>
@@ -867,7 +911,8 @@ def _resolve_host() -> str:
 
 
 def application(environ, start_response):
-    path = environ.get("PATH_INFO", "/")
+    base_path = _resolve_base_path()
+    path = _resolve_request_path(environ, base_path)
     filters = _parse_catalog_filters(environ)
 
     if path.startswith("/api/oportunidades/"):
@@ -935,7 +980,7 @@ def application(environ, start_response):
 
     if path.startswith("/oportunidades/"):
         opportunity_id = path.removeprefix("/oportunidades/")
-        content = _detail_html_response(opportunity_id)
+        content = _detail_html_response(opportunity_id, base_path)
         if content is None:
             body = b"No encontrado"
             return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
@@ -943,7 +988,7 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/":
-        body = b"".join(_html_response(_catalog_html_response(filters)))
+        body = b"".join(_html_response(_catalog_html_response(filters, base_path)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     body = b"No encontrado"
@@ -951,10 +996,11 @@ def application(environ, start_response):
 
 
 def main() -> None:
+    base_path = _resolve_base_path()
     host = _resolve_host()
     port = _resolve_port()
     with make_server(host, port, application) as httpd:
-        print(f"Servidor disponible en http://{host}:{port}")
+        print(f"Servidor disponible en http://{host}:{port}{base_path or '/'}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

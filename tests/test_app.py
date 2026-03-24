@@ -10,14 +10,17 @@ from unittest.mock import patch
 from podencoti.app import application, main
 
 
-def invoke_app(path: str, query_string: str = "") -> tuple[str, dict[str, str], bytes]:
+def invoke_app(path: str, query_string: str = "", script_name: str = "") -> tuple[str, dict[str, str], bytes]:
     captured: dict[str, object] = {}
 
     def start_response(status: str, headers: list[tuple[str, str]]) -> None:
         captured["status"] = status
         captured["headers"] = dict(headers)
 
-    body = b"".join(application({"PATH_INFO": path, "QUERY_STRING": query_string}, start_response))
+    environ = {"PATH_INFO": path, "QUERY_STRING": query_string}
+    if script_name:
+        environ["SCRIPT_NAME"] = script_name
+    body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
 
 
@@ -32,9 +35,19 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Servicio cloud para copias de seguridad", html)
         self.assertIn("Ver oferta concreta", html)
         self.assertIn("Publicación oficial", html)
-        self.assertIn("Ver oferta concreta", html)
         self.assertIn("Fuente oficial", html)
-        self.assertIn('/oportunidades/govcan-backup-cloud-2026', html)
+        self.assertIn('/podencoti/oportunidades/govcan-backup-cloud-2026', html)
+        self.assertIn('action="/podencoti"', html)
+
+    def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
+        status, headers, body = invoke_app("/podencoti/")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
+        self.assertIn('/podencoti/oportunidades/govcan-backup-cloud-2026', html)
+        self.assertIn('href="/podencoti"', html)
 
     def test_api_returns_catalog_only_with_mvp_ti_opportunities(self) -> None:
         status, headers, body = invoke_app("/api/oportunidades")
@@ -189,7 +202,7 @@ class ApplicationTests(unittest.TestCase):
                     main()
 
         output = stdout.getvalue()
-        self.assertIn("Servidor disponible en http://127.0.0.1:8123", output)
+        self.assertIn("Servidor disponible en http://127.0.0.1:8123/podencoti", output)
         self.assertIn("Servidor detenido de forma controlada.", output)
         make_server_mock.assert_called_once_with("127.0.0.1", 8123, application)
         server.server_close.assert_called_once_with()
@@ -206,7 +219,7 @@ class ApplicationTests(unittest.TestCase):
                     main()
 
         output = stdout.getvalue()
-        self.assertIn("Servidor disponible en http://0.0.0.0:8124", output)
+        self.assertIn("Servidor disponible en http://0.0.0.0:8124/podencoti", output)
         make_server_mock.assert_called_once_with("0.0.0.0", 8124, application)
 
     def test_main_rejects_invalid_port_configuration(self) -> None:
