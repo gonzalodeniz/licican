@@ -20,7 +20,7 @@
 - Dependencias funcionales: PB-007, PB-006
 - Prioridad: P0
 - Estado: `cerrado`
-- Nota de estado: validado por `qa-teams` en la issue #3 el 2026-03-18; su entrega quedo pendiente solo de integracion administrativa en `main` y cierre por `product-manager`.
+- Nota de estado: validado por `qa-teams` en la issue #3 el 2026-03-18, integrado en `main` y cerrado administrativamente por `product-manager` el 2026-03-19.
 
 ## HU-02 Evaluar una licitacion desde su ficha
 - Backlog relacionado: PB-002
@@ -39,7 +39,7 @@
 - Dependencias funcionales: PB-001
 - Prioridad: P0
 - Estado: `cerrado`
-- Nota de estado: validado por `qa-teams` en la issue #4 el 2026-03-19; su entrega incluye la base validada de `PB-001` y queda pendiente de integracion administrativa en `main` y cierre por `product-manager`.
+- Nota de estado: validado por `qa-teams` en la issue #4 el 2026-03-19, integrado en `main` y cerrado administrativamente por `product-manager` el mismo dia.
 
 ## HU-03 Filtrar oportunidades relevantes
 - Backlog relacionado: PB-003
@@ -170,5 +170,5 @@
   5. Existe una issue de GitHub ejecutable para `developer-teams` con criterios de aceptacion verificables.
 - Dependencias funcionales: PB-007, PB-006
 - Prioridad: P0
-- Estado: `validado`
-- Nota de estado: `qa-teams` valido la reentrega de la issue #9 el 2026-03-23. La historia no debe pasar a `cerrado` hasta que `developer-teams` integre la rama `developer-teams/issue-9-pb-009-fuentes-reales` en `main` y elimine esa rama tecnica.
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la entrega integrada en `main` en la issue #9 el 2026-03-24. `developer-teams` dejo constancia de fusion y borrado de la rama tecnica ese mismo dia y `product-manager` cerro administrativamente la issue el 2026-03-25.

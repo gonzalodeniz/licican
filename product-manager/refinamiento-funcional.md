@@ -2,12 +2,11 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
-La prioridad funcional vigente sigue siendo cerrar operativamente `PB-009`, ya validado por `qa-teams` en la issue #9 el 2026-03-23, antes de abrir la siguiente pieza de desarrollo.
+La prioridad funcional vigente pasa a ser `PB-004`, porque `PB-009` ya quedo validado por `qa-teams`, integrado en `main` y cerrado administrativamente en la issue #9.
 
 ## Huecos de definicion detectados en esta revision
-- La prioridad funcional de `PB-009` ya existia, pero faltaba fijar el orden de ejecucion entre fuentes reales oficiales para evitar una implementacion demasiado amplia en un solo salto.
-- Faltaba dejar explicito el minimo de trazabilidad al origen oficial que debe conservar cada oportunidad recopilada en esta iteracion.
-- Faltaba remarcar de forma mas dura que `PB-009` no abre por si mismo alertas, pipeline ni ampliacion comercial de cobertura.
+- La inconsistencia principal detectada no es de alcance, sino de trazabilidad: varios artefactos seguian tratando `PB-009` como pendiente de integracion cuando la issue #9 ya recoge fusion en `main`, borrado de rama y validacion final sobre la entrega integrada el 2026-03-24.
+- El siguiente hueco funcional relevante ya no esta en recopilacion, sino en concretar la siguiente iteracion ejecutable del MVP de retencion sobre `PB-004` sin mezclarla con pipeline ni con una promesa de notificacion saliente fuera de alcance.
 
 ## Estado funcional confirmado en el repositorio
 - `PB-007` dispone de entrega visible en producto y validacion explicita de `qa-teams` en la issue #1.
@@ -21,18 +20,16 @@ La prioridad funcional vigente sigue siendo cerrar operativamente `PB-009`, ya v
 - Queda definida la regla funcional para expedientes mixtos donde TI no es el unico componente.
 - Queda definido el tratamiento minimo de oportunidades anuladas, desiertas, desistidas o modificadas.
 - Queda identificado como deuda de trazabilidad el formato incompleto de varios issues abiertos, que debe corregirse para cumplir las reglas del repositorio.
-- Queda despejada la dependencia funcional entre catalogo y ficha: el catalogo base, la ficha y el filtrado ya estan validados y la siguiente pieza accionable pasa a ser `PB-009`.
+- Queda despejada la dependencia funcional entre catalogo y ficha: el catalogo base, la ficha, el filtrado y la priorizacion de fuentes reales ya estan resueltos; la siguiente pieza accionable actual pasa a ser `PB-004`.
 - Queda definido que una alerta del MVP necesita al menos un criterio funcional informado y no puede guardarse vacia.
 - Queda definido que el alta inicial en pipeline crea siempre el estado `Nueva`.
 - Queda definido que `PB-008` puede avanzar como definicion funcional de KPIs aunque la instrumentacion completa llegue en una iteracion posterior.
 - Queda incorporada como prioridad explicita la recopilacion desde fuentes reales oficiales nominadas, ya que `PB-007` solo cerraba cobertura funcional y no orden de implementacion de fuentes reales.
 
 ## Incidencia operativa abierta prioritaria
-- La prioridad operativa abierta para `developer-teams` es completar el cierre de `PB-009`.
 - La secuencia de trabajo ya no tiene bloqueos funcionales ni de validacion asociados a `PB-009`.
-- `qa-teams` valido la reentrega de la issue #9 el 2026-03-23 y elimino los defectos bloqueantes observados en la revision anterior.
-- La issue sigue abierta porque la rama `developer-teams/issue-9-pb-009-fuentes-reales` aun no se ha fusionado en `main` ni se ha borrado.
-- Mientras esa integracion no ocurra, no debe impulsarse una nueva implementacion funcional aunque el siguiente backlog ya este priorizado.
+- `qa-teams` valido la entrega integrada en `main` el 2026-03-24, `developer-teams` dejo constancia de integracion y borrado de rama ese mismo dia y `product-manager` cerro la issue #9 el 2026-03-25.
+- La siguiente pieza accionable para `developer-teams` es `PB-004`.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -123,7 +120,7 @@ La prioridad funcional vigente sigue siendo cerrar operativamente `PB-009`, ya v
 - Confirmar con negocio si el MVP debe cubrir tambien ayuntamientos desde la primera promesa comercial o si permanecen fuera de la comunicacion inicial.
 - Definir mas adelante si las modificaciones oficiales del expediente requieren un historial visible de cambios en lugar de mostrar solo el ultimo dato disponible.
 - Decidir si la primera captura operativa de KPIs de alertas se resolvera con medicion manual temporal o se aplazara hasta disponer de mas instrumentacion.
-- Confirmar que `developer-teams` fusiona en `main` la rama validada de `PB-009` y la borra antes de iniciar `PB-004`.
+- Confirmar con negocio si `PB-004` debe quedarse en registro interno de coincidencias dentro del producto o si debe exigirse ya una primera salida visible para el usuario sin llegar todavia a notificacion externa.
 
 ## Riesgos de producto
 - Riesgo de falsa expectativa si se comunica "todas las licitaciones canarias" sin matizar la cobertura inicial real.
@@ -144,9 +141,8 @@ La prioridad funcional vigente sigue siendo cerrar operativamente `PB-009`, ya v
 - Que datos minimos deben gobernar una futura decision de monetizacion o plan de pago.
 
 ## Recomendacion operativa para `developer-teams`
-- Fusionar en `main` la rama `developer-teams/issue-9-pb-009-fuentes-reales`, ya validada por `qa-teams`, y borrarla inmediatamente despues.
-- No abrir una nueva issue funcional hasta completar ese cierre operativo.
-- Tras la integracion de `PB-009`, tomar `PB-004` como siguiente pieza funcional prioritaria.
+- Tomar `PB-004` como siguiente pieza funcional prioritaria en la issue #6.
+- Mantener `PB-005` y `PB-008` por detras de `PB-004` salvo bloqueo funcional explicito.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
 - Aplicar el filtrado solo sobre oportunidades ya visibles dentro de cobertura MVP y clasificacion final `TI`.
@@ -156,6 +152,6 @@ La prioridad funcional vigente sigue siendo cerrar operativamente `PB-009`, ya v
 - `PB-007` y `HU-07` quedan cubiertos por la issue #1 y su validacion ya registrada.
 - `PB-006`, `HU-06` y `CU-08` resuelven la definicion de relevancia TI antes del catalogo.
 - `PB-001`, `PB-002` y `PB-003` ya quedaron validados por `qa-teams` y cerrados administrativamente; Release 1 queda funcionalmente completa.
-- `PB-009` ya quedo validado por `qa-teams` en la issue #9 y sigue abierto solo por pendiente de integracion en `main` y cierre administrativo posterior.
+- `PB-009` ya quedo validado por `qa-teams` sobre la entrega integrada en `main` y queda cerrado administrativamente en la issue #9 para mantener sincronizados backlog e historial operativo.
 - `PB-004` y `PB-005` quedan desplazados a la release posterior de retencion.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.
