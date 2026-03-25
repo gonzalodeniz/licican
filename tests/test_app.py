@@ -5,19 +5,37 @@ import io
 import json
 import unittest
 from contextlib import redirect_stdout
+from io import BytesIO
+from pathlib import Path
+import tempfile
 from unittest.mock import patch
 
 from podencoti.app import application, main
 
 
-def invoke_app(path: str, query_string: str = "", script_name: str = "") -> tuple[str, dict[str, str], bytes]:
+def invoke_app(
+    path: str,
+    query_string: str = "",
+    script_name: str = "",
+    method: str = "GET",
+    body: str = "",
+    content_type: str = "application/x-www-form-urlencoded",
+) -> tuple[str, dict[str, str], bytes]:
     captured: dict[str, object] = {}
 
     def start_response(status: str, headers: list[tuple[str, str]]) -> None:
         captured["status"] = status
         captured["headers"] = dict(headers)
 
-    environ = {"PATH_INFO": path, "QUERY_STRING": query_string}
+    payload = body.encode("utf-8")
+    environ = {
+        "PATH_INFO": path,
+        "QUERY_STRING": query_string,
+        "REQUEST_METHOD": method,
+        "CONTENT_LENGTH": str(len(payload)),
+        "CONTENT_TYPE": content_type,
+        "wsgi.input": BytesIO(payload),
+    }
     if script_name:
         environ["SCRIPT_NAME"] = script_name
     body = b"".join(application(environ, start_response))
@@ -175,6 +193,72 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("PB-006", payload["referencia_funcional"])
         self.assertEqual(5, len(payload["ejemplos_auditados"]))
         self.assertTrue(all(item["coincide_con_esperado"] for item in payload["ejemplos_auditados"]))
+
+    def test_alerts_page_renders_empty_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+                status, headers, body = invoke_app("/alertas")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Gestión de alertas tempranas", html)
+        self.assertIn("Todavía no hay alertas registradas", html)
+
+    def test_alert_creation_rejects_empty_form(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+                status, headers, body = invoke_app("/alertas", method="POST")
+
+        html = body.decode("utf-8")
+        self.assertEqual("400 Bad Request", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("La alerta necesita al menos un criterio funcional", html)
+
+    def test_alert_lifecycle_is_visible_from_html_and_api(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+                created_status, created_headers, _ = invoke_app(
+                    "/alertas",
+                    method="POST",
+                    body="palabra_clave=licencias",
+                )
+                self.assertEqual("303 See Other", created_status)
+                self.assertEqual("/podencoti/alertas?mensaje=Alerta+creada+y+activa", created_headers["Location"])
+                created_page_status, _, created_page_body = invoke_app("/alertas")
+                self.assertEqual("200 OK", created_page_status)
+                self.assertIn("Activa", created_page_body.decode("utf-8"))
+                self.assertIn("Palabra clave: licencias", created_page_body.decode("utf-8"))
+
+                invoke_app(
+                    "/alertas/alerta-001/editar",
+                    method="POST",
+                    body="procedimiento=Abierto",
+                )
+                invoke_app(
+                    "/alertas/alerta-001/desactivar",
+                    method="POST",
+                )
+                page_status, page_headers, page_body = invoke_app("/alertas")
+                api_status, api_headers, api_body = invoke_app("/api/alertas")
+
+        html = page_body.decode("utf-8")
+        api_payload = json.loads(api_body)
+
+        self.assertEqual("200 OK", page_status)
+        self.assertEqual("text/html; charset=utf-8", page_headers["Content-Type"])
+        self.assertIn("alerta-001", html)
+        self.assertIn("Inactiva", html)
+        self.assertIn("Procedimiento: Abierto", html)
+
+        self.assertEqual("200 OK", api_status)
+        self.assertEqual("application/json; charset=utf-8", api_headers["Content-Type"])
+        self.assertEqual(1, api_payload["summary"]["total_alertas"])
+        self.assertEqual(0, api_payload["summary"]["alertas_activas"])
+        self.assertEqual({"procedimiento": "Abierto"}, api_payload["alerts"][0]["filtros"])
 
     def test_unknown_path_returns_404(self) -> None:
         status, headers, body = invoke_app("/desconocido")

@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 import os
 from html import escape
+from io import BytesIO
 from pathlib import Path
-from urllib.parse import parse_qs, quote
+from urllib.parse import parse_qs, quote, urlencode
 from wsgiref.simple_server import make_server
 
+from podencoti.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from podencoti.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail
 from podencoti.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from podencoti.source_coverage import load_source_coverage, summary_by_status
@@ -246,6 +248,10 @@ def _page_template(
         border-left: 4px solid var(--accent);
         background: #f8f6f1;
       }}
+      .note-warning {{
+        border-left-color: var(--warn);
+        background: #fbf4e2;
+      }}
       code {{
         font-size: 0.95em;
       }}
@@ -477,14 +483,12 @@ def _detail_url(opportunity_id: str) -> str:
     return f"/oportunidades/{quote(opportunity_id)}"
 
 
-def _parse_catalog_filters(environ) -> CatalogFilters:
-    query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
-
+def _parse_filters_from_multidict(values: dict[str, list[str]]) -> CatalogFilters:
     def first(name: str) -> str | None:
-        values = query.get(name)
-        if not values:
+        candidates = values.get(name)
+        if not candidates:
             return None
-        value = values[0].strip()
+        value = candidates[0].strip()
         return value or None
 
     def integer(name: str) -> int | None:
@@ -503,6 +507,34 @@ def _parse_catalog_filters(environ) -> CatalogFilters:
         procedimiento=first("procedimiento"),
         ubicacion=first("ubicacion"),
     )
+
+
+def _parse_catalog_filters(environ) -> CatalogFilters:
+    return _parse_filters_from_multidict(parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False))
+
+
+def _read_form_data(environ) -> dict[str, list[str]]:
+    content_length = environ.get("CONTENT_LENGTH", "").strip()
+    try:
+        body_length = int(content_length or "0")
+    except ValueError:
+        body_length = 0
+
+    stream = environ.get("wsgi.input", BytesIO())
+    body = stream.read(body_length).decode("utf-8") if body_length > 0 else ""
+    return parse_qs(body, keep_blank_values=True)
+
+
+def _resolve_alerts_path() -> Path:
+    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
+    raw_path = os.environ.get("PODENCOTI_ALERTS_PATH", "").strip()
+    if raw_path:
+        return Path(raw_path)
+    return Path(__file__).resolve().parents[2] / "data" / "alerts.json"
+
+
+def _alert_filters_query(filters: dict[str, object]) -> str:
+    return urlencode({key: value for key, value in filters.items() if value not in (None, "")})
 
 
 def _active_filter_badges(filters: dict[str, object]) -> str:
@@ -528,15 +560,24 @@ def _active_filter_badges(filters: dict[str, object]) -> str:
     """
 
 
-def _validation_note_html(message: str | None) -> str:
+def _status_note_html(message: str | None, tone: str = "ok") -> str:
     if message is None:
         return ""
+
+    class_name = "note"
+    if tone == "warn":
+        class_name = "note note-warning"
     return f"""
-      <section class="note">
-        <strong>Corrige el rango de presupuesto.</strong>
+      <section class="{class_name}">
         {escape(message)}
       </section>
     """
+
+
+def _validation_note_html(message: str | None) -> str:
+    if message is None:
+        return ""
+    return _status_note_html(f"Corrige el rango de presupuesto. {message}", "warn")
 
 
 def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str = "") -> str:
@@ -662,6 +703,11 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
 
     content = f"""
       {filter_form}
+      <section class="note">
+        <strong>Alertas tempranas del MVP</strong><br />
+        Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(_app_url(base_path, '/alertas'))}">la gestión de alertas</a>.
+        {"<a class=\"button-link\" href=\"" + escape(_app_url(base_path, '/alertas')) + ("?" + escape(_alert_filters_query(active_filters)) if active_filters else "") + "\">Guardar estos criterios como alerta</a>" if active_filters else ""}
+      </section>
       {catalog_panel}
 
       <p class="note">
@@ -676,6 +722,194 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
         (
             "PodencoTI muestra aquí un primer catálogo consultable de oportunidades TI dentro de la cobertura MVP ya delimitada. "
             "Solo se publican registros clasificados como TI y con fuente oficial visible."
+        ),
+        content,
+    )
+
+
+def _alert_summary_text(filters: dict[str, object]) -> str:
+    labels = {
+        "palabra_clave": "Palabra clave",
+        "presupuesto_min": "Presupuesto mínimo",
+        "presupuesto_max": "Presupuesto máximo",
+        "procedimiento": "Procedimiento",
+        "ubicacion": "Ubicación",
+    }
+    if not filters:
+        return "Sin criterios informados"
+    return " · ".join(f"{labels[key]}: {value}" for key, value in filters.items())
+
+
+def _alerts_html_response(
+    base_path: str = "",
+    form_filters: CatalogFilters | None = None,
+    form_error: str | None = None,
+    status_message: str | None = None,
+) -> str:
+    reference, alerts = load_alerts(_resolve_alerts_path())
+    catalog = build_catalog()
+    available_filters = catalog["filtros_disponibles"]
+    summary = summarize_alerts(alerts)
+    form_active_filters = (form_filters or CatalogFilters()).normalized().active_filters()
+
+    create_form = f"""
+      <section class="panel">
+        <div class="panel-body">
+          <h2>Crear alerta</h2>
+          <p class="muted">
+            La alerta reutiliza exactamente los mismos criterios funcionales del catálogo.
+            En este MVP registra coincidencias internas visibles, sin notificación saliente.
+          </p>
+          {_status_note_html(status_message, "ok")}
+          {_status_note_html(form_error, "warn")}
+          <form method="post" action="{escape(_app_url(base_path, '/alertas'))}">
+            <div class="filters">
+              <div>
+                <label for="alerta_palabra_clave">Palabra clave</label>
+                <input id="alerta_palabra_clave" name="palabra_clave" type="text" value="{escape(str(form_active_filters.get("palabra_clave", "")))}" placeholder="backup, licencias, redes..." />
+              </div>
+              <div>
+                <label for="alerta_presupuesto_min">Presupuesto mínimo</label>
+                <input id="alerta_presupuesto_min" name="presupuesto_min" type="number" min="0" step="1" value="{escape(str(form_active_filters.get("presupuesto_min", "")))}" />
+              </div>
+              <div>
+                <label for="alerta_presupuesto_max">Presupuesto máximo</label>
+                <input id="alerta_presupuesto_max" name="presupuesto_max" type="number" min="0" step="1" value="{escape(str(form_active_filters.get("presupuesto_max", "")))}" />
+              </div>
+              <div>
+                <label for="alerta_procedimiento">Procedimiento</label>
+                <select id="alerta_procedimiento" name="procedimiento">
+                  <option value="">Todos</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if form_active_filters.get("procedimiento") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["procedimientos"]
+                  )}
+                </select>
+              </div>
+              <div>
+                <label for="alerta_ubicacion">Ubicación</label>
+                <select id="alerta_ubicacion" name="ubicacion">
+                  <option value="">Todas</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if form_active_filters.get("ubicacion") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["ubicaciones"]
+                  )}
+                </select>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button type="submit">Guardar alerta</button>
+              <a class="button-link" href="{escape(_app_url(base_path, '/alertas'))}">Limpiar formulario</a>
+            </div>
+          </form>
+        </div>
+      </section>
+    """
+
+    if alerts:
+        alert_sections = []
+        for alert in alerts:
+            alert_filters = alert.filtros.active_filters()
+            coincidence_items = "".join(
+                (
+                    "<li>"
+                    f'<a class="offer-link" href="{escape(_app_url(base_path, _detail_url(match.id)))}">{escape(match.titulo)}</a>'
+                    f" · {escape(match.organismo)} · {escape(match.estado)}"
+                    "</li>"
+                )
+                for match in alert.coincidencias
+            ) or "<li>Sin coincidencias accionables registradas en este momento.</li>"
+            alert_sections.append(
+                f"""
+      <section class="panel">
+        <div class="panel-body">
+          <div class="summary">
+            <article class="metric"><strong>{'Activa' if alert.activa else 'Inactiva'}</strong>Estado actual</article>
+            <article class="metric"><strong>{len(alert.coincidencias)}</strong>Coincidencias accionables</article>
+            <article class="metric"><strong>{escape(alert.id)}</strong>Identificador interno</article>
+          </div>
+          <p><strong>Criterios actuales:</strong> {escape(_alert_summary_text(alert_filters))}</p>
+          <p class="muted">Creada: {escape(alert.creada_en)} · Última actualización: {escape(alert.actualizada_en)}</p>
+          {_active_filter_badges(alert_filters)}
+          <h3>Editar alerta</h3>
+          <form method="post" action="{escape(_app_url(base_path, f'/alertas/{alert.id}/editar'))}">
+            <div class="filters">
+              <div>
+                <label for="{escape(alert.id)}-palabra_clave">Palabra clave</label>
+                <input id="{escape(alert.id)}-palabra_clave" name="palabra_clave" type="text" value="{escape(str(alert_filters.get("palabra_clave", "")))}" />
+              </div>
+              <div>
+                <label for="{escape(alert.id)}-presupuesto_min">Presupuesto mínimo</label>
+                <input id="{escape(alert.id)}-presupuesto_min" name="presupuesto_min" type="number" min="0" step="1" value="{escape(str(alert_filters.get("presupuesto_min", "")))}" />
+              </div>
+              <div>
+                <label for="{escape(alert.id)}-presupuesto_max">Presupuesto máximo</label>
+                <input id="{escape(alert.id)}-presupuesto_max" name="presupuesto_max" type="number" min="0" step="1" value="{escape(str(alert_filters.get("presupuesto_max", "")))}" />
+              </div>
+              <div>
+                <label for="{escape(alert.id)}-procedimiento">Procedimiento</label>
+                <select id="{escape(alert.id)}-procedimiento" name="procedimiento">
+                  <option value="">Todos</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if alert_filters.get("procedimiento") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["procedimientos"]
+                  )}
+                </select>
+              </div>
+              <div>
+                <label for="{escape(alert.id)}-ubicacion">Ubicación</label>
+                <select id="{escape(alert.id)}-ubicacion" name="ubicacion">
+                  <option value="">Todas</option>
+                  {"".join(
+                      f'<option value="{escape(item)}"' + (' selected' if alert_filters.get("ubicacion") == item else '') + f'>{escape(item)}</option>'
+                      for item in available_filters["ubicaciones"]
+                  )}
+                </select>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button type="submit">Actualizar alerta</button>
+            </div>
+          </form>
+          {f'<form method="post" action="{escape(_app_url(base_path, f"/alertas/{alert.id}/desactivar"))}"><div class="filter-actions"><button type="submit">Desactivar alerta</button></div></form>' if alert.activa else '<p class="muted">La alerta está desactivada y se conserva solo para trazabilidad del MVP.</p>'}
+          <h3>Coincidencias internas registradas</h3>
+          <ul>{coincidence_items}</ul>
+        </div>
+      </section>
+                """
+            )
+        alert_list = "".join(alert_sections)
+    else:
+        alert_list = """
+      <section class="note">
+        Todavía no hay alertas registradas. Guarda la primera para dejar visible el criterio activo del MVP.
+      </section>
+        """
+
+    content = f"""
+      {create_form}
+      <section class="panel">
+        <div class="panel-body">
+          <div class="summary">
+            <article class="metric"><strong>{summary["total_alertas"]}</strong>Alertas totales</article>
+            <article class="metric"><strong>{summary["alertas_activas"]}</strong>Alertas activas</article>
+            <article class="metric"><strong>{summary["coincidencias_activas"]}</strong>Coincidencias accionables activas</article>
+          </div>
+          <p class="muted">
+            Referencia funcional activa: <code>{escape(reference)}</code>.
+            Esta vista no envía notificaciones; solo registra coincidencias internas accionables del MVP.
+          </p>
+        </div>
+      </section>
+      {alert_list}
+    """
+    return _page_template(
+        "PodencoTI | Alertas tempranas del MVP",
+        "Gestión de alertas tempranas",
+        "Release 2 · PB-004 · Registro interno de anticipación",
+        (
+            "PodencoTI permite guardar criterios persistentes para dejar visible qué oportunidades TI deben seguirse sin búsqueda manual recurrente. "
+            "En esta primera entrega las coincidencias quedan registradas en la propia aplicación como soporte interno del MVP."
         ),
         content,
     )
@@ -865,13 +1099,24 @@ def _html_response(content: str) -> list[bytes]:
     return [content.encode("utf-8")]
 
 
-def _respond(start_response, status: str, content_type: str, body: bytes) -> list[bytes]:
+def _respond(
+    start_response,
+    status: str,
+    content_type: str,
+    body: bytes,
+    extra_headers: list[tuple[str, str]] | None = None,
+) -> list[bytes]:
     headers = [
         ("Content-Type", content_type),
         ("Content-Length", str(len(body))),
     ]
+    headers.extend(extra_headers or [])
     start_response(status, headers)
     return [body]
+
+
+def _redirect_response(start_response, location: str) -> list[bytes]:
+    return _respond(start_response, "303 See Other", "text/plain; charset=utf-8", b"", [("Location", location)])
 
 
 def _load_env_file(path: Path) -> None:
@@ -913,7 +1158,50 @@ def _resolve_host() -> str:
 def application(environ, start_response):
     base_path = _resolve_base_path()
     path = _resolve_request_path(environ, base_path)
+    method = (environ.get("REQUEST_METHOD", "GET") or "GET").upper()
     filters = _parse_catalog_filters(environ)
+
+    if path == "/api/alertas":
+        reference, alerts = load_alerts(_resolve_alerts_path())
+        payload = {
+            "referencia_funcional": reference,
+            "summary": summarize_alerts(alerts),
+            "alerts": [alert.to_payload() for alert in alerts],
+        }
+        body = b"".join(_json_response(payload))
+        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+
+    if path == "/alertas" and method == "POST":
+        form_filters = _parse_filters_from_multidict(_read_form_data(environ))
+        try:
+            create_alert(form_filters, path=_resolve_alerts_path())
+        except ValueError as exc:
+            body = b"".join(_html_response(_alerts_html_response(base_path, form_filters, str(exc))))
+            return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+        return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+creada+y+activa")
+
+    if path.startswith("/alertas/") and method == "POST":
+        segments = path.strip("/").split("/")
+        if len(segments) == 3 and segments[2] == "editar":
+            alert_id = segments[1]
+            form_filters = _parse_filters_from_multidict(_read_form_data(environ))
+            try:
+                update_alert(alert_id, form_filters, path=_resolve_alerts_path())
+            except ValueError as exc:
+                body = b"".join(_html_response(_alerts_html_response(base_path, None, f"No se ha actualizado {alert_id}. {exc}")))
+                return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+            except KeyError:
+                body = b"No encontrado"
+                return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+            return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+actualizada")
+        if len(segments) == 3 and segments[2] == "desactivar":
+            alert_id = segments[1]
+            try:
+                deactivate_alert(alert_id, path=_resolve_alerts_path())
+            except KeyError:
+                body = b"No encontrado"
+                return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+            return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+desactivada")
 
     if path.startswith("/api/oportunidades/"):
         opportunity_id = path.removeprefix("/api/oportunidades/")
@@ -976,6 +1264,12 @@ def application(environ, start_response):
 
     if path == "/priorizacion-fuentes-reales":
         body = b"".join(_html_response(_real_source_prioritization_html_response()))
+        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+
+    if path == "/alertas":
+        query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
+        status_message = (query.get("mensaje") or [None])[0]
+        body = b"".join(_html_response(_alerts_html_response(base_path, filters, status_message=status_message)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path.startswith("/oportunidades/"):
