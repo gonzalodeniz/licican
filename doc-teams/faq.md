@@ -22,7 +22,7 @@ Existe una entrega minima de descubrimiento con catalogo inicial de oportunidade
 - `/api/clasificacion-ti`
 
 ## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
-En `main` ya existen catalogo inicial, filtros funcionales, ficha de detalle y priorizacion de fuentes reales oficiales por olas. No existen todavia alertas ni pipeline, que siguen en backlog y roadmap de `product-manager/`.
+En `main` ya existen catalogo inicial, filtros funcionales, ficha de detalle y priorizacion de fuentes reales oficiales por olas. No existen todavia alertas ni pipeline en la superficie tecnica revisada, aunque `changelog/2026-03-25.md` los describe como entregados; esa discrepancia sigue abierta y no debe documentarse como comportamiento vigente hasta que el codigo y las pruebas la reflejen.
 
 ## Que filtros existen hoy?
 Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion` tanto en `/` como en `/api/oportunidades`.
@@ -31,7 +31,10 @@ Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `proced
 Si `presupuesto_min` es mayor que `presupuesto_max`, la vista HTML mantiene el catalogo y muestra un mensaje de correccion. La API responde `400 Bad Request` con el campo `error_validacion`.
 
 ## Sigue habiendo contradicciones documentales relevantes?
-Si. La principal contradiccion vigente es doble: `pyproject.toml` sigue describiendo el paquete como si solo cubriera cobertura de fuentes, y algunos documentos de `product-manager/` todavia conservan el estado anterior a la fusion de `PB-009`, aunque `main` ya expone esa superficie.
+Si. La principal contradiccion vigente es triple: `pyproject.toml` sigue describiendo el paquete como si solo cubriera cobertura de fuentes, algunos documentos de `product-manager/` todavia conservan el estado anterior a la fusion de `PB-009`, y `changelog/2026-03-25.md` atribuye `PB-004` a `main` sin que la superficie revisada muestre alertas o pipeline.
+
+## Por que el changelog de 2026-03-25 no coincide con esta documentacion?
+Porque esta FAQ toma como referencia el codigo, las rutas y las pruebas ejecutables en `main`. En esta revision no se observan alertas ni pipeline en `src/` o `tests/`, asi que la entrada del changelog se trata como una contradiccion operativa pendiente de conciliacion.
 
 ## Existe ya la priorizacion de fuentes reales de `PB-009` en `main`?
 Si. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `200 OK` y muestran `BOC`, `BOP Las Palmas` y `BOE` agrupadas por olas.

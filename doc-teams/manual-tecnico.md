@@ -84,6 +84,7 @@ Resultado verificado en esta revision:
 - No hay contrato de despliegue productivo versionado, mas alla del arranque local con `wsgiref` y la publicacion local en contenedor.
 - La priorizacion de fuentes reales de `PB-009` ya esta expuesta en la app verificada con `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - La entrega de `PB-009` no habilita alertas ni pipeline; solo refuerza origen, trazabilidad y orden de recopilacion.
+- Aunque `changelog/2026-03-25.md` menciona una entrega de `PB-004`, en el arbol tecnico revisado no hay rutas, datos ni tests de alertas o pipeline; esta documentacion se atiene a la evidencia visible en `main`.
 
 ## Dependencias abiertas
 - Implementar `PB-004` y `PB-005` para evolucionar desde el descubrimiento inicial filtrable a un MVP mas operativo.

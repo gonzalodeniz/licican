@@ -7,7 +7,7 @@ Equipo documental, stakeholders funcionales, equipo tecnico y administracion que
 Dejar una referencia unica y accionable sobre que capacidades estan disponibles hoy en `main`, que evidencia las respalda y que puntos siguen siendo backlog o contradiccion documental abierta.
 
 ## Estado de referencia
-- Fecha de revision: `2026-03-24`
+- Fecha de revision: `2026-03-25`
 - Rama revisada: `main`
 - Verificacion ejecutada:
   - `PYTHONPATH=src python3 -m unittest discover -s tests -v`
@@ -23,8 +23,8 @@ Dejar una referencia unica y accionable sobre que capacidades estan disponibles 
 | Cobertura inicial de fuentes | `PB-007`, `HU-07`, `CU-06`, `product-manager/refinamiento-funcional.md` | `data/source_coverage.json`, `src/podencoti/source_coverage.py`, `src/podencoti/app.py`, `tests/test_source_coverage.py`, `tests/test_app.py` | Disponible | Usuario, tecnico, administracion | Visible en `/cobertura-fuentes` y `/api/fuentes`. |
 | Clasificacion TI auditable | `PB-006`, `HU-06`, `CU-08`, `product-manager/refinamiento-funcional.md` | `data/ti_classification_rules.json`, `src/podencoti/ti_classification.py`, `src/podencoti/app.py`, `tests/test_ti_classification.py`, `tests/test_app.py` | Disponible | Usuario, tecnico, QA, producto | Visible en `/clasificacion-ti` y `/api/clasificacion-ti`. |
 | Priorizacion de recopilacion desde fuentes reales oficiales | `PB-009`, `HU-09`, `CU-09`, `product-manager/refinamiento-funcional.md` | `data/real_source_prioritization.json`, `src/podencoti/real_source_prioritization.py`, `src/podencoti/app.py`, `tests/test_real_source_prioritization.py`, `tests/test_app.py` | Disponible | Producto, tecnico, QA, administracion | Visible en `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`; ordena `BOC`, `BOP Las Palmas` y `BOE` por olas y explicita lo que queda fuera de alcance en esta iteracion. |
-| Alertas tempranas | `PB-004`, `HU-04`, `CU-04` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2. |
-| Pipeline de seguimiento | `PB-005`, `HU-05`, `CU-05` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2. |
+| Alertas tempranas | `PB-004`, `HU-04`, `CU-04` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2; el changelog de `2026-03-25` la menciona como entregada, pero la superficie revisada no la refleja. |
+| Pipeline de seguimiento | `PB-005`, `HU-05`, `CU-05` | No existe soporte visible en vistas, API, datos o pruebas | No disponible en `main` | Usuario, producto | Sigue como backlog de Release 2 y no presenta evidencia tecnica visible en esta revision. |
 | Instalacion local reproducible | `README.md`, `Makefile`, `pyproject.toml` | `pyproject.toml`, `Makefile`, paquete `src/podencoti/`, suite `tests/` | Disponible | Tecnico, administracion, QA | Requiere `python3 >= 3.12`; no hay dependencias externas adicionales versionadas. |
 | Despliegue local en contenedor | Necesidad operativa de validacion reproducible | `Dockerfile`, `docker-compose.yml`, `src/podencoti/app.py`, `Makefile`, `tests/test_app.py` | Disponible | Administracion, tecnico | Publica la app con `HOST=0.0.0.0`, monta `data/` y excluye artefactos operativos de la imagen. |
 | Despliegue productivo | Vision general y necesidad operativa futura | Solo existe `wsgiref.simple_server` y un contenedor local reproducible | No soportado documentalmente | Administracion, tecnico | El repositorio no incluye `systemd`, proxy ni healthcheck de produccion. |
@@ -34,6 +34,7 @@ Dejar una referencia unica y accionable sobre que capacidades estan disponibles 
 - La documentacion funcional mantiene capacidades futuras validas como alertas, pipeline y recopilacion real desde nuevas fuentes oficiales, pero no hay evidencia tecnica visible de esas capacidades en `main`.
 - La documentacion de `product-manager/` sigue mostrando algunos textos anteriores a la fusion de `PB-009`; cuando contradiga la evidencia tecnica de `main`, debe actualizarse.
 - La entrada de `changelog/2026-03-24.md` confirma la integracion de `PB-009` en `main` y debe usarse como referencia operativa frente a descripciones antiguas de estado pendiente.
+- La entrada de `changelog/2026-03-25.md` atribuye `PB-004` a `main`, pero la revision tecnica de esta fecha no encuentra rutas, datos ni pruebas de alertas o pipeline.
 
 ## Dependencias abiertas para siguiente revision documental
 - Revisar de nuevo esta matriz cuando `developer-teams` entregue una implementacion observable de `PB-004` o `PB-005` y su validacion quede integrada en `main`.

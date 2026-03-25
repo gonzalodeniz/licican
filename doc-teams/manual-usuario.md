@@ -42,6 +42,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Alertas tempranas.
 - Pipeline de seguimiento.
 - Gestion de usuarios o autenticacion.
+- La entrada de `changelog/2026-03-25.md` describe `PB-004` como entregado, pero en esta revision no hay rutas, datos ni pruebas visibles de esas capacidades en `main`.
 
 ## Como interpretar la documentacion funcional
 Los documentos de `product-manager/` siguen siendo la fuente funcional para vision, backlog, historias y casos de uso. Deben leerse como alcance esperado del producto, no como evidencia de que esas funcionalidades ya esten disponibles en esta entrega.
@@ -53,6 +54,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.
 - La metadata tecnica del paquete sigue describiendo una release anterior mas limitada que la visible hoy en `main`.
 - `product-manager/` sigue arrastrando algunos textos anteriores sobre `PB-009`; la evidencia reproducible de `main` y el changelog de `2026-03-24` deben tomarse como referencia para el estado vigente.
+- La nota de `changelog/2026-03-25.md` sobre `PB-004` no se corresponde todavia con la superficie visible de `main`; hasta que se sincronicen codigo, pruebas y documentacion, esta guia solo reconoce lo que puede verificarse directamente.
 
 ## Recomendacion de uso
 Para demos o revision funcional temprana, utiliza el catalogo en `/`, la ficha de detalle de una oportunidad visible y, como apoyo, las vistas de cobertura y clasificacion TI. Para capacidades de negocio pendientes, toma como referencia `product-manager/roadmap.md` y `product-manager/product-backlog.md`.

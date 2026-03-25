@@ -4,7 +4,7 @@
 Centralizar la documentacion oficial de `PodencoTI` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-03-24`.
+Fecha de revision: `2026-03-25`.
 
 Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision existe una entrega minima ejecutable de descubrimiento, pero su alcance sigue siendo acotado:
 
@@ -20,9 +20,10 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - Vista HTML de priorizacion de fuentes reales oficiales (`PB-009`) en `/priorizacion-fuentes-reales`.
 - API JSON de priorizacion de fuentes reales oficiales en `/api/fuentes-prioritarias`.
 - `PB-009` ya forma parte de `main` y su trazabilidad visible cubre `BOC`, `BOP Las Palmas` y `BOE` por olas.
+- No se observan superficies de alertas tempranas ni de pipeline de seguimiento en el codigo o en las pruebas de `main`, aunque el changelog del `2026-03-25` las describe como entregadas.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/` y configuracion de `PORT` via `.env`.
 
-No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni un despliegue productivo endurecido.
+No existen todavia alertas tempranas ni pipeline de seguimiento en la implementacion visible de `main`; la entrada de `changelog/2026-03-25.md` que las da por implementadas queda como contradiccion abierta hasta que el codigo y las pruebas la reflejen. Tampoco hay autenticacion ni un despliegue productivo endurecido.
 
 ## Audiencias cubiertas
 - Usuario final o stakeholder funcional: [manual-usuario.md](manual-usuario.md)
@@ -45,12 +46,13 @@ No existen todavia alertas tempranas, pipeline de seguimiento, autenticacion ni 
 - El catalogo visible publica 3 oportunidades TI a partir de 5 registros de origen dentro de la cobertura MVP actual.
 - El catalogo permite filtrar por `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
+- La entrada de `changelog/2026-03-25.md` que menciona `PB-004` no tiene reflejo tecnico visible en `src/` ni en `tests/`; esta revision prioriza la evidencia observable sobre ese registro hasta que se sincronicen.
 - Existe una contradiccion documental residual en `product-manager/`: varios documentos siguen describiendo `PB-009` como pendiente de fusion y borrado de rama, pero la evidencia tecnica y el changelog de `2026-03-24` ya muestran esa entrega integrada en `main`.
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero esas capacidades aun no estan implementadas en `main`.
 - `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de PodencoTI.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`), superficie auditable de `PB-006` y priorizacion de fuentes reales oficiales (`PB-009`).
-- Alertas (`PB-004`) y pipeline (`PB-005`) siguen definidos funcionalmente, pero no tienen evidencia tecnica visible en `main`.
+- Alertas (`PB-004`) y pipeline (`PB-005`) siguen definidos funcionalmente, pero no tienen evidencia tecnica visible en `main` revisado y se contradicen con la nota de `changelog/2026-03-25.md`.
 - `PB-009` ya existe como prioridad funcional en `product-manager/` y ahora tambien tiene evidencia integrada en `main`; lo que sigue desalineado es parte del texto de producto, que todavia conserva el estado operativo previo a la fusion.
 
 ## Criterio documental aplicado

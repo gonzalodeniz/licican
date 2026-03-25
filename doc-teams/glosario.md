@@ -11,8 +11,8 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Fuente oficial`: portal, perfil del contratante u origen institucional desde el que se obtiene informacion de contratacion publica.
 - `Clasificacion TI auditable`: superficie visible que expone reglas, exclusiones, casos frontera y ejemplos verificables antes del catalogo.
 - `Filtro funcional`: criterio aplicable sobre el catalogo visible y su API para reducir resultados por palabra clave, presupuesto, procedimiento o ubicacion.
-- `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada, no disponible en `main`.
-- `Alerta temprana`: mecanismo para registrar o notificar nuevas oportunidades compatibles con criterios del usuario; sigue siendo capacidad planificada, no disponible en `main`.
+- `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada, no disponible en `main` revisado. La entrada de `changelog/2026-03-25.md` que lo da por implementado no tiene reflejo tecnico visible en esta revision.
+- `Alerta temprana`: mecanismo para registrar o notificar nuevas oportunidades compatibles con criterios del usuario; sigue siendo capacidad planificada, no disponible en `main` revisado. La misma observacion aplica a la nota de `changelog/2026-03-25.md` sobre `PB-004`.
 
 ## Terminos operativos del repositorio
 - `main`: rama de referencia para trabajo funcional, documental y de coordinacion no tecnica.
