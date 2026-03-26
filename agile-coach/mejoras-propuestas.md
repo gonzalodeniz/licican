@@ -452,3 +452,24 @@ Una issue puede permanecer `validado` y abierta sin dejar una huella operativa c
 ### Riesgos y dependencias
 - Si el comentario se rellena de forma mecanica y sin evidencia real, el valor de la regla baja.
 - Requiere disciplina de `developer-teams` para ejecutar el borrado de rama inmediatamente despues del merge.
+
+## Secuencia prioritaria de adopcion
+Las mejoras anteriores ya cubren la mayor parte de las fricciones detectadas. Para que el cambio de proceso tenga impacto rapido y no genere mas ruido del necesario, la adopcion recomendada es esta:
+
+1. Blindar las plantillas operativas con `Rol:` como primera linea y con el `Estado operativo:` visible en el cuerpo de la issue.
+2. Exigir evidencia de cierre tecnico tras `validado`: merge en `main` y borrado de la rama antes del cierre administrativo.
+3. Mantener sincronizados backlog, refinamiento funcional y roadmap en el mismo ciclo en que cambia el estado real de la issue.
+4. Reducir duplicidad documental dejando las reglas compartidas en `agile-coach/acuerdos-operativos.md` y reservando a `AGENTS.md` y `README.md` solo las referencias o plantillas minimas.
+
+### Impacto esperado
+- Recorta la probabilidad de deriva entre documentos y comentarios operativos.
+- Hace que los cambios de estado sean mas visibles y auditablemente comparables.
+- Baja el coste de mantenimiento de futuras mejoras de proceso.
+
+### Tradeoffs
+- Obliga a editar varios documentos en una misma iteracion si se quiere mantener la coherencia.
+- Puede parecer mas estricto al principio, pero evita rehacer trabajo por estados o plantillas ambiguas.
+
+### Riesgos y dependencias
+- Si la secuencia se adopta de forma parcial, reapareceran las mismas inconsistencias en distintas fuentes.
+- La reduccion de duplicidad documental solo funciona si las copias derivadas dejan de reescribir reglas ya fijadas en la guia canónica.

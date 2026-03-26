@@ -16,6 +16,7 @@ Si una regla compartida cambia, primero debe actualizarse este documento y despu
 ## Mantenimiento de la fuente canónica
 - Cualquier regla compartida nueva o modificada sobre estados operativos, handoffs, sincronizacion o cierres debe redactarse primero en este documento.
 - Los `AGENTS.md` de raiz y de rol pueden resumir la regla, pero no deben convertirse en la fuente primaria ni introducir una redaccion distinta sin actualizar esta guia en el mismo cambio.
+- Cuando una regla compartida ya este fijada aqui, las copias en `AGENTS.md` y en `README.md` deben limitarse al minimo necesario: referencia a esta guia y, si hace falta, plantilla literal corta. No deben duplicar redacciones largas si con una remision basta.
 - Si existe divergencia entre una copia y esta guia, prevalece esta guia hasta que la copia quede sincronizada.
 
 ## Estados operativos comunes
