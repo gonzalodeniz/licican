@@ -2,14 +2,15 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
-La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` para fijar una navegacion principal responsive con menu lateral izquierdo de iconos antes de seguir ampliando modulos sin una base de interfaz comun.
+La prioridad funcional vigente se desplaza ahora hacia la operativizacion del dato real disponible en `data/`: se incorporan `PB-011` y `PB-012` para cargar snapshots `.atom` versionados, consolidarlos con reglas estructuradas y exponer en aplicacion una salida verificable alineada con el Excel `data/licitaciones_ti_canarias.xlsx`.
 `PB-004` deja de ser una prioridad "nueva": tras la validacion explicita de `qa-teams` en la issue #6 el 2026-03-25, su estado correcto pasa a `validado` pendiente de integracion y cierre administrativo.
 
 ## Huecos de definicion detectados en esta revision
 - La inconsistencia principal detectada no es de alcance, sino de trazabilidad: varios artefactos seguian tratando `PB-009` como pendiente de integracion cuando la issue #9 ya recoge fusion en `main`, borrado de rama y validacion final sobre la entrega integrada el 2026-03-24.
 - Aparece una segunda inconsistencia de trazabilidad: la issue #6 de `PB-004` ya refleja `Estado operativo: validado`, pero backlog, historias y roadmap seguian tratandola como trabajo `nuevo`.
-- El siguiente hueco funcional relevante ya no esta en recopilacion solamente: hay que resolver una base comun de navegacion con `PB-010` y, a continuacion, concretar la siguiente iteracion ejecutable del MVP de retencion sobre `PB-004` sin mezclarla con pipeline ni con una promesa de notificacion saliente fuera de alcance.
-- Aparece un hueco de experiencia de usuario transversal: la aplicacion ya necesita una estructura comun de navegacion principal para evitar crecimiento desordenado entre catalogo, alertas, pipeline y futuras superficies.
+- El siguiente hueco funcional relevante ya no es solo de interfaz: la aplicacion debe absorber los ficheros `.atom` ya presentes en `data/`, aunque cambien su fecha y hora en el nombre, y convertirlos en una base visible, trazable y verificable para usuario y QA.
+- Aparece un hueco de trazabilidad de dato: la ficha de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
+- Aparece un hueco de validacion funcional: `qa-teams` necesita una correspondencia operativa entre la aplicacion y el Excel `data/licitaciones_ti_canarias.xlsx`, al menos en `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 
 ## Estado funcional confirmado en el repositorio
 - `PB-007` dispone de entrega visible en producto y validacion explicita de `qa-teams` en la issue #1.
@@ -31,12 +32,17 @@ La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` pa
 - Queda incorporada como prioridad explicita la recopilacion desde fuentes reales oficiales nominadas, ya que `PB-007` solo cerraba cobertura funcional y no orden de implementacion de fuentes reales.
 - Queda definido que el rediseño de interfaz solicitado debe materializarse como un item funcional trazable y no como una observacion informal para desarrollo.
 - Queda corregida la lectura funcional de `PB-004`: el trabajo ya no esta pendiente de desarrollo, sino pendiente de integracion y cierre administrativo.
+- Queda definida la siguiente fuente operativa inmediata para desarrollo: todos los `.atom` presentes en `data/`, sin anclar la solucion a un nombre de fichero estable.
+- Queda definida la regla estructurada de filtrado para esta iteracion: Canarias por `ES7` o jerarquia territorial, y TI por CPVs con prefijo `72`, `48` o `302`.
+- Queda definido que la salida funcional visible debe poder contrastarse con `data/licitaciones_ti_canarias.xlsx`.
 
 ## Incidencia operativa abierta prioritaria
 - La secuencia de trabajo ya no tiene bloqueos funcionales ni de validacion asociados a `PB-009`.
 - `qa-teams` valido la entrega integrada en `main` el 2026-03-24, `developer-teams` dejo constancia de integracion y borrado de rama ese mismo dia y `product-manager` cerro la issue #9 el 2026-03-25.
 - La incidencia operativa inmediata ya no es funcional sino de flujo: `developer-teams` debe fusionar en `main` la rama validada de `PB-004` y borrarla antes de abrir el siguiente frente.
-- La siguiente pieza funcional a considerar para `developer-teams`, una vez resuelta esa integracion, pasa a ser `PB-010` como base de interfaz y navegacion comun; `PB-005` queda inmediatamente detras como siguiente modulo de negocio no iniciado.
+- La siguiente pieza funcional a considerar para `developer-teams`, una vez resuelta esa integracion, pasa a ser `PB-011` para consolidar los `.atom` versionados de `data/`.
+- Inmediatamente despues, la siguiente prioridad visible pasa a ser `PB-012` para exponer en aplicacion las superficies equivalentes al Excel de referencia y mostrar el fichero origen en detalle.
+- `PB-010` permanece como necesidad de experiencia transversal, pero deja de ser la siguiente pieza funcional inmediata.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -59,6 +65,12 @@ La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` pa
 - La definicion de KPIs de `PB-008` no exige disponer desde el primer dia de toda la instrumentacion automatizada, pero si exige dejar explicita cualquier limitacion de medicion.
 - La primera entrega de `PB-009` debe conservar, como minimo por oportunidad recopilada, referencia a la fuente oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando la fuente lo publique.
 - `PB-009` no cambia por si solo la promesa comercial de cobertura ni adelanta funcionalidades de alertas o pipeline.
+- La siguiente iteracion operativa debe tomar todos los `.atom` presentes en `data/` aunque cambien fecha y hora en su nombre.
+- El filtro geografico principal para Canarias en esta iteracion es `CountrySubentityCode` con prefijo `ES7`; si no basta, deben usarse `ParentLocatedParty` y `CountrySubentity` como apoyo.
+- La siguiente iteracion operativa considera TI por CPVs con prefijo `72`, `48` o `302`.
+- Si un expediente aparece repetido entre snapshots `.atom`, la aplicacion debe conservar una unica version funcional con el dato oficial mas reciente disponible.
+- El detalle de licitacion o contrato debe hacer visible el nombre del fichero `.atom` origen de la version vigente.
+- La superficie visible de la iteracion debe alinearse funcionalmente con las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones` del Excel `data/licitaciones_ti_canarias.xlsx`.
 - La navegacion principal de la aplicacion debe resolverse desde una estructura comun con menu lateral izquierdo de iconos cuando el ancho disponible lo permita.
 - La adaptacion responsive es un requisito funcional de producto: la interfaz debe conservar acceso a opciones principales y legibilidad del contenido al cambiar el ancho de la ventana.
 - Las opciones principales aun no operativas no deben aparecer como rutas plenamente disponibles sin senalizacion explicita.
@@ -140,6 +152,9 @@ La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` pa
 - Riesgo operativo si desarrollo declara rutas o superficies de validacion no expuestas realmente en la entrega revisable.
 - Riesgo de credibilidad si el producto retrasa la recopilacion real y prioriza antes capacidades de retencion sobre fuentes oficiales verificables.
 - Riesgo de dispersion si `developer-teams` intenta abordar simultaneamente las tres fuentes prioritarias sin un orden de entrega ni un minimo comun verificable.
+- Riesgo de carga incompleta si desarrollo ata la ingesta a un nombre fijo de fichero `.atom` y no a la presencia dinamica de todos los `.atom` en `data/`.
+- Riesgo de falsos positivos o falsos negativos si la extraccion no aplica de forma combinada los criterios estructurados de Canarias y CPV TI ya definidos para esta iteracion.
+- Riesgo de opacidad si el detalle no expone el fichero origen y `qa-teams` no puede reconciliar aplicacion con Excel y snapshots.
 - Riesgo de inconsistencia de experiencia si cada nueva vista incorpora navegacion propia en lugar de una estructura principal comun y responsive.
 - Riesgo operativo si una issue ya validada por `qa-teams` permanece abierta sin comentario administrativo ni plan explicito de integracion.
 
@@ -153,13 +168,15 @@ La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` pa
 - Que datos minimos deben gobernar una futura decision de monetizacion o plan de pago.
 
 ## Recomendacion operativa para `developer-teams`
-- Tomar `PB-010` como siguiente pieza funcional a valorar para estabilizar la base de interfaz y navegacion comun.
+- Tomar `PB-011` como siguiente pieza funcional para estabilizar la fuente operativa basada en los `.atom` ya presentes en `data/`.
 - Antes de abrir trabajo nuevo, fusionar en `main` la rama validada de `PB-004`, borrar la rama tecnica y actualizar la issue #6 con la trazabilidad de integracion.
-- Tomar la issue #10 ya creada con trazabilidad a `HU-10` y `CU-10`.
+- Tomar la issue #11 ya creada con trazabilidad a `HU-11` y `CU-11`.
+- A continuacion, tomar la issue #12 para exponer las tres pestañas y la trazabilidad al fichero origen.
 - Mantener `PB-005` como siguiente pieza de negocio posterior a `PB-010` o coordinar su arranque solo cuando la integracion de `PB-004` ya no deje una rama tecnica abierta innecesariamente.
-- Mantener `PB-005` y `PB-008` por detras de `PB-010` salvo bloqueo funcional explicito.
+- Mantener `PB-010`, `PB-005` y `PB-008` por detras de `PB-011` y `PB-012` salvo bloqueo funcional explicito.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
+- Garantizar en detalle la visibilidad del fichero `.atom` origen de la version consolidada.
 - Aplicar el filtrado solo sobre oportunidades ya visibles dentro de cobertura MVP y clasificacion final `TI`.
 - Tratar los expedientes mixtos dudosos como caso frontera fuera del catalogo hasta que exista evidencia funcional suficiente.
 
@@ -169,6 +186,8 @@ La prioridad funcional vigente ya no es solo retencion: se incorpora `PB-010` pa
 - `PB-001`, `PB-002` y `PB-003` ya quedaron validados por `qa-teams` y cerrados administrativamente; Release 1 queda funcionalmente completa.
 - `PB-009` ya quedo validado por `qa-teams` sobre la entrega integrada en `main` y queda cerrado administrativamente en la issue #9 para mantener sincronizados backlog e historial operativo.
 - `PB-004` queda validado por `qa-teams` y pendiente de integracion y cierre administrativo.
-- `PB-010` abre una nueva iteracion de base de interfaz previa a la consolidacion de nuevos modulos.
+- `PB-011` abre la nueva iteracion de consolidacion operativa desde `.atom` versionados.
+- `PB-012` completa esa iteracion haciendo visible en aplicacion la salida alineada con el Excel y la trazabilidad al fichero origen.
+- `PB-010` queda como iteracion de base de interfaz posterior a la consolidacion visible del dato.
 - `PB-005` queda como modulo posterior que debe apoyarse en esa base de navegacion comun.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

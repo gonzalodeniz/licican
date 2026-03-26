@@ -10,7 +10,7 @@
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion: `qa-teams` la valido en la issue #6 el 2026-03-25, pero sigue pendiente de integracion en `main` y borrado de la rama tecnica por `developer-teams`.
-- Siguiente recomendacion para `developer-teams`: completar primero la integracion pendiente de `PB-004` y, a continuacion, tomar la issue #10 de `PB-010` asociada a la base de navegacion principal responsive.
+- Siguiente recomendacion para `developer-teams`: completar primero la integracion pendiente de `PB-004` y, a continuacion, tomar la issue #11 de `PB-011` asociada a la consolidacion de los `.atom` versionados disponibles en `data/`.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -18,7 +18,7 @@
   - `PB-008` puede refinarse documentalmente antes de disponer de instrumentacion completa
   - la recopilacion desde fuentes reales oficiales nominadas se prioriza antes que alertas y pipeline
 - `PB-009` debe ejecutarse por olas y con trazabilidad minima visible al origen oficial
-- La validacion y la integracion de `PB-009` confirman la prioridad funcional definida y permiten abrir una nueva iteracion de base de interfaz antes de continuar con retencion
+- La validacion y la integracion de `PB-009` confirman la prioridad funcional definida y permiten abrir una nueva iteracion de operativizacion visible del dato real antes de continuar con retencion o con base de interfaz transversal
 
 ## Release 0: Delimitacion funcional del MVP
 - Objetivo: Cerrar ambiguedades criticas antes de la implementacion del catalogo.
@@ -69,7 +69,31 @@
   - `developer-teams` dejo trazabilidad explicita de integracion y borrado de rama en la issue #9 el 2026-03-24.
   - `product-manager` cerro administrativamente la issue #9 el 2026-03-25 tras reconciliar backlog, historia, caso de uso y roadmap.
 
-## Release 3: Base de navegacion y adaptabilidad
+## Release 3: Consolidacion de snapshots `.atom` y trazabilidad de origen
+- Objetivo: Convertir los `.atom` versionados ya presentes en `data/` en una fuente operativa consolidada de oportunidades TI Canarias con trazabilidad al fichero origen.
+- Alcance:
+  - PB-011 Consolidacion funcional de fuentes `.atom` versionadas para oportunidades TI Canarias.
+- Criterios de salida:
+  - La aplicacion procesa todos los `.atom` presentes en `data/` sin depender de un nombre de fichero fijo.
+  - El filtrado funcional usa criterios estructurados de Canarias y CPV TI.
+  - Si un expediente aparece en varios snapshots, queda una unica version funcional vigente.
+  - Cada registro consolidado conserva el nombre del fichero `.atom` origen de la version vigente.
+- Riesgo principal:
+  - Que la aplicacion siga dependiendo de un snapshot puntual, no absorba actualizaciones de nombre y rompa la trazabilidad del dato.
+
+## Release 4: Vistas verificables de licitaciones, lotes y adjudicaciones
+- Objetivo: Hacer visible en la aplicacion la informacion consolidada derivada de los `.atom` en una superficie contrastable con el Excel funcional de referencia.
+- Alcance:
+  - PB-012 Exposicion funcional en la aplicacion del dataset de licitaciones TI Canarias.
+- Criterios de salida:
+  - Existen las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
+  - La informacion visible se corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` para la muestra actual.
+  - El detalle de la licitacion o contrato muestra el fichero `.atom` origen.
+  - Los datos no informados y los estados vacios se muestran de forma clara.
+- Riesgo principal:
+  - Que el dato consolidado exista tecnicamente pero siga sin una superficie funcional verificable por usuario y QA.
+
+## Release 5: Base de navegacion y adaptabilidad
 - Objetivo: Establecer una estructura comun de interfaz para sostener el crecimiento de modulos con una navegacion principal clara y responsive.
 - Alcance:
   - PB-010 Navegacion principal responsive con menu lateral de iconos.
@@ -81,7 +105,7 @@
 - Riesgo principal:
   - Que el producto siga creciendo por modulos sin una base de interfaz comun y se vuelva mas dificil de usar y de evolucionar.
 
-## Release 4: Alertas y seguimiento operativo
+## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
 - Alcance:
   - PB-004 Configuracion de alertas tempranas.
@@ -91,7 +115,7 @@
   - El usuario puede seguir oportunidades guardadas sin duplicados y con estados consistentes.
   - Las oportunidades con estado oficial `anulada`, `desierta` o `desistida` no se presentan como nuevas alertas accionables y siguen siendo visibles en pipeline con advertencia.
 - Dependencia clave:
-  - Requiere que Release 1 haya validado el valor del catalogo y de los filtros, y que Release 2 haya fijado la prioridad de recopilacion real.
+  - Requiere que Release 1 haya validado el valor del catalogo y de los filtros, que Release 2 haya fijado la prioridad de recopilacion real y que Release 3 y Release 4 hayan hecho visible la base operativa derivada de `.atom`.
 - Decision funcional vigente:
   - Las alertas del MVP registran coincidencias de forma interna; la notificacion saliente queda fuera de esta release.
   - Una alerta del MVP solo es valida si contiene al menos un criterio funcional; no se permiten alertas vacias.
@@ -100,9 +124,9 @@
 - Estado operativo actual:
   - `PB-004` ya fue validado por `qa-teams` en la issue #6 el 2026-03-25.
   - La entrega sigue pendiente de fusion en `main` y borrado de la rama `developer-teams/issue-6-pb-004-alertas-tempranas`.
-  - `PB-005` permanece en `nuevo` y no debe iniciarse antes de resolver la integracion pendiente de `PB-004` y de abrir la nueva base de navegacion `PB-010`.
+  - `PB-005` permanece en `nuevo` y no debe iniciarse antes de resolver la integracion pendiente de `PB-004`, `PB-011` y `PB-012`, ni antes de decidir si la base de navegacion `PB-010` entra antes o despues de esta exposicion funcional.
 
-## Release 5: Medicion y aprendizaje
+## Release 7: Medicion y aprendizaje
 - Objetivo: Mejorar precision, cobertura y priorizacion apoyandose en indicadores.
 - Alcance:
   - PB-008 Medicion basica de valor del producto.
@@ -116,9 +140,10 @@
 - Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
 - Decidir en una iteracion posterior si los KPIs de alertas deben exigirse ya con dato real o pueden arrancar con definicion documental y recogida manual temporal.
 - Confirmar que modulos deben formar parte de la navegacion principal visible desde la primera entrega de `PB-010` y cuales deben quedar ocultos o marcados como `proximamente`.
+- Confirmar si la referencia funcional al Excel debe cubrir en una iteracion posterior tambien la hoja `Modificaciones` cuando existan datos disponibles.
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es fusionar y cerrar administrativamente `PB-004`; inmediatamente despues, la siguiente issue recomendada para iniciar es la issue #10 de `PB-010`.
+- El siguiente paso operativo recomendado para `developer-teams` es fusionar y cerrar administrativamente `PB-004`; inmediatamente despues, la siguiente issue recomendada para iniciar es la issue #11 de `PB-011`, seguida por la issue #12 de `PB-012`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
-- No se recomienda iniciar `PB-005` antes de `PB-004`, y ambas deberian apoyarse sobre la base de navegacion definida en `PB-010`.
+- No se recomienda iniciar `PB-005` antes de `PB-004`, `PB-011` y `PB-012`; la base de navegacion `PB-010` debe reevaluarse despues de dejar visible esta nueva superficie de dato consolidado.

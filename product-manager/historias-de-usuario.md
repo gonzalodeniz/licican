@@ -192,3 +192,41 @@
 - Dependencias funcionales: PB-001, PB-002, PB-003
 - Prioridad: P1
 - Estado: `nuevo`
+
+## HU-11 Consolidar licitaciones TI Canarias desde snapshots `.atom` versionados
+- Backlog relacionado: PB-011
+- Caso de uso relacionado: CU-11
+- Issue relacionado: #11
+- Historia:
+  Como responsable de producto,
+  quiero que la aplicacion tome todos los ficheros `.atom` disponibles en `data/` y consolide la version vigente de cada expediente TI de Canarias,
+  para trabajar sobre una fuente operativa real aunque los snapshots cambien de nombre por fecha y hora.
+- Criterios de aceptacion:
+  1. La carga de datos toma todos los ficheros `.atom` presentes en `data/` sin depender de un nombre fijo.
+  2. Solo se incluyen expedientes que cumplan simultaneamente filtro geografico Canarias y filtro TI por CPV segun las reglas estructuradas definidas.
+  3. El filtro geografico usa como criterio principal `CountrySubentityCode` con prefijo `ES7` y como criterios complementarios `ParentLocatedParty` o `CountrySubentity` con `Canarias` o nombres de islas canarias.
+  4. El filtro TI usa CPVs que empiecen por `72`, `48` o `302`.
+  5. Si un expediente aparece repetido en varios `.atom`, la aplicacion conserva una unica version funcional con la informacion mas reciente disponible.
+  6. Cada expediente consolidado conserva el nombre del fichero `.atom` origen de la version vigente.
+- Dependencias funcionales: PB-009, PB-006
+- Prioridad: P0
+- Estado: `nuevo`
+
+## HU-12 Consultar licitaciones, lotes y adjudicaciones con trazabilidad al fichero origen
+- Backlog relacionado: PB-012
+- Caso de uso relacionado: CU-12
+- Issue relacionado: #12
+- Historia:
+  Como empresa o profesional TI,
+  quiero consultar en la aplicacion las licitaciones, sus lotes y sus adjudicaciones con el mismo marco funcional del Excel de referencia y con visibilidad del fichero origen,
+  para revisar la oportunidad sin perder trazabilidad del dato.
+- Criterios de aceptacion:
+  1. La aplicacion muestra una pestaña `Licitaciones TI Canarias`.
+  2. La aplicacion muestra una pestaña `Detalle Lotes`.
+  3. La aplicacion muestra una pestaña `Adjudicaciones`.
+  4. El detalle de una licitacion o contrato muestra el nombre del fichero `.atom` de origen.
+  5. La informacion visible para la muestra actual se corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
+  6. Si un dato no viene informado en origen, la interfaz lo muestra como no informado o equivalente claro.
+- Dependencias funcionales: PB-011, PB-002
+- Prioridad: P0
+- Estado: `nuevo`

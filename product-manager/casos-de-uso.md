@@ -253,3 +253,58 @@
   - RB-33 En anchos amplios, la navegacion principal debe mostrarse en el lateral izquierdo con disposicion vertical por iconos.
   - RB-34 La adaptacion responsive no debe provocar perdida de acceso a opciones principales ni solapamiento del contenido.
   - RB-35 Ninguna opcion no disponible debe inducir al usuario a pensar que ya esta operativa si aun no lo esta.
+
+## CU-11 Consolidar snapshots `.atom` en un dataset funcional trazable
+- Backlog relacionado: PB-011
+- Historias relacionadas: HU-11
+- Actor principal: Responsable de producto o proceso de recopilacion del sistema.
+- Objetivo: Transformar los snapshots `.atom` versionados de `data/` en un conjunto consolidado de oportunidades TI Canarias listo para uso funcional.
+- Disparador: La aplicacion necesita actualizar su base visible a partir de los `.atom` disponibles.
+- Precondiciones:
+  - Existen ficheros `.atom` en la carpeta `data/`.
+  - Las reglas funcionales de relevancia TI siguen vigentes.
+- Flujo principal:
+  1. El sistema localiza todos los ficheros `.atom` disponibles en `data/`.
+  2. Recorre cada `<entry>` y evalua el filtro geografico Canarias y el filtro TI por CPV.
+  3. Agrupa los registros por expediente para evitar duplicados funcionales entre snapshots.
+  4. Conserva como version vigente la entrada mas reciente disponible para cada expediente.
+  5. Guarda o expone el nombre del fichero `.atom` del que procede esa version vigente.
+- Flujos alternativos:
+  - A1. Si un `.atom` no aporta entradas validas, el sistema lo ignora sin bloquear el resto de la consolidacion.
+  - A2. Si falta `CountrySubentityCode`, el sistema puede apoyarse en `ParentLocatedParty` o `CountrySubentity` para decidir el criterio geografico.
+  - A3. Si un expediente aparece en varios snapshots con distinta fecha oficial, el sistema conserva solo la version mas reciente.
+- Postcondiciones:
+  - Existe un dataset funcional consolidado de oportunidades TI Canarias con trazabilidad al fichero origen.
+- Reglas de negocio relacionadas:
+  - RB-36 La aplicacion debe procesar todos los `.atom` presentes en `data/`, no un unico nombre de fichero fijo.
+  - RB-37 El filtro geografico prioritario para Canarias es `CountrySubentityCode` con prefijo `ES7`.
+  - RB-38 El filtro geografico complementario puede usar `ParentLocatedParty` y `CountrySubentity` con referencias a Canarias o islas canarias.
+  - RB-39 La relevancia TI estructurada en esta iteracion se determina por CPVs con prefijo `72`, `48` o `302`.
+  - RB-40 La consolidacion debe conservar una unica version funcional por expediente y mantener trazabilidad al fichero origen vigente.
+
+## CU-12 Revisar la informacion consolidada en pestañas y detalle con fichero origen visible
+- Backlog relacionado: PB-012
+- Historias relacionadas: HU-12
+- Actor principal: Usuario registrado de PodencoTI.
+- Objetivo: Consultar la informacion consolidada de licitaciones, lotes y adjudicaciones desde una superficie verificable y con trazabilidad al snapshot origen.
+- Disparador: El usuario accede al modulo de oportunidades consolidado desde fuentes `.atom`.
+- Precondiciones:
+  - El dataset consolidado de `PB-011` esta disponible.
+  - Existe una referencia funcional de salida en `data/licitaciones_ti_canarias.xlsx`.
+- Flujo principal:
+  1. El usuario abre la vista principal de licitaciones TI Canarias.
+  2. El sistema muestra la pestaña `Licitaciones TI Canarias` con la informacion principal de los expedientes.
+  3. El usuario navega a `Detalle Lotes` o `Adjudicaciones` segun su necesidad.
+  4. El usuario abre el detalle de una licitacion o contrato.
+  5. El sistema muestra el nombre del fichero `.atom` origen de la version consolidada del dato.
+- Flujos alternativos:
+  - A1. Si una licitacion no tiene lotes o adjudicaciones, la superficie correspondiente muestra un estado vacio claro.
+  - A2. Si algun campo esperado no viene informado en origen, la aplicacion lo marca como no informado sin ocultar el resto del registro.
+  - A3. Si `qa-teams` compara una muestra con el Excel de referencia, puede localizar la correspondencia funcional en las tres pestañas principales.
+- Postcondiciones:
+  - El usuario ha revisado informacion estructurada y trazable sobre licitaciones, lotes y adjudicaciones.
+- Reglas de negocio relacionadas:
+  - RB-41 La aplicacion debe ofrecer las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
+  - RB-42 El detalle de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
+  - RB-43 La salida visible debe ser funcionalmente contrastable con `data/licitaciones_ti_canarias.xlsx` para la muestra de datos vigente.
+  - RB-44 Los datos no informados en origen deben quedar senalizados de forma clara.

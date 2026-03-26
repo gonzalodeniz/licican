@@ -2,6 +2,74 @@
 
 ## Estado actual
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26.
+- La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26.
+- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26.
+
+## Issue creada: Consolidar fuentes `.atom` versionadas de `/data` para licitaciones TI Canarias
+
+Titulo sugerido: `[product-manager] PB-011 Consolidar fuentes .atom versionadas de /data para licitaciones TI Canarias`
+
+Backlog: PB-011 Consolidacion funcional de fuentes `.atom` versionadas para oportunidades TI Canarias
+Historia de usuario: HU-11 Consolidar licitaciones TI Canarias desde snapshots `.atom` versionados
+Caso de uso: CU-11 Consolidar snapshots `.atom` en un dataset funcional trazable
+Criterios de aceptacion:
+1. La aplicacion toma como fuentes de entrada todos los ficheros con extension `.atom` disponibles en la carpeta `data/`, sin depender de un nombre fijo.
+2. La consolidacion funcional recorre cada `<entry>` y solo considera candidatas las oportunidades que cumplan simultaneamente criterio geografico Canarias y criterio TI por CPV.
+3. El criterio geografico se considera valido si existe algun `CountrySubentityCode` que empiece por `ES7`, o si en `ParentLocatedParty` o en `CountrySubentity` aparece `Canarias` o una isla canaria relevante.
+4. El criterio TI se considera valido si algun `ItemClassificationCode` empieza por `72`, `48` o `302`.
+5. Si un mismo expediente aparece en varios `.atom`, la aplicacion conserva una unica version funcional por expediente usando la version mas reciente disponible.
+6. Cada registro consolidado conserva el nombre del fichero `.atom` del que procede la version vigente.
+Dependencias: PB-009 y PB-006
+Estado operativo: nuevo
+
+Contexto funcional:
+- La carpeta `data/` ya contiene snapshots `.atom` que se iran actualizando con nuevas fechas y horas en el nombre del fichero.
+- Producto fija como regla funcional que la carga debe apoyarse en la presencia dinamica de todos los `.atom` y no en un nombre estatico.
+- La consolidacion debe ser auditable para que QA pueda contrastar entradas, filtros y trazabilidad.
+
+Tareas sugeridas:
+- Inventariar y cargar todos los `.atom` disponibles en `data/`.
+- Definir la clave funcional de consolidacion por expediente y la regla de version vigente.
+- Implementar el filtrado conjunto Canarias + TI con trazabilidad verificable.
+- Persistir o exponer el nombre del fichero origen asociado a la version vigente.
+- Dejar evidencia tecnica de la muestra consolidada obtenida desde los `.atom` actuales.
+
+Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
+- Que campo o combinacion de campos garantiza mejor la unicidad funcional del expediente cuando falte `ContractFolderID`.
+- Si la fecha oficial mas fiable para priorizar versiones es `atom:updated` o si debe existir criterio complementario en caso de empate.
+
+## Issue creada: Exponer en la aplicacion las vistas del Excel de licitaciones TI Canarias
+
+Titulo sugerido: `[product-manager] PB-012 Exponer en la aplicacion las vistas del Excel de licitaciones TI Canarias`
+
+Backlog: PB-012 Exposicion funcional en la aplicacion del dataset de licitaciones TI Canarias
+Historia de usuario: HU-12 Consultar licitaciones, lotes y adjudicaciones con trazabilidad al fichero origen
+Caso de uso: CU-12 Revisar la informacion consolidada en pestañas y detalle con fichero origen visible
+Criterios de aceptacion:
+1. La aplicacion muestra una pestaña `Licitaciones TI Canarias`.
+2. La aplicacion muestra una pestaña `Detalle Lotes`.
+3. La aplicacion muestra una pestaña `Adjudicaciones`.
+4. El detalle de una licitacion o contrato muestra de forma visible el nombre del fichero `.atom` origen.
+5. La informacion visible en la aplicacion para la muestra actual corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
+6. Si algun campo esperado no viene informado en origen, la aplicacion lo muestra como dato no informado o equivalente claro.
+Dependencias: PB-011 y PB-002
+Estado operativo: nuevo
+
+Contexto funcional:
+- El Excel `data/licitaciones_ti_canarias.xlsx` actua como referencia funcional de salida para esta iteracion.
+- QA debe poder comparar una muestra representativa entre aplicacion y Excel.
+- La trazabilidad del dato exige que el detalle muestre el fichero `.atom` origen de la version consolidada.
+
+Tareas sugeridas:
+- Mapear a la interfaz las columnas y agrupaciones funcionales relevantes del Excel de referencia.
+- Definir la navegacion o segmentacion adecuada entre licitaciones, lotes y adjudicaciones.
+- Exponer en el detalle de expediente o contrato el nombre del fichero `.atom` origen.
+- Preparar una muestra verificable para QA sobre los datos actuales de `data/`.
+- Documentar limitaciones funcionales si alguna columna del Excel no entra en esta iteracion.
+
+Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
+- Si la primera iteracion debe cubrir solo las tres pestañas indicadas o dejar preparada tambien la extension posterior a `Modificaciones`.
+- Que subconjunto minimo de columnas del Excel debe priorizarse primero si la interfaz no puede absorberlas todas en una unica pantalla sin degradar legibilidad.
 
 ## Issue creada: Navegacion principal responsive con menu lateral de iconos
 
