@@ -49,7 +49,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
 Resultado esperado en esta revision:
-- 41 pruebas en verde
+- 49 pruebas en verde
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 
@@ -118,3 +118,4 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 - `pyproject.toml` sigue describiendo una release mas limitada que la realmente visible; verifica siempre contra esta guia, el codigo y las pruebas.
 - La priorizacion de fuentes reales ya forma parte de la instalacion utilizable, pero no activa pipeline.
 - Las alertas disponibles en `main` registran coincidencias internas y siguen sin emitir notificaciones salientes.
+- Aunque el changelog de `2026-03-27` anuncie `PB-011`, esta instalacion no consolida snapshots `.atom`; el catalogo instalado sigue apoyandose en `data/opportunities.json`.

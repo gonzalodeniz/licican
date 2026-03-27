@@ -15,7 +15,7 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `PB-009`: priorizacion visible de fuentes reales oficiales por olas.
 - Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`.
 
-La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
+La version actual de `main` sigue construyendo el catalogo desde `data/opportunities.json`; aunque existen snapshots `.atom` en `data/`, no hay una consolidacion visible de esos ficheros ni una superficie de trazabilidad asociada en la aplicacion revisada. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
 
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
@@ -27,6 +27,7 @@ La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura d
 - Priorizacion de fuentes reales oficiales: `src/podencoti/real_source_prioritization.py`
 - Carga y evaluacion de reglas TI: `src/podencoti/ti_classification.py`
 - Datos versionados: `data/opportunities.json`, `data/source_coverage.json`, `data/real_source_prioritization.json`, `data/ti_classification_rules.json`
+- Snapshots `.atom` presentes en `data/` pero no consumidos por la aplicacion actual: `data/licitacionesPerfilesContratanteCompleto3_20260323_190607*.atom`
 - Datos de alertas: `data/alerts.json`
 - Suite tecnica: `tests/test_app.py`, `tests/test_alerts.py`, `tests/test_opportunity_catalog.py`, `tests/test_real_source_prioritization.py`, `tests/test_source_coverage.py`, `tests/test_ti_classification.py`
 - Contenedorizacion local: `Dockerfile`, `docker-compose.yml`, `.dockerignore`
@@ -76,7 +77,7 @@ docker compose up -d --build
 ```
 
 Resultado verificado en esta revision:
-- 41 pruebas automatizadas en verde.
+- 49 pruebas automatizadas en verde.
 - Servidor local disponible en `http://127.0.0.1:<PORT>`, usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.
 - Las rutas `http://127.0.0.1:<PORT>/alertas` y `http://127.0.0.1:<PORT>/api/alertas` responden con la gestion interna de alertas tempranas del MVP.
@@ -86,6 +87,7 @@ Resultado verificado en esta revision:
 - La documentacion funcional de `product-manager/` describe backlog posterior valido, pero no debe leerse como contrato tecnico ya implementado para pipeline o recopilacion real desde nuevas fuentes oficiales.
 - Parte de `product-manager/` sigue mostrando el estado anterior de `PB-004`; la evidencia tecnica vigente en `main` ya expone alertas, asi que esa fuente debe leerse con cautela hasta que se sincronice.
 - La documentacion funcional de `product-manager/` sigue mostrando algunos textos anteriores a la fusion de `PB-009`; cuando contradiga a `main`, la evidencia tecnica vigente debe prevalecer y esa fuente debe corregirse.
+- El changelog de `2026-03-27` menciona `PB-011` como validada, pero la evidencia tecnica de `main` revisada aqui sigue sin mostrar ingestion de `data/*.atom`, exposicion de fichero origen ni una ruta de consolidacion; esa referencia debe tratarse como desfasada hasta nueva sincronizacion.
 
 ## Limitaciones tecnicas actuales
 - No existe persistencia de usuario ni ingestion automatizada real de licitaciones; el catalogo se alimenta desde `data/opportunities.json`.
@@ -94,6 +96,7 @@ Resultado verificado en esta revision:
 - La priorizacion de fuentes reales de `PB-009` ya esta expuesta en la app verificada con `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - La entrega de `PB-009` no habilita pipeline; solo refuerza origen, trazabilidad y orden de recopilacion.
 - Las alertas de `PB-004` solo registran coincidencias internas y no envian notificaciones salientes.
+- Aunque el changelog de `2026-03-27` anuncie `PB-011`, la version tecnica revisada aqui no ingiere `data/*.atom`; por tanto, la operacion real sigue apoyandose en `data/opportunities.json` hasta que esa consolidacion se materialice en `main`.
 
 ## Dependencias abiertas
 - Implementar `PB-005` para evolucionar desde el descubrimiento inicial filtrable y la gestion interna de alertas a un MVP mas operativo.

@@ -57,6 +57,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - La metadata tecnica del paquete sigue describiendo una release anterior mas limitada que la visible hoy en `main`.
 - `product-manager/` sigue arrastrando algunos textos anteriores sobre `PB-009`; la evidencia reproducible de `main` y el changelog de `2026-03-24` deben tomarse como referencia para el estado vigente.
 - Las alertas visibles en `main` son internas: registran coincidencias accionables, pero todavia no envian notificaciones salientes.
+- Aunque el changelog de `2026-03-27` menciona `PB-011` como validada, la experiencia de usuario visible hoy sigue siendo la del catalogo actual; no aparece todavia una pantalla de consolidacion de snapshots `.atom` ni trazabilidad de fichero origen para el usuario final.
 
 ## Recomendacion de uso
 Para demos o revision funcional temprana, utiliza el catalogo en `/`, la ficha de detalle de una oportunidad visible, la gestion de alertas en `/alertas` y, como apoyo, las vistas de cobertura y clasificacion TI. Para capacidades de negocio pendientes, toma como referencia `product-manager/roadmap.md` y `product-manager/product-backlog.md`.

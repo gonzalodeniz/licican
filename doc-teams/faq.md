@@ -26,6 +26,9 @@ Existe una entrega minima de descubrimiento con catalogo inicial de oportunidade
 ## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
 En `main` ya existen catalogo inicial, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada.
 
+## PB-011 ya esta operativo en `main`?
+No en la evidencia tecnica revisada aqui. El changelog de `2026-03-27` lo menciona como validado, pero el codigo visible en `main` sigue leyendo `data/opportunities.json` y no expone aun una consolidacion trazable de `data/*.atom`.
+
 ## Que filtros existen hoy?
 Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion` tanto en `/` como en `/api/oportunidades`.
 
@@ -52,7 +55,7 @@ Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicia
 Si. La instalacion editable deja operativa la aplicacion local y permite ejecutar las pruebas.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 41 pruebas en esta revision.
+Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 49 pruebas en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.
@@ -61,6 +64,7 @@ No hay base documental suficiente para afirmarlo. Solo esta verificado el arranq
 - Para reglas del repositorio y coordinacion: `AGENTS.md`
 - Para vision y alcance funcional esperado: `product-manager/`
 - Para el estado tecnico realmente observable en `main`: los manuales actuales de `doc-teams/` y el codigo versionado
+- Si un changelog reciente contradice el codigo visible, debe prevalecer la evidencia reproducible de `main` hasta que se sincronice la documentacion implicada.
 
 ## Que dependencias siguen abiertas?
 - Implementar `PB-005`.

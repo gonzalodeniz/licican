@@ -4,7 +4,7 @@
 Centralizar la documentacion oficial de `PodencoTI` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-03-26`.
+Fecha de revision: `2026-03-27`.
 
 Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision existe una entrega minima ejecutable de descubrimiento, pero su alcance sigue siendo acotado:
 
@@ -22,6 +22,7 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - Vista HTML de priorizacion de fuentes reales oficiales (`PB-009`) en `/priorizacion-fuentes-reales`.
 - API JSON de priorizacion de fuentes reales oficiales en `/api/fuentes-prioritarias`.
 - `PB-009` ya forma parte de `main` y su trazabilidad visible cubre `BOC`, `BOP Las Palmas` y `BOE` por olas.
+- Aunque el changelog de `2026-03-27` menciona `PB-011` como validada, la evidencia tecnica visible en `main` revisada aqui sigue sin mostrar consolidacion de `data/*.atom`; el catalogo continua leyendose desde `data/opportunities.json`.
 - No se observan superficies de pipeline de seguimiento en el codigo o en las pruebas de `main`.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/` y configuracion de `PORT` via `.env`.
 
@@ -39,7 +40,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 
 ## Hallazgos principales de esta revision
 - `main` contiene implementacion Python versionada en `src/podencoti/`, datos en `data/` y pruebas automatizadas en `tests/`.
-- `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 41 pruebas y finaliza correctamente.
+- `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 49 pruebas y finaliza correctamente.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - `docker compose up -d --build` levanta la misma aplicacion en contenedor, publica el puerto configurado en `PORT` y monta `data/` como volumen persistente.
@@ -50,6 +51,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
 - La entrada de `changelog/2026-03-25.md` que menciona `PB-004` ya coincide con la evidencia tecnica visible en `main`; la contradiccion residual queda en algunos textos de `product-manager/` que todavia conservan estado anterior a la integracion.
 - Existe una contradiccion documental residual en `product-manager/`: varios documentos siguen describiendo `PB-009` como pendiente de fusion y borrado de rama, pero la evidencia tecnica y el changelog de `2026-03-24` ya muestran esa entrega integrada en `main`.
+- El changelog de `2026-03-27` registra `PB-011` como validada, pero el codigo y las pruebas de `main` revisados en esta pasada no muestran aun ingestion de `data/*.atom` ni una superficie de consolidacion trazable; hasta que se sincronice, esa referencia debe tratarse como contradiccion abierta y no como comportamiento vigente.
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero esas capacidades aun no estan implementadas en `main`.
