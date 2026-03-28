@@ -49,7 +49,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
 Resultado esperado en esta revision:
-- 49 pruebas en verde
+- 50 pruebas en verde
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 
@@ -103,7 +103,7 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 
 ## Que queda instalado realmente
 - Paquete `podencoti` en modo editable.
-- Aplicacion WSGI local para catalogo inicial, filtros funcionales, ficha de detalle, alertas internas, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
+- Aplicacion WSGI local para catalogo consolidado desde snapshots `.atom`, filtros funcionales, ficha de detalle con fichero origen, alertas internas, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
 - Acceso a datos versionados en `data/` y a la suite automatizada en `tests/`.
 - Imagen Docker minima con la misma superficie funcional, apta para despliegue local en contenedor.
 
@@ -114,8 +114,8 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 
 ## Limitaciones y dependencias abiertas
 - La instalacion deja operativa una entrega minima de descubrimiento, no el MVP completo descrito en backlog.
-- Los datos del catalogo son versionados y estaticos; no existe todavia rastreo automatizado en ejecucion local.
+- Los datos del catalogo se consolidan desde snapshots `.atom` versionados cuando existen; no existe todavia rastreo automatizado en ejecucion local.
 - `pyproject.toml` sigue describiendo una release mas limitada que la realmente visible; verifica siempre contra esta guia, el codigo y las pruebas.
 - La priorizacion de fuentes reales ya forma parte de la instalacion utilizable, pero no activa pipeline.
 - Las alertas disponibles en `main` registran coincidencias internas y siguen sin emitir notificaciones salientes.
-- Aunque el changelog de `2026-03-27` anuncie `PB-011`, esta instalacion no consolida snapshots `.atom`; el catalogo instalado sigue apoyandose en `data/opportunities.json`.
+- La instalacion actual consolida snapshots `.atom` y muestra el fichero de origen en el detalle; `data/opportunities.json` queda solo como respaldo si no hay `.atom` disponibles.

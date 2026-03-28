@@ -7,7 +7,7 @@ Personas usuarias internas, equipo tecnico y administracion que necesitan aclara
 Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
-Existe una entrega minima de descubrimiento con catalogo inicial de oportunidades TI, filtros funcionales sobre ese catalogo, ficha de detalle, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
+Existe una entrega minima de descubrimiento con catalogo consolidado desde snapshots `.atom`, filtros funcionales sobre ese catalogo, ficha de detalle con fichero origen visible, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
 
 ## Que rutas estan verificadas?
 - `/`
@@ -24,10 +24,10 @@ Existe una entrega minima de descubrimiento con catalogo inicial de oportunidade
 - `/api/clasificacion-ti`
 
 ## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
-En `main` ya existen catalogo inicial, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada.
+En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada.
 
 ## PB-011 ya esta operativo en `main`?
-No en la evidencia tecnica revisada aqui. El changelog de `2026-03-27` lo menciona como validado, pero el codigo visible en `main` sigue leyendo `data/opportunities.json` y no expone aun una consolidacion trazable de `data/*.atom`.
+Si. El codigo visible en `main` consolida los snapshots `.atom` de `data/` y expone el fichero de origen en el detalle. Si algun documento de producto sigue describiendo `PB-011` como pendiente, esa nota ya queda desfasada frente a `main`.
 
 ## Que filtros existen hoy?
 Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion` tanto en `/` como en `/api/oportunidades`.
@@ -36,17 +36,17 @@ Se pueden aplicar `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `proced
 Si `presupuesto_min` es mayor que `presupuesto_max`, la vista HTML mantiene el catalogo y muestra un mensaje de correccion. La API responde `400 Bad Request` con el campo `error_validacion`.
 
 ## Sigue habiendo contradicciones documentales relevantes?
-Si. La principal contradiccion vigente es doble: `pyproject.toml` sigue describiendo el paquete como si solo cubriera cobertura de fuentes, y algunos documentos de `product-manager/` todavia conservan el estado anterior a la fusion de `PB-009` o al estado ya visible de `PB-004`.
+Si. La principal contradiccion vigente es doble: `pyproject.toml` sigue describiendo el paquete como si solo cubriera cobertura de fuentes, y algunos documentos de `product-manager/` todavia conservan textos previos a la integracion de `PB-011` o al estado ya visible de `PB-004`.
 
-## Por que el changelog de 2026-03-25 no coincide con esta documentacion?
-Porque esta FAQ toma como referencia el codigo, las rutas y las pruebas ejecutables en `main`. En esta revision, las alertas si se observan en `src/` y `tests/`, asi que la contradiccion residual queda en algunos textos funcionales de producto que todavia no las reflejan.
+## Por que algunos textos de producto no coinciden con esta documentacion?
+Porque esta FAQ toma como referencia el codigo, las rutas y las pruebas ejecutables en `main`. En esta revision, las alertas si se observan en `src/` y `tests/`, y la consolidacion `.atom` ya esta integrada, asi que la contradiccion residual queda en algunos textos funcionales de producto que todavia no se han sincronizado.
 
 ## Existe ya la priorizacion de fuentes reales de `PB-009` en `main`?
 Si. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `200 OK` y muestran `BOC`, `BOP Las Palmas` y `BOE` agrupadas por olas.
 Si algun documento de producto sigue describiendo `PB-009` como pendiente de fusion, esa nota debe considerarse desactualizada frente a `main`.
 
 ## La ficha de detalle aplica rectificaciones o modificaciones oficiales?
-Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas en `data/opportunities.json`.
+Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas, y ademas expone el fichero `.atom` de origen cuando procede de la consolidacion.
 
 ## Por que la metadata del paquete no menciona la clasificacion TI?
 Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicial de fuentes. Esa descripcion ha quedado por detras del estado real de `main`, que ya incluye catalogo inicial, ficha de detalle y la superficie auditable de `PB-006`.
@@ -55,7 +55,7 @@ Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicia
 Si. La instalacion editable deja operativa la aplicacion local y permite ejecutar las pruebas.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 49 pruebas en esta revision.
+Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 50 pruebas en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.
@@ -67,6 +67,7 @@ No hay base documental suficiente para afirmarlo. Solo esta verificado el arranq
 - Si un changelog reciente contradice el codigo visible, debe prevalecer la evidencia reproducible de `main` hasta que se sincronice la documentacion implicada.
 
 ## Que dependencias siguen abiertas?
+- Exponer `PB-012` en la interfaz para las vistas funcionales del Excel de referencia.
 - Implementar `PB-005`.
 - Definir una estrategia de despliegue real cuando el alcance tecnico lo requiera.
 - Actualizar la metadata del paquete si se quiere alinearla con la superficie visible actual.
