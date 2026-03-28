@@ -308,3 +308,31 @@
   - RB-42 El detalle de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
   - RB-43 La salida visible debe ser funcionalmente contrastable con `data/licitaciones_ti_canarias.xlsx` para la muestra de datos vigente.
   - RB-44 Los datos no informados en origen deben quedar senalizados de forma clara.
+
+## CU-13 Aplicar permisos segun rol en consulta y gestion
+- Backlog relacionado: PB-013
+- Historias relacionadas: HU-13
+- Actor principal: Usuario autenticado o invitado segun el rol asignado.
+- Objetivo: Garantizar que cada rol ve y ejecuta solo las acciones que le corresponden.
+- Disparador: El usuario accede a una accion de consulta o de gestion en la aplicacion.
+- Precondiciones:
+  - Existe un rol funcional asignado o inferido para el usuario actual.
+  - El producto ya dispone de acciones visibles de consulta, alertas, pipeline o administracion.
+- Flujo principal:
+  1. El usuario accede a una vista o accion del producto.
+  2. El sistema identifica su rol: `Administrador`, `Colaborador` o `Lector/Invitado`.
+  3. El sistema muestra las acciones permitidas para ese rol.
+  4. El usuario ejecuta una accion autorizada.
+  5. El sistema procesa la accion manteniendo la trazabilidad de permisos aplicada.
+- Flujos alternativos:
+  - A1. Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
+  - A2. Si el rol es `Lector/Invitado`, el sistema permite consulta de catalogo, detalle, filtros y vistas consolidadas, pero no muestra acciones de alta o edicion.
+  - A3. Si el rol es `Colaborador`, el sistema limita la gestion a alertas y pipeline propios y excluye administracion global.
+- Postcondiciones:
+  - El usuario ha operado dentro del alcance permitido para su rol.
+- Reglas de negocio relacionadas:
+  - RB-45 El sistema debe distinguir al menos los roles `Administrador`, `Colaborador` y `Lector/Invitado`.
+  - RB-46 `Administrador` puede administrar acciones transversales de consulta y gestion.
+  - RB-47 `Colaborador` solo puede gestionar sus propios elementos salvo permiso adicional explicitado.
+  - RB-48 `Lector/Invitado` no puede crear ni modificar entidades.
+  - RB-49 La interfaz no debe mostrar como disponibles acciones bloqueadas por permisos.

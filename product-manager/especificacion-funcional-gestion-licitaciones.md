@@ -5,7 +5,7 @@ Definir, en un unico artefacto, la estructura funcional de mayor a menor abstrac
 
 ## Supuestos de alcance
 - Este documento toma como base la vision y el backlog funcional ya vigentes en `product-manager/`.
-- Las funcionalidades cubiertas son las actualmente trazadas en `PB-001` a `PB-012`.
+- Las funcionalidades cubiertas son las actualmente trazadas en `PB-001` a `PB-013`.
 - El modelo de permisos se define para tres roles de uso del producto: `Administrador`, `Colaborador` y `Lector/Invitado`.
 - Cuando una capacidad ya exista en el backlog como decision funcional cerrada, aqui se consolida sin reabrir su definicion.
 
@@ -193,6 +193,15 @@ Como Product Manager, quiero definir KPIs de cobertura, adopcion y uso para toma
   - Given que se revisa el rendimiento inicial del producto, When se consulta la documentacion de metricas, Then existe al menos un KPI de cobertura, uno de adopcion y uno de uso.
   - Given que cada KPI esta definido, When producto lo revisa, Then dispone de formula, umbral inicial y decision asociada.
   - Given que aun no existe toda la instrumentacion tecnica, When se documentan los KPIs, Then la limitacion queda explicita sin bloquear la salida funcional del MVP.
+
+### HU-13 Gestionar acceso por rol a las acciones del sistema
+Como responsable de producto y operacion, quiero que las acciones del sistema se habiliten segun el rol del usuario para proteger la gestion y mantener una experiencia coherente de consulta.
+
+- Criterios de aceptacion:
+  - Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, gestionar pipeline, consultar KPIs y administrar roles o permisos.
+  - Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas y su pipeline propio sin acceder a administracion global.
+  - Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 
 ## 4. Casos de uso
 
@@ -389,6 +398,27 @@ Como Product Manager, quiero definir KPIs de cobertura, adopcion y uso para toma
 - Postcondiciones:
   - Existe una decision trazable basada en indicadores o en la ausencia justificada de medicion.
 
+### CU-13 Aplicar permisos segun rol en consulta y gestion
+- Actor principal:
+  - Usuario autenticado o invitado segun el rol asignado.
+- Objetivo:
+  - Garantizar que cada rol ve y ejecuta solo las acciones que le corresponden.
+- Precondiciones:
+  - Existe un rol funcional asignado o inferido para el usuario actual.
+  - El producto ya dispone de acciones visibles de consulta, alertas, pipeline o administracion.
+- Disparador:
+  - El usuario accede a una vista o accion del producto.
+- Happy path:
+  1. El usuario accede a una vista o accion del producto.
+  2. El sistema identifica su rol.
+  3. El sistema muestra solo las acciones permitidas.
+  4. El usuario ejecuta una accion autorizada.
+  5. El sistema procesa la accion manteniendo la restriccion de permisos.
+- Flujo alternativo o error:
+  - Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
+- Postcondiciones:
+  - El usuario opera dentro del alcance permitido para su rol.
+
 ## 5. Reglas de negocio
 
 ### Reglas de cobertura y relevancia
@@ -457,7 +487,7 @@ Como Product Manager, quiero definir KPIs de cobertura, adopcion y uso para toma
 | E-01 Descubrimiento y relevancia de oportunidades | HU-01, HU-02, HU-03, HU-04, HU-05 | PB-007, PB-006, PB-001, PB-002, PB-003 |
 | E-02 Ingestion operativa y trazabilidad del dato oficial | HU-06, HU-07, HU-08 | PB-009, PB-011, PB-012 |
 | E-03 Retencion y seguimiento operativo del usuario | HU-09, HU-10 | PB-004, PB-005 |
-| E-04 Experiencia transversal y gobierno del producto | HU-11, HU-12 | PB-010, PB-008 |
+| E-04 Experiencia transversal y gobierno del producto | HU-10, HU-08, HU-13 | PB-010, PB-008, PB-013 |
 
 ## 8. Criterio de uso de este artefacto
 - Este documento sirve como referencia ejecutiva para ordenar el alcance de mayor a menor abstraccion.

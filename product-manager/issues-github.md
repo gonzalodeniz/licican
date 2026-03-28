@@ -2,8 +2,9 @@
 
 ## Estado actual
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26.
-- La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26 y `qa-teams` la valido el 2026-03-27; sigue abierta por falta de evidencia de fusion en `main` y borrado de rama.
-- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26.
+- La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
+- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26 y actualmente esta en `Estado operativo: no validado`.
+- La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
 ## Issue creada: Consolidar fuentes `.atom` versionadas de `/data` para licitaciones TI Canarias
@@ -21,7 +22,7 @@ Criterios de aceptacion:
 5. Si un mismo expediente aparece en varios `.atom`, la aplicacion conserva una unica version funcional por expediente usando la version mas reciente disponible.
 6. Cada registro consolidado conserva el nombre del fichero `.atom` del que procede la version vigente.
 Dependencias: PB-009 y PB-006
-Estado operativo: nuevo
+Estado operativo: cerrado
 
 Contexto funcional:
 - La carpeta `data/` ya contiene snapshots `.atom` que se iran actualizando con nuevas fechas y horas en el nombre del fichero.
@@ -54,7 +55,7 @@ Criterios de aceptacion:
 5. La informacion visible en la aplicacion para la muestra actual corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
 6. Si algun campo esperado no viene informado en origen, la aplicacion lo muestra como dato no informado o equivalente claro.
 Dependencias: PB-011 y PB-002
-Estado operativo: nuevo
+Estado operativo: no validado
 
 Contexto funcional:
 - El Excel `data/licitaciones_ti_canarias.xlsx` actua como referencia funcional de salida para esta iteracion.
@@ -112,3 +113,35 @@ Tareas sugeridas:
 Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Que opciones deben aparecer desde el primer dia como modulos principales visibles y cuales deben quedar ocultas o marcadas como `proximamente`.
 - Si alguna vista actual requiere ajuste de contenido adicional para encajar en el nuevo layout sin perder legibilidad.
+
+## Issue creada: Implementar modelo funcional de roles y permisos
+
+Titulo sugerido: `[product-manager] PB-013 Implementar modelo funcional de roles y permisos`
+
+Backlog: PB-013 Modelo funcional de roles y permisos
+Historia de usuario: HU-13 Gestionar acceso por rol a las acciones del sistema
+Caso de uso: CU-13 Aplicar permisos segun rol en consulta y gestion
+Criterios de aceptacion:
+1. El sistema distingue al menos los roles `Administrador`, `Colaborador` y `Lector/Invitado`.
+2. `Administrador` puede consultar licitaciones, gestionar alertas, gestionar pipeline propio y ajeno cuando aplique, consultar KPIs y administrar roles o permisos.
+3. `Colaborador` puede consultar licitaciones, crear y editar sus alertas, gestionar su pipeline propio y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
+4. `Lector/Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, pipeline, roles ni configuraciones de producto.
+5. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
+6. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
+Dependencias: PB-010, PB-004 y PB-005
+Estado operativo: nuevo
+
+Contexto funcional:
+- La especificacion funcional consolidada ya define una matriz de permisos para `Administrador`, `Colaborador` y `Lector/Invitado`, pero ese alcance no estaba todavia trazado como issue ejecutable.
+- Producto necesita convertir esa definicion en trabajo observable antes de ampliar gestion multiusuario o administracion operativa.
+
+Tareas sugeridas:
+- Inventariar las acciones visibles y mutables del producto actual.
+- Mapear cada accion a la matriz de permisos aprobada por producto.
+- Aplicar restricciones coherentes en interfaz y backend donde corresponda.
+- Ajustar navegacion y llamadas a la accion para que no sugieran capacidades inexistentes al rol actual.
+- Dejar evidencia verificable para `qa-teams` con escenarios por rol.
+
+Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
+- Si el primer corte funcional debe resolver autenticacion real o puede apoyarse inicialmente en roles simulados para validar el comportamiento visible.
+- Que vistas de KPI pueden exponerse a `Colaborador` sin abrir informacion sensible de negocio o de otros usuarios.

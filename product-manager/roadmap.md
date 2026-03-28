@@ -10,7 +10,7 @@
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
-- Siguiente recomendacion para `developer-teams`: completar la integracion en `main` de la issue #11 de `PB-011` y su cierre operativo; a continuacion, tomar la issue #12 de `PB-012`.
+- Siguiente recomendacion para `developer-teams`: reentregar `PB-012` sobre la issue #12, que permanece en `no validado`; despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -82,8 +82,9 @@
 - Riesgo principal:
   - Que la aplicacion siga dependiendo de un snapshot puntual, no absorba actualizaciones de nombre y rompa la trazabilidad del dato.
 - Estado operativo actual:
-  - `qa-teams` valido `PB-011` en la issue #11 el 2026-03-27 sobre la rama `developer-teams/pb-011-consolidacion-atom`.
-  - La rama tecnica sigue abierta y no existe todavia evidencia de fusion en `main` ni de borrado de rama, por lo que la release esta validada funcionalmente pero pendiente de integracion y cierre administrativo.
+  - `qa-teams` valido `PB-011` en la issue #11 el 2026-03-27.
+  - `developer-teams` integro la rama en `main` y la elimino el 2026-03-28.
+  - `product-manager` cerro administrativamente la issue #11 el 2026-03-28.
 
 ## Release 4: Vistas verificables de licitaciones, lotes y adjudicaciones
 - Objetivo: Hacer visible en la aplicacion la informacion consolidada derivada de los `.atom` en una superficie contrastable con el Excel funcional de referencia.
@@ -97,19 +98,21 @@
 - Riesgo principal:
   - Que el dato consolidado exista tecnicamente pero siga sin una superficie funcional verificable por usuario y QA.
 - Dependencia operativa:
-  - No debe iniciarse como nueva prioridad efectiva mientras `PB-011` siga sin integrar en `main`, porque su salida visible depende de esa base consolidada ya validada.
+  - Debe reintentarse sobre la misma issue #12 hasta salir de `no validado`, porque `PB-011` ya esta integrada en `main` y deja de ser el bloqueo operativo.
 
-## Release 5: Base de navegacion y adaptabilidad
-- Objetivo: Establecer una estructura comun de interfaz para sostener el crecimiento de modulos con una navegacion principal clara y responsive.
+## Release 5: Base de navegacion y control de acceso
+- Objetivo: Establecer una estructura comun de interfaz y un modelo minimo de permisos para sostener el crecimiento de modulos con una experiencia coherente y controlada.
 - Alcance:
   - PB-010 Navegacion principal responsive con menu lateral de iconos.
+  - PB-013 Modelo funcional de roles y permisos.
 - Criterios de salida:
   - La aplicacion muestra una navegacion principal comun y persistente en el lateral izquierdo cuando el ancho disponible lo permite.
   - La opcion activa queda visible y el contenido principal no se solapa con la navegacion.
   - En anchos reducidos la aplicacion conserva acceso util a las opciones principales mediante una variante responsive.
   - Las opciones no disponibles no se presentan como modulos operativos sin senalizacion explicita.
+  - Las acciones visibles de consulta y gestion se ajustan al rol del usuario sin exponer controles no autorizados.
 - Riesgo principal:
-  - Que el producto siga creciendo por modulos sin una base de interfaz comun y se vuelva mas dificil de usar y de evolucionar.
+  - Que el producto siga creciendo por modulos sin una base comun de interfaz y permisos y se vuelva mas dificil de usar, gobernar y evolucionar.
 
 ## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -130,6 +133,7 @@
 - Estado operativo actual:
   - `PB-004` ya fue validado por `qa-teams` en la issue #6 el 2026-03-25, integrado en `main` por `developer-teams` el 2026-03-26 y queda cerrado administrativamente por `product-manager`.
   - `PB-005` permanece en `nuevo` y no debe iniciarse antes de `PB-011` y `PB-012`, ni antes de decidir si la base de navegacion `PB-010` entra antes o despues de esta exposicion funcional.
+  - `PB-013` queda preparado en la issue #13 para convertir el modelo de roles y permisos en comportamiento observable antes de ampliar mas gestion multiusuario.
 
 ## Release 7: Medicion y aprendizaje
 - Objetivo: Mejorar precision, cobertura y priorizacion apoyandose en indicadores.
@@ -149,7 +153,7 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es integrar en `main` la rama validada de `PB-011`, borrar la rama tecnica y dejar evidencia en la issue #11; despues, iniciar la issue #12 de `PB-012`.
+- El siguiente paso operativo recomendado para `developer-teams` es corregir y reentregar `PB-012` sobre la issue #12, que sigue en `no validado`; despues, tomar `PB-010` o `PB-013`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
-- No se recomienda iniciar `PB-005` antes de `PB-011` y `PB-012`; la base de navegacion `PB-010` debe reevaluarse despues de dejar visible esta nueva superficie de dato consolidado.
+- No se recomienda iniciar `PB-005` antes de resolver `PB-012`; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar visible esta nueva superficie de dato consolidado.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.

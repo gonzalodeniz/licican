@@ -210,8 +210,8 @@
   6. Cada expediente consolidado conserva el nombre del fichero `.atom` origen de la version vigente.
 - Dependencias funcionales: PB-009, PB-006
 - Prioridad: P0
-- Estado: `validado`
-- Nota de estado: `qa-teams` valido la entrega en la issue #11 el 2026-03-27 sobre la rama `developer-teams/pb-011-consolidacion-atom`. Queda pendiente que `developer-teams` integre la rama en `main` y deje evidencia de borrado para que `product-manager` pueda cerrar administrativamente el item.
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la entrega en la issue #11 el 2026-03-27. `developer-teams` integro la rama en `main` y la elimino el 2026-03-28; `product-manager` cerro administrativamente la issue el mismo dia.
 
 ## HU-12 Consultar licitaciones, lotes y adjudicaciones con trazabilidad al fichero origen
 - Backlog relacionado: PB-012
@@ -230,4 +230,22 @@
   6. Si un dato no viene informado en origen, la interfaz lo muestra como no informado o equivalente claro.
 - Dependencias funcionales: PB-011, PB-002
 - Prioridad: P0
+- Estado: `no validado`
+- Nota de estado: `qa-teams` dejo la issue #12 en `no validado` el 2026-03-28 por ausencia de rama remota y de handoff valido de `developer-teams`; debe reintentarse sobre la misma issue.
+
+## HU-13 Gestionar acceso por rol a las acciones del sistema
+- Backlog relacionado: PB-013
+- Caso de uso relacionado: CU-13
+- Issue relacionado: #13
+- Historia:
+  Como responsable de producto y operacion,
+  quiero que las acciones del sistema se habiliten segun el rol del usuario,
+  para proteger la gestion de alertas, pipeline y administracion sin degradar la experiencia de consulta.
+- Criterios de aceptacion:
+  1. Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, gestionar pipeline, consultar KPIs y administrar roles o permisos.
+  2. Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas y su pipeline propio sin acceder a la administracion global.
+  3. Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  4. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
+- Dependencias funcionales: PB-010, PB-004, PB-005
+- Prioridad: P1
 - Estado: `nuevo`
