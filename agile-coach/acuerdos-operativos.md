@@ -156,6 +156,12 @@ Si el alcance cambia de forma material, `product-manager` debe decidir si corres
 - Si la integracion no puede hacerse de inmediato, `product-manager` debe dejar visible el motivo en su comentario administrativo usando `Bloqueo actual:` y `Estado de integracion: pendiente`.
 - Hasta que la fusion no exista, la funcionalidad aceptada por QA no debe tratarse como comportamiento vigente en la documentacion oficial mantenida sobre `main`.
 
+## Regla de continuidad operativa de `developer-teams`
+- La gestion de ramas por si sola no debe convertirse en el unico trabajo activo de `developer-teams` durante una iteracion completa.
+- Si, tras revisar los issues abiertos, el unico trabajo pendiente de `developer-teams` es cerrar una rama ya validada, borrar una rama ya fusionada o resolver otra gestion operativa equivalente de ramas, debe completar primero esa gestion prioritaria o dejar documentado el bloqueo que la impide.
+- Inmediatamente despues, si existe al menos una issue elegible para desarrollo, debe arrancar la siguiente issue prioritaria en la misma secuencia operativa con su rama dedicada y su comentario de arranque.
+- Esta continuidad no autoriza trabajo paralelo de implementacion: solo puede haber una issue en desarrollo, pero la mera gestion residual de ramas no justifica que `developer-teams` quede sin una nueva issue activa cuando el backlog ya ofrece una candidata operable.
+
 ## Cierre operativo de integracion
 - Una vez fusionada la rama tecnica en `main` y borrada de forma efectiva, `developer-teams` debe dejar en la issue un comentario de cierre de integracion que comience con `Rol: developer-teams` e incluya de forma literal `Rama:`, `Merge en main:` y `Rama eliminada:`.
 - Ese comentario no sustituye al handoff de QA ni al comentario administrativo de `product-manager`; solo documenta que la entrega ya no depende de la rama tecnica y permite cerrar con menos ambiguedad.

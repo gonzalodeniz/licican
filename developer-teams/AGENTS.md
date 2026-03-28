@@ -25,6 +25,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Si existen issues empezados que todavia no han sido validados por `qa-teams`, debe priorizar esos issues frente a los nuevos.
 - Si todos los issues abiertos son nuevos, puede elegir el orden de implementacion segun criterio del propio equipo de desarrollo.
 - Debe evitar abrir trabajo paralelo en varias tareas a la vez.
+- La mera gestion residual de ramas no cuenta como una nueva implementacion activa: si ese es su unico trabajo pendiente tras revisar los issues abiertos, debe resolverlo primero o dejar documentado su bloqueo y, a continuacion, arrancar la siguiente issue elegible.
 
 ## Flujo de ramas
 
@@ -40,6 +41,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Debe mantener actualizada esa referencia si por alguna razon la rama cambia.
 - Solo tras la validacion explicita de `qa-teams`, `developer-teams` debe decidir y ejecutar la fusion de su rama tecnica a `main`.
 - Tras `Estado operativo: validado`, debe priorizar esa fusion y el borrado de la rama por encima del inicio de una nueva issue, salvo bloqueo operativo documentado en la propia issue.
+- Si, una vez resuelta o bloqueada de forma explicita esa gestion de ramas, ya no queda una correccion `no validado` pendiente, debe comenzar en la misma secuencia operativa la siguiente issue elegible para no quedarse solo con tareas administrativas de ramas.
 - Tras completar el merge a `main`, debe borrar de inmediato la rama tecnica correspondiente para no mantener ramas abiertas sin necesidad operativa.
 - Tras fusionar y borrar la rama tecnica, debe dejar en la issue un comentario de cierre de integracion con `Rol: developer-teams`, `Rama:`, `Merge en main:` y `Rama eliminada:` para que `product-manager` pueda cerrar sin ambiguedad.
 - Si cambia de rama durante su trabajo, el ultimo paso operativo al finalizar debe ser volver a la rama `main`.
@@ -137,7 +139,8 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 16. Esperar validacion de `qa-teams`.
 17. Si la issue queda validada, fusionar la rama tecnica en `main` antes de iniciar una nueva issue salvo bloqueo operativo documentado.
 18. Borrar inmediatamente la rama tecnica tras completar el merge.
-19. Terminar la tarea dejando el repositorio situado en la rama `main`.
+19. Si la unica tarea restante era gestion de ramas y ya ha quedado resuelta o bloqueada con trazabilidad, arrancar la siguiente issue elegible con su nueva rama y comentario de inicio.
+20. Terminar la tarea dejando el repositorio situado en la rama `main`.
 
 ## Restricciones
 

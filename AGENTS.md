@@ -177,6 +177,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Tras un `Estado operativo: no validado`, `developer-teams` debe priorizar esa misma issue frente a nuevas issues, corregir en la misma rama mientras el alcance no cambie y publicar un nuevo handoff completo antes de volver a QA.
 - Solo tras la validacion de `qa-teams`, `developer-teams` debe decidir y ejecutar la fusion en `main` de la rama tecnica correspondiente.
 - Tras la validacion de `qa-teams`, `developer-teams` debe priorizar la fusion en `main` y el borrado de la rama tecnica antes de iniciar una nueva issue, salvo que exista un bloqueo explicito documentado en la propia issue.
+- Si la unica tarea pendiente de `developer-teams` es gestion operativa de ramas ya validadas o ya fusionadas, debe completar esa gestion o dejar documentado su bloqueo y arrancar despues la siguiente issue elegible; la gestion de ramas por si sola no debe dejar al equipo sin una nueva issue activa.
 - El borrado de la rama tecnica debe realizarlo `developer-teams` inmediatamente despues de completar el merge con `main`.
 - Tras la fusion a `main` realizada por `developer-teams`, `product-manager` debe cerrar el issue o dejar constancia explicita del motivo por el que sigue abierta.
 - Cuando `product-manager` cierre definitivamente una issue, debe actualizar tambien el cuerpo de la issue para dejar `Estado operativo: cerrado`.
