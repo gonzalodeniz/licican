@@ -220,5 +220,16 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - `developer-teams` y `agile-coach` no pueden distinguir con rapidez entre "validado pero pendiente de merge" y "validado e integrado pero pendiente de cierre administrativo".
 - La revision del flujo post-QA se vuelve manual y propensa a olvidar la limpieza de rama.
 
+## Problema 22: la documentacion de estado vigente puede quedar alineada con `main` mientras el backlog sigue desfasado
+### Evidencia
+- `product-manager/product-backlog.md` mantiene `PB-011` como `validado`, pero sigue marcando pendiente la integracion administrativa de la issue, mientras `doc-teams/README.md` ya describe esa entrega como parte de `main`.
+- La discrepancia no afecta al funcionamiento tecnico de la aplicacion, pero si a la lectura de que documento refleja el estado vigente y cual se quedo como fotografia anterior.
+- El propio flujo de coordinacion ya obliga a reconciliar backlog, refinamiento y roadmap tras cada merge, pero esa regla no nombraba de forma explicita la documentacion de estado mantenida por `doc-teams` como segundo detector de deriva.
+
+### Impacto observado
+- `product-manager` puede seguir leyendo el backlog como si fuera la fuente mas actual aunque la documentacion de estado de `main` ya refleje la entrega integrada.
+- `doc-teams` puede quedar alineado con `main` mientras el backlog conserva un estado previo, generando una falsa impresion de que el problema de sincronizacion aun esta en documentacion.
+- Se retrasa la deteccion de quien tiene que corregir primero y se mezcla el cierre administrativo con la lectura documental de la integracion.
+
 ## Conclusion
 El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado` y en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion, reduciendo incumplimientos por memoria, facilitando auditoria ligera y evitando estados historicos desalineados.

@@ -206,6 +206,7 @@ Al cerrar definitivamente la issue, `product-manager` debe actualizar tambien el
 
 ## Sincronizacion documental tras integracion
 - Cuando una issue validada se fusiona en `main`, `product-manager` debe reconciliar el backlog, el refinamiento funcional y el roadmap afectados antes de iniciar una nueva issue funcional.
+- En esa misma comprobacion, `product-manager` debe contrastar el estado visible en `product-manager/product-backlog.md` con la documentacion de estado vigente mantenida por `doc-teams` para la rama `main` y resolver cualquier contradiccion en el mismo ciclo operativo. Si la documentacion de `doc-teams` ya refleja `main` y el backlog sigue mostrando un estado anterior, el backlog se considera la copia desfasada que debe actualizarse antes de iniciar nueva planificacion funcional.
 - Si la issue sigue abierta por cierre administrativo o seguimiento, el comentario debe indicar tambien si la documentacion de producto ya quedo sincronizada o sigue pendiente.
 - No debe permanecer una version de backlog que sugiera `nuevo` o pendiente de trabajo cuando la entrega ya esta integrada en `main`.
 

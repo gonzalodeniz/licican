@@ -476,13 +476,35 @@ Dejar explicitamente en los acuerdos operativos y en `AGENTS.md` que:
 - Si los equipos siguen usando el `changelog/` como prueba de estado actual, la ambiguedad reaparecera.
 - La mejora depende de que `developer-teams` deje el comentario de cierre de integracion y de que `product-manager` no cierre la issue sin esa evidencia.
 
+## Mejora 23: usar la documentacion de estado vigente como segundo detector de deriva post-merge
+### Problema detectado
+Tras integrar una entrega validada, el backlog puede seguir mostrando un estado anterior aunque la documentacion de estado vigente mantenida por `doc-teams` ya refleje la realidad de `main`.
+
+### Propuesta
+- En el checkpoint post-merge, `product-manager` debe contrastar el estado del backlog con la documentacion de estado vigente de `doc-teams`.
+- Si ambos documentos divergen, la copia a corregir primero es la que sigue arrastrando el estado anterior, normalmente el backlog.
+- El comentario administrativo de cierre debe dejar visible si esa reconciliacion documental ya quedo hecha o sigue pendiente.
+
+### Impacto esperado
+- Reduce la probabilidad de que el backlog se convierta en una fotografia antigua mientras la documentacion de estado vigente ya esta actualizada.
+- Hace mas claro que documento esta atrasado cuando la discrepancia no es funcional sino de coordinacion.
+- Mejora la deteccion temprana de cierre administrativo incompleto sin obligar a revisar varias fuentes por separado.
+
+### Tradeoffs
+- Introduce una comprobacion documental adicional en el cierre post-merge.
+
+### Riesgos y dependencias
+- Si `doc-teams` y `product-manager` actualizan sus artefactos en momentos distintos, la discrepancia puede reaparecer temporalmente.
+- Requiere que el backlog y la documentacion de estado se revisen en el mismo ciclo que el merge, no en una iteracion posterior.
+
 ## Secuencia prioritaria de adopcion
 Las mejoras anteriores ya cubren la mayor parte de las fricciones detectadas. Para que el cambio de proceso tenga impacto rapido y no genere mas ruido del necesario, la adopcion recomendada es esta:
 
 1. Blindar las plantillas operativas con `Rol:` como primera linea y con el `Estado operativo:` visible en el cuerpo de la issue.
 2. Exigir evidencia de cierre tecnico tras `validado`: merge en `main` y borrado de la rama antes del cierre administrativo.
 3. Mantener sincronizados backlog, refinamiento funcional y roadmap en el mismo ciclo en que cambia el estado real de la issue.
-4. Reducir duplicidad documental dejando las reglas compartidas en `agile-coach/acuerdos-operativos.md` y reservando a `AGENTS.md` y `README.md` solo las referencias o plantillas minimas.
+4. Usar la documentacion de estado vigente como detector adicional de backlog desfasado tras el merge.
+5. Reducir duplicidad documental dejando las reglas compartidas en `agile-coach/acuerdos-operativos.md` y reservando a `AGENTS.md` y `README.md` solo las referencias o plantillas minimas.
 
 ### Impacto esperado
 - Recorta la probabilidad de deriva entre documentos y comentarios operativos.

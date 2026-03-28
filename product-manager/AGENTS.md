@@ -96,6 +96,7 @@ Este agente gestiona los issues del repositorio remoto como mecanismo de coordin
 - Debe aceptar como entrada operativa los informes estructurados de `quality-auditor`, aunque las issues tecnicas derivadas sean creadas por `developer-teams`.
 - Debe aceptar como entrada operativa los informes estructurados de `security-auditor`, aunque las issues tecnicas derivadas sean creadas por `developer-teams`.
 - Tras la fusion en `main` de una issue validada, debe reconciliar el backlog, el refinamiento funcional y el roadmap afectados antes de iniciar una nueva issue funcional.
+- En esa reconciliacion debe contrastar tambien `product-manager/product-backlog.md` con la documentacion de estado vigente mantenida por `doc-teams` para la rama `main`; si no coinciden, debe corregir primero el artefacto desfasado antes de abrir nueva planificacion funcional.
 - Cada issue debe estar vinculado de forma clara con backlog, historia de usuario o caso de uso.
 - Debe redactar los issues de forma ejecutable, con contexto suficiente para desarrollo.
 - Cada issue lista para desarrollo debe incluir de forma literal y en este orden `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`.

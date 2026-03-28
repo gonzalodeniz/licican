@@ -57,6 +57,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de issues con `Estado operativo: validado` que no tienen comentario de cierre de integracion de `developer-teams` con `Merge en main:` y `Rama eliminada:`, o que siguen abiertas sin comentario administrativo de `product-manager`.
 - Senal que aporta: detecta el limbo post-QA en el que la entrega ya paso validacion funcional pero todavia no queda claro si la rama tecnica fue fusionada y limpia.
 
+## 13. Desalineacion entre backlog y documentacion de estado vigente
+- Definicion: numero o porcentaje de items cuyo estado operativo en `product-manager/product-backlog.md` difiere de la documentacion de estado vigente mantenida por `doc-teams` para la misma entrega despues de un merge a `main`.
+- Senal que aporta: detecta si el backlog se ha quedado atras respecto a la documentacion que ya refleja `main`, o si la documentacion ha adelantado de forma indebida el estado de una entrega no reconciliada.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.

@@ -87,3 +87,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: el `changelog/` describe una entrega como validada o sincronizada, pero la rama `main` o los comentarios de cierre no muestran aun la integracion completa.
 - Impacto: `product-manager` o `doc-teams` pueden documentar como vigente una capacidad que todavia no esta realmente integrada, o dar por cerrada una issue sin evidencia tecnica suficiente.
 - Mitigacion acordada: tratar `main` y los comentarios de cierre como evidencia vigente de integracion; el `changelog/` solo tiene valor historico y nunca debe sustituir esa comprobacion.
+
+## Riesgo 18: backlog desfasado frente a la documentacion de estado vigente
+- Senal observable: `doc-teams/README.md` o la documentacion de estado vigente ya describen una entrega como parte de `main`, pero `product-manager/product-backlog.md` sigue marcandola con un estado anterior.
+- Impacto: el backlog pierde fiabilidad como fotografia operativa y puede hacer que la siguiente planificacion se base en una version atrasada del estado real del producto.
+- Mitigacion acordada: en el checkpoint post-merge, `product-manager` debe contrastar backlog y documentacion de estado vigente y corregir primero el artefacto que siga desfasado antes de abrir nueva planificacion funcional.

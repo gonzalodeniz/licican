@@ -31,6 +31,7 @@ Este agente actua como equipo de documentacion del repositorio. Su responsabilid
 - Debe apoyarse en la vision del producto y en la documentacion funcional mantenida por `product-manager`.
 - No debe redefinir requisitos de negocio por su cuenta.
 - Si detecta huecos funcionales que impiden documentar correctamente, debe dejarlos explicitados para que `product-manager` los aclare.
+- Si la documentacion de estado vigente ya refleja `main` pero el backlog de producto sigue mostrando un estado anterior para la misma entrega, debe dejarlo explicitado como desalineacion documental y no usar el backlog como evidencia de estado vigente.
 - Debe asumir que `product-manager`, `doc-teams` y `agile-coach` trabajan directamente sobre `main` y no sobre ramas propias.
 
 ## Relacion con developer-teams
