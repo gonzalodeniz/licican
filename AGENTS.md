@@ -33,6 +33,15 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 |-- Makefile
 |-- README.md
 |-- pyproject.toml
+|-- bbdd/
+|   |-- .env
+|   |-- .env.example
+|   |-- 01-schema.sql
+|   |-- Dockerfile
+|   |-- README.md
+|   |-- docker-compose-bbdd.yml
+|   |-- importar_licitaciones.py
+|   `-- requirements.txt
 |-- changelog/
 |-- data/
 |-- src/
@@ -60,6 +69,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - `src/`: codigo fuente Python de la aplicacion.
 - `tests/`: pruebas tecnicas automatizadas del proyecto.
 - `data/`: datos versionados que utiliza la aplicacion.
+- `bbdd/`: scripts, configuracion y artefactos auxiliares para esquema, despliegue e importacion de datos de la base de datos.
 - `changelog/`: registro diario de actividad por rol.
 - `product-manager/`: documentacion de producto, vision, backlog y artefactos funcionales.
 - `developer-teams/`: instrucciones, entregables y documentacion del equipo de desarrollo.
