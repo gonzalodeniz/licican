@@ -9,6 +9,7 @@ from urllib.parse import parse_qs, quote, urlencode
 from wsgiref.simple_server import make_server
 
 from podencoti.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
+from podencoti.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
 from podencoti.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail
 from podencoti.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from podencoti.source_coverage import load_source_coverage, summary_by_status
@@ -241,6 +242,27 @@ def _page_template(
         color: var(--muted);
         text-decoration-thickness: 1px;
         text-underline-offset: 0.16em;
+      }}
+      .tab-nav {{
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin: 1rem 0 1.25rem;
+      }}
+      .tab-link {{
+        display: inline-block;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        text-decoration: none;
+        border: 1px solid var(--line);
+        color: var(--accent-strong);
+        background: #fffaf3;
+      }}
+      .tab-link.active {{
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        box-shadow: 0 10px 24px rgb(15 76 92 / 0.18);
       }}
       .note {{
         margin-top: 1rem;
@@ -580,6 +602,287 @@ def _validation_note_html(message: str | None) -> str:
     return _status_note_html(f"Corrige el rango de presupuesto. {message}", "warn")
 
 
+def _display_value(value: object | None) -> str:
+    if value in (None, ""):
+        return "No informado"
+    return str(value)
+
+
+def _tab_link(base_path: str, current_view: str, view: str, label: str) -> str:
+    class_name = "tab-link active" if current_view == view else "tab-link"
+    return (
+        f'<a class="{class_name}" href="{escape(_app_url(base_path, f"/datos-consolidados?vista={view}"))}">'
+        f"{escape(label)}</a>"
+    )
+
+
+def _data_tabs_html(base_path: str, current_view: str) -> str:
+    return f"""
+      <nav class="tab-nav" aria-label="Pestañas de datos consolidados">
+        {_tab_link(base_path, current_view, "licitaciones", "Licitaciones TI Canarias")}
+        {_tab_link(base_path, current_view, "lotes", "Detalle Lotes")}
+        {_tab_link(base_path, current_view, "adjudicaciones", "Adjudicaciones")}
+      </nav>
+    """
+
+
+def _dataset_table_html(rows: list[dict[str, object]], columns: list[tuple[str, str]], actions: list[str] | None = None) -> str:
+    if not rows:
+        return """
+      <section class="note">
+        No hay filas disponibles en la hoja seleccionada para la muestra actual del Excel.
+      </section>
+        """
+
+    headers = "".join(f"<th>{escape(label)}</th>" for _, label in columns)
+    if actions is not None:
+        headers += "<th>Detalle</th>"
+
+    body_rows = []
+    for index, row in enumerate(rows):
+        cells = "".join(
+            f'<td data-label="{escape(label)}">{escape(_display_value(row.get(key)))}</td>'
+            for key, label in columns
+        )
+        if actions is not None:
+            cells += f'<td data-label="Detalle">{actions[index]}</td>'
+        body_rows.append(f"<tr>{cells}</tr>")
+
+    return f"""
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>{headers}</tr>
+          </thead>
+          <tbody>
+            {"".join(body_rows)}
+          </tbody>
+        </table>
+      </div>
+    """
+
+
+def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
+    dataset = load_canarias_dataset()
+    selected_view = view if view in {"licitaciones", "lotes", "adjudicaciones"} else "licitaciones"
+    tabs = _data_tabs_html(base_path, selected_view)
+
+    if selected_view == "licitaciones":
+        rows = dataset["licitaciones"]
+        columns = [
+            ("id_expediente", "ID Expediente"),
+            ("titulo", "Título"),
+            ("estado", "Estado"),
+            ("organo_contratacion", "Órgano Contratación"),
+            ("importe_sin_iva", "Importe sin IVA"),
+            ("procedimiento", "Procedimiento"),
+            ("plazo_presentacion", "Plazo Presentación"),
+            ("numero_lotes", "Nº Lotes"),
+            ("numero_adjudicaciones", "Nº Adjudicaciones"),
+            ("fichero_origen_atom", "Fichero Origen"),
+        ]
+        actions = [
+            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{item["slug"]}"))}">Ver detalle</a>'
+            for item in rows
+        ]
+        heading = "Licitaciones TI Canarias"
+        description = (
+            "La vista replica la hoja principal del Excel versionado y expone el expediente, su estado, "
+            "el órgano contratante, los importes clave y el fichero `.atom` consolidado visible para trazabilidad."
+        )
+    elif selected_view == "lotes":
+        rows = dataset["lotes"]
+        columns = [
+            ("id_expediente", "ID Expediente"),
+            ("titulo_licitacion", "Título Licitación"),
+            ("numero_lote", "Nº Lote"),
+            ("nombre_lote", "Nombre Lote"),
+            ("importe_sin_iva", "Importe sin IVA (€)"),
+            ("importe_con_iva", "Importe con IVA (€)"),
+            ("cpvs", "CPVs"),
+            ("ubicacion", "Ubicación"),
+            ("criterios_adjudicacion", "Criterios Adjudicación"),
+        ]
+        actions = [
+            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{item["licitacion_slug"]}"))}">Ver licitación</a>'
+            for item in rows
+        ]
+        heading = "Detalle Lotes"
+        description = (
+            "La hoja de lotes permite revisar el desglose funcional de cada expediente por lote, "
+            "manteniendo importes, ubicación, CPVs y criterios de adjudicación."
+        )
+    else:
+        rows = dataset["adjudicaciones"]
+        columns = [
+            ("id_expediente", "ID Expediente"),
+            ("titulo", "Título"),
+            ("fecha_adjudicacion", "Fecha Adjudicación"),
+            ("lote", "Lote"),
+            ("ganador", "Ganador"),
+            ("importe_adjudicacion_sin_iva", "Importe Adj. sin IVA"),
+            ("importe_adjudicacion_total", "Importe Adj. Total"),
+            ("id_contrato", "ID Contrato"),
+            ("fichero_origen_atom", "Fichero Origen"),
+        ]
+        actions = [
+            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/adjudicaciones/{item["slug"]}"))}">Ver contrato</a>'
+            for item in rows
+        ]
+        heading = "Adjudicaciones"
+        description = (
+            "La hoja de adjudicaciones expone el resultado contractual visible para la muestra actual, "
+            "incluyendo adjudicatario, importes, lote y trazabilidad al origen cuando la licitación asociada la aporta."
+        )
+
+    table_html = _dataset_table_html(rows, columns, actions)
+    summary = dataset["resumen"]
+    content = f"""
+      <section class="panel">
+        <div class="panel-body">
+          <div class="summary">
+            <article class="metric"><strong>{summary["licitaciones"]}</strong>Licitaciones en la muestra</article>
+            <article class="metric"><strong>{summary["lotes"]}</strong>Lotes visibles</article>
+            <article class="metric"><strong>{summary["adjudicaciones"]}</strong>Adjudicaciones visibles</article>
+          </div>
+          <p class="muted">
+            La fuente visible de esta entrega es <code>{escape(dataset["archivo_origen"])}</code>, alineada con <code>{escape(dataset["referencia_funcional"])}</code>.
+          </p>
+          {tabs}
+          <p>{description}</p>
+        </div>
+        {table_html}
+      </section>
+    """
+    return _page_template(
+        "PodencoTI | Datos consolidados TI Canarias",
+        heading,
+        "Release 7 · PB-012 · Excel funcional visible en la aplicación",
+        (
+            "PodencoTI expone aquí la misma estructura funcional que el Excel versionado de licitaciones TI Canarias, "
+            "con pestañas separadas para licitaciones, lotes y adjudicaciones."
+        ),
+        content,
+    )
+
+
+def _licitacion_excel_detail_html_response(slug: str, base_path: str = "") -> str | None:
+    detail = build_licitacion_detail(slug)
+    if detail is None:
+        return None
+
+    rows = [
+        ("ID Expediente", detail["id_expediente"]),
+        ("Estado", detail["estado"]),
+        ("Órgano Contratación", detail["organo_contratacion"]),
+        ("Importe estimado", detail["importe_estimado"]),
+        ("Importe con IVA", detail["importe_con_iva"]),
+        ("Importe sin IVA", detail["importe_sin_iva"]),
+        ("CPVs Informáticos", detail["cpvs_informaticos"]),
+        ("Ubicación", detail["ubicacion"]),
+        ("Procedimiento", detail["procedimiento"]),
+        ("Plazo Presentación", detail["plazo_presentacion"]),
+        ("Nº Lotes", detail["numero_lotes"]),
+        ("Nº Adjudicaciones", detail["numero_adjudicaciones"]),
+        ("Fecha Actualización", detail["fecha_actualizacion"]),
+        ("Fichero .atom origen", detail["fichero_origen_atom"]),
+    ]
+    table_rows = "".join(
+        f"<tr><th>{escape(label)}</th><td>{escape(_display_value(value))}</td></tr>" for label, value in rows
+    )
+    placsp_link = detail["enlace_placsp"]
+    extra_link = (
+        f'<p><a class="offer-action" href="{escape(str(placsp_link))}" target="_blank" rel="noopener noreferrer">Abrir expediente en PLACSP</a></p>'
+        if placsp_link
+        else ""
+    )
+    content = f"""
+      <section class="panel">
+        <div class="panel-body">
+          <p><a href="{escape(_app_url(base_path, '/datos-consolidados?vista=licitaciones'))}">Volver a Licitaciones TI Canarias</a></p>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                {table_rows}
+              </tbody>
+            </table>
+          </div>
+          {extra_link}
+        </div>
+      </section>
+    """
+    return _page_template(
+        "PodencoTI | Detalle de licitación consolidada",
+        str(detail["titulo"]),
+        "PB-012 · Detalle trazable del expediente",
+        (
+            "La ficha mantiene visible la correspondencia funcional con el Excel de referencia y deja explícito el fichero `.atom` "
+            "que alimenta la versión consolidada mostrada al usuario."
+        ),
+        content,
+    )
+
+
+def _adjudicacion_excel_detail_html_response(slug: str, base_path: str = "") -> str | None:
+    detail = build_adjudicacion_detail(slug)
+    if detail is None:
+        return None
+
+    rows = [
+        ("ID Expediente", detail["id_expediente"]),
+        ("Resultado", detail["resultado"]),
+        ("Fecha Adjudicación", detail["fecha_adjudicacion"]),
+        ("Lote", detail["lote"]),
+        ("Ganador", detail["ganador"]),
+        ("NIF Ganador", detail["nif_ganador"]),
+        ("Ciudad Ganador", detail["ciudad_ganador"]),
+        ("País", detail["pais"]),
+        ("Importe Adj. sin IVA", detail["importe_adjudicacion_sin_iva"]),
+        ("Importe Adj. Total", detail["importe_adjudicacion_total"]),
+        ("Ofertas Recibidas", detail["ofertas_recibidas"]),
+        ("Ofertas PYME", detail["ofertas_pyme"]),
+        ("PYME Adjudicatario", detail["pyme_adjudicatario"]),
+        ("ID Contrato", detail["id_contrato"]),
+        ("Fecha Contrato", detail["fecha_contrato"]),
+        ("Fichero .atom origen", detail["fichero_origen_atom"]),
+    ]
+    table_rows = "".join(
+        f"<tr><th>{escape(label)}</th><td>{escape(_display_value(value))}</td></tr>" for label, value in rows
+    )
+    licitacion_link = ""
+    if detail["licitacion_slug"] is not None:
+        licitacion_link = (
+            f'<p><a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{detail["licitacion_slug"]}"))}">'
+            "Ver licitación asociada</a></p>"
+        )
+    content = f"""
+      <section class="panel">
+        <div class="panel-body">
+          <p><a href="{escape(_app_url(base_path, '/datos-consolidados?vista=adjudicaciones'))}">Volver a Adjudicaciones</a></p>
+          <p>{escape(_display_value(detail["descripcion"]))}</p>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                {table_rows}
+              </tbody>
+            </table>
+          </div>
+          {licitacion_link}
+        </div>
+      </section>
+    """
+    return _page_template(
+        "PodencoTI | Detalle de adjudicación consolidada",
+        str(detail["titulo"]),
+        "PB-012 · Contrato adjudicado con trazabilidad",
+        (
+            "Esta ficha deja visible el resultado contractual de la muestra actual y, cuando existe correspondencia con la licitación, "
+            "hereda la trazabilidad del fichero `.atom` origen."
+        ),
+        content,
+    )
+
+
 def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str = "") -> str:
     catalog = build_catalog(filters=filters)
     opportunities = catalog["oportunidades"]
@@ -716,6 +1019,12 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
         """
 
     content = f"""
+      <section class="note">
+        <strong>Datos consolidados visibles del Excel</strong><br />
+        La aplicación incorpora una superficie funcional alineada con <code>data/licitaciones_ti_canarias.xlsx</code> en las pestañas
+        <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong>.
+        <a class="button-link" href="{escape(_app_url(base_path, '/datos-consolidados'))}">Abrir datos consolidados</a>
+      </section>
       {filter_form}
       <section class="note">
         <strong>Alertas tempranas del MVP</strong><br />
@@ -1176,6 +1485,10 @@ def application(environ, start_response):
     method = (environ.get("REQUEST_METHOD", "GET") or "GET").upper()
     filters = _parse_catalog_filters(environ)
 
+    if path == "/api/datos-consolidados":
+        body = b"".join(_json_response(load_canarias_dataset()))
+        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+
     if path == "/api/alertas":
         reference, alerts = load_alerts(_resolve_alerts_path())
         payload = {
@@ -1285,6 +1598,30 @@ def application(environ, start_response):
         query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
         status_message = (query.get("mensaje") or [None])[0]
         body = b"".join(_html_response(_alerts_html_response(base_path, filters, status_message=status_message)))
+        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+
+    if path == "/datos-consolidados":
+        query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
+        current_view = (query.get("vista") or ["licitaciones"])[0]
+        body = b"".join(_html_response(_datos_consolidados_html_response(current_view, base_path)))
+        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+
+    if path.startswith("/datos-consolidados/licitaciones/"):
+        slug = path.removeprefix("/datos-consolidados/licitaciones/")
+        content = _licitacion_excel_detail_html_response(slug, base_path)
+        if content is None:
+            body = b"No encontrado"
+            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(_html_response(content))
+        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+
+    if path.startswith("/datos-consolidados/adjudicaciones/"):
+        slug = path.removeprefix("/datos-consolidados/adjudicaciones/")
+        content = _adjudicacion_excel_detail_html_response(slug, base_path)
+        if content is None:
+            body = b"No encontrado"
+            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(_html_response(content))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path.startswith("/oportunidades/"):
