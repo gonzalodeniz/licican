@@ -5,6 +5,7 @@
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26 y actualmente esta en `Estado operativo: no validado`.
 - La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos.
+- En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
 ## Issue creada: Consolidar fuentes `.atom` versionadas de `/data` para licitaciones TI Canarias
@@ -123,23 +124,26 @@ Historia de usuario: HU-13 Gestionar acceso por rol a las acciones del sistema
 Caso de uso: CU-13 Aplicar permisos segun rol en consulta y gestion
 Criterios de aceptacion:
 1. El sistema distingue al menos los roles `Administrador`, `Colaborador` y `Lector/Invitado`.
-2. `Administrador` puede consultar licitaciones, gestionar alertas, gestionar pipeline propio y ajeno cuando aplique, consultar KPIs y administrar roles o permisos.
-3. `Colaborador` puede consultar licitaciones, crear y editar sus alertas, gestionar su pipeline propio y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
-4. `Lector/Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, pipeline, roles ni configuraciones de producto.
-5. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
-6. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
-Dependencias: PB-010, PB-004 y PB-005
+2. `Administrador` puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles, ademas de cualquier accion visible para los demas roles.
+3. `Colaborador` puede consultar licitaciones, crear y editar sus alertas propias y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
+4. `Lector/Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
+5. Si una superficie futura como pipeline aun no esta disponible, la primera iteracion de permisos no queda bloqueada por ello y deja preparada la extension de la misma matriz de permisos.
+6. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
+7. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
+Dependencias: PB-010 y PB-004
 Estado operativo: nuevo
 
 Contexto funcional:
 - La especificacion funcional consolidada ya define una matriz de permisos para `Administrador`, `Colaborador` y `Lector/Invitado`, pero ese alcance no estaba todavia trazado como issue ejecutable.
 - Producto necesita convertir esa definicion en trabajo observable antes de ampliar gestion multiusuario o administracion operativa.
+- Esta primera iteracion debe gobernar superficies ya visibles del producto; `PB-005` no bloquea este corte y heredara despues la misma matriz funcional.
 
 Tareas sugeridas:
 - Inventariar las acciones visibles y mutables del producto actual.
 - Mapear cada accion a la matriz de permisos aprobada por producto.
 - Aplicar restricciones coherentes en interfaz y backend donde corresponda.
 - Ajustar navegacion y llamadas a la accion para que no sugieran capacidades inexistentes al rol actual.
+- Dejar preparada la extension a pipeline sin exigir que esa superficie exista ya en esta entrega.
 - Dejar evidencia verificable para `qa-teams` con escenarios por rol.
 
 Preguntas abiertas que `developer-teams` debe aclarar si bloquean:

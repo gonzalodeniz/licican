@@ -45,7 +45,9 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Con `PB-011` ya cerrada, la siguiente prioridad visible sigue siendo `PB-012` para exponer en aplicacion las superficies equivalentes al Excel de referencia y mostrar el fichero origen en detalle.
 - `PB-010` permanece como necesidad de experiencia transversal, pero deja de ser la siguiente pieza funcional inmediata.
 - `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto, pero no estaba convertido en trabajo trazable para `developer-teams`.
+- Se detecto y corrige una inconsistencia de alcance: `PB-013` no debe quedar bloqueada por `PB-005`, porque su primera iteracion se aplica a superficies ya disponibles y la extension a pipeline debe heredar la misma matriz mas adelante.
 - Los informes de `quality-auditor` y `security-auditor` del 2026-03-28 quedan aceptados como entrada formal de priorizacion; falta que `developer-teams` materialice sus hallazgos accionables en issues tecnicas separadas para poder ordenarlas frente a `PB-010`, `PB-005` y `PB-008`.
+- Producto debe reservar capacidad visible para esos hallazgos antes de comprometer nueva expansion funcional posterior a `PB-012`.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -61,6 +63,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implicitas.
 - La regla TI ya puede validarse de forma observable antes de construir el catalogo, pero su casuistica seguira refinandose con ejemplos reales.
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
+- La primera iteracion de permisos de `PB-013` debe gobernar catalogo, detalle, filtros, vistas consolidadas, alertas y administracion visible; pipeline se incorpora despues sin redefinir la matriz funcional.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
 - Una alerta vacia no es valida: debe incluir al menos un criterio funcional entre palabra clave, presupuesto, procedimiento o ubicacion.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
@@ -164,6 +167,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Riesgo operativo si `PB-012` se reabre sin handoff completo y vuelve a entrar en revision de `qa-teams` sin rama remota trazable ni evidencia minima de entrega.
 - Riesgo funcional si el crecimiento de alertas, pipeline o futuras vistas no aplica de forma consistente el modelo de roles y permisos ya definido.
 - Riesgo de roadmap sesgado si los hallazgos tecnicos y de seguridad del 2026-03-28 no se convierten pronto en trabajo trazable y compiten de forma invisible con nuevas funcionalidades.
+- Riesgo de planificacion irreal si `PB-013` se mantiene ligada a dependencias aun no visibles y se retrasa un control de acceso que ya puede acotarse sobre superficies existentes.
 
 ## Supuestos explicitos
 - El primer objetivo es demostrar que la centralizacion y el filtrado ahorran tiempo al usuario.
@@ -180,6 +184,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Mantener `PB-005` como siguiente pieza de negocio posterior a `PB-010` o coordinar su arranque cuando `PB-011` y `PB-012` ya hayan dejado visible la nueva base de dato consolidado.
 - Mantener `PB-005` y `PB-008` por detras de `PB-012`, y reevaluar `PB-010` y `PB-013` como siguiente capa de experiencia y gobierno funcional.
 - Crear las issues tecnicas separadas derivadas de los informes de `quality-auditor` y `security-auditor` del 2026-03-28 para que producto pueda priorizarlas de forma explicita.
+- No tratar la inexistencia actual de ramas tecnicas remotas como permiso automatico para abrir nueva expansion: primero debe resolverse `PB-012` y hacerse visible la deuda tecnica y de seguridad.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
 - Garantizar en detalle la visibilidad del fichero `.atom` origen de la version consolidada.
@@ -195,6 +200,6 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-011` queda validado por `qa-teams`, integrado en `main` y cerrado administrativamente.
 - `PB-012` completa esa iteracion haciendo visible en aplicacion la salida alineada con el Excel y la trazabilidad al fichero origen.
 - `PB-010` queda como iteracion de base de interfaz posterior a la consolidacion visible del dato.
-- `PB-013` convierte en trabajo ejecutable la matriz de permisos definida en la especificacion consolidada.
+- `PB-013` convierte en trabajo ejecutable la matriz de permisos definida en la especificacion consolidada sobre las superficies ya disponibles, dejando pipeline como extension posterior.
 - `PB-005` queda como modulo posterior que debe apoyarse en esa base de navegacion comun.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

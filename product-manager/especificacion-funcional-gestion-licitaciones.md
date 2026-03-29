@@ -198,9 +198,10 @@ Como Product Manager, quiero definir KPIs de cobertura, adopcion y uso para toma
 Como responsable de producto y operacion, quiero que las acciones del sistema se habiliten segun el rol del usuario para proteger la gestion y mantener una experiencia coherente de consulta.
 
 - Criterios de aceptacion:
-  - Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, gestionar pipeline, consultar KPIs y administrar roles o permisos.
-  - Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas y su pipeline propio sin acceder a administracion global.
+  - Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
+  - Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas propias sin acceder a administracion global.
   - Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion, Then la matriz de permisos deja preparada su extension sin bloquear la entrega actual.
   - Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 
 ## 4. Casos de uso
@@ -405,7 +406,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
   - Garantizar que cada rol ve y ejecuta solo las acciones que le corresponden.
 - Precondiciones:
   - Existe un rol funcional asignado o inferido para el usuario actual.
-  - El producto ya dispone de acciones visibles de consulta, alertas, pipeline o administracion.
+  - El producto ya dispone de acciones visibles de consulta, alertas o administracion.
 - Disparador:
   - El usuario accede a una vista o accion del producto.
 - Happy path:
@@ -416,6 +417,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
   5. El sistema procesa la accion manteniendo la restriccion de permisos.
 - Flujo alternativo o error:
   - Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
+  - Si una superficie futura como pipeline aun no esta expuesta, la aplicacion conserva la misma matriz funcional para extenderla despues sin reabrir el alcance base.
 - Postcondiciones:
   - El usuario opera dentro del alcance permitido para su rol.
 

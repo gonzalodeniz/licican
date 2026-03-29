@@ -21,6 +21,7 @@ Dar al producto una base comun de navegacion, permisos y medicion para crecer si
 - La aplicacion mantiene una navegacion comun usable en escritorio y movil.
 - Las acciones visibles y ejecutables se adaptan al rol del usuario.
 - Producto dispone de KPIs definidos para orientar priorizacion posterior.
+- La primera iteracion de permisos no queda bloqueada por superficies futuras como pipeline si las superficies ya disponibles pueden gobernarse con la matriz aprobada.
 
 ## Riesgo principal
 - Que el producto crezca con interfaz fragmentada, permisos inconsistentes y decisiones de roadmap sin base de medicion.

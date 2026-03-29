@@ -242,10 +242,12 @@
   quiero que las acciones del sistema se habiliten segun el rol del usuario,
   para proteger la gestion de alertas, pipeline y administracion sin degradar la experiencia de consulta.
 - Criterios de aceptacion:
-  1. Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, gestionar pipeline, consultar KPIs y administrar roles o permisos.
-  2. Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas y su pipeline propio sin acceder a la administracion global.
+  1. Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
+  2. Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas propias y no accede a la administracion global.
   3. Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
-  4. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
-- Dependencias funcionales: PB-010, PB-004, PB-005
+  4. Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion de permisos, Then la matriz funcional deja preparada su extension sin bloquear la entrega actual.
+  5. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
+- Dependencias funcionales: PB-010, PB-004
 - Prioridad: P1
 - Estado: `nuevo`
+- Nota de alcance: la primera iteracion de `PB-013` gobierna las superficies ya disponibles; las reglas de pipeline se aplicaran en la evolucion de `PB-005` sin redefinir la matriz de permisos.

@@ -113,6 +113,8 @@
   - Las acciones visibles de consulta y gestion se ajustan al rol del usuario sin exponer controles no autorizados.
 - Riesgo principal:
   - Que el producto siga creciendo por modulos sin una base comun de interfaz y permisos y se vuelva mas dificil de usar, gobernar y evolucionar.
+- Decision de alcance:
+  - La primera iteracion de `PB-013` debe aplicarse sobre las superficies ya disponibles en producto y no quedar bloqueada por la futura existencia de `PB-005`; la extension de permisos a pipeline se aplicara cuando esa superficie exista.
 
 ## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -133,7 +135,7 @@
 - Estado operativo actual:
   - `PB-004` ya fue validado por `qa-teams` en la issue #6 el 2026-03-25, integrado en `main` por `developer-teams` el 2026-03-26 y queda cerrado administrativamente por `product-manager`.
   - `PB-005` permanece en `nuevo` y no debe iniciarse antes de `PB-011` y `PB-012`, ni antes de decidir si la base de navegacion `PB-010` entra antes o despues de esta exposicion funcional.
-  - `PB-013` queda preparado en la issue #13 para convertir el modelo de roles y permisos en comportamiento observable antes de ampliar mas gestion multiusuario.
+  - `PB-013` queda preparado en la issue #13 para convertir el modelo de roles y permisos en comportamiento observable sobre las superficies ya disponibles antes de ampliar mas gestion multiusuario.
 
 ## Release 7: Medicion y aprendizaje
 - Objetivo: Mejorar precision, cobertura y priorizacion apoyandose en indicadores.
@@ -157,3 +159,4 @@
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
 - No se recomienda iniciar `PB-005` antes de resolver `PB-012`; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar visible esta nueva superficie de dato consolidado.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
+- A fecha 2026-03-29 no existen ramas tecnicas remotas abiertas; el siguiente cuello de botella es de priorizacion y handoff, no de saturacion de ramas activas.

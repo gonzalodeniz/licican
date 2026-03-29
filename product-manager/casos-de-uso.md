@@ -317,7 +317,7 @@
 - Disparador: El usuario accede a una accion de consulta o de gestion en la aplicacion.
 - Precondiciones:
   - Existe un rol funcional asignado o inferido para el usuario actual.
-  - El producto ya dispone de acciones visibles de consulta, alertas, pipeline o administracion.
+  - El producto ya dispone de acciones visibles de consulta, alertas o administracion.
 - Flujo principal:
   1. El usuario accede a una vista o accion del producto.
   2. El sistema identifica su rol: `Administrador`, `Colaborador` o `Lector/Invitado`.
@@ -327,7 +327,8 @@
 - Flujos alternativos:
   - A1. Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
   - A2. Si el rol es `Lector/Invitado`, el sistema permite consulta de catalogo, detalle, filtros y vistas consolidadas, pero no muestra acciones de alta o edicion.
-  - A3. Si el rol es `Colaborador`, el sistema limita la gestion a alertas y pipeline propios y excluye administracion global.
+  - A3. Si el rol es `Colaborador`, el sistema limita la gestion a sus elementos propios en las superficies ya disponibles y excluye administracion global.
+  - A4. Si una superficie futura como pipeline aun no esta expuesta, la aplicacion conserva la regla funcional definida sin bloquear la iteracion de permisos sobre las superficies vigentes.
 - Postcondiciones:
   - El usuario ha operado dentro del alcance permitido para su rol.
 - Reglas de negocio relacionadas:
@@ -336,3 +337,4 @@
   - RB-47 `Colaborador` solo puede gestionar sus propios elementos salvo permiso adicional explicitado.
   - RB-48 `Lector/Invitado` no puede crear ni modificar entidades.
   - RB-49 La interfaz no debe mostrar como disponibles acciones bloqueadas por permisos.
+  - RB-50 La primera iteracion de permisos debe ser ejecutable sobre las superficies ya disponibles y extenderse a pipeline cuando `PB-005` exista sin redefinir la matriz base.
