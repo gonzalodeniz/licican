@@ -1,0 +1,40 @@
+services:
+
+  postgres-licitaciones:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postgres-licitaciones
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: licitaciones_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Lic1t4c10n3s_2026!}
+      POSTGRES_DB: postgres     # DB por defecto; la DB 'licitaciones' se crea en el script de init
+      TZ: Atlantic/Canary
+
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+    volumes:
+      # Persistencia de datos
+      - pgdata_licitaciones:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U licitaciones_admin -d licitaciones"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    # Límites de recursos (ajustar según el servidor)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+    #     reservations:
+    #       memory: 256M
+
+volumes:
+  pgdata_licitaciones:
+    name: pgdata_licitaciones
