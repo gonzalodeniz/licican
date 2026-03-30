@@ -10,7 +10,7 @@ from wsgiref.simple_server import make_server
 
 from podencoti.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from podencoti.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from podencoti.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail
+from podencoti.opportunity_catalog import CatalogDataSourceError, CatalogFilters, build_catalog, build_opportunity_detail
 from podencoti.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from podencoti.source_coverage import load_source_coverage, summary_by_status
 from podencoti.ti_classification import audit_examples, load_rule_set
@@ -1238,6 +1238,33 @@ def _alerts_html_response(
     )
 
 
+def _catalog_data_error_html_response(base_path: str, message: str) -> str:
+    content = f"""
+      <section class="note note-warning">
+        <strong>Fuente temporalmente no disponible</strong><br />
+        {escape(message)}
+      </section>
+      <section class="panel">
+        <div class="panel-body">
+          <p>
+            La aplicacion no ha podido consultar la fuente de datos operativa configurada para el catalogo.
+            Revisa la conexion a PostgreSQL o la configuracion del backend antes de reintentar.
+          </p>
+          <p>
+            Ruta afectada del catalogo: <code>{escape(_app_url(base_path, '/api/oportunidades'))}</code>
+          </p>
+        </div>
+      </section>
+    """
+    return _page_template(
+        "PodencoTI | Catalogo temporalmente no disponible",
+        "Catalogo temporalmente no disponible",
+        "Servicio de datos no disponible",
+        "El catalogo y el detalle requieren acceso a la fuente de datos configurada para la aplicacion.",
+        content,
+    )
+
+
 def _detail_html_response(opportunity_id: str, base_path: str = "") -> str | None:
     detail = build_opportunity_detail(opportunity_id)
     if detail is None:
@@ -1506,6 +1533,9 @@ def application(environ, start_response):
         except ValueError as exc:
             body = b"".join(_html_response(_alerts_html_response(base_path, form_filters, str(exc))))
             return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
+            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
         return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+creada+y+activa")
 
     if path.startswith("/alertas/") and method == "POST":
@@ -1518,6 +1548,9 @@ def application(environ, start_response):
             except ValueError as exc:
                 body = b"".join(_html_response(_alerts_html_response(base_path, None, f"No se ha actualizado {alert_id}. {exc}")))
                 return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+            except CatalogDataSourceError as exc:
+                body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
+                return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
             except KeyError:
                 body = b"No encontrado"
                 return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
@@ -1533,7 +1566,11 @@ def application(environ, start_response):
 
     if path.startswith("/api/oportunidades/"):
         opportunity_id = path.removeprefix("/api/oportunidades/")
-        detail = build_opportunity_detail(opportunity_id)
+        try:
+            detail = build_opportunity_detail(opportunity_id)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_json_response({"error": str(exc)}))
+            return _respond(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
         if detail is None:
             body = b"No encontrado"
             return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
@@ -1541,7 +1578,11 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/oportunidades":
-        payload = build_catalog(filters=filters)
+        try:
+            payload = build_catalog(filters=filters)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_json_response({"error": str(exc)}))
+            return _respond(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
         status = "400 Bad Request" if payload["error_validacion"] else "200 OK"
         body = b"".join(_json_response(payload))
         return _respond(start_response, status, "application/json; charset=utf-8", body)
@@ -1597,7 +1638,12 @@ def application(environ, start_response):
     if path == "/alertas":
         query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
         status_message = (query.get("mensaje") or [None])[0]
-        body = b"".join(_html_response(_alerts_html_response(base_path, filters, status_message=status_message)))
+        try:
+            content = _alerts_html_response(base_path, filters, status_message=status_message)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
+            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+        body = b"".join(_html_response(content))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/datos-consolidados":
@@ -1626,7 +1672,11 @@ def application(environ, start_response):
 
     if path.startswith("/oportunidades/"):
         opportunity_id = path.removeprefix("/oportunidades/")
-        content = _detail_html_response(opportunity_id, base_path)
+        try:
+            content = _detail_html_response(opportunity_id, base_path)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
+            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
         if content is None:
             body = b"No encontrado"
             return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
@@ -1634,7 +1684,12 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/":
-        body = b"".join(_html_response(_catalog_html_response(filters, base_path)))
+        try:
+            content = _catalog_html_response(filters, base_path)
+        except CatalogDataSourceError as exc:
+            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
+            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+        body = b"".join(_html_response(content))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     body = b"No encontrado"

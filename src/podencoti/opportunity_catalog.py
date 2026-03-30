@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from podencoti.atom_consolidation import load_atom_opportunities
+from podencoti.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
 from podencoti.source_coverage import load_source_coverage
 from podencoti.ti_classification import OpportunityCandidate, classify_opportunity, load_rule_set
 
@@ -116,7 +118,24 @@ class CatalogFilters:
         return None
 
 
-def load_opportunity_records(path: Path = DEFAULT_DATA_PATH) -> tuple[str, list[OpportunityRecord]]:
+class CatalogDataSourceError(RuntimeError):
+    pass
+
+
+def load_opportunity_records(
+    path: Path = DEFAULT_DATA_PATH,
+    backend: str | None = None,
+) -> tuple[str, list[OpportunityRecord]]:
+    resolved_backend = _resolve_catalog_backend(path, backend)
+    if resolved_backend == "postgres":
+        try:
+            reference, records = load_postgres_opportunity_records()
+        except PostgresCatalogError as exc:
+            raise CatalogDataSourceError(
+                "No se pudo cargar el catalogo desde PostgreSQL. Revisa la conexion configurada."
+            ) from exc
+        return reference, [OpportunityRecord(**record) for record in records]
+
     if path.is_dir():
         atom_files = sorted(path.glob("*.atom"))
         if atom_files:
@@ -172,6 +191,18 @@ def load_opportunity_records(path: Path = DEFAULT_DATA_PATH) -> tuple[str, list[
         for item in payload["opportunities"]
     ]
     return payload["referencia_funcional"], records
+
+
+def _resolve_catalog_backend(path: Path, backend: str | None) -> str:
+    if backend is not None:
+        normalized = backend.strip().lower()
+    elif path != DEFAULT_DATA_PATH:
+        normalized = "file"
+    else:
+        normalized = os.getenv("PODENCOTI_CATALOG_BACKEND", "postgres").strip().lower() or "postgres"
+    if normalized not in {"file", "postgres"}:
+        raise ValueError(f"Backend de catalogo no soportado: {normalized}")
+    return normalized
 
 
 def _sorted_updates(record: OpportunityRecord) -> tuple[dict[str, object], ...]:
@@ -273,8 +304,9 @@ def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], fil
 def build_opportunity_detail(
     opportunity_id: str,
     path: Path = DEFAULT_DATA_PATH,
+    backend: str | None = None,
 ) -> dict[str, object] | None:
-    reference, records = load_opportunity_records(path)
+    reference, records = load_opportunity_records(path, backend=backend)
     rules = load_rule_set()
     mvp_sources = {source.nombre for source in load_source_coverage() if source.estado == "MVP"}
 
@@ -319,8 +351,9 @@ def build_opportunity_detail(
 def build_catalog(
     path: Path = DEFAULT_DATA_PATH,
     filters: CatalogFilters | None = None,
+    backend: str | None = None,
 ) -> dict[str, object]:
-    reference, records = load_opportunity_records(path)
+    reference, records = load_opportunity_records(path, backend=backend)
     rules = load_rule_set()
     mvp_sources = {source.nombre for source in load_source_coverage() if source.estado == "MVP"}
     active_filters = (filters or CatalogFilters()).normalized()

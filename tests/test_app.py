@@ -10,6 +10,8 @@ from pathlib import Path
 import tempfile
 from unittest.mock import patch
 
+import psycopg2
+
 from podencoti.app import application, main
 
 
@@ -43,6 +45,19 @@ def invoke_app(
 
 
 class ApplicationTests(unittest.TestCase):
+    def test_api_returns_controlled_error_when_postgresql_is_unavailable(self) -> None:
+        with patch.dict(os.environ, {"PODENCOTI_CATALOG_BACKEND": "postgres"}, clear=False):
+            with patch(
+                "podencoti.postgres_catalog.psycopg2.connect",
+                side_effect=psycopg2.OperationalError("db down"),
+            ):
+                status, headers, body = invoke_app("/api/oportunidades")
+
+        payload = json.loads(body)
+        self.assertEqual("503 Service Unavailable", status)
+        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
+        self.assertIn("No se pudo cargar el catalogo desde PostgreSQL", payload["error"])
+
     def test_root_renders_catalog_page(self) -> None:
         status, headers, body = invoke_app("/")
         html = body.decode("utf-8")
