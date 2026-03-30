@@ -60,7 +60,7 @@ Criterios de aceptacion:
 5. La informacion visible en la aplicacion para la muestra actual corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
 6. Si algun campo esperado no viene informado en origen, la aplicacion lo muestra como dato no informado o equivalente claro.
 Dependencias: PB-011 y PB-002
-Estado operativo: validado
+Estado operativo: cerrado
 
 Contexto funcional:
 - El Excel `data/licitaciones_ti_canarias.xlsx` actua como referencia funcional de salida para esta iteracion.

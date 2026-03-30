@@ -163,7 +163,7 @@
 - Riesgo principal:
   - Que el volumen de resultados o la retencion de datos generen friccion operativa si no se acotan con una politica clara.
 - Estado operativo actual:
-  - `PB-014` y `PB-015` ya estan creadas como issues de producto y quedan disponibles para planificacion tras resolver la regresion del filtrado.
+- `PB-015` sigue como issue de producto disponible para planificacion; `PB-014` ya quedo cerrado tras su integracion.
 
 ## Dependencias abiertas de roadmap
 - Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
