@@ -171,7 +171,7 @@ Criterios de aceptacion:
 4. La paginacion conserva los filtros activos y el orden de listado.
 5. Si la pagina solicitada es inexistente o invalida, el sistema responde con un comportamiento controlado y consistente.
 Dependencias: PB-001, PB-003, issue #14
-Estado operativo: nuevo
+Estado operativo: validado
 
 Contexto funcional:
 - El catalogo necesita manejar mejor volumentes mayores de resultados sin perder filtros ni contexto.
