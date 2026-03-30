@@ -100,10 +100,14 @@ class OpportunityCatalogTests(unittest.TestCase):
             [
                 "pcsp-cabildo-licencias-2026",
                 "govcan-backup-cloud-2026",
-                "cabildo-redes-2026",
             ],
             [item["id"] for item in catalog["oportunidades"]],
         )
+        self.assertEqual(1, catalog["paginacion"]["pagina_actual"])
+        self.assertEqual(2, catalog["paginacion"]["tamano_pagina"])
+        self.assertEqual(2, catalog["paginacion"]["total_paginas"])
+        self.assertEqual(1, catalog["paginacion"]["resultado_desde"])
+        self.assertEqual(2, catalog["paginacion"]["resultado_hasta"])
         self.assertEqual(3, len(catalog["cobertura_aplicada"]))
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in catalog["oportunidades"]))
 
@@ -151,6 +155,9 @@ class OpportunityCatalogTests(unittest.TestCase):
         self.assertEqual(1, catalog["total_registros_origen"])
         self.assertEqual(0, catalog["total_oportunidades_catalogo"])
         self.assertEqual([], catalog["oportunidades"])
+        self.assertEqual(1, catalog["paginacion"]["pagina_actual"])
+        self.assertEqual(0, catalog["paginacion"]["resultado_desde"])
+        self.assertEqual(0, catalog["paginacion"]["resultado_hasta"])
 
     def test_build_catalog_applies_combined_filters(self) -> None:
         catalog = build_catalog(
@@ -177,6 +184,7 @@ class OpportunityCatalogTests(unittest.TestCase):
             },
             catalog["filtros_activos"],
         )
+        self.assertEqual(1, catalog["paginacion"]["total_paginas"])
 
     def test_build_catalog_excludes_records_without_known_budget_when_range_is_requested(self) -> None:
         catalog = build_catalog(filters=CatalogFilters(presupuesto_max=100000), backend="file")
@@ -198,7 +206,31 @@ class OpportunityCatalogTests(unittest.TestCase):
             catalog["error_validacion"],
         )
         self.assertEqual(3, catalog["total_oportunidades_catalogo"])
-        self.assertEqual(3, len(catalog["oportunidades"]))
+        self.assertEqual(2, len(catalog["oportunidades"]))
+
+    def test_build_catalog_returns_requested_page_slice(self) -> None:
+        catalog = build_catalog(page=2, backend="file")
+
+        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in catalog["oportunidades"]])
+        self.assertEqual(2, catalog["paginacion"]["pagina_actual"])
+        self.assertEqual(3, catalog["paginacion"]["resultado_desde"])
+        self.assertEqual(3, catalog["paginacion"]["resultado_hasta"])
+        self.assertFalse(catalog["paginacion"]["hay_siguiente"])
+
+    def test_build_catalog_normalizes_invalid_requested_page(self) -> None:
+        catalog = build_catalog(page=0, backend="file")
+
+        self.assertEqual(1, catalog["paginacion"]["pagina_actual"])
+        self.assertTrue(catalog["paginacion"]["ajustada"])
+        self.assertEqual("invalida", catalog["paginacion"]["motivo_ajuste"])
+
+    def test_build_catalog_clamps_page_out_of_range(self) -> None:
+        catalog = build_catalog(page=9, backend="file")
+
+        self.assertEqual(2, catalog["paginacion"]["pagina_actual"])
+        self.assertTrue(catalog["paginacion"]["ajustada"])
+        self.assertEqual("fuera_de_rango", catalog["paginacion"]["motivo_ajuste"])
+        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in catalog["oportunidades"]])
 
     def test_load_opportunity_records_consolidates_latest_snapshot_from_atom_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

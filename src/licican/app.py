@@ -10,7 +10,12 @@ from wsgiref.simple_server import make_server
 
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from licican.opportunity_catalog import CatalogDataSourceError, CatalogFilters, build_catalog, build_opportunity_detail
+from licican.opportunity_catalog import (
+    CatalogDataSourceError,
+    CatalogFilters,
+    build_catalog,
+    build_opportunity_detail,
+)
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
@@ -194,6 +199,45 @@ def _page_template(
       }}
       .active-filters {{
         margin-top: 1rem;
+      }}
+      .pagination-bar {{
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        margin: 1rem 0 1.25rem;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #f8f4ed;
+      }}
+      .pagination-status {{
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }}
+      .pagination-actions {{
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }}
+      .pagination-jump {{
+        display: flex;
+        gap: 0.65rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }}
+      .pagination-jump label {{
+        color: var(--muted);
+      }}
+      .pagination-jump input {{
+        width: 6rem;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.65rem 0.8rem;
+        font: inherit;
       }}
       .table-wrap {{
         overflow-x: auto;
@@ -535,6 +579,17 @@ def _parse_catalog_filters(environ) -> CatalogFilters:
     return _parse_filters_from_multidict(parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False))
 
 
+def _parse_catalog_page(environ) -> int:
+    values = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
+    candidates = values.get("page")
+    if not candidates:
+        return 1
+    try:
+        return int(candidates[0])
+    except ValueError:
+        return 1
+
+
 def _read_form_data(environ) -> dict[str, list[str]]:
     content_length = environ.get("CONTENT_LENGTH", "").strip()
     try:
@@ -578,6 +633,93 @@ def _active_filter_badges(filters: dict[str, object]) -> str:
       <div class="active-filters">
         <p><strong>Filtros activos</strong></p>
         <div>{badges}</div>
+      </div>
+    """
+
+
+def _catalog_query_string(filters: dict[str, object], page: int | None = None) -> str:
+    params = {key: value for key, value in filters.items() if value not in (None, "")}
+    if page is not None:
+        params["page"] = page
+    if not params:
+        return ""
+    return urlencode(params)
+
+
+def _catalog_page_url(base_path: str, filters: dict[str, object], page: int) -> str:
+    query = _catalog_query_string(filters, page)
+    path = _app_url(base_path, "/")
+    if not query:
+        return path
+    return f"{path}?{query}"
+
+
+def _pagination_adjustment_message(pagination: dict[str, object]) -> str | None:
+    if not pagination.get("ajustada"):
+        return None
+    requested_page = pagination["pagina_solicitada"]
+    current_page = pagination["pagina_actual"]
+    if pagination.get("motivo_ajuste") == "invalida":
+        return (
+            f"La pagina solicitada ({requested_page}) no es valida. "
+            f"Se muestra la pagina {current_page}."
+        )
+    return (
+        f"La pagina solicitada ({requested_page}) no existe. "
+        f"Se muestra la pagina {current_page}."
+    )
+
+
+def _pagination_jump_form(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
+    if int(pagination["total_paginas"]) <= 1:
+        return ""
+
+    hidden_fields = "".join(
+        f'<input type="hidden" name="{escape(str(key))}" value="{escape(str(value))}" />'
+        for key, value in filters.items()
+        if value not in (None, "")
+    )
+    return f"""
+      <form class="pagination-jump" method="get" action="{escape(_app_url(base_path, '/'))}">
+        {hidden_fields}
+        <label for="catalog-page">Ir a la pagina</label>
+        <input id="catalog-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" />
+        <button type="submit">Ir</button>
+      </form>
+    """
+
+
+def _pagination_controls_html(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
+    if int(pagination["total_paginas"]) <= 1:
+        return ""
+
+    prev_link = ""
+    if pagination["pagina_anterior"] is not None:
+        prev_link = (
+            f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_anterior"])))}">'
+            "Pagina anterior"
+            "</a>"
+        )
+
+    next_link = ""
+    if pagination["pagina_siguiente"] is not None:
+        next_link = (
+            f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_siguiente"])))}">'
+            "Pagina siguiente"
+            "</a>"
+        )
+
+    return f"""
+      <div class="pagination-bar">
+        <div class="pagination-status">
+          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+        </div>
+        <div class="pagination-actions">
+          {prev_link}
+          {next_link}
+        </div>
+        {_pagination_jump_form(base_path, filters, pagination)}
       </div>
     """
 
@@ -883,12 +1025,13 @@ def _adjudicacion_excel_detail_html_response(slug: str, base_path: str = "") -> 
     )
 
 
-def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str = "") -> str:
-    catalog = build_catalog(filters=filters)
+def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1, base_path: str = "") -> str:
+    catalog = build_catalog(filters=filters, page=page)
     opportunities = catalog["oportunidades"]
     active_filters = catalog["filtros_activos"]
     available_filters = catalog["filtros_disponibles"]
     validation_error = catalog.get("error_validacion")
+    pagination = catalog["paginacion"]
     uses_atom_consolidation = catalog["referencia_funcional"] == "PB-011"
     coverage_label = "Snapshots .atom consolidados" if uses_atom_consolidation else "Fuentes oficiales MVP aplicadas"
     coverage_note = (
@@ -947,6 +1090,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
           </form>
           {_active_filter_badges(active_filters)}
           {_validation_note_html(validation_error)}
+          {_status_note_html(_pagination_adjustment_message(pagination), "warn")}
         </div>
       </section>
     """
@@ -976,6 +1120,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
             <article class="metric"><strong>{len(catalog["cobertura_aplicada"])}</strong>{coverage_label}</article>
             <article class="metric"><strong>{catalog["total_oportunidades_visibles"]}</strong>Oportunidades TI antes de filtrar</article>
           </div>
+          {_pagination_controls_html(base_path, active_filters, pagination)}
           <p class="muted">
             {coverage_note}
           </p>
@@ -999,6 +1144,9 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
               {rows}
             </tbody>
           </table>
+        </div>
+        <div class="panel-body">
+          {_pagination_controls_html(base_path, active_filters, pagination)}
         </div>
       </section>
         """
@@ -1511,6 +1659,7 @@ def application(environ, start_response):
     path = _resolve_request_path(environ, base_path)
     method = (environ.get("REQUEST_METHOD", "GET") or "GET").upper()
     filters = _parse_catalog_filters(environ)
+    page = _parse_catalog_page(environ)
 
     if path == "/api/datos-consolidados":
         body = b"".join(_json_response(load_canarias_dataset()))
@@ -1579,7 +1728,7 @@ def application(environ, start_response):
 
     if path == "/api/oportunidades":
         try:
-            payload = build_catalog(filters=filters)
+            payload = build_catalog(filters=filters, page=page)
         except CatalogDataSourceError as exc:
             body = b"".join(_json_response({"error": str(exc)}))
             return _respond(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
@@ -1685,7 +1834,7 @@ def application(environ, start_response):
 
     if path == "/":
         try:
-            content = _catalog_html_response(filters, base_path)
+            content = _catalog_html_response(filters, page, base_path)
         except CatalogDataSourceError as exc:
             body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
             return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)

@@ -13,6 +13,7 @@ from licican.ti_classification import OpportunityCandidate, classify_opportunity
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_PATH = BASE_DIR / "data"
+DEFAULT_CATALOG_PAGE_SIZE = 2
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,36 @@ class CatalogFilters:
 
 class CatalogDataSourceError(RuntimeError):
     pass
+
+
+def _build_pagination(total_results: int, requested_page: int, page_size: int) -> dict[str, object]:
+    safe_page_size = max(page_size, 1)
+    total_pages = max((total_results + safe_page_size - 1) // safe_page_size, 1)
+    current_page = min(max(requested_page, 1), total_pages)
+    start_index = 0 if total_results == 0 else (current_page - 1) * safe_page_size
+    end_index = min(start_index + safe_page_size, total_results)
+    visible_from = 0 if total_results == 0 else start_index + 1
+    visible_to = end_index
+    adjusted = current_page != requested_page
+    adjustment_reason = None
+    if adjusted:
+        adjustment_reason = "invalida" if requested_page < 1 else "fuera_de_rango"
+
+    return {
+        "pagina_solicitada": requested_page,
+        "pagina_actual": current_page,
+        "tamano_pagina": safe_page_size,
+        "total_paginas": total_pages,
+        "total_resultados": total_results,
+        "resultado_desde": visible_from,
+        "resultado_hasta": visible_to,
+        "hay_anterior": current_page > 1,
+        "hay_siguiente": current_page < total_pages,
+        "pagina_anterior": current_page - 1 if current_page > 1 else None,
+        "pagina_siguiente": current_page + 1 if current_page < total_pages else None,
+        "ajustada": adjusted,
+        "motivo_ajuste": adjustment_reason,
+    }
 
 
 def load_opportunity_records(
@@ -351,6 +382,8 @@ def build_opportunity_detail(
 def build_catalog(
     path: Path = DEFAULT_DATA_PATH,
     filters: CatalogFilters | None = None,
+    page: int = 1,
+    page_size: int = DEFAULT_CATALOG_PAGE_SIZE,
     backend: str | None = None,
 ) -> dict[str, object]:
     reference, records = load_opportunity_records(path, backend=backend)
@@ -399,6 +432,11 @@ def build_catalog(
         )
 
     opportunities.sort(key=lambda opportunity: opportunity.fecha_limite)
+    pagination = _build_pagination(len(opportunities), page, page_size)
+    page_slice = slice(
+        max(int(pagination["resultado_desde"]) - 1, 0),
+        int(pagination["resultado_hasta"]),
+    )
     return {
         "referencia_funcional": reference,
         "cobertura_aplicada": applied_coverage,
@@ -411,5 +449,6 @@ def build_catalog(
             "procedimientos": sorted(available_procedures),
             "ubicaciones": sorted(available_locations),
         },
-        "oportunidades": [opportunity.__dict__ for opportunity in opportunities],
+        "paginacion": pagination,
+        "oportunidades": [opportunity.__dict__ for opportunity in opportunities[page_slice]],
     }
