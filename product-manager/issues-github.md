@@ -8,7 +8,7 @@
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
 - La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones.
-- La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30 y sigue abierta por falta de evidencia de fusion en `main` y borrado de rama.
+- La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
