@@ -251,3 +251,40 @@
 - Prioridad: P1
 - Estado: `nuevo`
 - Nota de alcance: la primera iteracion de `PB-013` gobierna las superficies ya disponibles; las reglas de pipeline se aplicaran en la evolucion de `PB-005` sin redefinir la matriz de permisos.
+
+## HU-14 Paginacion de resultados del catalogo
+- Backlog relacionado: PB-014
+- Caso de uso relacionado: CU-14
+- Issue relacionado: #15
+- Historia:
+  Como empresa o profesional TI,
+  quiero navegar el catalogo y la API en paginas,
+  para revisar un volumen grande de licitaciones sin perder contexto ni rendimiento.
+- Criterios de aceptacion:
+  1. El catalogo HTML y la API JSON permiten navegar por paginas.
+  2. El sistema muestra el total de resultados y el rango actualmente visible.
+  3. El usuario puede avanzar, retroceder y saltar a una pagina concreta.
+  4. La paginacion conserva los filtros activos y el orden de listado.
+  5. Si la pagina solicitada es inexistente o invalida, el sistema responde con un comportamiento controlado y consistente.
+- Dependencias funcionales: PB-001, PB-003
+- Prioridad: P1
+- Estado: `nuevo`
+
+## HU-15 Configurar conservacion y archivado de licitaciones
+- Backlog relacionado: PB-015
+- Caso de uso relacionado: CU-15
+- Issue relacionado: #16
+- Historia:
+  Como administradora u operador de datos,
+  quiero configurar la antiguedad de conservacion y archivado de las licitaciones,
+  para controlar cuanto tiempo permanecen activas en la base de datos antes de moverlas a archivo.
+- Criterios de aceptacion:
+  1. La vista de panel de control muestra la antiguedad configurada en dias.
+  2. La politica puede expresarse como dias desde la creacion o como antiguedad de las licitaciones cerradas.
+  3. Las licitaciones con seguimiento activo no se borran nunca.
+  4. Las licitaciones cerradas que estuvieron activas se trasladan a una tabla `licitaciones archivadas`.
+  5. La tabla archivada conserva los mismos datos que la tabla principal.
+  6. El panel deja visible que registros se conservaran, archivaran o mantendran activos.
+- Dependencias funcionales: issue #14, PB-005
+- Prioridad: P1
+- Estado: `nuevo`

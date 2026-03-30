@@ -118,7 +118,7 @@
 - Decision de alcance:
   - La primera iteracion de `PB-013` debe aplicarse sobre las superficies ya disponibles en producto y no quedar bloqueada por la futura existencia de `PB-005`; la extension de permisos a pipeline se aplicara cuando esa superficie exista.
 - Restriccion operativa vigente:
-- La issue tecnica `#14` ya no bloquea el arranque de `PB-013`; la prioridad entre `PB-010` y `PB-013` vuelve a depender de producto y de la mejor reduccion de deuda de experiencia o control de acceso.
+  - La issue tecnica `#14` ya no bloquea el arranque de `PB-013`; la prioridad entre `PB-010` y `PB-013` vuelve a depender de producto y de la mejor reduccion de deuda de experiencia o control de acceso.
 
 ## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -150,6 +150,21 @@
   - Existen definiciones de KPI utilizables para decidir siguientes inversiones funcionales.
   - El roadmap posterior puede justificarse con evidencia y no solo con intuicion.
 
+## Release 8: Escalado de consulta y gobierno de retencion
+- Objetivo: Mejorar la consulta de listados amplios y definir una politica clara de conservacion y archivado de licitaciones.
+- Alcance:
+  - PB-014 Paginacion de resultados del catalogo.
+  - PB-015 Panel de control de conservacion y archivado de licitaciones.
+- Criterios de salida:
+  - El catalogo y la API permiten recorrer resultados por paginas sin perder filtros ni orden.
+  - El panel de control deja visible el umbral de conservacion y la politica de archivado.
+  - Las licitaciones con seguimiento activo no se eliminan.
+  - Las licitaciones cerradas se archivan en una tabla homologa cuando corresponde.
+- Riesgo principal:
+  - Que el volumen de resultados o la retencion de datos generen friccion operativa si no se acotan con una politica clara.
+- Estado operativo actual:
+  - `PB-014` y `PB-015` ya estan creadas como issues de producto y quedan disponibles para planificacion tras resolver la regresion del filtrado.
+
 ## Dependencias abiertas de roadmap
 - Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
 - Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
@@ -159,7 +174,8 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es continuar con `PB-010` o `PB-013`, segun el orden que mejor reduzca deuda de experiencia y de control de acceso.
+- El siguiente paso operativo recomendado para `developer-teams` es resolver `T-002` antes de abrir nuevas expansiones funcionales, porque la regresion del filtrado afecta a una capacidad central ya existente.
+- Una vez corregida la regresion, el orden funcional recomendado pasa a `PB-014`, `PB-015`, `PB-010` y `PB-013`, segun la reduccion de deuda de experiencia y de control de acceso.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
 - No se recomienda iniciar `PB-005` sin reevaluar antes la base de navegacion `PB-010` y el control de acceso `PB-013`, porque ambas piezas siguen siendo las siguientes capas funcionales relevantes.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.

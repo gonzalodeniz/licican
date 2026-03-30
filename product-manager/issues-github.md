@@ -6,6 +6,9 @@
 - La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26, `qa-teams` la valido el 2026-03-29 y actualmente sigue abierta en `Estado operativo: validado` por falta de evidencia de fusion en `main` y borrado de rama.
 - La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos.
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
+- La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
+- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones.
+- La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL.
 - En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
@@ -153,3 +156,64 @@ Tareas sugeridas:
 Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si el primer corte funcional debe resolver autenticacion real o puede apoyarse inicialmente en roles simulados para validar el comportamiento visible.
 - Que vistas de KPI pueden exponerse a `Colaborador` sin abrir informacion sensible de negocio o de otros usuarios.
+
+## Issue creada: Paginacion de resultados del catalogo
+
+Titulo sugerido: `[product-manager] PB-014 Paginacion de resultados del catalogo`
+
+Backlog: PB-014 Paginacion de resultados del catalogo
+Historia de usuario: HU-14 Paginacion de resultados del catalogo
+Caso de uso: CU-14 Navegar resultados del catalogo en paginas
+Criterios de aceptacion:
+1. El catalogo HTML y la API JSON permiten navegar por paginas.
+2. El sistema muestra el total de resultados y el rango actualmente visible.
+3. El usuario puede avanzar, retroceder y saltar a una pagina concreta.
+4. La paginacion conserva los filtros activos y el orden de listado.
+5. Si la pagina solicitada es inexistente o invalida, el sistema responde con un comportamiento controlado y consistente.
+Dependencias: PB-001, PB-003, issue #14
+Estado operativo: nuevo
+
+Contexto funcional:
+- El catalogo necesita manejar mejor volumentes mayores de resultados sin perder filtros ni contexto.
+- La paginacion debe ser visible tanto en HTML como en la API para que QA pueda verificarla con la misma muestra.
+
+## Issue creada: Panel de control de conservacion y archivado de licitaciones
+
+Titulo sugerido: `[product-manager] PB-015 Panel de control de conservacion y archivado de licitaciones`
+
+Backlog: PB-015 Panel de control de conservacion y archivado de licitaciones
+Historia de usuario: HU-15 Configurar conservacion y archivado de licitaciones
+Caso de uso: CU-15 Configurar conservacion y archivado de licitaciones
+Criterios de aceptacion:
+1. La vista de panel de control muestra la antiguedad configurada en dias.
+2. La politica puede expresarse como dias desde la creacion o como antiguedad de las licitaciones cerradas.
+3. Las licitaciones con seguimiento activo no se borran nunca.
+4. Las licitaciones cerradas que estuvieron activas se trasladan a una tabla `licitaciones archivadas`.
+5. La tabla archivada conserva los mismos datos que la tabla principal.
+6. El panel deja visible que registros se conservaran, archivaran o mantendran activos.
+Dependencias: issue #14, PB-005
+Estado operativo: nuevo
+
+Contexto funcional:
+- El panel debe servir de control operativo para conservar datos y prevenir borrados no deseados de oportunidades activas.
+- La tabla archivada debe mantener la misma estructura de datos para no romper trazabilidad ni consultas futuras.
+
+## Issue creada: Corregir el filtrado de licitaciones tras PostgreSQL
+
+Titulo sugerido: `[product-manager] T-002 Corregir el filtrado de licitaciones tras PostgreSQL`
+
+Backlog: T-002 Corregir el filtrado de licitaciones tras PostgreSQL
+Historia de usuario: HU-03 Filtrar oportunidades relevantes
+Caso de uso: CU-03 Filtrar oportunidades
+Criterios de aceptacion:
+1. Los filtros por palabra clave, presupuesto, procedimiento y ubicacion funcionan en HTML y API sobre PostgreSQL.
+2. Los rangos de presupuesto invalidos siguen devolviendo una respuesta controlada.
+3. Los filtros combinados devuelven resultados coherentes con el backend `file` cuando se comparan sobre la misma muestra.
+4. El filtrado no depende de datos embebidos obsoletos ni de rutas internas de la implementacion anterior.
+5. Existen pruebas de regresion especificas sobre PostgreSQL para la combinacion de filtros mas usada.
+Dependencias: PB-003, issue #14
+Estado operativo: nuevo
+
+Contexto funcional:
+- La migracion a PostgreSQL ha dejado una regresion visible en el filtrado que debe corregirse antes de abrir nueva expansion funcional.
+- Esta issue debe tratarse como correccion prioritaria porque afecta a una capacidad central ya disponible del producto.

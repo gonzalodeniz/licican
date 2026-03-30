@@ -8,6 +8,9 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 ## Huecos de definicion detectados en esta revision
 - La inconsistencia principal detectada en esta revision es de trazabilidad operativa: la issue #11 ya figura como `validado` por `qa-teams`, pero varios artefactos de producto seguian tratandola como `nuevo`.
 - El siguiente hueco relevante ya no es funcional en `PB-012`, sino de priorizacion: la issue `#14` sustituyo la fuente de datos por PostgreSQL, ya quedo validada por `qa-teams`, se integro en `main` y se cerro administrativamente.
+- Aparece una regresion tecnica en el filtrado del catalogo tras la migracion a PostgreSQL que debe corregirse antes de abrir nueva expansion funcional.
+- Aparece una necesidad de escalado de consulta: los resultados del catalogo necesitan paginacion una vez el backend PostgreSQL sostiene mas volumen.
+- Aparece una necesidad de gobierno de datos: el producto necesita una vista de panel de control para parametrizar la antiguedad de conservacion y archivado de licitaciones.
 - Aparece un hueco de trazabilidad de dato: la ficha de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
 - Aparece un hueco de validacion funcional: `qa-teams` necesita una correspondencia operativa entre la aplicacion y el Excel `data/licitaciones_ti_canarias.xlsx`, al menos en `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 - Aparece una dependencia de priorizacion tecnica: los informes de auditoria de calidad y seguridad del 2026-03-28 deben convertirse en issues tecnicas por `developer-teams` antes de que producto pueda ordenar su capacidad frente al roadmap funcional.
@@ -43,6 +46,8 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `qa-teams` valido `PB-004` el 2026-03-25 y `developer-teams` dejo constancia de integracion y borrado de rama el 2026-03-26.
 - `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama.
 - Con `PB-011`, `PB-012` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es reordenar `PB-010` y `PB-013` antes de abrir otra implementacion.
+- `T-002` pasa a ser la prioridad operativa inmediata porque la regresion del filtrado rompe una capacidad central ya disponible.
+- `PB-014` y `PB-015` aparecen como nuevas piezas funcionales para escalado de consulta y gobierno de datos; deben planificarse despues de restablecer el filtrado.
 - `PB-010` permanece como necesidad de experiencia transversal, pero deja de ser la siguiente pieza funcional inmediata.
 - `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto y puede arrancar cuando producto lo priorice sobre `PB-010` u otras piezas posteriores.
 - Se detecto y corrige una inconsistencia de alcance: `PB-013` no debe quedar bloqueada por `PB-005`, porque su primera iteracion se aplica a superficies ya disponibles y la extension a pipeline debe heredar la misma matriz mas adelante.

@@ -338,3 +338,51 @@
   - RB-48 `Lector/Invitado` no puede crear ni modificar entidades.
   - RB-49 La interfaz no debe mostrar como disponibles acciones bloqueadas por permisos.
   - RB-50 La primera iteracion de permisos debe ser ejecutable sobre las superficies ya disponibles y extenderse a pipeline cuando `PB-005` exista sin redefinir la matriz base.
+
+## CU-14 Navegar resultados del catalogo en paginas
+- Backlog relacionado: PB-014
+- Historias relacionadas: HU-14
+- Actor principal: Usuario registrado de PodencoTI.
+- Objetivo: Consultar resultados amplios del catalogo sin perder contexto ni rendimiento.
+- Disparador: El usuario solicita avanzar, retroceder o cambiar de pagina en el catalogo o su API.
+- Precondiciones:
+  - El catalogo dispone de mas resultados de los que una sola vista muestra por defecto.
+  - Los filtros funcionales de catalogo siguen disponibles.
+- Flujo principal:
+  1. El usuario abre el catalogo o consulta la API.
+  2. El sistema muestra los resultados en paginas y expone el rango visible actual.
+  3. El usuario cambia de pagina o salta a una concreta.
+  4. El sistema mantiene filtros y orden mientras actualiza la pagina visible.
+- Flujos alternativos:
+  - A1. Si la pagina solicitada no existe o es invalida, el sistema responde con un comportamiento controlado y consistente.
+  - A2. Si los filtros activos reducen mucho el resultado, el sistema sigue mostrando la paginacion disponible de forma clara.
+- Postcondiciones:
+  - El usuario sigue trabajando con un subconjunto manejable de resultados.
+- Reglas de negocio relacionadas:
+  - RB-51 La navegacion paginada debe preservar filtros activos y orden visible.
+  - RB-52 El sistema debe mostrar total de resultados y rango actualmente visible.
+
+## CU-15 Configurar conservacion y archivado de licitaciones
+- Backlog relacionado: PB-015
+- Historias relacionadas: HU-15
+- Actor principal: Administradora u operador de datos.
+- Objetivo: Definir cuanto tiempo se conservan las licitaciones activas y cuando deben archivarse las cerradas.
+- Disparador: El responsable de operacion abre el panel de control de retencion.
+- Precondiciones:
+  - Existe configuracion operativa de retencion disponible.
+  - La fuente de datos y la gestion de seguimiento activo estan disponibles o preparadas.
+- Flujo principal:
+  1. El responsable abre el panel de control.
+  2. El sistema muestra el umbral de conservacion configurado.
+  3. El responsable ajusta si la politica se mide desde la creacion o desde el cierre de la licitacion.
+  4. El sistema aplica la politica sobre licitaciones cerradas y conserva las activas con seguimiento.
+  5. Las licitaciones archivadas se trasladan a una tabla homologa con la misma estructura de datos.
+- Flujos alternativos:
+  - A1. Si una licitacion mantiene seguimiento activo, el sistema no la borra aunque supere el umbral.
+  - A2. Si la politica no puede ejecutarse todavia sobre la base de datos, el panel sigue mostrando la configuracion sin aplicar borrado automatico.
+- Postcondiciones:
+  - La politica de conservacion y archivado queda visible y alineada con la operacion.
+- Reglas de negocio relacionadas:
+  - RB-53 Las licitaciones con seguimiento activo no se eliminan.
+  - RB-54 Las licitaciones cerradas y archivables se trasladan a una tabla de archivadas con la misma estructura de datos.
+  - RB-55 La configuracion puede expresarse en dias totales desde la creacion o en antiguedad de las cerradas.
