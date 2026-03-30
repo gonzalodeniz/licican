@@ -40,7 +40,11 @@ def invoke_app(
     }
     if script_name:
         environ["SCRIPT_NAME"] = script_name
-    body = b"".join(application(environ, start_response))
+    env_overrides = {}
+    if "PODENCOTI_CATALOG_BACKEND" not in os.environ:
+        env_overrides["PODENCOTI_CATALOG_BACKEND"] = "file"
+    with patch.dict(os.environ, env_overrides, clear=False):
+        body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
 
 
@@ -65,11 +69,11 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
-        self.assertIn("Servicio de Desarrollo, Mantenimiento y Soporte de los Sistemas de Información", html)
+        self.assertIn("Servicio cloud para copias de seguridad y continuidad de sistemas corporativos", html)
         self.assertIn("Ver oferta concreta", html)
         self.assertIn("Publicación oficial", html)
         self.assertIn("Fuente oficial", html)
-        self.assertIn('/podencoti/oportunidades/pao-0120-2021', html)
+        self.assertIn('/podencoti/oportunidades/pcsp-cabildo-licencias-2026', html)
         self.assertIn('action="/podencoti"', html)
         self.assertIn("Licitaciones TI Canarias", html)
         self.assertIn("Detalle Lotes", html)
@@ -83,7 +87,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
-        self.assertIn('/podencoti/oportunidades/pao-0120-2021', html)
+        self.assertIn('/podencoti/oportunidades/pcsp-cabildo-licencias-2026', html)
         self.assertIn('href="/podencoti"', html)
 
     def test_api_returns_catalog_only_with_mvp_ti_opportunities(self) -> None:
@@ -92,24 +96,24 @@ class ApplicationTests(unittest.TestCase):
 
         self.assertEqual("200 OK", status)
         self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
-        self.assertEqual(14, payload["total_oportunidades_catalogo"])
-        self.assertEqual(14, payload["total_registros_origen"])
-        self.assertEqual("2026-03-23", payload["oportunidades"][0]["fecha_publicacion_oficial"])
-        self.assertEqual(10854107, payload["oportunidades"][0]["presupuesto"])
+        self.assertEqual(3, payload["total_oportunidades_catalogo"])
+        self.assertEqual(5, payload["total_registros_origen"])
+        self.assertEqual("2026-03-22", payload["oportunidades"][0]["fecha_publicacion_oficial"])
+        self.assertEqual(97000, payload["oportunidades"][0]["presupuesto"])
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in payload["oportunidades"]))
 
     def test_api_applies_functional_filters_from_query_string(self) -> None:
         status, headers, body = invoke_app(
             "/api/oportunidades",
-            "palabra_clave=incidencias&presupuesto_min=90000&presupuesto_max=120000&procedimiento=Abierto&ubicacion=Canarias",
+            "palabra_clave=licencias&presupuesto_min=90000&presupuesto_max=120000&procedimiento=Abierto+simplificado&ubicacion=Santa+Cruz+de+Tenerife",
         )
         payload = json.loads(body)
 
         self.assertEqual("200 OK", status)
         self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
         self.assertEqual(1, payload["total_oportunidades_catalogo"])
-        self.assertEqual(["ser-2026-0000004892"], [item["id"] for item in payload["oportunidades"]])
-        self.assertEqual("incidencias", payload["filtros_activos"]["palabra_clave"])
+        self.assertEqual(["pcsp-cabildo-licencias-2026"], [item["id"] for item in payload["oportunidades"]])
+        self.assertEqual("licencias", payload["filtros_activos"]["palabra_clave"])
 
     def test_api_rejects_invalid_budget_range_with_explicit_message(self) -> None:
         status, headers, body = invoke_app(
@@ -125,31 +129,34 @@ class ApplicationTests(unittest.TestCase):
             "Revisa el rango antes de aplicar los filtros.",
             payload["error_validacion"],
         )
-        self.assertEqual(14, payload["total_oportunidades_catalogo"])
+        self.assertEqual(3, payload["total_oportunidades_catalogo"])
 
     def test_detail_page_renders_critical_fields_and_latest_visible_update(self) -> None:
-        status, headers, body = invoke_app("/oportunidades/ser-2025-0000122082")
+        status, headers, body = invoke_app("/oportunidades/pcsp-cabildo-licencias-2026")
         html = body.decode("utf-8")
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
-        self.assertIn("Servicio de Mantenimiento, Evolución, Actualización Tecnológica", html)
-        self.assertIn("2026-03-23", html)
-        self.assertIn("2025-12-10", html)
-        self.assertIn("919.422 EUR", html)
-        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260323_190607_3.atom", html)
+        self.assertIn("Suministro de licencias y software de gestion tributaria insular", html)
+        self.assertIn("2026-03-22", html)
+        self.assertIn("2026-04-10", html)
+        self.assertIn("97.000 EUR", html)
+        self.assertIn("Rectificacion", html)
 
     def test_detail_api_returns_structured_detail_payload(self) -> None:
-        status, headers, body = invoke_app("/api/oportunidades/ser-2025-0000122082")
+        status, headers, body = invoke_app("/api/oportunidades/pcsp-cabildo-licencias-2026")
         payload = json.loads(body)
 
         self.assertEqual("200 OK", status)
         self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
-        self.assertEqual("ser-2025-0000122082", payload["id"])
-        self.assertEqual("2026-03-23", payload["fecha_publicacion_oficial"])
-        self.assertEqual("2025-12-10", payload["fecha_limite"])
-        self.assertEqual("licitacionesPerfilesContratanteCompleto3_20260323_190607_3.atom", payload["fichero_origen_atom"])
-        self.assertEqual([], payload["criterios_adjudicacion"])
+        self.assertEqual("pcsp-cabildo-licencias-2026", payload["id"])
+        self.assertEqual("2026-03-22", payload["fecha_publicacion_oficial"])
+        self.assertEqual("2026-04-10", payload["fecha_limite"])
+        self.assertIsNone(payload["fichero_origen_atom"])
+        self.assertEqual(
+            ["Oferta economica", "Cobertura funcional de la plataforma", "Plan de migracion y soporte"],
+            payload["criterios_adjudicacion"],
+        )
 
     def test_consolidated_dataset_page_renders_excel_tabs_and_rows(self) -> None:
         status, headers, body = invoke_app("/datos-consolidados")

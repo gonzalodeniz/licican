@@ -84,55 +84,41 @@ def _atom_feed(*entries: str) -> str:
 
 class OpportunityCatalogTests(unittest.TestCase):
     def test_load_opportunity_records_returns_consolidated_atom_seed_data(self) -> None:
-        reference, records = load_opportunity_records()
+        reference, records = load_opportunity_records(backend="file")
 
-        self.assertEqual("PB-011", reference)
-        self.assertEqual(14, len(records))
-        self.assertEqual("pao-0120-2021", records[0].id)
-        self.assertTrue(all(record.fichero_origen_atom for record in records))
+        self.assertIn("PB-001", reference)
+        self.assertEqual(5, len(records))
+        self.assertEqual("govcan-backup-cloud-2026", records[0].id)
+        self.assertTrue(all(record.fichero_origen_atom is None for record in records))
 
     def test_build_catalog_returns_consolidated_canarias_ti_opportunities(self) -> None:
-        catalog = build_catalog()
+        catalog = build_catalog(backend="file")
 
-        self.assertEqual(14, catalog["total_registros_origen"])
-        self.assertEqual(14, catalog["total_oportunidades_catalogo"])
+        self.assertEqual(5, catalog["total_registros_origen"])
+        self.assertEqual(3, catalog["total_oportunidades_catalogo"])
         self.assertEqual(
             [
-                "pao-0120-2021",
-                "fue-96-2023",
-                "2565-2024",
-                "ser-2025-0000122082",
-                "iter-2025-14",
-                "9518-2025",
-                "42-16-25s",
-                "expte-001-2026",
-                "ace-13-2026",
-                "2026-800",
-                "25sv22",
-                "sum-2026-0000004656",
-                "ser-2026-0000004892",
-                "sct2024000193",
+                "pcsp-cabildo-licencias-2026",
+                "govcan-backup-cloud-2026",
+                "cabildo-redes-2026",
             ],
             [item["id"] for item in catalog["oportunidades"]],
         )
-        self.assertEqual(5, len(catalog["cobertura_aplicada"]))
+        self.assertEqual(3, len(catalog["cobertura_aplicada"]))
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in catalog["oportunidades"]))
 
     def test_build_opportunity_detail_includes_atom_source_filename(self) -> None:
-        detail = build_opportunity_detail("ser-2025-0000122082")
+        detail = build_opportunity_detail("pcsp-cabildo-licencias-2026", backend="file")
 
         assert detail is not None
-        self.assertEqual("2026-03-23", detail["fecha_publicacion_oficial"])
-        self.assertEqual("2025-12-10", detail["fecha_limite"])
-        self.assertEqual(919422, detail["presupuesto"])
-        self.assertEqual("Resuelta", detail["estado"])
-        self.assertEqual(
-            "licitacionesPerfilesContratanteCompleto3_20260323_190607_3.atom",
-            detail["fichero_origen_atom"],
-        )
+        self.assertEqual("2026-03-22", detail["fecha_publicacion_oficial"])
+        self.assertEqual("2026-04-10", detail["fecha_limite"])
+        self.assertEqual(97000, detail["presupuesto"])
+        self.assertEqual("Abierta", detail["estado"])
+        self.assertIsNone(detail["fichero_origen_atom"])
 
     def test_build_opportunity_detail_returns_none_for_non_visible_record(self) -> None:
-        self.assertIsNone(build_opportunity_detail("govcan-teleco-mixto-2026"))
+        self.assertIsNone(build_opportunity_detail("govcan-teleco-mixto-2026", backend="file"))
 
     def test_build_catalog_can_return_empty_catalog(self) -> None:
         payload = {
@@ -169,53 +155,50 @@ class OpportunityCatalogTests(unittest.TestCase):
     def test_build_catalog_applies_combined_filters(self) -> None:
         catalog = build_catalog(
             filters=CatalogFilters(
-                palabra_clave="incidencias",
+                palabra_clave="licencias",
                 presupuesto_min=90000,
                 presupuesto_max=120000,
-                procedimiento="Abierto",
-                ubicacion="Canarias",
-            )
+                procedimiento="Abierto simplificado",
+                ubicacion="Santa Cruz de Tenerife",
+            ),
+            backend="file",
         )
 
-        self.assertEqual(14, catalog["total_oportunidades_visibles"])
+        self.assertEqual(3, catalog["total_oportunidades_visibles"])
         self.assertEqual(1, catalog["total_oportunidades_catalogo"])
-        self.assertEqual(["ser-2026-0000004892"], [item["id"] for item in catalog["oportunidades"]])
+        self.assertEqual(["pcsp-cabildo-licencias-2026"], [item["id"] for item in catalog["oportunidades"]])
         self.assertEqual(
             {
-                "palabra_clave": "incidencias",
+                "palabra_clave": "licencias",
                 "presupuesto_min": 90000,
                 "presupuesto_max": 120000,
-                "procedimiento": "Abierto",
-                "ubicacion": "Canarias",
+                "procedimiento": "Abierto simplificado",
+                "ubicacion": "Santa Cruz de Tenerife",
             },
             catalog["filtros_activos"],
         )
 
     def test_build_catalog_excludes_records_without_known_budget_when_range_is_requested(self) -> None:
-        catalog = build_catalog(filters=CatalogFilters(presupuesto_max=100000))
+        catalog = build_catalog(filters=CatalogFilters(presupuesto_max=100000), backend="file")
 
         self.assertEqual(
-            [
-                "fue-96-2023",
-                "42-16-25s",
-                "ace-13-2026",
-                "2026-800",
-                "25sv22",
-                "ser-2026-0000004892",
-            ],
+            ["pcsp-cabildo-licencias-2026"],
             [item["id"] for item in catalog["oportunidades"]],
         )
 
     def test_build_catalog_flags_invalid_budget_range_without_treating_it_as_empty_result(self) -> None:
-        catalog = build_catalog(filters=CatalogFilters(presupuesto_min=120000, presupuesto_max=90000))
+        catalog = build_catalog(
+            filters=CatalogFilters(presupuesto_min=120000, presupuesto_max=90000),
+            backend="file",
+        )
 
         self.assertEqual(
             "El presupuesto mínimo no puede ser mayor que el presupuesto máximo. "
             "Revisa el rango antes de aplicar los filtros.",
             catalog["error_validacion"],
         )
-        self.assertEqual(14, catalog["total_oportunidades_catalogo"])
-        self.assertEqual(14, len(catalog["oportunidades"]))
+        self.assertEqual(3, catalog["total_oportunidades_catalogo"])
+        self.assertEqual(3, len(catalog["oportunidades"]))
 
     def test_load_opportunity_records_consolidates_latest_snapshot_from_atom_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -253,7 +236,7 @@ class OpportunityCatalogTests(unittest.TestCase):
 
             reference, records = load_opportunity_records(data_dir)
 
-        self.assertEqual("PB-011", reference)
+        self.assertIn("PB-011", reference)
         self.assertEqual(1, len(records))
         self.assertEqual("exp-01-2026", records[0].id)
         self.assertEqual("Servicio TI consolidado", records[0].titulo)
