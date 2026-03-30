@@ -62,7 +62,7 @@ Este comentario fija que rama esta activa, permite auditar el limite de ramas ab
 Al publicar este arranque, `developer-teams` debe actualizar tambien el `Estado operativo:` del cuerpo de la issue a `en desarrollo`.
 
 ## Handoff minimo de `developer-teams` a `qa-teams`
-El comentario final de entrega de `developer-teams` debe incluir como minimo:
+El comentario final de entrega de `developer-teams` debe empezar con `Rol: developer-teams` y debe incluir como minimo:
 - `Rama:`
 - `Resumen:`
 - `Decisiones relevantes:`
@@ -100,7 +100,7 @@ Estado operativo: listo para qa
 Al publicar este handoff, `developer-teams` debe actualizar tambien el `Estado operativo:` del cuerpo de la issue a `listo para qa`.
 
 ## Handoff minimo de `qa-teams`
-El comentario de revision de `qa-teams` debe incluir como minimo:
+El comentario de revision de `qa-teams` debe empezar con `Rol: qa-teams` y debe incluir como minimo:
 - `Rama revisada:`
 - `Pruebas realizadas:`
 - `Revision de codigo:`
@@ -193,6 +193,8 @@ Tras `Estado operativo: validado`, `product-manager` debe:
 2. cerrar la issue o dejar constancia explicita del motivo por el que sigue abierta
 3. si sigue abierta, indicar bloqueo actual, siguiente responsable y siguiente paso operativo
 4. promover el merge segun el flujo del repositorio
+
+Si la issue sigue abierta, el comentario debe empezar con `Rol: product-manager`.
 
 Si la issue sigue abierta, usar esta plantilla minima:
 

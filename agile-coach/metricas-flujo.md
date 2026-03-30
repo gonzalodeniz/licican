@@ -61,6 +61,10 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de items cuyo estado operativo en `product-manager/product-backlog.md` difiere de la documentacion de estado vigente mantenida por `doc-teams` para la misma entrega despues de un merge a `main`.
 - Senal que aporta: detecta si el backlog se ha quedado atras respecto a la documentacion que ya refleja `main`, o si la documentacion ha adelantado de forma indebida el estado de una entrega no reconciliada.
 
+## 14. Comentarios operativos sin prefijo `Rol:`
+- Definicion: numero o porcentaje de comentarios de arranque, handoff, validacion o cierre que no comienzan con `Rol: <nombre-del-rol>`.
+- Senal que aporta: detecta deriva en las plantillas literales, reduce la trazabilidad por autoria operativa y permite corregir de forma temprana una regla global que de otro modo se incumple por copia incompleta.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.
