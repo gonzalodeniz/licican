@@ -10,7 +10,7 @@
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
-- Siguiente recomendacion para `developer-teams`: completar la issue tecnica #14 ya iniciada sobre PostgreSQL, cerrar su handoff tecnico y, solo despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
+- Siguiente recomendacion para `developer-teams`: completar la integracion administrativa de la issue tecnica #14, que ya fue validada sobre PostgreSQL, y dejar evidencia de merge en `main` y borrado de rama antes de tomar `PB-010` o `PB-013`.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -118,7 +118,7 @@
 - Decision de alcance:
   - La primera iteracion de `PB-013` debe aplicarse sobre las superficies ya disponibles en producto y no quedar bloqueada por la futura existencia de `PB-005`; la extension de permisos a pipeline se aplicara cuando esa superficie exista.
 - Restriccion operativa vigente:
-  - Mientras la issue tecnica `#14` siga en `en desarrollo`, `developer-teams` no debe arrancar `PB-013` en paralelo.
+  - Mientras la issue tecnica `#14` siga abierta sin evidencia de merge en `main` y borrado de rama, `developer-teams` no debe arrancar `PB-013` en paralelo.
 
 ## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -159,8 +159,8 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es completar la issue tecnica `#14` ya iniciada y dejar su handoff tecnico antes de arrancar una nueva issue funcional; despues, tomar `PB-010` o `PB-013`.
+- El siguiente paso operativo recomendado para `developer-teams` es cerrar la integracion administrativa de la issue tecnica `#14`, que ya fue validada por `qa-teams`, y dejar evidencia de merge en `main` y borrado de rama antes de arrancar una nueva issue funcional; despues, tomar `PB-010` o `PB-013`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
-- No se recomienda iniciar `PB-013` ni `PB-005` mientras la issue tecnica `#14` siga abierta como implementacion activa; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar ese trabajo tecnico estabilizado.
+- No se recomienda iniciar `PB-013` ni `PB-005` mientras la issue tecnica `#14` siga abierta sin evidencia de integracion; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar ese trabajo tecnico estabilizado.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
-- A fecha 2026-03-30 la integracion de `PB-012` ya esta resuelta en `main`; el siguiente cuello de botella operativo es la issue tecnica `#14` y la posterior reordenacion de `PB-010` y `PB-013`.
+- A fecha 2026-03-30 la integracion de `PB-012` ya esta resuelta en `main`; el siguiente cuello de botella operativo es el cierre administrativo de la issue tecnica `#14` y la posterior reordenacion de `PB-010` y `PB-013`.

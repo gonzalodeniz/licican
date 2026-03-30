@@ -34,7 +34,7 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - `PB-011` queda cerrado administrativamente: `qa-teams` valido la entrega en la issue #11 el 2026-03-27, `developer-teams` la integro en `main` y elimino la rama tecnica el 2026-03-28, y `product-manager` cerro la issue el mismo dia.
 - `PB-012` queda cerrado administrativamente: `qa-teams` valido la reentrega en la issue #12 el 2026-03-29, `developer-teams` la integro en `main` y elimino la rama tecnica el 2026-03-30, y `product-manager` cierra la issue tras verificar la integracion.
 - Se incorpora `PB-013` para convertir en trabajo ejecutable el modelo funcional de roles y permisos definido ya en la especificacion consolidada del producto.
-- Se incorpora `T-001` como trabajo tecnico activo para sustituir la fuente de datos actual por lectura operativa desde PostgreSQL sobre la tabla `licitacion`.
+- Se incorpora `T-001` como trabajo tecnico de la issue #14 para sustituir la fuente de datos actual por lectura operativa desde PostgreSQL sobre la tabla `licitacion`; la entrega ya fue validada por `qa-teams` y queda pendiente de integracion administrativa en `main`.
 
 ## Backlog priorizado
 
@@ -77,7 +77,7 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - El detalle de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
 
 ## Orden recomendado para `developer-teams`
-1. Completar la issue tecnica `T-001` en la issue #14 y cerrar su handoff tecnico antes de abrir una nueva implementacion funcional.
+1. Completar la integracion administrativa de la issue tecnica `#14` ya validada y cerrar su handoff operativo en `main` antes de abrir una nueva implementacion funcional.
 2. PB-010
 3. PB-013
 4. PB-005
@@ -87,7 +87,7 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - Producto mantiene reservada la siguiente ventana de priorizacion despues de `PB-012` para las issues tecnicas que `developer-teams` debe crear a partir de los informes de `quality-auditor` y `security-auditor` del 2026-03-28.
 - Ninguna nueva expansion funcional posterior a `PB-012` debe considerarse definitivamente arrancable hasta que esas issues tecnicas existan y puedan ordenarse frente a `PB-010`, `PB-013`, `PB-005` y `PB-008`.
 - La reserva minima de capacidad debe absorber primero los hallazgos de severidad `alta` y `media` que afecten a seguridad operativa, robustez de carga de datos o mantenibilidad del modulo principal.
-- A fecha 2026-03-30 `developer-teams` ya trabaja en la rama `developer-teams/issue-14-postgresql-licitacion`; mientras esa issue tecnica siga en `en desarrollo`, `PB-013` no debe arrancarse en paralelo.
+- A fecha 2026-03-30 `developer-teams` ya trabaja en la rama `developer-teams/issue-14-postgresql-licitacion`; mientras esa issue tecnica siga abierta sin evidencia de integracion en `main`, `PB-013` no debe arrancarse en paralelo.
 
 ## Notas de priorizacion
 - `PB-007` y `PB-006` ya cumplieron su objetivo y quedan cerrados administrativamente tras validacion e integracion en `main`.
@@ -101,7 +101,7 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - `PB-010` sigue siendo importante como base de experiencia, pero pasa por detras de la incorporacion operativa del dataset `.atom` y de su exposicion verificable en aplicacion.
 - `PB-013` entra como `P1` porque la matriz de permisos ya esta definida funcionalmente y debe traducirse en comportamiento observable sobre las superficies ya disponibles antes de ampliar gestion multiusuario o administracion.
 - La primera iteracion de `PB-013` no debe bloquearse por `PB-005`: pipeline queda como extension funcional posterior de la misma matriz de permisos cuando esa superficie exista.
-- La issue tecnica `#14` entra como trabajo activo por su impacto transversal en catalogo, detalle y robustez de la fuente operativa del dato.
+- La issue tecnica `#14` ya fue validada por `qa-teams` y sigue abierta solo a la espera de evidencia de integracion en `main` y borrado de rama; su impacto transversal en catalogo, detalle y robustez de la fuente operativa del dato sigue siendo prioritario.
 - `PB-005` sigue siendo valioso, pero pasa por detras de la incorporacion de fuentes reales prioritarias, de la exposicion verificable del dataset consolidado y de la base de navegacion de `PB-010`.
 - `PB-008` queda fuera del camino critico del MVP, pero debe prepararse antes de una ampliacion comercial o de cobertura.
 
@@ -117,7 +117,7 @@ Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable par
 - Existe riesgo de permisos inconsistentes si la aplicacion incorpora mas vistas y acciones sin aplicar de forma homogena el modelo de roles ya definido por producto.
 - Existe riesgo de perder foco de valor si el rediseño de interfaz desplaza indefinidamente la evolucion de alertas sin una decision explicita de prioridad.
 - Existe una dependencia de priorizacion tecnica abierta: los informes de `quality-auditor` y `security-auditor` del 2026-03-28 exigen que `developer-teams` convierta sus hallazgos accionables en issues tecnicas para que producto pueda reservar capacidad y ordenarlas frente a nuevas expansiones funcionales.
-- Existe riesgo operativo si `developer-teams` intenta abrir `PB-013` mientras la issue tecnica `#14` sigue en `en desarrollo`, porque el repositorio exige una sola implementacion activa por equipo.
+- Existe riesgo operativo si `developer-teams` intenta abrir `PB-013` mientras la issue tecnica `#14` sigue abierta sin evidencia de integracion en `main`, porque el repositorio exige una sola implementacion activa por equipo.
 
 ## Preguntas abiertas para siguiente iteracion
 - Que umbral comercial debe exigirse para considerar suficiente la cobertura MVP antes de ampliar a ayuntamientos.
