@@ -22,8 +22,9 @@ class AlertsTests(unittest.TestCase):
             alerts_path = Path(tmp_dir) / "alerts.json"
 
             created_alert = create_alert(
-                CatalogFilters(palabra_clave="incidencias"),
+                CatalogFilters(palabra_clave="backup"),
                 path=alerts_path,
+                catalog_path=Path("data"),
                 now="2026-03-25T10:00:00Z",
             )
             reference, alerts = load_alerts(alerts_path)
@@ -32,15 +33,16 @@ class AlertsTests(unittest.TestCase):
         self.assertEqual("alerta-001", created_alert.id)
         self.assertEqual(1, len(alerts))
         self.assertTrue(alerts[0].activa)
-        self.assertEqual({"palabra_clave": "incidencias"}, alerts[0].filtros.active_filters())
-        self.assertEqual(["ser-2026-0000004892"], [match.id for match in alerts[0].coincidencias])
+        self.assertEqual({"palabra_clave": "backup"}, alerts[0].filtros.active_filters())
+        self.assertEqual(["govcan-backup-cloud-2026"], [match.id for match in alerts[0].coincidencias])
 
     def test_update_alert_recomputes_criteria_and_matches(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
             create_alert(
-                CatalogFilters(palabra_clave="incidencias"),
+                CatalogFilters(palabra_clave="backup"),
                 path=alerts_path,
+                catalog_path=Path("data"),
                 now="2026-03-25T10:00:00Z",
             )
 
@@ -48,19 +50,13 @@ class AlertsTests(unittest.TestCase):
                 "alerta-001",
                 CatalogFilters(procedimiento="Abierto"),
                 path=alerts_path,
+                catalog_path=Path("data"),
                 now="2026-03-25T11:00:00Z",
             )
 
         self.assertEqual({"procedimiento": "Abierto"}, updated_alert.filtros.active_filters())
         self.assertEqual(
-            [
-                "pao-0120-2021",
-                "2565-2024",
-                "ser-2025-0000122082",
-                "expte-001-2026",
-                "2026-800",
-                "ser-2026-0000004892",
-            ],
+            ["govcan-backup-cloud-2026", "cabildo-redes-2026"],
             [match.id for match in updated_alert.coincidencias],
         )
         self.assertEqual("2026-03-25T11:00:00Z", updated_alert.actualizada_en)
@@ -69,8 +65,9 @@ class AlertsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
             create_alert(
-                CatalogFilters(palabra_clave="incidencias"),
+                CatalogFilters(palabra_clave="backup"),
                 path=alerts_path,
+                catalog_path=Path("data"),
                 now="2026-03-25T10:00:00Z",
             )
 

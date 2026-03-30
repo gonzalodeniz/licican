@@ -10,6 +10,12 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: ${PORT:-8000}
+      PODENCOTI_CATALOG_BACKEND: postgres
+      DB_HOST: postgres-licitaciones
+      DB_PORT: 5432
+      DB_NAME: licitaciones
+      DB_USER: ${DB_USER:-licitaciones_admin}
+      DB_PASSWORD: ${DB_PASSWORD:-Lic1t4c10n3s_2026!}
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     volumes:
