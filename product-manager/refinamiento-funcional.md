@@ -2,7 +2,7 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
-La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente tras la reconciliacion operativa del 2026-03-30, y `PB-010` pasa a ser la siguiente capa funcional de interfaz comun.
+La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente tras la reconciliacion operativa del 2026-03-30, y `PB-010` ya quedo cerrada administrativamente tras su validacion de navegacion.
 `PB-004` deja de formar parte del trabajo abierto: tras la validacion explicita de `qa-teams` en la issue #6 el 2026-03-25, `developer-teams` integro la entrega en `main` y elimino la rama tecnica el 2026-03-26, por lo que producto debe tratarla ya como funcionalidad vigente.
 
 ## Huecos de definicion detectados en esta revision
@@ -45,11 +45,11 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `qa-teams` valido la entrega integrada en `main` de `PB-009` el 2026-03-24 y `product-manager` cerro la issue #9 el 2026-03-25.
 - `qa-teams` valido `PB-004` el 2026-03-25 y `developer-teams` dejo constancia de integracion y borrado de rama el 2026-03-26.
 - `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama.
-- Con `PB-011`, `PB-012` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es reordenar `PB-010` y `PB-013` antes de abrir otra implementacion.
+- Con `PB-011`, `PB-012` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es reordenar `PB-015` y `PB-013` antes de abrir otra implementacion.
 - `T-002` ya quedo validado por `qa-teams`, integrado en `main` por `developer-teams` y cerrado administrativamente por `product-manager`.
 - `PB-015` aparece como nueva pieza funcional para gobierno de datos; `PB-014` ya quedo cerrada tras su integracion.
-- `PB-010` permanece como necesidad de experiencia transversal, pero deja de ser la siguiente pieza funcional inmediata.
-- `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto y puede arrancar cuando producto lo priorice sobre `PB-010` u otras piezas posteriores.
+- `PB-010` deja de ser una pieza funcional abierta y pasa a historial cerrado de navegacion transversal.
+- `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto y puede arrancar cuando producto lo priorice sobre `PB-015` u otras piezas posteriores.
 - Se detecto y corrige una inconsistencia de alcance: `PB-013` no debe quedar bloqueada por `PB-005`, porque su primera iteracion se aplica a superficies ya disponibles y la extension a pipeline debe heredar la misma matriz mas adelante.
 - Los informes de `quality-auditor` y `security-auditor` del 2026-03-28 quedan aceptados como entrada formal de priorizacion; falta que `developer-teams` materialice sus hallazgos accionables en issues tecnicas separadas para poder ordenarlas frente a `PB-010`, `PB-005` y `PB-008`.
 - Producto debe reservar capacidad visible para esos hallazgos antes de comprometer nueva expansion funcional posterior a `PB-012`.
