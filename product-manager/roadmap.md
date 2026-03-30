@@ -10,7 +10,7 @@
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
-- Siguiente recomendacion para `developer-teams`: integrar en `main` la entrega validada de `PB-012`, dejar evidencia de fusion y borrado de rama en la issue #12 y, solo despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
+- Siguiente recomendacion para `developer-teams`: completar la issue tecnica #14 ya iniciada sobre PostgreSQL, cerrar su handoff tecnico y, solo despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -97,8 +97,10 @@
   - Los datos no informados y los estados vacios se muestran de forma clara.
 - Riesgo principal:
   - Que el dato consolidado exista tecnicamente pero siga sin una superficie funcional verificable por usuario y QA.
-- Dependencia operativa:
-  - La release ya esta `validada` por `qa-teams` en la issue #12, pero sigue pendiente de integracion administrativa en `main` hasta que `developer-teams` deje constancia explicita de fusion y borrado de rama.
+- Estado operativo actual:
+  - `qa-teams` valido `PB-012` en la issue #12 el 2026-03-29.
+  - `developer-teams` integro la rama validada en `main` y elimino la rama tecnica el 2026-03-30.
+  - `product-manager` debe tratar esta release como ya integrada en `main` y cerrada administrativamente.
 
 ## Release 5: Base de navegacion y control de acceso
 - Objetivo: Establecer una estructura comun de interfaz y un modelo minimo de permisos para sostener el crecimiento de modulos con una experiencia coherente y controlada.
@@ -115,6 +117,8 @@
   - Que el producto siga creciendo por modulos sin una base comun de interfaz y permisos y se vuelva mas dificil de usar, gobernar y evolucionar.
 - Decision de alcance:
   - La primera iteracion de `PB-013` debe aplicarse sobre las superficies ya disponibles en producto y no quedar bloqueada por la futura existencia de `PB-005`; la extension de permisos a pipeline se aplicara cuando esa superficie exista.
+- Restriccion operativa vigente:
+  - Mientras la issue tecnica `#14` siga en `en desarrollo`, `developer-teams` no debe arrancar `PB-013` en paralelo.
 
 ## Release 6: Alertas y seguimiento operativo
 - Objetivo: Convertir el descubrimiento en uso recurrente y gestion operativa.
@@ -155,8 +159,8 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es fusionar en `main` la entrega ya validada de `PB-012` y dejar trazabilidad de esa integracion en la issue #12; despues, tomar `PB-010` o `PB-013`.
+- El siguiente paso operativo recomendado para `developer-teams` es completar la issue tecnica `#14` ya iniciada y dejar su handoff tecnico antes de arrancar una nueva issue funcional; despues, tomar `PB-010` o `PB-013`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
-- No se recomienda iniciar `PB-005` antes de completar la integracion administrativa de `PB-012`; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar esa entrega fusionada en `main`.
+- No se recomienda iniciar `PB-013` ni `PB-005` mientras la issue tecnica `#14` siga abierta como implementacion activa; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar ese trabajo tecnico estabilizado.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
-- A fecha 2026-03-30 la rama `developer-teams/issue-12-pb-012-vistas-excel` sigue siendo la referencia de una entrega ya validada; el siguiente cuello de botella es integrar esa rama y ordenar despues la siguiente implementacion funcional.
+- A fecha 2026-03-30 la integracion de `PB-012` ya esta resuelta en `main`; el siguiente cuello de botella operativo es la issue tecnica `#14` y la posterior reordenacion de `PB-010` y `PB-013`.

@@ -2,12 +2,12 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
-La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, mientras `PB-012` ya fue validado por `qa-teams` en la issue #12 el 2026-03-29 y queda pendiente solo de evidencia de fusion en `main` y borrado de rama para su cierre administrativo.
+La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, y `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente tras la reconciliacion operativa del 2026-03-30.
 `PB-004` deja de formar parte del trabajo abierto: tras la validacion explicita de `qa-teams` en la issue #6 el 2026-03-25, `developer-teams` integro la entrega en `main` y elimino la rama tecnica el 2026-03-26, por lo que producto debe tratarla ya como funcionalidad vigente.
 
 ## Huecos de definicion detectados en esta revision
 - La inconsistencia principal detectada en esta revision es de trazabilidad operativa: la issue #11 ya figura como `validado` por `qa-teams`, pero varios artefactos de producto seguian tratandola como `nuevo`.
-- El siguiente hueco funcional relevante ya no es de definicion de `PB-012`, sino de integracion operativa: la entrega ya esta validada, pero producto sigue necesitando evidencia de merge en `main` para reconciliar definitivamente la documentacion con la rama principal.
+- El siguiente hueco relevante ya no es funcional en `PB-012`, sino tecnico y de priorizacion: la issue `#14` abre la sustitucion de la fuente de datos por PostgreSQL y condiciona el siguiente arranque funcional de `PB-010` o `PB-013`.
 - Aparece un hueco de trazabilidad de dato: la ficha de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
 - Aparece un hueco de validacion funcional: `qa-teams` necesita una correspondencia operativa entre la aplicacion y el Excel `data/licitaciones_ti_canarias.xlsx`, al menos en `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 - Aparece una dependencia de priorizacion tecnica: los informes de auditoria de calidad y seguridad del 2026-03-28 deben convertirse en issues tecnicas por `developer-teams` antes de que producto pueda ordenar su capacidad frente al roadmap funcional.
@@ -41,8 +41,8 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La secuencia de trabajo ya no tiene bloqueos funcionales ni de validacion asociados a `PB-009` ni a `PB-004`.
 - `qa-teams` valido la entrega integrada en `main` de `PB-009` el 2026-03-24 y `product-manager` cerro la issue #9 el 2026-03-25.
 - `qa-teams` valido `PB-004` el 2026-03-25 y `developer-teams` dejo constancia de integracion y borrado de rama el 2026-03-26.
-- `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, pero `developer-teams` aun no ha dejado en la issue #12 la evidencia requerida de fusion en `main` y borrado de rama.
-- Con `PB-011` ya cerrada y `PB-012` ya validada, la siguiente prioridad operativa inmediata no es una nueva reentrega funcional sino completar su integracion administrativa antes de abrir nueva expansion.
+- `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama.
+- Con `PB-011` y `PB-012` ya cerradas, la siguiente prioridad operativa inmediata no es una nueva expansion funcional sino estabilizar la issue tecnica `#14` ya iniciada sobre PostgreSQL antes de abrir otra implementacion.
 - `PB-010` permanece como necesidad de experiencia transversal, pero deja de ser la siguiente pieza funcional inmediata.
 - `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto, pero no estaba convertido en trabajo trazable para `developer-teams`.
 - Se detecto y corrige una inconsistencia de alcance: `PB-013` no debe quedar bloqueada por `PB-005`, porque su primera iteracion se aplica a superficies ya disponibles y la extension a pipeline debe heredar la misma matriz mas adelante.
@@ -164,7 +164,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Riesgo de opacidad si el detalle no expone el fichero origen y `qa-teams` no puede reconciliar aplicacion con Excel y snapshots.
 - Riesgo de inconsistencia de experiencia si cada nueva vista incorpora navegacion propia en lugar de una estructura principal comun y responsive.
 - Riesgo operativo si la documentacion de producto no refleja con rapidez las integraciones ya realizadas en `main` y sigue guiando al equipo con prioridades desfasadas.
-- Riesgo operativo si `PB-012` se trata como cerrada sin evidencia de fusion en `main`, o si se abre nueva implementacion antes de completar esa integracion administrativa.
+- Riesgo operativo si `developer-teams` abre `PB-013` mientras la issue tecnica `#14` sigue en `en desarrollo`, incumpliendo la regla de una sola implementacion activa.
 - Riesgo funcional si el crecimiento de alertas, pipeline o futuras vistas no aplica de forma consistente el modelo de roles y permisos ya definido.
 - Riesgo de roadmap sesgado si los hallazgos tecnicos y de seguridad del 2026-03-28 no se convierten pronto en trabajo trazable y compiten de forma invisible con nuevas funcionalidades.
 - Riesgo de planificacion irreal si `PB-013` se mantiene ligada a dependencias aun no visibles y se retrasa un control de acceso que ya puede acotarse sobre superficies existentes.
@@ -179,12 +179,12 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Que datos minimos deben gobernar una futura decision de monetizacion o plan de pago.
 
 ## Recomendacion operativa para `developer-teams`
-- Fusionar en `main` la entrega ya validada de la issue #12 y dejar en la propia issue la evidencia de integracion y borrado de rama antes de iniciar nueva implementacion funcional.
+- Completar la issue tecnica `#14` ya iniciada y dejar su handoff tecnico antes de iniciar nueva implementacion funcional.
 - A continuacion, tomar `PB-010` o `PB-013` segun el orden que mejor reduzca deuda de experiencia y de control de acceso.
 - Mantener `PB-005` como siguiente pieza de negocio posterior a `PB-010` o coordinar su arranque cuando `PB-011` y `PB-012` ya hayan dejado visible la nueva base de dato consolidado.
 - Mantener `PB-005` y `PB-008` por detras de `PB-012`, y reevaluar `PB-010` y `PB-013` como siguiente capa de experiencia y gobierno funcional.
 - Crear las issues tecnicas separadas derivadas de los informes de `quality-auditor` y `security-auditor` del 2026-03-28 para que producto pueda priorizarlas de forma explicita.
-- No tratar la validacion de `PB-012` como permiso automatico para abrir nueva expansion: primero debe completarse su integracion en `main` y hacerse visible la deuda tecnica y de seguridad.
+- No tratar el arranque de la issue tecnica `#14` como permiso automatico para abrir `PB-013` en paralelo: primero debe resolverse o bloquearse de forma explicita la implementacion activa actual.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
 - Garantizar en detalle la visibilidad del fichero `.atom` origen de la version consolidada.
