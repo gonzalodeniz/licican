@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := help
+
 .PHONY: help run test docker-build docker-up docker-down docker-logs docker-restart docker-psql
 
 SHELL := /bin/bash
