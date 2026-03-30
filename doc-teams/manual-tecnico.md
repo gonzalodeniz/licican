@@ -4,7 +4,7 @@
 Equipo tecnico que necesita conocer la implementacion actual de `main`, sus rutas verificables y los limites funcionales todavia abiertos.
 
 ## Resumen tecnico verificable
-`PodencoTI` expone en `main` una aplicacion WSGI minima en Python con ocho piezas funcionales verificables y un despliegue local en contenedor:
+`PodencoTI` expone en `main` una aplicacion WSGI minima en Python con un conjunto funcional verificable y un despliegue local en contenedor:
 
 - `PB-001`: catalogo inicial de oportunidades TI.
 - `PB-003`: filtros funcionales aplicados sobre el catalogo HTML y la API JSON.
@@ -14,9 +14,10 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `PB-006`: regla de clasificacion TI auditable con ejemplos trazables.
 - `PB-009`: priorizacion visible de fuentes reales oficiales por olas.
 - `PB-011`: consolidacion funcional trazable de snapshots `.atom` con detalle de fichero origen.
+- `Issue #14`: backend PostgreSQL operativo por defecto para catalogo y detalle, con modo `file` disponible para pruebas aisladas.
 - Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, incluyendo PostgreSQL integrada.
 
-La version actual de `main` consolida el catalogo desde todos los snapshots `.atom` versionados presentes en `data/` cuando existen. Cada oportunidad consolidada conserva trazabilidad al fichero origen y el detalle visible expone `fichero_origen_atom`. `data/opportunities.json` queda como respaldo historico si no hay snapshots `.atom` disponibles. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
+La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defecto mediante la issue tecnica #14. El modo `file` sigue disponible para pruebas aisladas y la documentacion de `PB-011` conserva valor historico sobre la consolidacion de snapshots `.atom`, pero esa evidencia no es reproducible todavia en esta checkout porque los snapshots estan en `data/atom/` mientras el cargador sigue buscando `data/*.atom`. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
 
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
@@ -28,7 +29,7 @@ La version actual de `main` consolida el catalogo desde todos los snapshots `.at
 - Priorizacion de fuentes reales oficiales: `src/podencoti/real_source_prioritization.py`
 - Carga y evaluacion de reglas TI: `src/podencoti/ti_classification.py`
 - Datos versionados: `data/opportunities.json`, `data/source_coverage.json`, `data/real_source_prioritization.json`, `data/ti_classification_rules.json`
-- Snapshots `.atom` consumidos por la aplicacion actual: `data/licitacionesPerfilesContratanteCompleto3_20260323_190607*.atom`
+- Snapshots `.atom` presentes en el repositorio: `data/atom/*.atom`
 - Datos de alertas: `data/alerts.json`
 - Suite tecnica: `tests/test_app.py`, `tests/test_alerts.py`, `tests/test_opportunity_catalog.py`, `tests/test_real_source_prioritization.py`, `tests/test_source_coverage.py`, `tests/test_ti_classification.py`
 - Contenedorizacion local: `Dockerfile`, `docker-compose.yml`, `.dockerignore`
@@ -50,7 +51,7 @@ La version actual de `main` consolida el catalogo desde todos los snapshots `.at
 La aplicacion devuelve `404 Not Found` para cualquier otra ruta no declarada.
 Los parametros funcionales visibles hoy para `/` y `/api/oportunidades` son `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 Si `presupuesto_min` es mayor que `presupuesto_max`, la API responde `400 Bad Request` y la vista HTML mantiene el catalogo base junto con un mensaje de correccion.
-Cuando existen snapshots `.atom` en `data/`, el catalogo y el detalle se alimentan de la consolidacion funcional de `PB-011`; en ese caso, cada ficha muestra tambien `fichero_origen_atom`.
+Cuando la aplicacion opera con `PODENCOTI_CATALOG_BACKEND=file`, el catalogo y el detalle se alimentan de la consolidacion funcional de `PB-011`; en ese caso, cada ficha muestra tambien `fichero_origen_atom`. En esta checkout la carga Atom no es completamente reproducible porque los ficheros estan en `data/atom/` y el cargador aun busca `data/*.atom`. Con el backend PostgreSQL por defecto, la carga procede de la tabla `licitacion` y mantiene error controlado si la base no esta disponible.
 
 ### Campos visibles por superficie
 - `/api/oportunidades`: devuelve `referencia_funcional`, `cobertura_aplicada`, `total_registros_origen`, `total_oportunidades_visibles`, `total_oportunidades_catalogo`, `filtros_activos`, `error_validacion`, `filtros_disponibles` y `oportunidades`.
@@ -66,6 +67,7 @@ Cuando existen snapshots `.atom` en `data/`, el catalogo y el detalle se aliment
 - [atom_consolidation.py](/opt/apps/podencoti/src/podencoti/atom_consolidation.py) consolida snapshots `.atom`, resuelve la version vigente por expediente y conserva el fichero origen.
 - [alerts.py](/opt/apps/podencoti/src/podencoti/alerts.py) persiste alertas internas, valida criterios funcionales y recalcula coincidencias accionables.
 - [opportunity_catalog.py](/opt/apps/podencoti/src/podencoti/opportunity_catalog.py) carga registros versionados desde la consolidacion Atom cuando existe, filtra por cobertura MVP, aplica la clasificacion TI y resuelve el ultimo dato oficial visible para ficha y catalogo.
+- [postgres_catalog.py](/opt/apps/podencoti/src/podencoti/postgres_catalog.py) centraliza la carga desde PostgreSQL para el backend operativo por defecto y conserva el modo `file` como alternativa de apoyo.
 - [source_coverage.py](/opt/apps/podencoti/src/podencoti/source_coverage.py) valida estados de cobertura permitidos (`MVP`, `Posterior`, `Por definir`) y resume conteos.
 - [real_source_prioritization.py](/opt/apps/podencoti/src/podencoti/real_source_prioritization.py) valida las olas permitidas (`Ola 1`, `Ola 2`, `Ola 3`), ordena las fuentes por prioridad y resume la distribucion por ola.
 - [ti_classification.py](/opt/apps/podencoti/src/podencoti/ti_classification.py) normaliza texto, aplica reglas funcionales y audita ejemplos con tres salidas posibles: `TI`, `No TI` y `Caso frontera`.
@@ -80,13 +82,14 @@ docker compose up -d --build
 ```
 
 Resultado verificado en esta revision:
-- 50 pruebas automatizadas en verde.
+- 54 pruebas automatizadas descubiertas en esta revision, con fallos todavia abiertos por la discrepancia de rutas de `PB-011`.
 - Servidor local disponible en `http://127.0.0.1:<PORT>`, usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.
 - La BBDD PostgreSQL integrada responde en `localhost:15432` por defecto y se puede abrir con `make docker-psql`.
 - Las rutas `http://127.0.0.1:<PORT>/alertas` y `http://127.0.0.1:<PORT>/api/alertas` responden con la gestion interna de alertas tempranas del MVP.
 - Las rutas `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` y `http://127.0.0.1:<PORT>/api/fuentes-prioritarias` siguen disponibles para la priorizacion de fuentes reales.
-- La ruta `http://127.0.0.1:<PORT>/oportunidades/<id>` expone el fichero `.atom` origen de la oportunidad cuando procede de la consolidacion.
+- La ruta `http://127.0.0.1:<PORT>/oportunidades/<id>` expone el fichero `.atom` origen de la oportunidad cuando la consolidacion Atom es reproducible.
+- El backend PostgreSQL por defecto devuelve error controlado si la base no esta disponible y el modo `file` sigue accesible para verificacion aislada.
 
 ## Contradicciones explicitadas
 - `pyproject.toml` sigue describiendo el paquete como una release centrada solo en cobertura de fuentes, aunque la rama ya expone catalogo, filtros, detalle y clasificacion TI auditable.
@@ -103,7 +106,7 @@ Resultado verificado en esta revision:
 - La priorizacion de fuentes reales de `PB-009` ya esta expuesta en la app verificada con `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - La entrega de `PB-009` no habilita pipeline; solo refuerza origen, trazabilidad y orden de recopilacion.
 - Las alertas de `PB-004` solo registran coincidencias internas y no envian notificaciones salientes.
-- La consolidacion de `PB-011` ya esta materializada en `main` y expone el fichero de origen por oportunidad; esa trazabilidad no implica cobertura total ni pipeline.
+- La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su carga automatizada requiere corregir la discrepancia entre `data/atom/` y el patron que usa el cargador.
 
 ## Dependencias abiertas
 - Implementar `PB-012` para exponer en interfaz las vistas funcionales equivalentes al Excel de referencia y ampliar la trazabilidad visible al usuario final.

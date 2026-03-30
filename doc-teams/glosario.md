@@ -11,7 +11,7 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Fuente oficial`: portal, perfil del contratante u origen institucional desde el que se obtiene informacion de contratacion publica.
 - `Clasificacion TI auditable`: superficie visible que expone reglas, exclusiones, casos frontera y ejemplos verificables antes del catalogo.
 - `Filtro funcional`: criterio aplicable sobre el catalogo visible y su API para reducir resultados por palabra clave, presupuesto, procedimiento o ubicacion.
-- `Snapshot .atom`: fichero Atom versionado en `data/` que forma parte de la consolidacion funcional de `PB-011`.
+- `Snapshot .atom`: fichero Atom versionado en `data/atom/` que forma parte de la consolidacion funcional de `PB-011`; la carga automatizada sigue pendiente de alinear el patron que usa el cargador.
 - `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada y no esta disponible en `main` revisado.
 - `Alerta temprana`: capacidad disponible en `main` para crear, editar y desactivar alertas internas reutilizando los filtros del catalogo y registrando coincidencias accionables; no incluye notificaciones salientes.
 

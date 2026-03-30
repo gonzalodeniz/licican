@@ -7,7 +7,7 @@ Personas usuarias internas, equipo tecnico y administracion que necesitan aclara
 Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio, levanta la BBDD integrada y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
-Existe una entrega minima de descubrimiento con catalogo consolidado desde snapshots `.atom`, filtros funcionales sobre ese catalogo, ficha de detalle con fichero origen visible, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
+Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQL por defecto, filtros funcionales sobre ese catalogo, ficha de detalle con origen funcional visible, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
 
 ## Que rutas estan verificadas?
 - `/`
@@ -27,7 +27,10 @@ Existe una entrega minima de descubrimiento con catalogo consolidado desde snaps
 En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada.
 
 ## PB-011 ya esta operativo en `main`?
-Si. El codigo visible en `main` consolida los snapshots `.atom` de `data/` y expone el fichero de origen en el detalle. Si algun documento de producto sigue describiendo `PB-011` como pendiente, esa nota ya queda desfasada frente a `main`.
+La intencion funcional sigue documentada, pero en esta checkout la evidencia automatizada no se reproduce completa: los snapshots viven en `data/atom/` y el cargador actual sigue buscando `data/*.atom`. Hasta que esa discrepancia se resuelva, la trazabilidad de `PB-011` debe tratarse como condicionada y no como validacion cerrada.
+
+## La aplicacion ya usa PostgreSQL por defecto?
+Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `PODENCOTI_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
 
 ## PB-012 ya esta operativo en `main`?
 No segun la evidencia tecnica revisada en esta documentacion. El changelog de `2026-03-29` la registra como validada, pero en `main` no aparecen rutas, vistas ni pruebas para `/datos-consolidados` ni para las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
@@ -63,7 +66,7 @@ Si. La instalacion editable deja operativa la aplicacion local y permite ejecuta
 Desde la raiz del proyecto, `make docker-psql` abre una sesion interactiva `psql` contra `postgres-licitaciones`.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 50 pruebas en esta revision.
+Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` descubre 54 pruebas en esta revision, pero no termina en verde por la discrepancia de rutas asociada a `PB-011`.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.

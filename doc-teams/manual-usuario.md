@@ -7,10 +7,10 @@ Stakeholder funcional, producto o persona usuaria interna que necesita entender 
 La rama `main` expone una entrega minima navegable orientada a descubrimiento inicial y validacion funcional temprana, no un producto de uso final completo.
 
 ## Que si existe hoy
-- Un catalogo de oportunidades TI consolidado a partir de snapshots `.atom` versionados presentes en `data/` y visible en `/`.
+- Un catalogo de oportunidades TI servido desde PostgreSQL por defecto y visible en `/`, con modo `file` disponible como respaldo para pruebas aisladas.
 - Una API JSON del catalogo en `/api/oportunidades`.
 - Filtros funcionales en el catalogo y en `/api/oportunidades` por palabra clave, presupuesto, procedimiento y ubicacion.
-- Una ficha HTML de detalle por oportunidad en `/oportunidades/<id>`, con trazabilidad al fichero `.atom` origen vigente.
+- Una ficha HTML de detalle por oportunidad en `/oportunidades/<id>`, con trazabilidad al origen funcional vigente de cada registro.
 - Una API JSON del detalle en `/api/oportunidades/<id>`.
 - Una gestion HTML de alertas tempranas en `/alertas`.
 - Una API JSON de alertas persistidas y coincidencias internas en `/api/alertas`.
@@ -27,7 +27,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Que si el rango de presupuesto es invalido, la interfaz solicita corregirlo y no lo presenta como ausencia de resultados.
 - Que cada oportunidad mantiene organismo, ubicacion, estado oficial, fecha limite y referencia a su fuente oficial.
 - Que la ficha de detalle refleja el ultimo dato oficial visible cuando existe una rectificacion o modificacion publicada.
-- Que cada detalle muestra el nombre del fichero `.atom` origen de la version vigente cuando la oportunidad procede de la consolidacion.
+- Que cada detalle muestra el origen funcional vigente cuando el backend lo permite y, en modo `file`, el nombre del fichero `.atom` origen de la version consolidada.
 - Que la cobertura inicial del MVP esta acotada a fuentes `MVP`, `Posterior` y `Por definir`.
 - Que la priorizacion de fuentes reales oficiales para recopilacion ya esta visible y ordenada por `Ola 1`, `Ola 2` y `Ola 3`.
 - Que las alertas tempranas reutilizan los mismos filtros que el catalogo, se pueden crear, editar y desactivar, y registran coincidencias internas accionables.
@@ -57,7 +57,8 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - La priorizacion de fuentes reales oficiales ya es accesible en una superficie propia, pero solo ordena la recopilacion; no activa pipeline.
 - Los filtros actuales actuan solo sobre el catalogo visible y su API; no existe todavia una persistencia de preferencias separada del registro de alertas internas.
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.
-- La consolidacion actual toma snapshots `.atom` versionados y el detalle muestra su fichero origen; eso no implica cobertura total ni pipeline.
+- El backend PostgreSQL es el modo operativo por defecto y el modo `file` queda como apoyo de pruebas; eso no implica cobertura total ni pipeline.
+- La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su reproduccion automatizada queda condicionada por la discrepancia entre `data/atom/` y el cargador que busca `data/*.atom`.
 - La metadata tecnica del paquete sigue describiendo una release anterior mas limitada que la visible hoy en `main`.
 - `product-manager/` sigue arrastrando algunos textos anteriores a la integracion de `PB-011`; la evidencia reproducible de `main` y el changelog de `2026-03-29` deben tomarse como referencia para el estado vigente, salvo en `PB-012`, donde el changelog entra en contradiccion con el codigo y prevalece `main`.
 - Las alertas visibles en `main` son internas: registran coincidencias accionables, pero todavia no envian notificaciones salientes.
