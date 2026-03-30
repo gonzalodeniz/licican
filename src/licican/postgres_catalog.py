@@ -126,7 +126,7 @@ def load_postgres_opportunity_records() -> tuple[str, list[dict[str, Any]]]:
 
 
 def _resolve_database_url() -> str:
-    explicit_url = os.getenv("PODENCOTI_DATABASE_URL") or os.getenv("DATABASE_URL")
+    explicit_url = os.getenv("LICICAN_DATABASE_URL") or os.getenv("DATABASE_URL")
     if explicit_url:
         return explicit_url
 

@@ -12,9 +12,9 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY src/ /app/src/
 COPY data/ /app/data/
 
-RUN useradd --create-home --shell /usr/sbin/nologin podencoti \
-    && chown -R podencoti:podencoti /app
+RUN useradd --create-home --shell /usr/sbin/nologin licican \
+    && chown -R licican:licican /app
 
-USER podencoti
+USER licican
 
-CMD ["python", "-m", "podencoti.app"]
+CMD ["python", "-m", "licican.app"]

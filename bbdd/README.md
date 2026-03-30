@@ -36,7 +36,7 @@ docker compose -f docker-compose-bbdd.yml ps
 Desde la raiz del proyecto, la pila completa ya integra esta BBDD en `docker-compose.yml`:
 
 ```bash
-cd /opt/apps/podencoti
+cd /opt/apps/licican
 docker compose up -d --build
 make docker-psql
 ```

@@ -1,4 +1,4 @@
-# Casos de Uso de PodencoTI
+# Casos de Uso de Licican
 
 ## Convenciones de trazabilidad
 - Cada caso de uso referencia backlog e historias relacionadas.
@@ -7,7 +7,7 @@
 ## CU-01 Consultar catalogo de oportunidades TI
 - Backlog relacionado: PB-001
 - Historias relacionadas: HU-01
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Descubrir en un solo lugar oportunidades de contratacion publica TI relevantes en Canarias.
 - Disparador: El usuario accede al modulo principal de oportunidades.
 - Precondiciones:
@@ -34,7 +34,7 @@
 ## CU-02 Revisar el detalle de una licitacion
 - Backlog relacionado: PB-002
 - Historias relacionadas: HU-02
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Evaluar rapidamente si una licitacion merece seguimiento.
 - Disparador: El usuario selecciona una oportunidad desde el listado o una alerta.
 - Precondiciones:
@@ -58,7 +58,7 @@
 ## CU-03 Filtrar oportunidades
 - Backlog relacionado: PB-003
 - Historias relacionadas: HU-03
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Reducir el ruido y quedarse con oportunidades que encajan con su perfil comercial o tecnico.
 - Disparador: El usuario aplica uno o varios filtros sobre el catalogo.
 - Precondiciones:
@@ -80,7 +80,7 @@
 ## CU-04 Configurar alertas tempranas
 - Backlog relacionado: PB-004
 - Historias relacionadas: HU-04
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Recibir nuevas oportunidades sin tener que revisar manualmente todas las fuentes.
 - Disparador: El usuario decide crear una alerta.
 - Precondiciones:
@@ -107,7 +107,7 @@
 ## CU-05 Gestionar pipeline de oportunidades
 - Backlog relacionado: PB-005
 - Historias relacionadas: HU-05
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Hacer seguimiento del estado de trabajo de cada licitacion relevante.
 - Disparador: El usuario decide guardar una oportunidad en su pipeline.
 - Precondiciones:
@@ -230,7 +230,7 @@
 ## CU-10 Navegar por los modulos principales con una estructura responsive
 - Backlog relacionado: PB-010
 - Historias relacionadas: HU-10
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Moverse entre las opciones principales de la aplicacion desde una navegacion clara, estable y adaptable al ancho disponible.
 - Disparador: El usuario accede a cualquier pantalla principal de la aplicacion.
 - Precondiciones:
@@ -285,7 +285,7 @@
 ## CU-12 Revisar la informacion consolidada en pestañas y detalle con fichero origen visible
 - Backlog relacionado: PB-012
 - Historias relacionadas: HU-12
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Consultar la informacion consolidada de licitaciones, lotes y adjudicaciones desde una superficie verificable y con trazabilidad al snapshot origen.
 - Disparador: El usuario accede al modulo de oportunidades consolidado desde fuentes `.atom`.
 - Precondiciones:
@@ -342,7 +342,7 @@
 ## CU-14 Navegar resultados del catalogo en paginas
 - Backlog relacionado: PB-014
 - Historias relacionadas: HU-14
-- Actor principal: Usuario registrado de PodencoTI.
+- Actor principal: Usuario registrado de Licican.
 - Objetivo: Consultar resultados amplios del catalogo sin perder contexto ni rendimiento.
 - Disparador: El usuario solicita avanzar, retroceder o cambiar de pagina en el catalogo o su API.
 - Precondiciones:

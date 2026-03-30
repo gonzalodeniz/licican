@@ -7,21 +7,21 @@ Persona responsable de preparar el entorno local, arrancar la entrega minima act
 En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. Su alcance operativo es de validacion local y demostracion funcional temprana; no equivale a una operacion productiva completa.
 
 ## Prerequisitos
-- Acceso al arbol del proyecto en `/opt/apps/podencoti`.
+- Acceso al arbol del proyecto en `/opt/apps/licican`.
 - `python3` compatible con `>=3.12`.
 - Entorno virtual activo o directorio `.venv/` disponible si se va a usar `make`.
 - `make` para usar los objetivos definidos en `Makefile`.
-- Un fichero `.env` con `PORT` definido. Si no existe, puede copiarse desde [`.env.example`](/opt/apps/podencoti/.env.example).
+- Un fichero `.env` con `PORT` definido. Si no existe, puede copiarse desde [`.env.example`](/opt/apps/licican/.env.example).
 - Un fichero `.env` con `DB_PORT` definido si se quiere exponer la BBDD integrada en un puerto distinto; por defecto se usa `15432`.
-- Un fichero `.env` con `PODENCOTI_CATALOG_BACKEND` definido si se quiere forzar `file`; por defecto se usa PostgreSQL.
-- Si se quieren guardar alertas en una ruta alternativa, configurar `PODENCOTI_ALERTS_PATH`; por defecto se usa `data/alerts.json`.
+- Un fichero `.env` con `LICICAN_CATALOG_BACKEND` definido si se quiere forzar `file`; por defecto se usa PostgreSQL.
+- Si se quieren guardar alertas en una ruta alternativa, configurar `LICICAN_ALERTS_PATH`; por defecto se usa `data/alerts.json`.
 - Para el despliegue en contenedor, disponer de `docker` y `docker compose`.
 
 ## Arranque local reproducible
 Desde la raiz del proyecto:
 
 ```bash
-cd /opt/apps/podencoti
+cd /opt/apps/licican
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -e .
@@ -33,7 +33,7 @@ make run
 Desde la raiz del proyecto:
 
 ```bash
-cd /opt/apps/podencoti
+cd /opt/apps/licican
 docker compose up -d --build
 # En otra terminal, si quieres ver logs:
 # docker compose logs -f
@@ -95,7 +95,7 @@ No existe en `main`:
 - La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con pipeline ni otras capacidades de seguimiento.
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.
 - Las alertas de `PB-004` ya se pueden operar localmente desde `/alertas` y `/api/alertas`; lo que sigue sin estar disponible es el pipeline.
-- La entrega administrable revisada ya opera sobre PostgreSQL por defecto; `PODENCOTI_CATALOG_BACKEND=file` conserva la ruta de apoyo basada en fichero.
+- La entrega administrable revisada ya opera sobre PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` conserva la ruta de apoyo basada en fichero.
 - La carga Atom sigue condicionada por la discrepancia de rutas entre `data/atom/` y el patron que usa el cargador.
 - No debe asumirse operativa la validacion de `PB-012` que aparece en el changelog de `2026-03-29` mientras `main` no exponga sus rutas y pruebas asociadas.
 - La BBDD integrada se publica en `DB_PORT` y puede abrirse por terminal con `make docker-psql`.

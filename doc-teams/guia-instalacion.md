@@ -4,19 +4,19 @@
 Equipo tecnico, QA o soporte que necesita preparar el proyecto en local de forma reproducible.
 
 ## Objetivo real de esta guia
-Instalar la entrega minima actual de `PodencoTI`, dejar operativo el entorno local o contenedorizado y verificar sus rutas visibles y su suite tecnica.
+Instalar la entrega minima actual de `Licican`, dejar operativo el entorno local o contenedorizado y verificar sus rutas visibles y su suite tecnica.
 
 ## Prerequisitos
 - Sistema con `python3`.
 - Version compatible: `3.12` o superior.
-- Acceso local al repositorio en `/opt/apps/podencoti`.
+- Acceso local al repositorio en `/opt/apps/licican`.
 - Para la ruta en contenedor, disponer de `docker` y `docker compose`.
 
 ## Preparacion local
 1. Situate en la raiz del proyecto:
 
 ```bash
-cd /opt/apps/podencoti
+cd /opt/apps/licican
 ```
 
 2. Crea el entorno virtual recomendado:
@@ -39,7 +39,7 @@ cp .env.example .env
 ```
 
 Edita `.env` y ajusta al menos `PORT` si quieres usar un puerto distinto del valor por defecto.
-Si vas a ejecutar el contenedor o el backend PostgreSQL por defecto, revisa tambien `DB_*` y `PODENCOTI_CATALOG_BACKEND`; `PORT` sigue siendo el puerto publicado y la aplicacion usa `HOST=0.0.0.0` dentro de Compose.
+Si vas a ejecutar el contenedor o el backend PostgreSQL por defecto, revisa tambien `DB_*` y `LICICAN_CATALOG_BACKEND`; `PORT` sigue siendo el puerto publicado y la aplicacion usa `HOST=0.0.0.0` dentro de Compose.
 
 ## Verificaciones posteriores
 1. Ejecuta la suite tecnica:
@@ -102,7 +102,7 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 ```
 
 ## Que queda instalado realmente
-- Paquete `podencoti` en modo editable.
+- Paquete `licican` en modo editable.
 - Aplicacion WSGI local con backend PostgreSQL por defecto para catalogo y detalle, modo `file` para apoyo, filtros funcionales, ficha de detalle con origen visible, alertas internas, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
 - Acceso a datos versionados en `data/`, configuracion de base de datos y a la suite automatizada en `tests/`.
 - Imagen Docker minima con la misma superficie funcional, apta para despliegue local en contenedor.

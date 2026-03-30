@@ -5,10 +5,10 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from podencoti.atom_consolidation import load_atom_opportunities
-from podencoti.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
-from podencoti.source_coverage import load_source_coverage
-from podencoti.ti_classification import OpportunityCandidate, classify_opportunity, load_rule_set
+from licican.atom_consolidation import load_atom_opportunities
+from licican.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
+from licican.source_coverage import load_source_coverage
+from licican.ti_classification import OpportunityCandidate, classify_opportunity, load_rule_set
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -199,7 +199,7 @@ def _resolve_catalog_backend(path: Path, backend: str | None) -> str:
     elif path != DEFAULT_DATA_PATH:
         normalized = "file"
     else:
-        normalized = os.getenv("PODENCOTI_CATALOG_BACKEND", "postgres").strip().lower() or "postgres"
+        normalized = os.getenv("LICICAN_CATALOG_BACKEND", "postgres").strip().lower() or "postgres"
     if normalized not in {"file", "postgres"}:
         raise ValueError(f"Backend de catalogo no soportado: {normalized}")
     return normalized

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from podencoti.real_source_prioritization import (
+from licican.real_source_prioritization import (
     load_real_source_prioritization,
     summarize_prioritization,
 )

@@ -1,4 +1,4 @@
-# Refinamiento Funcional de PodencoTI
+# Refinamiento Funcional de Licican
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.

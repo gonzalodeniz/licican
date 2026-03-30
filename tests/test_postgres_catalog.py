@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import psycopg2
 
-from podencoti.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail, load_opportunity_records
 
 
 class _FakeCursor:
@@ -67,7 +67,7 @@ class PostgresCatalogTests(unittest.TestCase):
             }
         ]
 
-        with patch("podencoti.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
             reference, records = load_opportunity_records(backend="postgres")
 
         self.assertIn("T-001", reference)
@@ -120,7 +120,7 @@ class PostgresCatalogTests(unittest.TestCase):
             },
         ]
 
-        with patch("podencoti.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
             payload = build_catalog(
                 filters=CatalogFilters(procedimiento="Abierto"),
                 backend="postgres",
@@ -133,14 +133,14 @@ class PostgresCatalogTests(unittest.TestCase):
 
     def test_build_opportunity_detail_returns_none_when_record_is_not_visible(self) -> None:
         rows = []
-        with patch("podencoti.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
             detail = build_opportunity_detail("inexistente", backend="postgres")
 
         self.assertIsNone(detail)
 
     def test_build_catalog_raises_controlled_error_when_postgresql_fails(self) -> None:
         with patch(
-            "podencoti.postgres_catalog.psycopg2.connect",
+            "licican.postgres_catalog.psycopg2.connect",
             side_effect=psycopg2.OperationalError("db down"),
         ):
             with self.assertRaisesRegex(Exception, "No se pudo cargar el catalogo desde PostgreSQL"):

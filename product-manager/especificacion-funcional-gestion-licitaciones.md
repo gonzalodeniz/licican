@@ -1,7 +1,7 @@
 # Especificacion Funcional de Producto: Gestion y Seguimiento de Licitaciones
 
 ## Objetivo
-Definir, en un unico artefacto, la estructura funcional de mayor a menor abstraccion para la aplicacion de gestion y seguimiento de licitaciones publicas de PodencoTI.
+Definir, en un unico artefacto, la estructura funcional de mayor a menor abstraccion para la aplicacion de gestion y seguimiento de licitaciones publicas de Licican.
 
 ## Supuestos de alcance
 - Este documento toma como base la vision y el backlog funcional ya vigentes en `product-manager/`.
@@ -179,7 +179,7 @@ Como empresa o profesional TI, quiero guardar oportunidades y moverlas por estad
   - Given que la oportunidad cambia a estado oficial `anulada`, `desierta` o `desistida`, When el usuario la consulta en su pipeline, Then el sistema conserva el registro y muestra una advertencia visible.
 
 ### HU-11 Navegar por la aplicacion con estructura comun
-Como usuario de PodencoTI, quiero disponer de una navegacion principal clara y responsive para moverme entre modulos sin perder contexto.
+Como usuario de Licican, quiero disponer de una navegacion principal clara y responsive para moverme entre modulos sin perder contexto.
 
 - Criterios de aceptacion:
   - Given que el usuario accede desde un ancho amplio, When se carga la aplicacion, Then se muestra una navegacion lateral persistente con la opcion activa destacada.

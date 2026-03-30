@@ -1,10 +1,10 @@
 # Glosario
 
 ## Publico objetivo
-Usuario interno del proyecto que necesita interpretar de forma consistente la terminologia funcional, tecnica y operativa de `PodencoTI`.
+Usuario interno del proyecto que necesita interpretar de forma consistente la terminologia funcional, tecnica y operativa de `Licican`.
 
 ## Terminos del producto
-- `PodencoTI`: plataforma orientada a centralizar y detectar oportunidades de contratacion publica TI en Canarias.
+- `Licican`: plataforma orientada a centralizar y detectar oportunidades de contratacion publica TI en Canarias.
 - `MVP`: alcance minimo inicial del producto; segun la documentacion funcional vigente, debe comunicarse como cobertura inicial priorizada y no como cobertura total.
 - `Oportunidad TI`: licitacion o expediente considerado relevante para tecnologia conforme a las reglas funcionales vigentes de clasificacion.
 - `Cobertura funcional`: conjunto de fuentes y capacidades que el producto declara cubrir de forma observable y verificable.

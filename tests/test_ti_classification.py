@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from podencoti.ti_classification import (
+from licican.ti_classification import (
     OpportunityCandidate,
     audit_examples,
     classify_opportunity,

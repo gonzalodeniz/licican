@@ -1,4 +1,4 @@
-# Definicion de Hecho de PodencoTI
+# Definicion de Hecho de Licican
 
 ## Objetivo
 Establecer cuando un item funcional puede considerarse terminado para pasar a validacion de `qa-teams` y cuando puede cerrarse administrativamente por `product-manager`.

@@ -1,8 +1,8 @@
-# PodencoTI
+# Licican
 
 ## Descripcion
 
-`PodencoTI` es una plataforma para centralizar y detectar oportunidades de contratacion publica TI en Canarias. El proyecto busca evitar la busqueda manual en multiples portales oficiales, agregando licitaciones, clasificandolas como relevantes para tecnologia y permitiendo actuar con mas tiempo y mejor informacion.
+`Licican` es una plataforma para centralizar y detectar oportunidades de contratacion publica TI en Canarias. El proyecto busca evitar la busqueda manual en multiples portales oficiales, agregando licitaciones, clasificandolas como relevantes para tecnologia y permitiendo actuar con mas tiempo y mejor informacion.
 
 ## Objetivo
 
@@ -112,7 +112,7 @@ Si no existe `.env`, copia `.env.example` y ajusta al menos `PORT` antes de arra
 
 El arranque local usa el puerto definido en `.env` mediante `PORT`. Si no se define, la aplicacion cae al valor por defecto `8000`.
 El servidor local escucha en `127.0.0.1` por defecto. En contenedor o Compose se usa `HOST=0.0.0.0`.
-La carga del catalogo y del detalle usa PostgreSQL por defecto. Si necesitas forzar temporalmente la fuente historica basada en ficheros para pruebas locales, exporta `PODENCOTI_CATALOG_BACKEND=file`.
+La carga del catalogo y del detalle usa PostgreSQL por defecto. Si necesitas forzar temporalmente la fuente historica basada en ficheros para pruebas locales, exporta `LICICAN_CATALOG_BACKEND=file`.
 
 Configuracion local por defecto del backend PostgreSQL:
 
@@ -123,7 +123,7 @@ Configuracion local por defecto del backend PostgreSQL:
 - `DB_PASSWORD=Lic1t4c10n3s_2026!`
 
 ```bash
-PYTHONPATH=src python3 -m podencoti.app
+PYTHONPATH=src python3 -m licican.app
 ```
 
 Luego se puede abrir:
@@ -151,8 +151,8 @@ Ejemplos de filtros ya soportados:
 
 El `docker-compose.yml` raiz levanta la aplicacion y la base de datos PostgreSQL integrada.
 
-- `podencoti` publica el puerto definido por `PORT` y monta `./data:/app/data` para persistencia.
-- `podencoti` arranca con `PODENCOTI_CATALOG_BACKEND=postgres` y conecta con `postgres-licitaciones` usando la configuracion `DB_*` del compose.
+- `licican` publica el puerto definido por `PORT` y monta `./data:/app/data` para persistencia.
+- `licican` arranca con `LICICAN_CATALOG_BACKEND=postgres` y conecta con `postgres-licitaciones` usando la configuracion `DB_*` del compose.
 - `postgres-licitaciones` publica la base de datos en `DB_PORT` y persiste los datos en `pgdata_licitaciones`.
 - La aplicacion en contenedor escucha con `HOST=0.0.0.0`, mientras que en local mantiene `127.0.0.1`.
 

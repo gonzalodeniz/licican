@@ -30,7 +30,7 @@ En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle
 La intencion funcional sigue documentada, pero en esta checkout la evidencia automatizada no se reproduce completa: los snapshots viven en `data/atom/` y el cargador actual sigue buscando `data/*.atom`. Hasta que esa discrepancia se resuelva, la trazabilidad de `PB-011` debe tratarse como condicionada y no como validacion cerrada.
 
 ## La aplicacion ya usa PostgreSQL por defecto?
-Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `PODENCOTI_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
+Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `LICICAN_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
 
 ## PB-012 ya esta operativo en `main`?
 No segun la evidencia tecnica revisada en esta documentacion. El changelog de `2026-03-29` la registra como validada, pero en `main` no aparecen rutas, vistas ni pruebas para `/datos-consolidados` ni para las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.

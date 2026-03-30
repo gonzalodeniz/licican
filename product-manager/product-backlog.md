@@ -1,7 +1,7 @@
-# Product Backlog de PodencoTI
+# Product Backlog de Licican
 
 ## Objetivo
-Traducir la vision de PodencoTI en trabajo priorizado, trazable y ejecutable para `developer-teams`, manteniendo alineacion con la validacion posterior de `qa-teams`.
+Traducir la vision de Licican en trabajo priorizado, trazable y ejecutable para `developer-teams`, manteniendo alineacion con la validacion posterior de `qa-teams`.
 
 ## Escala de prioridad
 - `P0`: imprescindible para validar el MVP de descubrimiento.

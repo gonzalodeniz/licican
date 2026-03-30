@@ -4,7 +4,7 @@
 Equipo tecnico que necesita conocer la implementacion actual de `main`, sus rutas verificables y los limites funcionales todavia abiertos.
 
 ## Resumen tecnico verificable
-`PodencoTI` expone en `main` una aplicacion WSGI minima en Python con un conjunto funcional verificable y un despliegue local en contenedor:
+`Licican` expone en `main` una aplicacion WSGI minima en Python con un conjunto funcional verificable y un despliegue local en contenedor:
 
 - `PB-001`: catalogo inicial de oportunidades TI.
 - `PB-003`: filtros funcionales aplicados sobre el catalogo HTML y la API JSON.
@@ -22,12 +22,12 @@ La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defect
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
 - Automatizacion local: `Makefile`
-- Aplicacion WSGI: `src/podencoti/app.py`
-- Alertas tempranas: `src/podencoti/alerts.py`
-- Catalogo y detalle de oportunidades: `src/podencoti/opportunity_catalog.py`
-- Carga de cobertura de fuentes: `src/podencoti/source_coverage.py`
-- Priorizacion de fuentes reales oficiales: `src/podencoti/real_source_prioritization.py`
-- Carga y evaluacion de reglas TI: `src/podencoti/ti_classification.py`
+- Aplicacion WSGI: `src/licican/app.py`
+- Alertas tempranas: `src/licican/alerts.py`
+- Catalogo y detalle de oportunidades: `src/licican/opportunity_catalog.py`
+- Carga de cobertura de fuentes: `src/licican/source_coverage.py`
+- Priorizacion de fuentes reales oficiales: `src/licican/real_source_prioritization.py`
+- Carga y evaluacion de reglas TI: `src/licican/ti_classification.py`
 - Datos versionados: `data/opportunities.json`, `data/source_coverage.json`, `data/real_source_prioritization.json`, `data/ti_classification_rules.json`
 - Snapshots `.atom` presentes en el repositorio: `data/atom/*.atom`
 - Datos de alertas: `data/alerts.json`
@@ -51,7 +51,7 @@ La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defect
 La aplicacion devuelve `404 Not Found` para cualquier otra ruta no declarada.
 Los parametros funcionales visibles hoy para `/` y `/api/oportunidades` son `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 Si `presupuesto_min` es mayor que `presupuesto_max`, la API responde `400 Bad Request` y la vista HTML mantiene el catalogo base junto con un mensaje de correccion.
-Cuando la aplicacion opera con `PODENCOTI_CATALOG_BACKEND=file`, el catalogo y el detalle se alimentan de la consolidacion funcional de `PB-011`; en ese caso, cada ficha muestra tambien `fichero_origen_atom`. En esta checkout la carga Atom no es completamente reproducible porque los ficheros estan en `data/atom/` y el cargador aun busca `data/*.atom`. Con el backend PostgreSQL por defecto, la carga procede de la tabla `licitacion` y mantiene error controlado si la base no esta disponible.
+Cuando la aplicacion opera con `LICICAN_CATALOG_BACKEND=file`, el catalogo y el detalle se alimentan de la consolidacion funcional de `PB-011`; en ese caso, cada ficha muestra tambien `fichero_origen_atom`. En esta checkout la carga Atom no es completamente reproducible porque los ficheros estan en `data/atom/` y el cargador aun busca `data/*.atom`. Con el backend PostgreSQL por defecto, la carga procede de la tabla `licitacion` y mantiene error controlado si la base no esta disponible.
 
 ### Campos visibles por superficie
 - `/api/oportunidades`: devuelve `referencia_funcional`, `cobertura_aplicada`, `total_registros_origen`, `total_oportunidades_visibles`, `total_oportunidades_catalogo`, `filtros_activos`, `error_validacion`, `filtros_disponibles` y `oportunidades`.
@@ -63,21 +63,21 @@ Cuando la aplicacion opera con `PODENCOTI_CATALOG_BACKEND=file`, el catalogo y e
 - `/api/clasificacion-ti`: devuelve `referencia_funcional`, `reglas` y `ejemplos_auditados`.
 
 ## Estructura tecnica
-- [app.py](/opt/apps/podencoti/src/podencoti/app.py) centraliza el router WSGI, el renderizado HTML y las respuestas JSON.
-- [atom_consolidation.py](/opt/apps/podencoti/src/podencoti/atom_consolidation.py) consolida snapshots `.atom`, resuelve la version vigente por expediente y conserva el fichero origen.
-- [alerts.py](/opt/apps/podencoti/src/podencoti/alerts.py) persiste alertas internas, valida criterios funcionales y recalcula coincidencias accionables.
-- [opportunity_catalog.py](/opt/apps/podencoti/src/podencoti/opportunity_catalog.py) carga registros versionados desde la consolidacion Atom cuando existe, filtra por cobertura MVP, aplica la clasificacion TI y resuelve el ultimo dato oficial visible para ficha y catalogo.
-- [postgres_catalog.py](/opt/apps/podencoti/src/podencoti/postgres_catalog.py) centraliza la carga desde PostgreSQL para el backend operativo por defecto y conserva el modo `file` como alternativa de apoyo.
-- [source_coverage.py](/opt/apps/podencoti/src/podencoti/source_coverage.py) valida estados de cobertura permitidos (`MVP`, `Posterior`, `Por definir`) y resume conteos.
-- [real_source_prioritization.py](/opt/apps/podencoti/src/podencoti/real_source_prioritization.py) valida las olas permitidas (`Ola 1`, `Ola 2`, `Ola 3`), ordena las fuentes por prioridad y resume la distribucion por ola.
-- [ti_classification.py](/opt/apps/podencoti/src/podencoti/ti_classification.py) normaliza texto, aplica reglas funcionales y audita ejemplos con tres salidas posibles: `TI`, `No TI` y `Caso frontera`.
+- [app.py](/opt/apps/licican/src/licican/app.py) centraliza el router WSGI, el renderizado HTML y las respuestas JSON.
+- [atom_consolidation.py](/opt/apps/licican/src/licican/atom_consolidation.py) consolida snapshots `.atom`, resuelve la version vigente por expediente y conserva el fichero origen.
+- [alerts.py](/opt/apps/licican/src/licican/alerts.py) persiste alertas internas, valida criterios funcionales y recalcula coincidencias accionables.
+- [opportunity_catalog.py](/opt/apps/licican/src/licican/opportunity_catalog.py) carga registros versionados desde la consolidacion Atom cuando existe, filtra por cobertura MVP, aplica la clasificacion TI y resuelve el ultimo dato oficial visible para ficha y catalogo.
+- [postgres_catalog.py](/opt/apps/licican/src/licican/postgres_catalog.py) centraliza la carga desde PostgreSQL para el backend operativo por defecto y conserva el modo `file` como alternativa de apoyo.
+- [source_coverage.py](/opt/apps/licican/src/licican/source_coverage.py) valida estados de cobertura permitidos (`MVP`, `Posterior`, `Por definir`) y resume conteos.
+- [real_source_prioritization.py](/opt/apps/licican/src/licican/real_source_prioritization.py) valida las olas permitidas (`Ola 1`, `Ola 2`, `Ola 3`), ordena las fuentes por prioridad y resume la distribucion por ola.
+- [ti_classification.py](/opt/apps/licican/src/licican/ti_classification.py) normaliza texto, aplica reglas funcionales y audita ejemplos con tres salidas posibles: `TI`, `No TI` y `Caso frontera`.
 
 ## Verificacion reproducible
 Desde la raiz del proyecto:
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
-PYTHONPATH=src python3 -m podencoti.app
+PYTHONPATH=src python3 -m licican.app
 docker compose up -d --build
 ```
 

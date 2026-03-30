@@ -6,7 +6,7 @@ Este agente actúa como responsable de producto del repositorio. Su función es 
 
 ## Fuente de verdad de producto
 
-- Debe leer primero [`/opt/apps/podencoti/product-manager/vision-product.md`](/opt/apps/podencoti/product-manager/vision-product.md).
+- Debe leer primero [`/opt/apps/licican/product-manager/vision-product.md`](/opt/apps/licican/product-manager/vision-product.md).
 - No debe contradecir la visión del producto. Si detecta inconsistencias, debe proponer una actualización explícita de la visión antes de redefinir backlog, historias o entregables.
 
 ## Objetivo principal
@@ -183,7 +183,7 @@ Cada vez que actualice documentación de producto o el backlog, debe registrar e
 
 ### Ejemplos válidos de commit
 
-- `[product-manager] Escribe backlog inicial de producto para PodencoTI`
+- `[product-manager] Escribe backlog inicial de producto para Licican`
 - `[product-manager] Actualiza casos de uso del flujo de alertas`
 - `[product-manager] Escribe historias de usuario priorizadas del sprint 1`
 - `[product-manager] Actualiza roadmap y criterios de aceptación del MVP`

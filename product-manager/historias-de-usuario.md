@@ -1,4 +1,4 @@
-# Historias de Usuario de PodencoTI
+# Historias de Usuario de Licican
 
 ## Convenciones
 - Cada historia enlaza con backlog, caso de uso e issue de GitHub cuando existe.
@@ -179,7 +179,7 @@
 - Caso de uso relacionado: CU-10
 - Issue relacionado: #10
 - Historia:
-  Como usuario de PodencoTI,
+  Como usuario de Licican,
   quiero disponer de una navegacion principal clara con menu lateral de iconos y comportamiento responsive,
   para moverme entre las opciones principales de la aplicacion sin perder contexto al cambiar el ancho de la ventana.
 - Criterios de aceptacion:

@@ -1,16 +1,16 @@
 services:
-  podencoti:
+  licican:
     build:
       context: .
       dockerfile: Dockerfile
-    image: podencoti:latest
+    image: licican:latest
     depends_on:
       postgres-licitaciones:
         condition: service_healthy
     environment:
       HOST: 0.0.0.0
       PORT: ${PORT:-8000}
-      PODENCOTI_CATALOG_BACKEND: postgres
+      LICICAN_CATALOG_BACKEND: postgres
       DB_HOST: postgres-licitaciones
       DB_PORT: 5432
       DB_NAME: licitaciones

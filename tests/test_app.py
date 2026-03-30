@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import psycopg2
 
-from podencoti.app import application, main
+from licican.app import application, main
 
 
 def invoke_app(
@@ -41,8 +41,9 @@ def invoke_app(
     if script_name:
         environ["SCRIPT_NAME"] = script_name
     env_overrides = {}
-    if "PODENCOTI_CATALOG_BACKEND" not in os.environ:
-        env_overrides["PODENCOTI_CATALOG_BACKEND"] = "file"
+    env_overrides["BASE_PATH"] = "/licican"
+    if "LICICAN_CATALOG_BACKEND" not in os.environ:
+        env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     with patch.dict(os.environ, env_overrides, clear=False):
         body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
@@ -50,9 +51,9 @@ def invoke_app(
 
 class ApplicationTests(unittest.TestCase):
     def test_api_returns_controlled_error_when_postgresql_is_unavailable(self) -> None:
-        with patch.dict(os.environ, {"PODENCOTI_CATALOG_BACKEND": "postgres"}, clear=False):
+        with patch.dict(os.environ, {"LICICAN_CATALOG_BACKEND": "postgres"}, clear=False):
             with patch(
-                "podencoti.postgres_catalog.psycopg2.connect",
+                "licican.postgres_catalog.psycopg2.connect",
                 side_effect=psycopg2.OperationalError("db down"),
             ):
                 status, headers, body = invoke_app("/api/oportunidades")
@@ -73,22 +74,22 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Ver oferta concreta", html)
         self.assertIn("Publicación oficial", html)
         self.assertIn("Fuente oficial", html)
-        self.assertIn('/podencoti/oportunidades/pcsp-cabildo-licencias-2026', html)
-        self.assertIn('action="/podencoti"', html)
+        self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
+        self.assertIn('action="/licican"', html)
         self.assertIn("Licitaciones TI Canarias", html)
         self.assertIn("Detalle Lotes", html)
         self.assertIn("Adjudicaciones", html)
-        self.assertIn('/podencoti/datos-consolidados', html)
+        self.assertIn('/licican/datos-consolidados', html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
-        status, headers, body = invoke_app("/podencoti/")
+        status, headers, body = invoke_app("/licican/")
         html = body.decode("utf-8")
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
-        self.assertIn('/podencoti/oportunidades/pcsp-cabildo-licencias-2026', html)
-        self.assertIn('href="/podencoti"', html)
+        self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
+        self.assertIn('href="/licican"', html)
 
     def test_api_returns_catalog_only_with_mvp_ti_opportunities(self) -> None:
         status, headers, body = invoke_app("/api/oportunidades")
@@ -269,7 +270,7 @@ class ApplicationTests(unittest.TestCase):
     def test_alerts_page_renders_empty_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
-            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+            with patch.dict(os.environ, {"LICICAN_ALERTS_PATH": str(alerts_path)}, clear=False):
                 status, headers, body = invoke_app("/alertas")
 
         html = body.decode("utf-8")
@@ -281,7 +282,7 @@ class ApplicationTests(unittest.TestCase):
     def test_alert_creation_rejects_empty_form(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
-            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+            with patch.dict(os.environ, {"LICICAN_ALERTS_PATH": str(alerts_path)}, clear=False):
                 status, headers, body = invoke_app("/alertas", method="POST")
 
         html = body.decode("utf-8")
@@ -292,14 +293,14 @@ class ApplicationTests(unittest.TestCase):
     def test_alert_lifecycle_is_visible_from_html_and_api(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
-            with patch.dict(os.environ, {"PODENCOTI_ALERTS_PATH": str(alerts_path)}, clear=False):
+            with patch.dict(os.environ, {"LICICAN_ALERTS_PATH": str(alerts_path)}, clear=False):
                 created_status, created_headers, _ = invoke_app(
                     "/alertas",
                     method="POST",
                     body="palabra_clave=licencias",
                 )
                 self.assertEqual("303 See Other", created_status)
-                self.assertEqual("/podencoti/alertas?mensaje=Alerta+creada+y+activa", created_headers["Location"])
+                self.assertEqual("/licican/alertas?mensaje=Alerta+creada+y+activa", created_headers["Location"])
                 created_page_status, _, created_page_body = invoke_app("/alertas")
                 self.assertEqual("200 OK", created_page_status)
                 self.assertIn("Activa", created_page_body.decode("utf-8"))
@@ -349,8 +350,8 @@ class ApplicationTests(unittest.TestCase):
     def test_main_handles_keyboard_interrupt_with_controlled_shutdown(self) -> None:
         stdout = io.StringIO()
 
-        with patch.dict(os.environ, {"PORT": "8123"}, clear=False):
-            with patch("podencoti.app.make_server") as make_server_mock:
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "PORT": "8123"}, clear=False):
+            with patch("licican.app.make_server") as make_server_mock:
                 server = make_server_mock.return_value.__enter__.return_value
                 server.serve_forever.side_effect = KeyboardInterrupt
 
@@ -358,7 +359,7 @@ class ApplicationTests(unittest.TestCase):
                     main()
 
         output = stdout.getvalue()
-        self.assertIn("Servidor disponible en http://127.0.0.1:8123/podencoti", output)
+        self.assertIn("Servidor disponible en http://127.0.0.1:8123/licican", output)
         self.assertIn("Servidor detenido de forma controlada.", output)
         make_server_mock.assert_called_once_with("127.0.0.1", 8123, application)
         server.server_close.assert_called_once_with()
@@ -366,8 +367,8 @@ class ApplicationTests(unittest.TestCase):
     def test_main_uses_configured_host_when_present(self) -> None:
         stdout = io.StringIO()
 
-        with patch.dict(os.environ, {"HOST": "0.0.0.0", "PORT": "8124"}, clear=False):
-            with patch("podencoti.app.make_server") as make_server_mock:
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "HOST": "0.0.0.0", "PORT": "8124"}, clear=False):
+            with patch("licican.app.make_server") as make_server_mock:
                 server = make_server_mock.return_value.__enter__.return_value
                 server.serve_forever.side_effect = KeyboardInterrupt
 
@@ -375,11 +376,11 @@ class ApplicationTests(unittest.TestCase):
                     main()
 
         output = stdout.getvalue()
-        self.assertIn("Servidor disponible en http://0.0.0.0:8124/podencoti", output)
+        self.assertIn("Servidor disponible en http://0.0.0.0:8124/licican", output)
         make_server_mock.assert_called_once_with("0.0.0.0", 8124, application)
 
     def test_main_rejects_invalid_port_configuration(self) -> None:
-        with patch.dict(os.environ, {"PORT": "not-a-number"}, clear=False):
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "PORT": "not-a-number"}, clear=False):
             with self.assertRaisesRegex(ValueError, "PORT debe ser un numero entero valido"):
                 main()
 
@@ -395,7 +396,7 @@ class ApplicationTests(unittest.TestCase):
             "oportunidades": [],
         }
 
-        with patch("podencoti.app.build_catalog", return_value=empty_catalog):
+        with patch("licican.app.build_catalog", return_value=empty_catalog):
             status, headers, body = invoke_app("/")
 
         html = body.decode("utf-8")

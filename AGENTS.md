@@ -2,7 +2,7 @@
 
 ## Proposito
 
-Este archivo define las reglas globales del repositorio `podencoti` y aclara como deben activarse las instrucciones especificas de cada rol.
+Este archivo define las reglas globales del repositorio `licican` y aclara como deben activarse las instrucciones especificas de cada rol.
 
 ## Regla de activacion por rol
 
@@ -45,7 +45,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 |-- changelog/
 |-- data/
 |-- src/
-|   `-- podencoti/
+|   `-- licican/
 |-- tests/
 |-- product-manager/
 |-- developer-teams/
@@ -89,7 +89,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 
 ## Vision del producto
 
-`PodencoTI` es una plataforma para centralizar y detectar oportunidades de contratacion publica TI en Canarias. El producto busca evitar la busqueda manual en multiples portales, agregando licitaciones, clasificandolas como relevantes para tecnologia y enviando alertas tempranas para que empresas y profesionales puedan preparar ofertas con mas tiempo y mejor informacion.
+`Licican` es una plataforma para centralizar y detectar oportunidades de contratacion publica TI en Canarias. El producto busca evitar la busqueda manual en multiples portales, agregando licitaciones, clasificandolas como relevantes para tecnologia y enviando alertas tempranas para que empresas y profesionales puedan preparar ofertas con mas tiempo y mejor informacion.
 
 ### Problema que resuelve
 
@@ -136,7 +136,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 - Limitar el numero de ramas abiertas para facilitar el seguimiento operativo del proyecto.
 - Todos los commits del repositorio deben comenzar con el prefijo del rol que los ejecuta en formato `[rol]`, por ejemplo `[developer-teams] Implementa clasificacion TI`.
 - Si para ejecutar o desarrollar el proyecto en Python fuese necesaria la instalacion de librerias adicionales en el sistema o en el entorno de trabajo, debe existir y mantenerse un fichero `requirements.txt` en la raiz del repositorio con dichas dependencias.
-- Limitar lectura y escritura al directorio del proyecto `/opt/apps/podencoti`.
+- Limitar lectura y escritura al directorio del proyecto `/opt/apps/licican`.
 
 ## Flujo de trabajo entre equipos
 

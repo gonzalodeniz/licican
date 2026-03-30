@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from podencoti.opportunity_catalog import CatalogFilters, DEFAULT_DATA_PATH, build_catalog
+from licican.opportunity_catalog import CatalogFilters, DEFAULT_DATA_PATH, build_catalog
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]

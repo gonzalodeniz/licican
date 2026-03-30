@@ -6,18 +6,26 @@ PYTHONPATH := src
 VENV_ACTIVATE := .venv/bin/activate
 DOCKER ?= docker
 COMPOSE ?= docker compose
-IMAGE_NAME ?= podencoti:latest
+IMAGE_NAME ?= licican:latest
 
 define ENSURE_VENV
-	if [[ -z "$$VIRTUAL_ENV" ]]; then \
-		if [[ -f "$(VENV_ACTIVATE)" ]]; then \
-			source "$(VENV_ACTIVATE)"; \
-		else \
-			echo "No se encontro $(VENV_ACTIVATE)"; \
-			exit 1; \
-		fi; \
+	if [[ -n "$$VIRTUAL_ENV" && -x "$$VIRTUAL_ENV/bin/python3" ]]; then \
+		:; \
+	elif [[ -f "$(VENV_ACTIVATE)" ]]; then \
+		source "$(VENV_ACTIVATE)"; \
+	else \
+		echo "No se encontro $(VENV_ACTIVATE)"; \
+		exit 1; \
 	fi
 endef
+
+run:
+	@$(ENSURE_VENV); \
+	BASE_PATH=/licican PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m licican.app
+
+test:
+	@$(ENSURE_VENV); \
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests -v
 
 help:
 	@printf "%s\n" \
@@ -31,14 +39,6 @@ help:
 		"  make docker-restart - Recrea el despliegue Docker" \
 		"  make docker-psql   - Abre una terminal psql en la base de datos" \
 		"Los objetivos activan .venv automaticamente si no hay un entorno virtual ya activo."
-
-run:
-	@$(ENSURE_VENV); \
-	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m podencoti.app
-
-test:
-	@$(ENSURE_VENV); \
-	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests -v
 
 docker-build:
 	@$(DOCKER) build -t $(IMAGE_NAME) .

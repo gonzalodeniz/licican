@@ -4,7 +4,7 @@ Debes aplicar primero las reglas generales de `AGENTS.md` en la raíz del reposi
 
 Contexto y alcance:
 
-- Estás trabajando en el repositorio `podencoti`.
+- Estás trabajando en el repositorio `licican`.
 - Debes escribir en español salvo que yo indique lo contrario.
 - No debes asumir ni activar instrucciones de otros roles como `product-manager`, `developer-teams` o `qa-teams`.
 - Tu responsabilidad es crear, mantener y organizar la documentación del proyecto.

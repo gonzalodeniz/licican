@@ -8,12 +8,12 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlencode
 from wsgiref.simple_server import make_server
 
-from podencoti.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
-from podencoti.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from podencoti.opportunity_catalog import CatalogDataSourceError, CatalogFilters, build_catalog, build_opportunity_detail
-from podencoti.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
-from podencoti.source_coverage import load_source_coverage, summary_by_status
-from podencoti.ti_classification import audit_examples, load_rule_set
+from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
+from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
+from licican.opportunity_catalog import CatalogDataSourceError, CatalogFilters, build_catalog, build_opportunity_detail
+from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
+from licican.source_coverage import load_source_coverage, summary_by_status
+from licican.ti_classification import audit_examples, load_rule_set
 
 
 def _page_template(
@@ -335,7 +335,7 @@ def _normalize_base_path(raw_base_path: str | None) -> str:
 
 def _resolve_base_path() -> str:
     _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    return _normalize_base_path(os.environ.get("BASE_PATH", "/podencoti"))
+    return _normalize_base_path(os.environ.get("BASE_PATH", "/licican"))
 
 
 def _app_url(base_path: str, path: str) -> str:
@@ -410,11 +410,11 @@ def _coverage_html_response() -> str:
       </p>
     """
     return _page_template(
-        "PodencoTI | Cobertura inicial del MVP",
+        "Licican | Cobertura inicial del MVP",
         "Cobertura inicial de fuentes oficiales del MVP",
         "Release 0 · PB-007 · Cobertura visible y verificable",
         (
-            "PodencoTI no comunica cobertura total del ecosistema canario en esta entrega. "
+            "Licican no comunica cobertura total del ecosistema canario en esta entrega. "
             "Esta vista delimita qué fuentes oficiales entran en el MVP, cuáles quedan para una fase posterior "
             "y cuáles siguen pendientes de decisión funcional."
         ),
@@ -483,11 +483,11 @@ def _real_source_prioritization_html_response() -> str:
       </p>
     """
     return _page_template(
-        "PodencoTI | Priorización de fuentes reales oficiales",
+        "Licican | Priorización de fuentes reales oficiales",
         "Priorización de fuentes reales oficiales para recopilación",
         "Release 2 · PB-009 · Recopilación priorizada por olas",
         (
-            "PodencoTI deja aquí visible qué fuentes oficiales reales deben entrar antes en la recopilación temprana. "
+            "Licican deja aquí visible qué fuentes oficiales reales deben entrar antes en la recopilación temprana. "
             "La entrega refuerza credibilidad y trazabilidad sin ampliar todavía cobertura comercial, alertas ni pipeline."
         ),
         content,
@@ -549,7 +549,7 @@ def _read_form_data(environ) -> dict[str, list[str]]:
 
 def _resolve_alerts_path() -> Path:
     _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    raw_path = os.environ.get("PODENCOTI_ALERTS_PATH", "").strip()
+    raw_path = os.environ.get("LICICAN_ALERTS_PATH", "").strip()
     if raw_path:
         return Path(raw_path)
     return Path(__file__).resolve().parents[2] / "data" / "alerts.json"
@@ -755,11 +755,11 @@ def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
       </section>
     """
     return _page_template(
-        "PodencoTI | Datos consolidados TI Canarias",
+        "Licican | Datos consolidados TI Canarias",
         heading,
         "Release 7 · PB-012 · Excel funcional visible en la aplicación",
         (
-            "PodencoTI expone aquí la misma estructura funcional que el Excel versionado de licitaciones TI Canarias, "
+            "Licican expone aquí la misma estructura funcional que el Excel versionado de licitaciones TI Canarias, "
             "con pestañas separadas para licitaciones, lotes y adjudicaciones."
         ),
         content,
@@ -812,7 +812,7 @@ def _licitacion_excel_detail_html_response(slug: str, base_path: str = "") -> st
       </section>
     """
     return _page_template(
-        "PodencoTI | Detalle de licitación consolidada",
+        "Licican | Detalle de licitación consolidada",
         str(detail["titulo"]),
         "PB-012 · Detalle trazable del expediente",
         (
@@ -872,7 +872,7 @@ def _adjudicacion_excel_detail_html_response(slug: str, base_path: str = "") -> 
       </section>
     """
     return _page_template(
-        "PodencoTI | Detalle de adjudicación consolidada",
+        "Licican | Detalle de adjudicación consolidada",
         str(detail["titulo"]),
         "PB-012 · Contrato adjudicado con trazabilidad",
         (
@@ -1039,11 +1039,11 @@ def _catalog_html_response(filters: CatalogFilters | None = None, base_path: str
       </p>
     """
     return _page_template(
-        "PodencoTI | Catálogo inicial de oportunidades TI",
+        "Licican | Catálogo inicial de oportunidades TI",
         "Catálogo inicial de oportunidades TI de Canarias",
         "Release 6 · PB-011 · Consolidacion funcional trazable",
         (
-            "PodencoTI muestra aquí un catálogo consultable obtenido a partir de todos los snapshots `.atom` versionados presentes en `data/`. "
+            "Licican muestra aquí un catálogo consultable obtenido a partir de todos los snapshots `.atom` versionados presentes en `data/`. "
             "Solo se publican registros que cumplen simultáneamente criterio geográfico Canarias y criterio TI por CPV, con fuente oficial visible."
         ),
         content,
@@ -1227,11 +1227,11 @@ def _alerts_html_response(
       {alert_list}
     """
     return _page_template(
-        "PodencoTI | Alertas tempranas del MVP",
+        "Licican | Alertas tempranas del MVP",
         "Gestión de alertas tempranas",
         "Release 2 · PB-004 · Registro interno de anticipación",
         (
-            "PodencoTI permite guardar criterios persistentes para dejar visible qué oportunidades TI deben seguirse sin búsqueda manual recurrente. "
+            "Licican permite guardar criterios persistentes para dejar visible qué oportunidades TI deben seguirse sin búsqueda manual recurrente. "
             "En esta primera entrega las coincidencias quedan registradas en la propia aplicación como soporte interno del MVP."
         ),
         content,
@@ -1257,7 +1257,7 @@ def _catalog_data_error_html_response(base_path: str, message: str) -> str:
       </section>
     """
     return _page_template(
-        "PodencoTI | Catalogo temporalmente no disponible",
+        "Licican | Catalogo temporalmente no disponible",
         "Catalogo temporalmente no disponible",
         "Servicio de datos no disponible",
         "El catalogo y el detalle requieren acceso a la fuente de datos configurada para la aplicacion.",
@@ -1340,7 +1340,7 @@ def _detail_html_response(opportunity_id: str, base_path: str = "") -> str | Non
     """
 
     return _page_template(
-        "PodencoTI | Ficha de detalle de licitacion",
+        "Licican | Ficha de detalle de licitacion",
         str(detail["titulo"]),
         "Release 1 · PB-002 · Ficha resumida verificable",
         (
@@ -1430,11 +1430,11 @@ def _classification_html_response() -> str:
       </section>
     """
     return _page_template(
-        "PodencoTI | Clasificación TI auditable",
+        "Licican | Clasificación TI auditable",
         "Clasificación TI auditable",
         "Release 0 · PB-006 · Regla TI verificable",
         (
-            "PodencoTI fija aquí la regla funcional mínima para decidir qué oportunidades son TI, "
+            "Licican fija aquí la regla funcional mínima para decidir qué oportunidades son TI, "
             "cuáles deben excluirse y qué expedientes requieren revisión adicional antes de aparecer en el catálogo."
         ),
         content,

@@ -6,7 +6,7 @@ Si alguna instrucción de este prompt entra en conflicto con `AGENTS.md` o con `
 
 Contexto y alcance:
 
-- Estás trabajando en el repositorio `podencoti`.
+- Estás trabajando en el repositorio `licican`.
 - Debes escribir en español salvo que yo indique lo contrario.
 - No debes asumir ni activar instrucciones de otros roles como `product-manager` o `qa-teams`.
 - Tu responsabilidad es implementar trabajo definido en issues abiertos de GitHub y dejarlo listo para revisión de `qa-teams`.

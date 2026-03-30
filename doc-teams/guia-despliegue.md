@@ -1,7 +1,7 @@
 # Guia de despliegue
 
 ## Publico objetivo
-Persona responsable de publicar o exponer `PodencoTI` fuera de un entorno local de desarrollo.
+Persona responsable de publicar o exponer `Licican` fuera de un entorno local de desarrollo.
 
 ## Estado actual del despliegue
 La rama `main` contiene una aplicacion arrancable en local con PostgreSQL como backend operativo por defecto, modo `file` disponible para pruebas aisladas y una ruta reproducible de contenedor con `Dockerfile` y `docker-compose.yml` que levanta la aplicacion y la BBDD PostgreSQL integrada. Esto cubre despliegue local reproducible, pero no implica aun una publicacion productiva endurecida.
@@ -10,7 +10,7 @@ La rama `main` contiene una aplicacion arrancable en local con PostgreSQL como b
 Antes de plantear cualquier publicacion, confirma desde la raiz del proyecto:
 
 ```bash
-cd /opt/apps/podencoti
+cd /opt/apps/licican
 source .venv/bin/activate
 python3 -m pip install -e .
 make test
@@ -47,7 +47,7 @@ Solo debe considerarse soportado el arranque local de validacion y el despliegue
 - Si se quiere pasar de contenedor local a produccion, endurecer la imagen, definir usuario/volumenes finales y documentar supervision, observabilidad y rollback.
 - La priorizacion de fuentes reales ya puede desplegarse junto con el resto de la entrega minima, pero sigue siendo una funcionalidad de recopilacion, no una capa operativa completa.
 - Las alertas visibles son internas y no sustituyen una capa de notificacion o automatizacion de seguimiento.
-- La entrega documentada aqui usa PostgreSQL por defecto; `PODENCOTI_CATALOG_BACKEND=file` y `data/opportunities.json` quedan como respaldo operativo cuando se fuerza ese modo.
+- La entrega documentada aqui usa PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` y `data/opportunities.json` quedan como respaldo operativo cuando se fuerza ese modo.
 - La consolidacion Atom sigue sujeta a la discrepancia de rutas entre `data/atom/` y el patron que usa el cargador.
 
 ## Riesgos

@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from podencoti.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
-from podencoti.opportunity_catalog import CatalogFilters
+from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
+from licican.opportunity_catalog import CatalogFilters
 
 
 class AlertsTests(unittest.TestCase):

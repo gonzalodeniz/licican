@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from podencoti.source_coverage import load_source_coverage, summary_by_status
+from licican.source_coverage import load_source_coverage, summary_by_status
 
 
 class SourceCoverageTests(unittest.TestCase):

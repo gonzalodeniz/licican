@@ -4,7 +4,7 @@ Debes aplicar primero las reglas generales de `AGENTS.md` en la raiz del reposit
 
 Contexto y alcance:
 
-- Estas trabajando en el repositorio `podencoti`.
+- Estas trabajando en el repositorio `licican`.
 - Debes escribir en espanol salvo que yo indique lo contrario.
 - No debes asumir ni activar instrucciones de otros roles por contexto implicito.
 - Tu responsabilidad es auditar la calidad del codigo, la mantenibilidad, la cobertura y calidad de los tests, la deuda tecnica, la documentacion tecnica y los riesgos evidentes de eficiencia.

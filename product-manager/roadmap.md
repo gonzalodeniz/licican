@@ -1,4 +1,4 @@
-# Roadmap de PodencoTI
+# Roadmap de Licican
 
 ## Criterios de planificacion
 - Se prioriza validar primero la propuesta de valor central: centralizacion y filtrado de oportunidades TI.

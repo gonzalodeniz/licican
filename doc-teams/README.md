@@ -1,7 +1,7 @@
 # Documentacion de `doc-teams`
 
 ## Objetivo
-Centralizar la documentacion oficial de `PodencoTI` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
+Centralizar la documentacion oficial de `Licican` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
 Fecha de revision: `2026-03-30`.
@@ -22,7 +22,7 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - Vista HTML de priorizacion de fuentes reales oficiales (`PB-009`) en `/priorizacion-fuentes-reales`.
 - API JSON de priorizacion de fuentes reales oficiales en `/api/fuentes-prioritarias`.
 - Vista HTML del catalogo consolidado (`PB-011`) en `/`.
-- El backend operativo por defecto para catalogo y detalle es PostgreSQL; `PODENCOTI_CATALOG_BACKEND=file` sigue disponible para aislamiento de pruebas.
+- El backend operativo por defecto para catalogo y detalle es PostgreSQL; `LICICAN_CATALOG_BACKEND=file` sigue disponible para aislamiento de pruebas.
 - `PB-009` ya forma parte de `main` y su trazabilidad visible cubre `BOC`, `BOP Las Palmas` y `BOE` por olas.
 - `PB-011` sigue siendo la referencia funcional del catalogo consolidado, pero en esta checkout los snapshots viven en `data/atom/` y el cargador actual aun busca `data/*.atom`, de modo que la reproduccion automatizada de esa consolidacion queda pendiente de corregir.
 - La issue tecnica #14 ya esta cerrada administrativamente en GitHub tras la validacion funcional y la integracion en `main`.
@@ -43,7 +43,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 - Terminologia transversal del proyecto: [glosario.md](glosario.md)
 
 ## Hallazgos principales de esta revision
-- `main` contiene implementacion Python versionada en `src/podencoti/`, datos en `data/` y pruebas automatizadas en `tests/`.
+- `main` contiene implementacion Python versionada en `src/licican/`, datos en `data/` y pruebas automatizadas en `tests/`.
 - `PYTHONPATH=src python3 -m unittest discover -s tests -v` descubre 54 pruebas en esta checkout y no finaliza en verde: la discrepancia principal sigue estando en la carga de `PB-011`, porque las fuentes Atom estan en `data/atom/` y el cargador todavia busca `data/*.atom`.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
@@ -58,7 +58,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero no deben leerse como evidencia de que `PB-012`, `PB-005` o el resto de ampliaciones planificadas ya esten disponibles en `main`.
-- `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de PodencoTI.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`), superficie auditable de `PB-006`, priorizacion de fuentes reales oficiales (`PB-009`) y consolidacion trazable de snapshots `.atom` (`PB-011`).
+- `pyproject.toml` sigue describiendo el paquete como "Cobertura inicial visible de fuentes del MVP de Licican.", aunque `main` ya expone tambien catalogo inicial (`PB-001`), filtros funcionales (`PB-003`), ficha de detalle (`PB-002`), superficie auditable de `PB-006`, priorizacion de fuentes reales oficiales (`PB-009`) y consolidacion trazable de snapshots `.atom` (`PB-011`).
 - `PB-009` ya tiene evidencia integrada en `main`; `PB-011` conserva trazabilidad funcional en la documentacion, pero su reproduccion automatizada sigue abierta por la discrepancia de rutas de los snapshots Atom.
 - `PB-012` aparece como validada en el changelog de `2026-03-29`, pero en `main` sigue sin observarse ninguna ruta, vista o prueba que la exponga; hasta que eso cambie, debe tratarse como trabajo validado no integrado o como evidencia documental desalineada.
 

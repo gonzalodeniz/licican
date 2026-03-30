@@ -1,7 +1,7 @@
-# Visión del Producto: PodencoTI
+# Visión del Producto: Licican
 
 ## 1. Declaración de Visión (Elevator Pitch)
-Para **empresas de tecnología y profesionales autónomos TI** que buscan adjudicarse contratos públicos en las Islas Canarias, **PodencoTI** es una **plataforma centralizada de alertas y búsqueda** que unifica todas las licitaciones tecnológicas de la región. A diferencia de la búsqueda manual en múltiples perfiles del contratante y boletines oficiales, nuestro producto **automatiza el descubrimiento de oportunidades, filtra requisitos técnicos y envía notificaciones en tiempo real**, permitiendo a las empresas centrarse en preparar la mejor propuesta técnica.
+Para **empresas de tecnología y profesionales autónomos TI** que buscan adjudicarse contratos públicos en las Islas Canarias, **Licican** es una **plataforma centralizada de alertas y búsqueda** que unifica todas las licitaciones tecnológicas de la región. A diferencia de la búsqueda manual en múltiples perfiles del contratante y boletines oficiales, nuestro producto **automatiza el descubrimiento de oportunidades, filtra requisitos técnicos y envía notificaciones en tiempo real**, permitiendo a las empresas centrarse en preparar la mejor propuesta técnica.
 
 ## 2. El Problema
 El ecosistema de contratación pública en Canarias está altamente fragmentado. Existen decenas de portales diferentes, incluyendo el Gobierno de Canarias, los 7 cabildos, los 88 ayuntamientos, además de múltiples empresas públicas y consorcios. Monitorizar todas estas fuentes en busca de pliegos de prescripciones técnicas relacionados con desarrollo de software, ciberseguridad, sistemas o hardware es un proceso lento, tedioso y que consume recursos valiosos. Las empresas a menudo pierden oportunidades de negocio u ofertan con prisas porque la información pasó desapercibida o se encontró tarde.
