@@ -14,7 +14,7 @@ services:
       TZ: Atlantic/Canary
 
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${DB_PORT:-5432}:5432"
 
     volumes:
       # Persistencia de datos
@@ -28,12 +28,14 @@ services:
       start_period: 30s
 
     # Límites de recursos (ajustar según el servidor)
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1G
-    #     reservations:
-    #       memory: 256M
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
 volumes:
   pgdata_licitaciones:
