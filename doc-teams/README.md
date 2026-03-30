@@ -7,6 +7,7 @@ Centralizar la documentacion oficial de `Licican` separando con claridad el cont
 Fecha de revision: `2026-03-30`.
 
 Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, y mantiene el modo `file` como respaldo explicito para pruebas aisladas. La consolidacion de `PB-011` sigue documentada, pero la evidencia automatizada depende todavia de alinear la ruta de los snapshots `data/atom/*.atom` con el cargador que hoy sigue buscando `data/*.atom`.
+La issue tecnica #17 (`T-002`) ya fue validada por `qa-teams`, pero sigue pendiente de integracion en `main`; hasta que `developer-teams` la fusione, su correccion del filtrado PostgreSQL no debe leerse aqui como comportamiento vigente del producto.
 
 - Vista HTML del catalogo inicial de oportunidades TI (`PB-001`) en `/`.
 - API JSON del catalogo en `/api/oportunidades`.
@@ -28,6 +29,7 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - La issue tecnica #14 ya esta cerrada administrativamente en GitHub tras la validacion funcional y la integracion en `main`.
 - No se observan superficies de pipeline de seguimiento ni de `PB-012` en el codigo o en las pruebas de `main`.
 - El changelog de `2026-03-29` registra `PB-012` como validada, pero la evidencia tecnica visible en `main` no expone todavia esa superficie; esta desalineacion sigue abierta y debe documentarse como tal.
+- La issue tecnica `#17` queda documentada como validada en rama y pendiente de integracion; este estado no altera la fotografia vigente de `main` hasta que exista merge efectivo.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/`, configuracion de `PORT` via `.env`, variables `DB_*` para PostgreSQL y una BBDD integrada con volumen persistente.
 
 Las alertas tempranas ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion ni un despliegue productivo endurecido.

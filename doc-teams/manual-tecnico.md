@@ -18,6 +18,7 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, incluyendo PostgreSQL integrada.
 
 La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defecto mediante la issue tecnica #14. El modo `file` sigue disponible para pruebas aisladas y la documentacion de `PB-011` conserva valor historico sobre la consolidacion de snapshots `.atom`, pero esa evidencia no es reproducible todavia en esta checkout porque los snapshots estan en `data/atom/` mientras el cargador sigue buscando `data/*.atom`. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
+La issue tecnica #17 ya esta validada en su rama de trabajo y corrige la resolucion de ubicacion en PostgreSQL para no degradar etiquetas geograficas especificas a `Canarias`, pero hasta su merge en `main` esta mejora sigue siendo una expectativa validada y no un comportamiento vigente documentable como parte estable de la rama principal.
 
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
@@ -107,6 +108,7 @@ Resultado verificado en esta revision:
 - La entrega de `PB-009` no habilita pipeline; solo refuerza origen, trazabilidad y orden de recopilacion.
 - Las alertas de `PB-004` solo registran coincidencias internas y no envian notificaciones salientes.
 - La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su carga automatizada requiere corregir la discrepancia entre `data/atom/` y el patron que usa el cargador.
+- La issue `#17` ya tiene validacion funcional, pero la documentacion de `main` debe seguir tratandola como pendiente de integracion hasta que exista el merge y el borrado de la rama tecnica.
 
 ## Dependencias abiertas
 - Implementar `PB-012` para exponer en interfaz las vistas funcionales equivalentes al Excel de referencia y ampliar la trazabilidad visible al usuario final.
