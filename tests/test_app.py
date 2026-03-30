@@ -80,6 +80,10 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Detalle Lotes", html)
         self.assertIn("Adjudicaciones", html)
         self.assertIn('/licican/datos-consolidados', html)
+        self.assertIn("Pagina 1 de 2", html)
+        self.assertIn("Mostrando 1-2 de 3", html)
+        self.assertIn("Pagina siguiente", html)
+        self.assertIn("Ir a la pagina", html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
         status, headers, body = invoke_app("/licican/")
@@ -101,6 +105,9 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(5, payload["total_registros_origen"])
         self.assertEqual("2026-03-22", payload["oportunidades"][0]["fecha_publicacion_oficial"])
         self.assertEqual(97000, payload["oportunidades"][0]["presupuesto"])
+        self.assertEqual(1, payload["paginacion"]["pagina_actual"])
+        self.assertEqual(2, payload["paginacion"]["tamano_pagina"])
+        self.assertEqual(2, payload["paginacion"]["total_paginas"])
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in payload["oportunidades"]))
 
     def test_api_applies_functional_filters_from_query_string(self) -> None:
@@ -115,6 +122,84 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(1, payload["total_oportunidades_catalogo"])
         self.assertEqual(["pcsp-cabildo-licencias-2026"], [item["id"] for item in payload["oportunidades"]])
         self.assertEqual("licencias", payload["filtros_activos"]["palabra_clave"])
+
+    def test_api_allows_requesting_a_specific_page(self) -> None:
+        status, headers, body = invoke_app("/api/oportunidades", "page=2")
+        payload = json.loads(body)
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
+        self.assertEqual(2, payload["paginacion"]["pagina_actual"])
+        self.assertEqual(3, payload["paginacion"]["resultado_desde"])
+        self.assertEqual(3, payload["paginacion"]["resultado_hasta"])
+        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
+
+    def test_api_normalizes_invalid_page_requests(self) -> None:
+        status, _, body = invoke_app("/api/oportunidades", "page=99")
+        payload = json.loads(body)
+
+        self.assertEqual("200 OK", status)
+        self.assertTrue(payload["paginacion"]["ajustada"])
+        self.assertEqual("fuera_de_rango", payload["paginacion"]["motivo_ajuste"])
+        self.assertEqual(2, payload["paginacion"]["pagina_actual"])
+        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
+
+    def test_root_preserves_filters_in_pagination_links(self) -> None:
+        paginated_catalog = {
+            "referencia_funcional": "PB-014",
+            "cobertura_aplicada": ["Gobierno de Canarias"],
+            "total_registros_origen": 3,
+            "total_oportunidades_visibles": 3,
+            "total_oportunidades_catalogo": 3,
+            "filtros_activos": {"ubicacion": "Gran Canaria"},
+            "filtros_disponibles": {"procedimientos": ["Abierto"], "ubicaciones": ["Gran Canaria"]},
+            "error_validacion": None,
+            "paginacion": {
+                "pagina_solicitada": 1,
+                "pagina_actual": 1,
+                "tamano_pagina": 2,
+                "total_paginas": 2,
+                "total_resultados": 3,
+                "resultado_desde": 1,
+                "resultado_hasta": 2,
+                "hay_anterior": False,
+                "hay_siguiente": True,
+                "pagina_anterior": None,
+                "pagina_siguiente": 2,
+                "ajustada": False,
+                "motivo_ajuste": None,
+            },
+            "oportunidades": [
+                {
+                    "id": "uno",
+                    "titulo": "Oferta 1",
+                    "organismo": "Cabildo",
+                    "ubicacion": "Gran Canaria",
+                    "procedimiento": "Abierto",
+                    "presupuesto": 1000,
+                    "fecha_publicacion_oficial": "2026-03-20",
+                    "fecha_limite": "2026-04-10",
+                    "estado": "Abierta",
+                    "fuente_oficial": "Cabildo",
+                    "url_fuente_oficial": "https://example.test/1",
+                    "clasificacion_ti": "TI",
+                }
+            ],
+        }
+
+        with patch("licican.app.build_catalog", return_value=paginated_catalog):
+            status, _, body = invoke_app("/", "ubicacion=Gran+Canaria")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertIn("ubicacion=Gran+Canaria&amp;page=2", html)
+
+    def test_root_reports_adjusted_invalid_page_consistently(self) -> None:
+        status, _, body = invoke_app("/", "page=0")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertIn("La pagina solicitada (0) no es valida. Se muestra la pagina 1.", html)
 
     def test_api_rejects_invalid_budget_range_with_explicit_message(self) -> None:
         status, headers, body = invoke_app(
@@ -393,6 +478,21 @@ class ApplicationTests(unittest.TestCase):
             "total_oportunidades_catalogo": 0,
             "filtros_activos": {},
             "filtros_disponibles": {"procedimientos": [], "ubicaciones": []},
+            "paginacion": {
+                "pagina_solicitada": 1,
+                "pagina_actual": 1,
+                "tamano_pagina": 2,
+                "total_paginas": 1,
+                "total_resultados": 0,
+                "resultado_desde": 0,
+                "resultado_hasta": 0,
+                "hay_anterior": False,
+                "hay_siguiente": False,
+                "pagina_anterior": None,
+                "pagina_siguiente": None,
+                "ajustada": False,
+                "motivo_ajuste": None,
+            },
             "oportunidades": [],
         }
 
