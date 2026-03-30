@@ -4,7 +4,7 @@
 Persona responsable de publicar o exponer `PodencoTI` fuera de un entorno local de desarrollo.
 
 ## Estado actual del despliegue
-La rama `main` contiene una aplicacion arrancable en local, consolidacion funcional de snapshots `.atom` y una ruta reproducible de contenedor con `Dockerfile` y `docker-compose.yml`. Esto cubre despliegue local reproducible, pero no implica aun una publicacion productiva endurecida.
+La rama `main` contiene una aplicacion arrancable en local, consolidacion funcional de snapshots `.atom` y una ruta reproducible de contenedor con `Dockerfile` y `docker-compose.yml` que levanta la aplicacion y la BBDD PostgreSQL integrada. Esto cubre despliegue local reproducible, pero no implica aun una publicacion productiva endurecida.
 
 ## Verificacion previa obligatoria
 Antes de plantear cualquier publicacion, confirma desde la raiz del proyecto:
@@ -24,7 +24,7 @@ Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En con
 - `python3 -m pip install -e .` termina correctamente.
 - `make test` ejecuta 50 pruebas en verde.
 - `make run` arranca el servidor local usando `PORT` desde `.env` y queda a la escucha hasta que se interrumpe el proceso.
-- `docker compose up -d --build` publica la misma aplicacion en un contenedor y monta `data/` como volumen persistente.
+- `docker compose up -d --build` publica la misma aplicacion en un contenedor, levanta la BBDD integrada y monta `data/` como volumen persistente.
 - En la superficie desplegada responden tambien `/alertas` y `/api/alertas`, que almacenan alertas internas sin notificaciones salientes.
 - El detalle de oportunidad muestra el fichero `.atom` origen cuando procede de la consolidacion funcional.
 

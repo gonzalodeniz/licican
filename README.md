@@ -140,17 +140,15 @@ Ejemplos de filtros ya soportados:
 
 ### Despliegue con Docker
 
-La imagen Docker incluye solo lo esencial de la aplicación:
+El `docker-compose.yml` raiz levanta la aplicacion y la base de datos PostgreSQL integrada.
 
-- `src/`
-- `data/`
+- `podencoti` publica el puerto definido por `PORT` y monta `./data:/app/data` para persistencia.
+- `postgres-licitaciones` publica la base de datos en `DB_PORT` y persiste los datos en `pgdata_licitaciones`.
+- La aplicacion en contenedor escucha con `HOST=0.0.0.0`, mientras que en local mantiene `127.0.0.1`.
 
-Quedan fuera de la imagen los manuales, `changelog/`, scripts de roles, tests y otros artefactos de coordinación.
-
-1. Revisa `.env` y ajusta `PORT` si necesitas un puerto distinto.
-2. Levanta el contenedor con `docker compose up -d --build`.
-3. `docker-compose.yml` publica el puerto definido por `PORT` y monta `./data:/app/data` para persistencia.
-4. La aplicación en contenedor escucha con `HOST=0.0.0.0`, mientras que en local mantiene `127.0.0.1`.
+1. Revisa `.env` y ajusta `PORT` o `DB_PORT` si necesitas puertos distintos.
+2. Levanta la pila completa con `docker compose up -d --build`.
+3. Usa `make docker-psql` para abrir una terminal `psql` sobre la BBDD integrada.
 
 Objetivos de `Makefile` disponibles:
 
@@ -160,6 +158,7 @@ make docker-up
 make docker-down
 make docker-logs
 make docker-restart
+make docker-psql
 ```
 
 ## Capacidades aun no implementadas en esta rama

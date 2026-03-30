@@ -12,6 +12,7 @@ En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. 
 - Entorno virtual activo o directorio `.venv/` disponible si se va a usar `make`.
 - `make` para usar los objetivos definidos en `Makefile`.
 - Un fichero `.env` con `PORT` definido. Si no existe, puede copiarse desde [`.env.example`](/opt/apps/podencoti/.env.example).
+- Un fichero `.env` con `DB_PORT` definido si se quiere exponer la BBDD integrada en un puerto distinto; por defecto se usa `15432`.
 - Si se quieren guardar alertas en una ruta alternativa, configurar `PODENCOTI_ALERTS_PATH`; por defecto se usa `data/alerts.json`.
 - Para el despliegue en contenedor, disponer de `docker` y `docker compose`.
 
@@ -33,7 +34,9 @@ Desde la raiz del proyecto:
 ```bash
 cd /opt/apps/podencoti
 docker compose up -d --build
-docker compose logs -f
+# En otra terminal, si quieres ver logs:
+# docker compose logs -f
+make docker-psql
 ```
 
 Resultado esperado:
@@ -44,7 +47,8 @@ Resultado esperado:
 ## Resultado esperado en esta revision
 - `make test` ejecuta 50 pruebas y termina en verde.
 - `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`.
-- `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT`.
+- `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT` y levanta la BBDD integrada.
+- `make docker-psql` abre una terminal `psql` contra `postgres-licitaciones`.
 - Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/priorizacion-fuentes-reales`, `/api/fuentes-prioritarias`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
 - La ficha de detalle muestra el fichero `.atom` origen cuando la oportunidad procede de la consolidacion de `PB-011`.
 
@@ -91,6 +95,7 @@ No existe en `main`:
 - Las alertas de `PB-004` ya se pueden operar localmente desde `/alertas` y `/api/alertas`; lo que sigue sin estar disponible es el pipeline.
 - La entrega administrable revisada ya consolida snapshots `.atom`; `data/opportunities.json` queda como respaldo, no como origen principal cuando hay snapshots disponibles.
 - No debe asumirse operativa la validacion de `PB-012` que aparece en el changelog de `2026-03-29` mientras `main` no exponga sus rutas y pruebas asociadas.
+- La BBDD integrada se publica en `DB_PORT` y puede abrirse por terminal con `make docker-psql`.
 
 ## Dependencias abiertas para administracion
 - Definir estrategia de despliegue productivo cuando exista una aplicacion mas alla del servidor local de demostracion.

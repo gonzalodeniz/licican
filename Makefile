@@ -1,4 +1,4 @@
-.PHONY: help run test docker-build docker-up docker-down docker-logs docker-restart
+.PHONY: help run test docker-build docker-up docker-down docker-logs docker-restart docker-psql
 
 SHELL := /bin/bash
 PYTHON ?= python3
@@ -29,6 +29,7 @@ help:
 		"  make docker-down   - Detiene el despliegue con docker compose" \
 		"  make docker-logs   - Muestra los logs del contenedor" \
 		"  make docker-restart - Recrea el despliegue Docker" \
+		"  make docker-psql   - Abre una terminal psql en la base de datos" \
 		"Los objetivos activan .venv automaticamente si no hay un entorno virtual ya activo."
 
 run:
@@ -53,3 +54,10 @@ docker-logs:
 
 docker-restart:
 	@$(COMPOSE) down && $(COMPOSE) up -d --build
+
+docker-psql:
+	@set -a; \
+	if [[ -f .env ]]; then source .env; fi; \
+	set +a; \
+	$(COMPOSE) up -d postgres-licitaciones >/dev/null && \
+	$(COMPOSE) exec -it postgres-licitaciones psql -U "$${DB_USER:-licitaciones_admin}" -d "$${DB_NAME:-licitaciones}"

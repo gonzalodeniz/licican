@@ -33,6 +33,14 @@ docker compose -f docker-compose-bbdd.yml up -d --build
 docker compose -f docker-compose-bbdd.yml ps
 ```
 
+Desde la raiz del proyecto, la pila completa ya integra esta BBDD en `docker-compose.yml`:
+
+```bash
+cd /opt/apps/podencoti
+docker compose up -d --build
+make docker-psql
+```
+
 Al arrancar por primera vez, el contenedor ejecuta automáticamente `initdb/01-schema.sql`, que crea la base de datos `licitaciones` y la tabla con todos sus índices.
 
 Los datos se persisten en el volumen Docker `pgdata_licitaciones`.
@@ -90,7 +98,7 @@ La clave primaria es `id_plataforma` (la URL de sindicación del entry ATOM).
 
 ```bash
 # Desde el host
-psql -h localhost -p 5432 -U licitaciones_admin -d licitaciones
+psql -h localhost -p 15432 -U licitaciones_admin -d licitaciones
 
 # Desde otro contenedor en la misma red
 psql -h postgres-licitaciones -U licitaciones_admin -d licitaciones
@@ -130,9 +138,9 @@ LIMIT 20;
 | Variable | Valor por defecto | Descripción |
 |---|---|---|
 | `POSTGRES_PASSWORD` | `Lic1t4c10n3s_2026!` | Contraseña del usuario admin |
-| `POSTGRES_PORT` | `5432` | Puerto externo |
+| `POSTGRES_PORT` | `5432` | Puerto externo para el compose standalone |
 | `DB_HOST` | `localhost` | Host de la BBDD (para el importador) |
-| `DB_PORT` | `5432` | Puerto de la BBDD (para el importador) |
+| `DB_PORT` | `15432` | Puerto de la BBDD integrado en el compose raiz |
 | `DB_NAME` | `licitaciones` | Nombre de la BBDD |
 | `DB_USER` | `licitaciones_admin` | Usuario de la BBDD |
 | `DB_PASSWORD` | `Lic1t4c10n3s_2026!` | Contraseña (para el importador) |

@@ -4,6 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: podencoti:latest
+    depends_on:
+      postgres-licitaciones:
+        condition: service_healthy
     environment:
       HOST: 0.0.0.0
       PORT: ${PORT:-8000}
@@ -12,3 +15,29 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+
+  postgres-licitaciones:
+    build:
+      context: ./bbdd
+      dockerfile: Dockerfile
+    container_name: postgres-licitaciones
+    environment:
+      POSTGRES_USER: ${DB_USER:-licitaciones_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Lic1t4c10n3s_2026!}
+      POSTGRES_DB: postgres
+      TZ: Atlantic/Canary
+    ports:
+      - "${DB_PORT:-15432}:5432"
+    volumes:
+      - pgdata_licitaciones:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-licitaciones_admin} -d licitaciones"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  pgdata_licitaciones:
+    name: pgdata_licitaciones

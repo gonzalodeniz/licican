@@ -27,7 +27,7 @@ Esta carpeta documenta el estado real verificable de la rama `main`. En esta rev
 - `PB-011` ya forma parte de `main` y consolida todos los snapshots `.atom` versionados presentes en `data/`.
 - No se observan superficies de pipeline de seguimiento ni de `PB-012` en el codigo o en las pruebas de `main`.
 - El changelog de `2026-03-29` registra `PB-012` como validada, pero la evidencia tecnica visible en `main` no expone todavia esa superficie; esta desalineacion sigue abierta y debe documentarse como tal.
-- Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/` y configuracion de `PORT` via `.env`.
+- Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/`, configuracion de `PORT` via `.env` y una BBDD PostgreSQL integrada con volumen persistente.
 
 Las alertas tempranas ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion ni un despliegue productivo endurecido.
 

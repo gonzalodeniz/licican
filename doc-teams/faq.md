@@ -4,7 +4,7 @@
 Personas usuarias internas, equipo tecnico y administracion que necesitan aclarar contradicciones entre vision, historial operativo y comportamiento real de `main`.
 
 ## La aplicacion esta disponible para arrancar en `main`?
-Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio y monta `data/` como volumen persistente.
+Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio, levanta la BBDD integrada y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
 Existe una entrega minima de descubrimiento con catalogo consolidado desde snapshots `.atom`, filtros funcionales sobre ese catalogo, ficha de detalle con fichero origen visible, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
@@ -58,6 +58,9 @@ Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicia
 
 ## Se puede instalar algo util con `pip install -e .`?
 Si. La instalacion editable deja operativa la aplicacion local y permite ejecutar las pruebas.
+
+## Como abro una terminal psql contra la BBDD integrada?
+Desde la raiz del proyecto, `make docker-psql` abre una sesion interactiva `psql` contra `postgres-licitaciones`.
 
 ## Hay pruebas automatizadas disponibles?
 Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` ejecuta 50 pruebas en esta revision.

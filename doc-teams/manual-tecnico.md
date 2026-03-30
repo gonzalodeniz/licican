@@ -14,7 +14,7 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `PB-006`: regla de clasificacion TI auditable con ejemplos trazables.
 - `PB-009`: priorizacion visible de fuentes reales oficiales por olas.
 - `PB-011`: consolidacion funcional trazable de snapshots `.atom` con detalle de fichero origen.
-- Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`.
+- Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, incluyendo PostgreSQL integrada.
 
 La version actual de `main` consolida el catalogo desde todos los snapshots `.atom` versionados presentes en `data/` cuando existen. Cada oportunidad consolidada conserva trazabilidad al fichero origen y el detalle visible expone `fichero_origen_atom`. `data/opportunities.json` queda como respaldo historico si no hay snapshots `.atom` disponibles. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
 
@@ -83,6 +83,7 @@ Resultado verificado en esta revision:
 - 50 pruebas automatizadas en verde.
 - Servidor local disponible en `http://127.0.0.1:<PORT>`, usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.
+- La BBDD PostgreSQL integrada responde en `localhost:15432` por defecto y se puede abrir con `make docker-psql`.
 - Las rutas `http://127.0.0.1:<PORT>/alertas` y `http://127.0.0.1:<PORT>/api/alertas` responden con la gestion interna de alertas tempranas del MVP.
 - Las rutas `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` y `http://127.0.0.1:<PORT>/api/fuentes-prioritarias` siguen disponibles para la priorizacion de fuentes reales.
 - La ruta `http://127.0.0.1:<PORT>/oportunidades/<id>` expone el fichero `.atom` origen de la oportunidad cuando procede de la consolidacion.
