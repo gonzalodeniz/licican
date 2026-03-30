@@ -2,7 +2,7 @@
 
 ## Estado actual
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
-La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, y `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente tras la reconciliacion operativa del 2026-03-30.
+La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente tras la reconciliacion operativa del 2026-03-30, y `PB-010` pasa a ser la siguiente capa funcional de interfaz comun.
 `PB-004` deja de formar parte del trabajo abierto: tras la validacion explicita de `qa-teams` en la issue #6 el 2026-03-25, `developer-teams` integro la entrega en `main` y elimino la rama tecnica el 2026-03-26, por lo que producto debe tratarla ya como funcionalidad vigente.
 
 ## Huecos de definicion detectados en esta revision

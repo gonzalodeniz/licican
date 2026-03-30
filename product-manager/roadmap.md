@@ -10,7 +10,7 @@
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
-- Siguiente recomendacion para `developer-teams`: tomar `PB-010` o `PB-013` segun la prioridad que mejor reduzca deuda de experiencia y control de acceso, porque la issue tecnica #14 ya ha quedado validada, integrada en `main` y cerrada administrativamente.
+- Siguiente recomendacion para `developer-teams`: tomar `PB-010` como siguiente issue funcional prioritaria para consolidar la base de interfaz comun, porque la issue tecnica #14 ya ha quedado validada, integrada en `main` y cerrada administrativamente.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -175,7 +175,7 @@
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
 - La issue tecnica `T-002` ya quedo cerrada administrativamente el 2026-03-30 tras validacion, merge en `main` y borrado de rama.
-- A partir de ese cierre, el orden funcional recomendado pasa a `PB-014`, `PB-015`, `PB-010` y `PB-013`, segun la reduccion de deuda de experiencia y de control de acceso.
+- A partir de ese cierre, el orden funcional recomendado pasa a `PB-010`, `PB-015` y `PB-013`, segun la reduccion de deuda de experiencia y de control de acceso.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
 - No se recomienda iniciar `PB-005` sin reevaluar antes la base de navegacion `PB-010` y el control de acceso `PB-013`, porque ambas piezas siguen siendo las siguientes capas funcionales relevantes.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
