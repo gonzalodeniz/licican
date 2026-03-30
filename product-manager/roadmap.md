@@ -174,8 +174,8 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es resolver `T-002` antes de abrir nuevas expansiones funcionales, porque la regresion del filtrado afecta a una capacidad central ya existente.
-- Una vez corregida la regresion, el orden funcional recomendado pasa a `PB-014`, `PB-015`, `PB-010` y `PB-013`, segun la reduccion de deuda de experiencia y de control de acceso.
+- El siguiente paso operativo recomendado es cerrar administrativamente la issue tecnica `T-002` una vez `developer-teams` deje evidencia de merge y borrado de rama, porque la regresion ya quedo validada y no debe seguir tratandose como trabajo de desarrollo activo.
+- Una vez cerrada la integracion de `T-002`, el orden funcional recomendado pasa a `PB-014`, `PB-015`, `PB-010` y `PB-013`, segun la reduccion de deuda de experiencia y de control de acceso.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
 - No se recomienda iniciar `PB-005` sin reevaluar antes la base de navegacion `PB-010` y el control de acceso `PB-013`, porque ambas piezas siguen siendo las siguientes capas funcionales relevantes.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
