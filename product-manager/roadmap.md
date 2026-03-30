@@ -6,11 +6,11 @@
 - Cada release debe dejar un resultado verificable por `qa-teams` y trazable a backlog e issues.
 
 ## Estado de referencia de la iteracion
-- Fecha de corte documental: 2026-03-28.
+- Fecha de corte documental: 2026-03-30.
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
-- Siguiente recomendacion para `developer-teams`: reentregar `PB-012` sobre la issue #12, que permanece en `no validado`; despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
+- Siguiente recomendacion para `developer-teams`: integrar en `main` la entrega validada de `PB-012`, dejar evidencia de fusion y borrado de rama en la issue #12 y, solo despues, tomar `PB-010` o `PB-013` segun la capacidad disponible para experiencia y gobierno funcional.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -98,7 +98,7 @@
 - Riesgo principal:
   - Que el dato consolidado exista tecnicamente pero siga sin una superficie funcional verificable por usuario y QA.
 - Dependencia operativa:
-  - Debe reintentarse sobre la misma issue #12 hasta salir de `no validado`, porque `PB-011` ya esta integrada en `main` y deja de ser el bloqueo operativo.
+  - La release ya esta `validada` por `qa-teams` en la issue #12, pero sigue pendiente de integracion administrativa en `main` hasta que `developer-teams` deje constancia explicita de fusion y borrado de rama.
 
 ## Release 5: Base de navegacion y control de acceso
 - Objetivo: Establecer una estructura comun de interfaz y un modelo minimo de permisos para sostener el crecimiento de modulos con una experiencia coherente y controlada.
@@ -155,8 +155,8 @@
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
-- El siguiente paso operativo recomendado para `developer-teams` es corregir y reentregar `PB-012` sobre la issue #12, que sigue en `no validado`; despues, tomar `PB-010` o `PB-013`.
+- El siguiente paso operativo recomendado para `developer-teams` es fusionar en `main` la entrega ya validada de `PB-012` y dejar trazabilidad de esa integracion en la issue #12; despues, tomar `PB-010` o `PB-013`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
-- No se recomienda iniciar `PB-005` antes de resolver `PB-012`; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar visible esta nueva superficie de dato consolidado.
+- No se recomienda iniciar `PB-005` antes de completar la integracion administrativa de `PB-012`; la base de navegacion `PB-010` y el control de acceso `PB-013` deben reevaluarse despues de dejar esa entrega fusionada en `main`.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
-- A fecha 2026-03-29 no existen ramas tecnicas remotas abiertas; el siguiente cuello de botella es de priorizacion y handoff, no de saturacion de ramas activas.
+- A fecha 2026-03-30 la rama `developer-teams/issue-12-pb-012-vistas-excel` sigue siendo la referencia de una entrega ya validada; el siguiente cuello de botella es integrar esa rama y ordenar despues la siguiente implementacion funcional.

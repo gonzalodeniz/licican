@@ -3,7 +3,7 @@
 ## Estado actual
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26.
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
-- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26 y actualmente esta en `Estado operativo: no validado`.
+- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26, `qa-teams` la valido el 2026-03-29 y actualmente sigue abierta en `Estado operativo: validado` por falta de evidencia de fusion en `main` y borrado de rama.
 - La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos.
 - En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
@@ -56,7 +56,7 @@ Criterios de aceptacion:
 5. La informacion visible en la aplicacion para la muestra actual corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
 6. Si algun campo esperado no viene informado en origen, la aplicacion lo muestra como dato no informado o equivalente claro.
 Dependencias: PB-011 y PB-002
-Estado operativo: no validado
+Estado operativo: validado
 
 Contexto funcional:
 - El Excel `data/licitaciones_ti_canarias.xlsx` actua como referencia funcional de salida para esta iteracion.
@@ -73,6 +73,9 @@ Tareas sugeridas:
 Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si la primera iteracion debe cubrir solo las tres pestañas indicadas o dejar preparada tambien la extension posterior a `Modificaciones`.
 - Que subconjunto minimo de columnas del Excel debe priorizarse primero si la interfaz no puede absorberlas todas en una unica pantalla sin degradar legibilidad.
+
+Bloqueo administrativo actual:
+- `qa-teams` ya valido la entrega el 2026-03-29, pero la issue no debe cerrarse hasta que `developer-teams` deje en la propia issue la evidencia explicita de fusion en `main` y borrado de la rama `developer-teams/issue-12-pb-012-vistas-excel`.
 
 ## Issue creada: Navegacion principal responsive con menu lateral de iconos
 

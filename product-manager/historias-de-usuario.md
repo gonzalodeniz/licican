@@ -230,8 +230,8 @@
   6. Si un dato no viene informado en origen, la interfaz lo muestra como no informado o equivalente claro.
 - Dependencias funcionales: PB-011, PB-002
 - Prioridad: P0
-- Estado: `no validado`
-- Nota de estado: `qa-teams` dejo la issue #12 en `no validado` el 2026-03-28 por ausencia de rama remota y de handoff valido de `developer-teams`; debe reintentarse sobre la misma issue.
+- Estado: `validado`
+- Nota de estado: `qa-teams` valido la reentrega de la issue #12 el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`. La historia no puede cerrarse administrativamente hasta que `developer-teams` deje evidencia de fusion en `main` y borrado de rama.
 
 ## HU-13 Gestionar acceso por rol a las acciones del sistema
 - Backlog relacionado: PB-013
