@@ -26,6 +26,42 @@ CANARIAS_KEYWORDS = (
     "santa cruz de tenerife",
     "las palmas",
 )
+LOCATION_LABELS = (
+    ("santa cruz de tenerife", "Santa Cruz de Tenerife"),
+    ("gran canaria", "Gran Canaria"),
+    ("fuerteventura", "Fuerteventura"),
+    ("lanzarote", "Lanzarote"),
+    ("la palma", "La Palma"),
+    ("la gomera", "La Gomera"),
+    ("el hierro", "El Hierro"),
+    ("la graciosa", "La Graciosa"),
+    ("tenerife", "Tenerife"),
+    ("las palmas", "Las Palmas"),
+    ("canarias", "Canarias"),
+)
+GENERIC_LOCATION_LABELS = {
+    "canarias",
+    "comunidad autonoma de canarias",
+    "entidades locales",
+    "sector publico",
+    "comunidades y ciudades autonomas",
+    "ayuntamientos",
+}
+ADMIN_LOCATION_HINTS = (
+    "cabildo",
+    "consejeria",
+    "consejería",
+    "consejo",
+    "direccion",
+    "dirección",
+    "gerencia",
+    "secretaria",
+    "secretaría",
+    "servicio",
+    "ayuntamiento",
+    "alcaldia",
+    "alcaldía",
+)
 STATUS_LABELS = {
     "ADJ": "Adjudicada",
     "AN": "Anulada",
@@ -174,15 +210,45 @@ def _resolve_location_label(
     nuts_code: str | None,
     hierarchy: tuple[str, ...] | list[str],
 ) -> str:
-    if comunidad and comunidad.strip():
+    normalized_comunidad = _normalize_text(comunidad) if comunidad and comunidad.strip() else None
+    if normalized_comunidad and normalized_comunidad != "canarias":
         return comunidad.strip()
+
+    hierarchy_location = _resolve_hierarchy_location(hierarchy)
+    if hierarchy_location is not None:
+        return hierarchy_location
+
     if nuts_code and str(nuts_code).startswith("ES7"):
         return "Canarias"
+    if comunidad and comunidad.strip():
+        return comunidad.strip()
+    return "Canarias"
+
+
+def _resolve_hierarchy_location(hierarchy: tuple[str, ...] | list[str]) -> str | None:
     for item in hierarchy:
         normalized = _normalize_text(str(item))
-        if any(keyword in normalized for keyword in CANARIAS_KEYWORDS):
-            return str(item).strip()
-    return "Canarias"
+        if not normalized or normalized in GENERIC_LOCATION_LABELS:
+            continue
+        if not any(keyword in normalized for keyword in CANARIAS_KEYWORDS):
+            continue
+        if any(hint in normalized for hint in ADMIN_LOCATION_HINTS):
+            continue
+        return str(item).strip()
+
+    for item in hierarchy:
+        normalized = _normalize_text(str(item))
+        extracted = _extract_location_from_text(normalized)
+        if extracted is not None:
+            return extracted
+    return None
+
+
+def _extract_location_from_text(normalized: str) -> str | None:
+    for keyword, label in LOCATION_LABELS:
+        if keyword in normalized:
+            return label
+    return None
 
 
 def _map_status(value: Any) -> str:

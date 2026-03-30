@@ -131,6 +131,50 @@ class PostgresCatalogTests(unittest.TestCase):
         self.assertEqual(1, payload["total_oportunidades_catalogo"])
         self.assertEqual(["a-2026"], [item["id"] for item in payload["oportunidades"]])
 
+    def test_build_catalog_preserves_specific_location_for_combined_postgresql_filters(self) -> None:
+        rows = [
+            {
+                "expediente_id": "EXP-001",
+                "id_plataforma": "1",
+                "titulo": "Suministro de licencias corporativas",
+                "resumen": "Licencias y soporte de plataforma",
+                "organo_contratacion": "Cabildo de Tenerife",
+                "ubicacion_comunidad": "Canarias",
+                "ubicacion_nuts": "ES70",
+                "procedimiento": "9",
+                "presupuesto_base": 97000,
+                "updated_at": datetime(2026, 3, 28, 10, 0, 0, tzinfo=timezone.utc),
+                "fecha_limite_presentacion": datetime(2026, 4, 10, 10, 0, 0, tzinfo=timezone.utc),
+                "estado": "PUB",
+                "organo_perfil_url": None,
+                "link_detalle": "https://contrataciondelestado.es/detalle/1",
+                "cpv_codes": ["48600000"],
+                "fichero_origen": "snapshot.atom",
+                "jerarquia_org": [
+                    "Cabildo Insular de Tenerife",
+                    "Santa Cruz de Tenerife",
+                    "Canarias",
+                    "ENTIDADES LOCALES",
+                    "Sector Publico",
+                ],
+            }
+        ]
+
+        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+            payload = build_catalog(
+                filters=CatalogFilters(
+                    palabra_clave="licencias",
+                    presupuesto_min=90000,
+                    presupuesto_max=120000,
+                    procedimiento="Abierto simplificado",
+                    ubicacion="Santa Cruz de Tenerife",
+                ),
+                backend="postgres",
+            )
+
+        self.assertEqual(["exp-001"], [item["id"] for item in payload["oportunidades"]])
+        self.assertEqual("Santa Cruz de Tenerife", payload["oportunidades"][0]["ubicacion"])
+
     def test_build_opportunity_detail_returns_none_when_record_is_not_visible(self) -> None:
         rows = []
         with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
