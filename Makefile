@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help run test docker-build docker-up docker-down docker-logs docker-restart docker-psql
+.PHONY: help run test coverage docker-build docker-up docker-down docker-logs docker-restart docker-psql
 
 SHELL := /bin/bash
 PYTHON ?= python3
@@ -29,11 +29,17 @@ test:
 	@$(ENSURE_VENV); \
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests -v
 
+coverage:
+	@$(ENSURE_VENV); \
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m coverage run --source=src -m unittest discover -s tests -v && \
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m coverage report -m
+
 help:
 	@printf "%s\n" \
 		"Objetivos disponibles:" \
 		"  make run   - Ejecuta la aplicacion local usando PORT desde .env" \
 		"  make test  - Ejecuta la suite tecnica con unittest" \
+		"  make coverage - Ejecuta la suite y muestra el informe de cobertura" \
 		"  make docker-build  - Construye la imagen Docker minima" \
 		"  make docker-up     - Levanta el despliegue con docker compose" \
 		"  make docker-down   - Detiene el despliegue con docker compose" \
