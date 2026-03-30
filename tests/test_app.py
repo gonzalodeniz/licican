@@ -56,6 +56,10 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Fuente oficial", html)
         self.assertIn('/podencoti/oportunidades/pao-0120-2021', html)
         self.assertIn('action="/podencoti"', html)
+        self.assertIn("Licitaciones TI Canarias", html)
+        self.assertIn("Detalle Lotes", html)
+        self.assertIn("Adjudicaciones", html)
+        self.assertIn('/podencoti/datos-consolidados', html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
         status, headers, body = invoke_app("/podencoti/")
@@ -131,6 +135,53 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("2025-12-10", payload["fecha_limite"])
         self.assertEqual("licitacionesPerfilesContratanteCompleto3_20260323_190607_3.atom", payload["fichero_origen_atom"])
         self.assertEqual([], payload["criterios_adjudicacion"])
+
+    def test_consolidated_dataset_page_renders_excel_tabs_and_rows(self) -> None:
+        status, headers, body = invoke_app("/datos-consolidados")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Licitaciones TI Canarias", html)
+        self.assertIn("Detalle Lotes", html)
+        self.assertIn("Adjudicaciones", html)
+        self.assertIn("Servicios y suministros de un conjunto de soluciones digitales innovadoras", html)
+        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", html)
+
+    def test_consolidated_dataset_supports_lot_and_award_tabs(self) -> None:
+        lot_status, _, lot_body = invoke_app("/datos-consolidados", "vista=lotes")
+        award_status, _, award_body = invoke_app("/datos-consolidados", "vista=adjudicaciones")
+
+        self.assertEqual("200 OK", lot_status)
+        self.assertIn("LOTE 1: Portal web de análisis de turismo inteligente", lot_body.decode("utf-8"))
+        self.assertEqual("200 OK", award_status)
+        self.assertIn("SOLUCIONES AVANZADAS EN INFORMATICA APLICADA", award_body.decode("utf-8"))
+        self.assertIn("Fichero Origen", award_body.decode("utf-8"))
+
+    def test_consolidated_dataset_api_returns_excel_counts(self) -> None:
+        status, headers, body = invoke_app("/api/datos-consolidados")
+        payload = json.loads(body)
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
+        self.assertEqual("PB-012", payload["referencia_funcional"])
+        self.assertEqual({"licitaciones": 23, "lotes": 29, "adjudicaciones": 18}, payload["resumen"])
+        self.assertEqual(
+            "licitacionesPerfilesContratanteCompleto3_20260322_190106.atom",
+            payload["licitaciones"][0]["fichero_origen_atom"],
+        )
+
+    def test_excel_detail_pages_show_atom_traceability(self) -> None:
+        licitacion_status, _, licitacion_body = invoke_app("/datos-consolidados/licitaciones/114-2025")
+        adjudicacion_status, _, adjudicacion_body = invoke_app(
+            "/datos-consolidados/adjudicaciones/2565-2024-pt1-pccntr-4934579"
+        )
+
+        self.assertEqual("200 OK", licitacion_status)
+        self.assertIn("Fichero .atom origen", licitacion_body.decode("utf-8"))
+        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", licitacion_body.decode("utf-8"))
+        self.assertEqual("200 OK", adjudicacion_status)
+        self.assertIn("Fichero .atom origen", adjudicacion_body.decode("utf-8"))
 
     def test_coverage_page_remains_available_on_dedicated_route(self) -> None:
         status, headers, body = invoke_app("/cobertura-fuentes")
