@@ -23,7 +23,22 @@ endef
 
 run:
 	@$(ENSURE_VENV); \
-	BASE_PATH=/licican PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m licican.app
+	requested_port="$${PORT:-8000}"; \
+	resolved_port=""; \
+	for candidate_port in $$(seq "$$requested_port" 8100); do \
+		if ! ( : < /dev/tcp/127.0.0.1/$$candidate_port ) 2>/dev/null; then \
+			resolved_port="$$candidate_port"; \
+			break; \
+		fi; \
+	done; \
+	if [[ -z "$$resolved_port" ]]; then \
+		echo "No se encontraron puertos libres entre $$requested_port y 8100"; \
+		exit 1; \
+	fi; \
+	if [[ "$$resolved_port" != "$$requested_port" ]]; then \
+		echo "Puerto $$requested_port ocupado, usando $$resolved_port"; \
+	fi; \
+	BASE_PATH=/licican PORT="$$resolved_port" PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m licican.app
 
 test:
 	@$(ENSURE_VENV); \
@@ -37,7 +52,7 @@ coverage:
 help:
 	@printf "%s\n" \
 		"Objetivos disponibles:" \
-		"  make run   - Ejecuta la aplicacion local usando PORT desde .env" \
+		"  make run   - Ejecuta la aplicacion local usando PORT o el siguiente puerto libre" \
 		"  make test  - Ejecuta la suite tecnica con unittest" \
 		"  make coverage - Ejecuta la suite y muestra el informe de cobertura" \
 		"  make docker-build  - Construye la imagen Docker minima" \
