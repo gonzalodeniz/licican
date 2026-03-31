@@ -518,3 +518,23 @@ Las mejoras anteriores ya cubren la mayor parte de las fricciones detectadas. Pa
 ### Riesgos y dependencias
 - Si la secuencia se adopta de forma parcial, reapareceran las mismas inconsistencias en distintas fuentes.
 - La reduccion de duplicidad documental solo funciona si las copias derivadas dejan de reescribir reglas ya fijadas en la guia canónica.
+
+## Mejora 24: medir el coste de propagar reglas compartidas
+### Problema detectado
+Aunque las reglas compartidas ya tienen una referencia canónica, cada cambio sigue obligando a revisar varias superficies documentales y eso hace visible solo una parte del coste de mantenimiento.
+
+### Propuesta
+Registrar, en cada cambio de proceso relevante, el tiempo que tarda en propagarse la regla desde `agile-coach/acuerdos-operativos.md` hasta las copias derivadas que sigan siendo necesarias. Si la propagacion obliga a editar muchas superficies o se alarga mas de lo razonable dentro del mismo ciclo, revisar si alguna copia sigue aportando valor operativo o si puede reducirse a una remision breve.
+
+### Impacto esperado
+- Hace visible el coste real de mantener reglas compartidas en varios documentos.
+- Ayuda a detectar temprano cuando la documentacion de proceso esta demasiado fragmentada.
+- Reduce el riesgo de que una copia quede atrasada sin que nadie lo note hasta la siguiente iteracion.
+
+### Tradeoffs
+- Añade una comprobacion ligera mas cuando se cambie una regla compartida.
+- Puede parecer un control extra si la estructura documental ya esta bien sincronizada.
+
+### Riesgos y dependencias
+- Si la medicion no se usa en revisiones posteriores, solo añadira registro sin mejorar el proceso.
+- Depende de que `agile-coach/acuerdos-operativos.md` siga siendo la referencia primaria y de que las copias deriven de ella, no al reves.

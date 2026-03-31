@@ -65,6 +65,11 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Definicion: numero o porcentaje de comentarios de arranque, handoff, validacion o cierre que no comienzan con `Rol: <nombre-del-rol>`.
 - Senal que aporta: detecta deriva en las plantillas literales, reduce la trazabilidad por autoria operativa y permite corregir de forma temprana una regla global que de otro modo se incumple por copia incompleta.
 
+## 15. Tiempo de propagacion de una regla compartida
+- Definicion: tiempo transcurrido entre la primera actualizacion de una regla compartida en `agile-coach/acuerdos-operativos.md` y la ultima actualizacion de las copias derivadas que sigan siendo necesarias en `AGENTS.md` o documentos de apoyo.
+- Senal que aporta: mide el coste de mantenimiento de las reglas duplicadas y detecta ventanas en las que la documentacion derivada puede quedar desfasada respecto a la referencia canónica.
+- Regla de uso: si esta propagacion se alarga de forma recurrente, revisar si la copia derivada aporta valor operativo suficiente o si puede sustituirse por una remision breve a la guia canónica.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.
