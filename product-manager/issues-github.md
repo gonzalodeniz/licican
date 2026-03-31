@@ -9,6 +9,16 @@
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
 - La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones.
 - La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
+- La issue tecnica `T-003` ya fue creada en GitHub como issue #18 para unificar utilidades de texto compartidas.
+- La issue tecnica `T-004` ya fue creada en GitHub como issue #19 para centralizar constantes de dominio compartidas.
+- La issue tecnica `T-005` ya fue creada en GitHub como issue #20 para endurecer la configuracion de credenciales PostgreSQL.
+- La issue tecnica `T-006` ya fue creada en GitHub como issue #21 para extraer la resolucion de configuracion a `licican/config.py`.
+- La issue tecnica `T-007` ya fue creada en GitHub como issue #22 para extraer helpers HTTP a `licican/web/responses.py`.
+- La issue tecnica `T-008` ya fue creada en GitHub como issue #23 para servir el CSS como recurso estatico.
+- La issue tecnica `T-009` ya fue creada en GitHub como issue #24 para separar plantillas HTML por vistas.
+- La issue tecnica `T-010` ya fue creada en GitHub como issue #26 para introducir un router declarativo en la aplicacion WSGI.
+- La issue tecnica `T-011` ya fue creada en GitHub como issue #27 para desacoplar `CatalogFilters` hacia `licican/shared/filters.py`.
+- La issue tecnica `T-012` ya fue creada en GitHub como issue #25 para extraer helpers de navegacion XML compartidos.
 - En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
@@ -217,3 +227,85 @@ Estado operativo: nuevo
 Contexto funcional:
 - La migracion a PostgreSQL ha dejado una regresion visible en el filtrado que debe corregirse antes de abrir nueva expansion funcional.
 - Esta issue debe tratarse como correccion prioritaria porque afecta a una capacidad central ya disponible del producto.
+
+## Issues creadas: Secuencia tecnica de refactorizacion sin cambio funcional externo
+
+### issue #18
+Titulo sugerido: `[product-manager] T-003 Unificar utilidades de texto compartidas`
+
+Resumen:
+- Crea `licican/shared/text.py` y elimina duplicados de normalizacion, slugificado y limpieza de texto en cuatro modulos.
+- Exige mantener type hints y crear cobertura basica si la existente no basta.
+- Abre la secuencia tecnica y no tiene dependencias previas.
+
+### issue #19
+Titulo sugerido: `[product-manager] T-004 Centralizar constantes de dominio compartidas`
+
+Resumen:
+- Crea `licican/shared/domain_constants.py` para compartir constantes y mapeos de dominio entre `atom_consolidation.py` y `postgres_catalog.py`.
+- Mantiene fuera del modulo comun las heuristicas especificas de ubicacion de PostgreSQL.
+- Depende de `T-003`.
+
+### issue #20
+Titulo sugerido: `[product-manager] T-005 Endurecer configuracion de credenciales PostgreSQL`
+
+Resumen:
+- Elimina passwords hardcodeados y exige configuracion explicita por entorno.
+- Mantiene defaults no sensibles permitidos para host, puerto, base de datos y usuario.
+- Depende de `T-004`.
+
+### issue #21
+Titulo sugerido: `[product-manager] T-006 Extraer resolucion de configuracion a licican/config.py`
+
+Resumen:
+- Saca de `app.py` la carga de `.env`, la resolucion de `BASE_PATH`, host, puerto y rutas auxiliares.
+- Exige que `load_env_file()` solo cargue una vez por proceso.
+- Depende de `T-005`.
+
+### issue #22
+Titulo sugerido: `[product-manager] T-007 Extraer helpers HTTP a licican/web/responses.py`
+
+Resumen:
+- Mueve respuestas HTTP, redirecciones, construccion de cuerpos HTML/JSON, lectura de formularios y construccion de URLs a un modulo web comun.
+- Mantiene la interfaz WSGI y las URLs existentes.
+- Depende de `T-006`.
+
+### issue #23
+Titulo sugerido: `[product-manager] T-008 Servir el CSS como recurso estatico`
+
+Resumen:
+- Extrae el CSS embebido a `licican/web/static/style.css`.
+- Exige una ruta `/static/<filename>` con `content-type` adecuado y sin cambios visuales.
+- Depende de `T-007`.
+
+### issue #24
+Titulo sugerido: `[product-manager] T-009 Separar plantillas HTML por vistas`
+
+Resumen:
+- Crea `licican/web/templates/` y distribuye renders por vista y componentes.
+- Mantiene el HTML visible sin cambios externos.
+- Depende de `T-008`.
+
+### issue #26
+Titulo sugerido: `[product-manager] T-010 Crear un router declarativo para la aplicacion WSGI`
+
+Resumen:
+- Introduce `licican/web/router.py`, handlers desacoplados y un `Request` simple o equivalente.
+- Fija como objetivo dejar `app.py` por debajo de 100 lineas o documentar bloqueo tecnico objetivo.
+- Depende de `T-009`.
+
+### issue #27
+Titulo sugerido: `[product-manager] T-011 Desacoplar CatalogFilters hacia licican/shared/filters.py`
+
+Resumen:
+- Mueve `CatalogFilters` a un modulo compartido para romper la dependencia de `alerts.py` respecto a `opportunity_catalog.py`.
+- Mantiene filtros y alertas sin cambios funcionales.
+- Depende de `T-010`.
+
+### issue #25
+Titulo sugerido: `[product-manager] T-012 Extraer helpers de navegacion XML compartidos`
+
+Resumen:
+- Crea `licican/shared/xml_helpers.py` y mueve ahi los helpers XML de `atom_consolidation.py`.
+- Cierra la secuencia tecnica y exige prueba unitaria basica o cobertura equivalente del modulo nuevo.
+- Depende de `T-011`.
