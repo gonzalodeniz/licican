@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
@@ -9,23 +8,17 @@ from typing import Any
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from licican.shared.domain_constants import (
+    CANARIAS_KEYWORDS,
+    map_procedure,
+    map_status,
+)
+from licican.shared.text import normalize_text, slugify
+
 
 REFERENCE = "T-001 · Carga de datos desde PostgreSQL para la aplicacion"
 SOURCE_NAME = "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias"
 SOURCE_URL = "https://contrataciondelestado.es/"
-CANARIAS_KEYWORDS = (
-    "canarias",
-    "gran canaria",
-    "tenerife",
-    "fuerteventura",
-    "lanzarote",
-    "la palma",
-    "la gomera",
-    "el hierro",
-    "la graciosa",
-    "santa cruz de tenerife",
-    "las palmas",
-)
 LOCATION_LABELS = (
     ("santa cruz de tenerife", "Santa Cruz de Tenerife"),
     ("gran canaria", "Gran Canaria"),
@@ -62,19 +55,6 @@ ADMIN_LOCATION_HINTS = (
     "alcaldia",
     "alcaldía",
 )
-STATUS_LABELS = {
-    "ADJ": "Adjudicada",
-    "AN": "Anulada",
-    "DES": "Desierta",
-    "EV": "En evaluacion",
-    "PUB": "Publicada",
-    "RES": "Resuelta",
-}
-PROCEDURE_LABELS = {
-    "1": "Abierto",
-    "9": "Abierto simplificado",
-}
-
 CATALOG_SQL = """
 WITH latest AS (
     SELECT DISTINCT ON (COALESCE(NULLIF(expediente, ''), id_plataforma))
@@ -166,11 +146,17 @@ def _resolve_database_url() -> str:
     if explicit_url:
         return explicit_url
 
+    raw_password = os.getenv("DB_PASSWORD")
+    if raw_password is None or not raw_password.strip():
+        raise PostgresCatalogError(
+            "No se ha configurado conexión a PostgreSQL. Define LICICAN_DATABASE_URL o las variables DB_*."
+        )
+
     host = os.getenv("DB_HOST", "localhost")
     port = os.getenv("DB_PORT", "15432")
     database = os.getenv("DB_NAME", "licitaciones")
     user = os.getenv("DB_USER", "licitaciones_admin")
-    password = os.getenv("DB_PASSWORD", "Lic1t4c10n3s_2026!")
+    password = raw_password.strip()
     return f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
 
@@ -185,16 +171,16 @@ def _row_to_record(row: dict[str, Any]) -> dict[str, Any]:
     )
 
     return {
-        "id": _slugify(expediente_id),
+        "id": slugify(expediente_id),
         "titulo": titulo,
         "descripcion": descripcion,
         "organismo": str(row.get("organo_contratacion") or "No informado").strip(),
         "ubicacion": ubicacion,
-        "procedimiento": _map_procedure(row.get("procedimiento")),
+        "procedimiento": map_procedure(None if row.get("procedimiento") is None else str(row.get("procedimiento"))),
         "presupuesto": _parse_budget(row.get("presupuesto_base")),
         "fecha_publicacion_oficial": _iso_date(row.get("updated_at")) or "No informado",
         "fecha_limite": _iso_date(row.get("fecha_limite_presentacion")) or "No informado",
-        "estado": _map_status(row.get("estado")),
+        "estado": map_status(None if row.get("estado") is None else str(row.get("estado"))),
         "solvencia_tecnica": None,
         "criterios_adjudicacion": (),
         "fuente_oficial": SOURCE_NAME,
@@ -210,7 +196,7 @@ def _resolve_location_label(
     nuts_code: str | None,
     hierarchy: tuple[str, ...] | list[str],
 ) -> str:
-    normalized_comunidad = _normalize_text(comunidad) if comunidad and comunidad.strip() else None
+    normalized_comunidad = normalize_text(comunidad) if comunidad and comunidad.strip() else None
     if normalized_comunidad and normalized_comunidad != "canarias":
         return comunidad.strip()
 
@@ -227,7 +213,7 @@ def _resolve_location_label(
 
 def _resolve_hierarchy_location(hierarchy: tuple[str, ...] | list[str]) -> str | None:
     for item in hierarchy:
-        normalized = _normalize_text(str(item))
+        normalized = normalize_text(str(item))
         if not normalized or normalized in GENERIC_LOCATION_LABELS:
             continue
         if not any(keyword in normalized for keyword in CANARIAS_KEYWORDS):
@@ -237,7 +223,7 @@ def _resolve_hierarchy_location(hierarchy: tuple[str, ...] | list[str]) -> str |
         return str(item).strip()
 
     for item in hierarchy:
-        normalized = _normalize_text(str(item))
+        normalized = normalize_text(str(item))
         extracted = _extract_location_from_text(normalized)
         if extracted is not None:
             return extracted
@@ -249,24 +235,6 @@ def _extract_location_from_text(normalized: str) -> str | None:
         if keyword in normalized:
             return label
     return None
-
-
-def _map_status(value: Any) -> str:
-    if value is None:
-        return "No informado"
-    normalized = str(value).strip()
-    return STATUS_LABELS.get(normalized, normalized)
-
-
-def _map_procedure(value: Any) -> str | None:
-    if value is None:
-        return None
-    normalized = str(value).strip()
-    if not normalized:
-        return None
-    return PROCEDURE_LABELS.get(normalized, f"Procedimiento {normalized}")
-
-
 def _parse_budget(value: Any) -> int | None:
     if value is None:
         return None
@@ -284,24 +252,3 @@ def _iso_date(value: Any) -> str | None:
     if isinstance(value, date):
         return value.isoformat()
     return str(value)
-
-
-def _normalize_text(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value)
-    return normalized.encode("ascii", "ignore").decode("ascii").lower().strip()
-
-
-def _slugify(value: str) -> str:
-    normalized = _normalize_text(value)
-    chunks: list[str] = []
-    current: list[str] = []
-    for char in normalized:
-        if char.isalnum():
-            current.append(char)
-            continue
-        if current:
-            chunks.append("".join(current))
-            current = []
-    if current:
-        chunks.append("".join(current))
-    return "-".join(chunks) or "expediente-sin-id"

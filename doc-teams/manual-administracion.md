@@ -46,7 +46,7 @@ Resultado esperado:
 - dentro del contenedor la aplicacion escucha en `HOST=0.0.0.0`
 
 ## Resultado esperado en esta revision
-- `make test` descubre 54 pruebas en esta checkout y no termina en verde mientras siga abierta la discrepancia de rutas entre `data/atom/` y el cargador que busca `data/*.atom`.
+- `make test` ejecuta 104 pruebas en verde con `pytest`.
 - `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`.
 - `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT` y levanta la BBDD integrada.
 - `make docker-psql` abre una terminal `psql` contra `postgres-licitaciones`.

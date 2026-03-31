@@ -7,6 +7,8 @@ from pathlib import Path
 
 from licican.atom_consolidation import load_atom_opportunities
 from licican.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
+from licican.shared.filters import CatalogFilters
+from licican.shared.text import clean_text
 from licican.source_coverage import load_source_coverage
 from licican.ti_classification import OpportunityCandidate, classify_opportunity, load_rule_set
 
@@ -74,49 +76,6 @@ class OpportunityDetail:
     actualizacion_oficial_mas_reciente: dict[str, object] | None
     historial_actualizaciones: tuple[dict[str, object], ...]
     fichero_origen_atom: str | None
-
-
-@dataclass(frozen=True)
-class CatalogFilters:
-    palabra_clave: str | None = None
-    presupuesto_min: int | None = None
-    presupuesto_max: int | None = None
-    procedimiento: str | None = None
-    ubicacion: str | None = None
-
-    def normalized(self) -> "CatalogFilters":
-        return CatalogFilters(
-            palabra_clave=_normalize_text(self.palabra_clave),
-            presupuesto_min=self.presupuesto_min,
-            presupuesto_max=self.presupuesto_max,
-            procedimiento=_normalize_text(self.procedimiento),
-            ubicacion=_normalize_text(self.ubicacion),
-        )
-
-    def active_filters(self) -> dict[str, object]:
-        return {
-            key: value
-            for key, value in {
-                "palabra_clave": self.palabra_clave,
-                "presupuesto_min": self.presupuesto_min,
-                "presupuesto_max": self.presupuesto_max,
-                "procedimiento": self.procedimiento,
-                "ubicacion": self.ubicacion,
-            }.items()
-            if value not in (None, "")
-        }
-
-    def validation_error(self) -> str | None:
-        if (
-            self.presupuesto_min is not None
-            and self.presupuesto_max is not None
-            and self.presupuesto_min > self.presupuesto_max
-        ):
-            return (
-                "El presupuesto mínimo no puede ser mayor que el presupuesto máximo. "
-                "Revisa el rango antes de aplicar los filtros."
-            )
-        return None
 
 
 class CatalogDataSourceError(RuntimeError):
@@ -287,13 +246,6 @@ def _classify_record(record: OpportunityRecord, rules) -> str:
     return decision.clasificacion
 
 
-def _normalize_text(value: str | None) -> str | None:
-    if value is None:
-        return None
-    normalized = value.strip()
-    return normalized or None
-
-
 def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], filters: CatalogFilters) -> bool:
     normalized_filters = filters.normalized()
 
@@ -320,12 +272,12 @@ def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], fil
             return False
 
     if normalized_filters.procedimiento is not None:
-        procedimiento = _normalize_text(str(snapshot["procedimiento"] or ""))
+        procedimiento = clean_text(str(snapshot["procedimiento"] or ""))
         if procedimiento is None or procedimiento.lower() != normalized_filters.procedimiento.lower():
             return False
 
     if normalized_filters.ubicacion is not None:
-        ubicacion = _normalize_text(record.ubicacion)
+        ubicacion = clean_text(record.ubicacion)
         if ubicacion is None or ubicacion.lower() != normalized_filters.ubicacion.lower():
             return False
 

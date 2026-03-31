@@ -7,6 +7,8 @@ from pathlib import Path
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 
+from licican.shared.text import clean_text, slugify
+
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET_PATH = BASE_DIR / "data" / "licitaciones_ti_canarias.xlsx"
@@ -191,16 +193,16 @@ def _cell_value(cell: ET.Element) -> str | None:
     inline = cell.find("x:is", NS)
     if inline is not None:
         text = "".join(node.text or "" for node in inline.iter(f"{{{MAIN_NS}}}t"))
-        return _normalize_text(text)
+        return clean_text(text)
 
     value = cell.findtext("x:v", default="", namespaces=NS)
-    return _normalize_text(value)
+    return clean_text(value)
 
 
 def _build_licitacion(row: dict[str, str | None]) -> CanariasLicitacion:
     expediente_id = row["ID Expediente"] or "Expediente sin identificar"
     return CanariasLicitacion(
-        slug=_slugify(expediente_id),
+        slug=slugify(expediente_id),
         id_expediente=expediente_id,
         titulo=row["Título"] or expediente_id,
         estado=row["Estado"],
@@ -225,7 +227,7 @@ def _build_lote(row: dict[str, str | None], licitaciones_by_id: dict[str, Canari
     numero_lote = row["Nº Lote"]
     licitacion = licitaciones_by_id.get(expediente_id)
     return CanariasLote(
-        slug=_slugify(f"{expediente_id}-{numero_lote or 'sin-lote'}-{row['Nombre Lote'] or ''}"),
+        slug=slugify(f"{expediente_id}-{numero_lote or 'sin-lote'}-{row['Nombre Lote'] or ''}"),
         id_expediente=expediente_id,
         titulo_licitacion=row["Título Licitación"] or expediente_id,
         numero_lote=numero_lote,
@@ -237,7 +239,7 @@ def _build_lote(row: dict[str, str | None], licitaciones_by_id: dict[str, Canari
         nuts=row["NUTS"],
         ciudad=row["Ciudad"],
         criterios_adjudicacion=row["Criterios Adjudicación"],
-        licitacion_slug=licitacion.slug if licitacion is not None else _slugify(expediente_id),
+        licitacion_slug=licitacion.slug if licitacion is not None else slugify(expediente_id),
     )
 
 
@@ -248,7 +250,7 @@ def _build_adjudicacion(
     licitacion = licitaciones_by_id.get(expediente_id)
     contract_id = row["ID Contrato"]
     return CanariasAdjudicacion(
-        slug=_slugify(f"{expediente_id}-{contract_id or row['Ganador'] or row['Fecha Adjudicación'] or 'adjudicacion'}"),
+        slug=slugify(f"{expediente_id}-{contract_id or row['Ganador'] or row['Fecha Adjudicación'] or 'adjudicacion'}"),
         id_expediente=expediente_id,
         titulo=row["Título"] or expediente_id,
         resultado=row["Resultado"],
@@ -306,13 +308,6 @@ def _format_boolean(value: str | None) -> str | None:
     return value
 
 
-def _normalize_text(value: str | None) -> str | None:
-    if value is None:
-        return None
-    stripped = value.strip()
-    return stripped or None
-
-
 def _column_letters(reference: str) -> str:
     letters: list[str] = []
     for char in reference:
@@ -321,18 +316,3 @@ def _column_letters(reference: str) -> str:
             continue
         break
     return "".join(letters)
-
-
-def _slugify(value: str) -> str:
-    chunks: list[str] = []
-    current: list[str] = []
-    for char in value.strip().lower():
-        if char.isalnum():
-            current.append(char)
-            continue
-        if current:
-            chunks.append("".join(current))
-            current = []
-    if current:
-        chunks.append("".join(current))
-    return "-".join(chunks) or "registro-sin-id"

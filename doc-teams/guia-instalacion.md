@@ -45,11 +45,11 @@ Si vas a ejecutar el contenedor o el backend PostgreSQL por defecto, revisa tamb
 1. Ejecuta la suite tecnica:
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m pytest -v
 ```
 
 Resultado esperado en esta revision:
-- 54 pruebas descubiertas en esta checkout; la suite sigue fallando mientras persista la discrepancia de rutas entre `data/atom/` y el cargador que busca `data/*.atom`.
+- 104 pruebas ejecutadas en verde con `pytest`.
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 

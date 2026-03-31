@@ -80,6 +80,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Detalle Lotes", html)
         self.assertIn("Adjudicaciones", html)
         self.assertIn('/licican/datos-consolidados', html)
+        self.assertIn('<link rel="stylesheet" href="/licican/static/style.css"', html)
         self.assertIn("Pagina 1 de 2", html)
         self.assertIn("Mostrando 1-2 de 3", html)
         self.assertIn("Pagina siguiente", html)
@@ -101,6 +102,13 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
         self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
         self.assertIn('href="/licican"', html)
+
+    def test_static_route_serves_css_file(self) -> None:
+        status, headers, body = invoke_app("/static/style.css")
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/css; charset=utf-8", headers["Content-Type"])
+        self.assertIn(b"--accent: #0f4c5c;", body)
 
     def test_api_returns_catalog_only_with_mvp_ti_opportunities(self) -> None:
         status, headers, body = invoke_app("/api/oportunidades")
@@ -194,7 +202,7 @@ class ApplicationTests(unittest.TestCase):
             ],
         }
 
-        with patch("licican.app.build_catalog", return_value=paginated_catalog):
+        with patch("licican.web.router.build_catalog", return_value=paginated_catalog):
             status, _, body = invoke_app("/", "ubicacion=Gran+Canaria")
 
         html = body.decode("utf-8")
@@ -512,7 +520,7 @@ class ApplicationTests(unittest.TestCase):
             "oportunidades": [],
         }
 
-        with patch("licican.app.build_catalog", return_value=empty_catalog):
+        with patch("licican.web.router.build_catalog", return_value=empty_catalog):
             status, headers, body = invoke_app("/")
 
         html = body.decode("utf-8")

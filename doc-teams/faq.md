@@ -66,7 +66,7 @@ Si. La instalacion editable deja operativa la aplicacion local y permite ejecuta
 Desde la raiz del proyecto, `make docker-psql` abre una sesion interactiva `psql` contra `postgres-licitaciones`.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m unittest discover -s tests -v` descubre 54 pruebas en esta revision, pero no termina en verde por la discrepancia de rutas asociada a `PB-011`.
+Si. `PYTHONPATH=src python3 -m pytest -v` ejecuta 104 pruebas en verde en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.
