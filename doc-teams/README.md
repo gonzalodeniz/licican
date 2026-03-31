@@ -4,10 +4,10 @@
 Centralizar la documentacion oficial de `Licican` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-03-30`.
+Fecha de revision: `2026-03-31`.
 
-Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, y mantiene el modo `file` como respaldo explicito para pruebas aisladas. La consolidacion de `PB-011` sigue documentada, pero la evidencia automatizada depende todavia de alinear la ruta de los snapshots `data/atom/*.atom` con el cargador que hoy sigue buscando `data/*.atom`.
-La issue tecnica #17 (`T-002`) ya fue validada por `qa-teams`, pero sigue pendiente de integracion en `main`; hasta que `developer-teams` la fusione, su correccion del filtrado PostgreSQL no debe leerse aqui como comportamiento vigente del producto.
+Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, y mantiene el modo `file` como respaldo explicito para pruebas aisladas. La issue tecnica #17 (`T-002`) ya esta integrada en `main` y corrige la resolucion de ubicacion en PostgreSQL para no degradar ubicaciones geograficas especificas a `Canarias`.
+La consolidacion de `PB-011` sigue documentada, pero la evidencia automatizada depende todavia de alinear la ruta de los snapshots `data/atom/*.atom` con el cargador que hoy sigue buscando `data/*.atom`.
 
 - Vista HTML del catalogo inicial de oportunidades TI (`PB-001`) en `/`.
 - API JSON del catalogo en `/api/oportunidades`.
@@ -28,8 +28,9 @@ La issue tecnica #17 (`T-002`) ya fue validada por `qa-teams`, pero sigue pendie
 - `PB-011` sigue siendo la referencia funcional del catalogo consolidado, pero en esta checkout los snapshots viven en `data/atom/` y el cargador actual aun busca `data/*.atom`, de modo que la reproduccion automatizada de esa consolidacion queda pendiente de corregir.
 - La issue tecnica #14 ya esta cerrada administrativamente en GitHub tras la validacion funcional y la integracion en `main`.
 - No se observan superficies de pipeline de seguimiento ni de `PB-012` en el codigo o en las pruebas de `main`.
+- El changelog de `2026-03-31` menciona `pipeline` como validado, pero en `main` no aparecen aun las rutas `/pipeline` ni `/api/pipeline`; esa entrada debe leerse como desalineacion documental hasta que el codigo la respalde.
 - El changelog de `2026-03-29` registra `PB-012` como validada, pero la evidencia tecnica visible en `main` no expone todavia esa superficie; esta desalineacion sigue abierta y debe documentarse como tal.
-- La issue tecnica `#17` queda documentada como validada en rama y pendiente de integracion; este estado no altera la fotografia vigente de `main` hasta que exista merge efectivo.
+- La issue tecnica `#17` queda documentada como integrada en `main`; este estado ya forma parte de la fotografia vigente de la rama principal.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/`, configuracion de `PORT` via `.env`, variables `DB_*` para PostgreSQL y una BBDD integrada con volumen persistente.
 
 Las alertas tempranas ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion ni un despliegue productivo endurecido.
@@ -57,6 +58,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
 - La entrega consolidada de `PB-011` sigue documentada como objetivo funcional, pero la evidencia automatizada queda condicionada por la discrepancia de rutas entre `data/atom/` y el cargador de `data/*.atom`.
 - Existe una contradiccion documental residual en `product-manager/`: varios documentos seguian describiendo `PB-011` como pendiente de integracion antes de esta sincronizacion, por lo que esa fuente debe revisarse frente a `main`.
+- Existe otra desalineacion abierta: el changelog de `2026-03-31` registra `pipeline` como validado, pero `main` no expone esa superficie ni tiene pruebas que la demuestren.
 
 ## Dependencias y contradicciones abiertas
 - La vision y el backlog de `product-manager/` describen capacidades futuras validas como fuente funcional, pero no deben leerse como evidencia de que `PB-012`, `PB-005` o el resto de ampliaciones planificadas ya esten disponibles en `main`.

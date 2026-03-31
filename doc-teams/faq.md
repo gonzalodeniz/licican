@@ -24,7 +24,7 @@ Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQ
 - `/api/clasificacion-ti`
 
 ## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
-En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada.
+En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada, aunque el changelog de `2026-03-31` lo mencione como validado.
 
 ## PB-011 ya esta operativo en `main`?
 La intencion funcional sigue documentada, pero en esta checkout la evidencia automatizada no se reproduce completa: los snapshots viven en `data/atom/` y el cargador actual sigue buscando `data/*.atom`. Hasta que esa discrepancia se resuelva, la trazabilidad de `PB-011` debe tratarse como condicionada y no como validacion cerrada.

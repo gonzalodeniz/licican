@@ -18,7 +18,7 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, incluyendo PostgreSQL integrada.
 
 La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defecto mediante la issue tecnica #14. El modo `file` sigue disponible para pruebas aisladas y la documentacion de `PB-011` conserva valor historico sobre la consolidacion de snapshots `.atom`, pero esa evidencia no es reproducible todavia en esta checkout porque los snapshots estan en `data/atom/` mientras el cargador sigue buscando `data/*.atom`. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
-La issue tecnica #17 ya esta validada en su rama de trabajo y corrige la resolucion de ubicacion en PostgreSQL para no degradar etiquetas geograficas especificas a `Canarias`, pero hasta su merge en `main` esta mejora sigue siendo una expectativa validada y no un comportamiento vigente documentable como parte estable de la rama principal.
+La issue tecnica #17 ya esta integrada en `main` y corrige la resolucion de ubicacion en PostgreSQL para no degradar etiquetas geograficas especificas a `Canarias`.
 
 ## Artefactos tecnicos presentes
 - Configuracion de paquete: `pyproject.toml`
@@ -98,17 +98,19 @@ Resultado verificado en esta revision:
 - Parte de `product-manager/` sigue mostrando el estado anterior de `PB-004`; la evidencia tecnica vigente en `main` ya expone alertas, asi que esa fuente debe leerse con cautela hasta que se sincronice.
 - La documentacion funcional de `product-manager/` sigue mostrando algunos textos anteriores a la integracion de `PB-011`; cuando contradiga a `main`, la evidencia tecnica vigente debe prevalecer y esa fuente debe corregirse.
 - El changelog de `2026-03-29` registra `PB-012` como validada, pero en `main` no hay rutas, vistas ni pruebas que expongan `/datos-consolidados` ni las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`; esa entrega sigue siendo una contradiccion documental abierta hasta que el codigo la materialice.
+- El changelog de `2026-03-31` registra `pipeline` como validado, pero en `main` no hay rutas, vistas ni pruebas que expongan esa superficie; la contradiccion queda abierta hasta que el codigo la materialice.
 
 ## Limitaciones tecnicas actuales
 - No existe persistencia de usuario ni ingestion automatizada fuera de los snapshots `.atom` versionados disponibles; el catalogo se alimenta de la consolidacion funcional de `PB-011` cuando hay `.atom` en `data/` y cae a `data/opportunities.json` solo como respaldo.
 - `PB-012` no esta expuesto en la superficie tecnica revisada, asi que no debe documentarse como disponible aunque el changelog la haya citado como validada.
-- No hay autenticacion, base de datos, tareas programadas ni integracion externa.
+- El changelog de `2026-03-31` menciona `pipeline` como validado, pero el codigo y las pruebas de `main` no exponen todavia esa superficie.
+- No hay autenticacion, tareas programadas ni integracion externa.
 - No hay contrato de despliegue productivo versionado, mas alla del arranque local con `wsgiref` y la publicacion local en contenedor.
 - La priorizacion de fuentes reales de `PB-009` ya esta expuesta en la app verificada con `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - La entrega de `PB-009` no habilita pipeline; solo refuerza origen, trazabilidad y orden de recopilacion.
 - Las alertas de `PB-004` solo registran coincidencias internas y no envian notificaciones salientes.
 - La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su carga automatizada requiere corregir la discrepancia entre `data/atom/` y el patron que usa el cargador.
-- La issue `#17` ya tiene validacion funcional, pero la documentacion de `main` debe seguir tratandola como pendiente de integracion hasta que exista el merge y el borrado de la rama tecnica.
+- La issue `#17` ya forma parte de `main`, asi que no debe tratarse como pendiente de integracion en la documentacion vigente.
 
 ## Dependencias abiertas
 - Implementar `PB-012` para exponer en interfaz las vistas funcionales equivalentes al Excel de referencia y ampliar la trazabilidad visible al usuario final.

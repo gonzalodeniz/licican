@@ -12,7 +12,7 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Clasificacion TI auditable`: superficie visible que expone reglas, exclusiones, casos frontera y ejemplos verificables antes del catalogo.
 - `Filtro funcional`: criterio aplicable sobre el catalogo visible y su API para reducir resultados por palabra clave, presupuesto, procedimiento o ubicacion.
 - `Snapshot .atom`: fichero Atom versionado en `data/atom/` que forma parte de la consolidacion funcional de `PB-011`; la carga automatizada sigue pendiente de alinear el patron que usa el cargador.
-- `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada y no esta disponible en `main` revisado.
+- `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada y no esta disponible en `main` revisado, aunque el changelog de `2026-03-31` la menciona como validada.
 - `Alerta temprana`: capacidad disponible en `main` para crear, editar y desactivar alertas internas reutilizando los filtros del catalogo y registrando coincidencias accionables; no incluye notificaciones salientes.
 
 ## Terminos operativos del repositorio
@@ -26,7 +26,7 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Contradiccion documental`: diferencia entre lo que una fuente del repositorio afirma y lo que puede verificarse realmente en `main`.
 - `No disponible en main`: capacidad descrita por vision o backlog que no debe documentarse como funcionalidad utilizable hoy.
 - `Entrega minima ejecutable`: estado actual de `main` con servidor local, catalogo consolidado desde snapshots `.atom`, filtros funcionales, ficha de detalle con fichero origen, alertas internas, rutas de cobertura, rutas de priorizacion de fuentes reales y rutas de clasificacion TI auditables, ademas de un despliegue local en contenedor, pero sin pipeline ni despliegue productivo endurecido.
-- `Trabajo validado no integrado`: entrega que puede aparecer en `changelog/` o en una issue como validada por `qa-teams`, pero que aun no forma parte del comportamiento observable de `main` hasta su integracion efectiva; esta expresion ya no aplica a `PB-009` ni a `PB-011`, que ya forman parte de `main`, y vuelve a ser util para leer `PB-012` mientras el changelog la cite como validada sin que el codigo visible la exponga.
+- `Trabajo validado no integrado`: entrega que puede aparecer en `changelog/` o en una issue como validada por `qa-teams`, pero que aun no forma parte del comportamiento observable de `main` hasta su integracion efectiva; esta expresion ya no aplica a `PB-009` ni a `PB-011`, que ya forman parte de `main`, y vuelve a ser util para leer `PB-012` o `pipeline` mientras el changelog las cite como validadas sin que el codigo visible las exponga.
 
 ## Contradicciones clave asociadas al glosario
 - `Catalogo validado`: expresion historica que hoy si coincide con las rutas y modulos presentes en `main`, porque el catalogo consolidado, la ficha de detalle, las alertas internas y la priorizacion de fuentes reales ya forman parte de la rama principal.

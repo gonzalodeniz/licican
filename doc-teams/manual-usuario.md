@@ -48,6 +48,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Gestion de usuarios o autenticacion.
 - La superficie funcional de `PB-012` con las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 - Aunque el changelog de `2026-03-29` la menciona como validada, esa superficie de `PB-012` no aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
+- Aunque el changelog de `2026-03-31` menciona `pipeline` como validado, esa superficie tampoco aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
 
 ## Como interpretar la documentacion funcional
 Los documentos de `product-manager/` siguen siendo la fuente funcional para vision, backlog, historias y casos de uso. Deben leerse como alcance esperado del producto, no como evidencia de que esas funcionalidades ya esten disponibles en esta entrega. Cuando contradigan a `main`, prevalece la evidencia reproducible de la rama actual.
@@ -64,6 +65,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - Las alertas visibles en `main` son internas: registran coincidencias accionables, pero todavia no envian notificaciones salientes.
 - La superficie de `PB-012` sigue pendiente: no aparecen todavia las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` ni `Adjudicaciones`.
 - El changelog de `2026-03-29` contradice parcialmente ese estado al registrar `PB-012` como validada; mientras esa desalineacion no se resuelva con evidencia en `main`, la referencia valida para usuario es la ausencia de la superficie.
+- El changelog de `2026-03-31` contradice ademas la ausencia de `pipeline`, pero la interfaz y la API siguen sin exponerla; la referencia valida para usuario sigue siendo que no esta disponible.
 
 ## Recomendacion de uso
 Para demos o revision funcional temprana, utiliza el catalogo en `/`, la ficha de detalle de una oportunidad visible, la gestion de alertas en `/alertas` y, como apoyo, las vistas de cobertura y clasificacion TI. Para capacidades de negocio pendientes, toma como referencia `product-manager/roadmap.md` y `product-manager/product-backlog.md`.

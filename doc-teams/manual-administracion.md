@@ -88,9 +88,11 @@ No existe en `main`:
 - superficie funcional de `PB-012`
 - superficie documental o tecnica de `PB-012` aunque el changelog de `2026-03-29` la cite como validada; hasta ver esa evidencia en `main`, la operacion debe seguir tratandola como no disponible
 
+La entrada del changelog de `2026-03-31` menciona `pipeline` como validado, pero en `main` no existe todavia esa superficie.
+
 ## Riesgos operativos
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
-- Comunicar que el producto ya ofrece pipeline induciria a error; las alertas visibles son internas y no envian notificaciones salientes.
+- Comunicar que el producto ya ofrece pipeline induciria a error; las alertas visibles son internas y no envian notificaciones salientes, y la entrada del changelog de `2026-03-31` no cambia ese estado tecnico observable.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
 - La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con pipeline ni otras capacidades de seguimiento.
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.
