@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import json
-import os
 from html import escape
 from io import BytesIO
-from pathlib import Path
 from urllib.parse import parse_qs, quote, urlencode
 from wsgiref.simple_server import make_server
 
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
+from licican.config import (
+    normalize_base_path,
+    resolve_alerts_path,
+    resolve_base_path,
+    resolve_host,
+    resolve_port,
+)
 from licican.opportunity_catalog import (
     CatalogDataSourceError,
     CatalogFilters,
@@ -539,28 +544,6 @@ def _page_template(
 </html>"""
 
 
-def _normalize_base_path(raw_base_path: str | None) -> str:
-    if raw_base_path is None:
-        return ""
-
-    base_path = raw_base_path.strip()
-    if not base_path or base_path == "/":
-        return ""
-
-    if not base_path.startswith("/"):
-        base_path = f"/{base_path}"
-
-    if len(base_path) > 1:
-        base_path = base_path.rstrip("/")
-
-    return base_path or ""
-
-
-def _resolve_base_path() -> str:
-    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    return _normalize_base_path(os.environ.get("BASE_PATH", "/licican"))
-
-
 def _app_url(base_path: str, path: str) -> str:
     normalized_path = path if path.startswith("/") else f"/{path}"
     if not base_path:
@@ -572,7 +555,7 @@ def _app_url(base_path: str, path: str) -> str:
 
 def _resolve_request_path(environ, base_path: str) -> str:
     raw_path = environ.get("PATH_INFO", "/") or "/"
-    script_name = _normalize_base_path(environ.get("SCRIPT_NAME")) or base_path
+    script_name = normalize_base_path(environ.get("SCRIPT_NAME")) or base_path
 
     if script_name and raw_path.startswith(script_name):
         raw_path = raw_path[len(script_name) :] or "/"
@@ -903,14 +886,6 @@ def _read_form_data(environ) -> dict[str, list[str]]:
     stream = environ.get("wsgi.input", BytesIO())
     body = stream.read(body_length).decode("utf-8") if body_length > 0 else ""
     return parse_qs(body, keep_blank_values=True)
-
-
-def _resolve_alerts_path() -> Path:
-    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    raw_path = os.environ.get("LICICAN_ALERTS_PATH", "").strip()
-    if raw_path:
-        return Path(raw_path)
-    return Path(__file__).resolve().parents[2] / "data" / "alerts.json"
 
 
 def _alert_filters_query(filters: dict[str, object]) -> str:
@@ -1528,7 +1503,7 @@ def _alerts_html_response(
     form_error: str | None = None,
     status_message: str | None = None,
 ) -> str:
-    reference, alerts = load_alerts(_resolve_alerts_path())
+    reference, alerts = load_alerts(resolve_alerts_path())
     catalog = build_catalog()
     available_filters = catalog["filtros_disponibles"]
     summary = summarize_alerts(alerts)
@@ -1937,44 +1912,8 @@ def _redirect_response(start_response, location: str) -> list[bytes]:
     return _respond(start_response, "303 See Other", "text/plain; charset=utf-8", b"", [("Location", location)])
 
 
-def _load_env_file(path: Path) -> None:
-    if not path.is_file():
-        return
-
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        key = key.strip()
-        if not key or key in os.environ:
-            continue
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-            value = value[1:-1]
-        os.environ[key] = value
-
-
-def _resolve_port() -> int:
-    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    raw_port = os.environ.get("PORT", "8000").strip()
-    try:
-        port = int(raw_port)
-    except ValueError as exc:
-        raise ValueError(f"PORT debe ser un numero entero valido, no {raw_port!r}") from exc
-    if not 1 <= port <= 65535:
-        raise ValueError(f"PORT debe estar entre 1 y 65535, no {port}")
-    return port
-
-
-def _resolve_host() -> str:
-    _load_env_file(Path(__file__).resolve().parents[2] / ".env")
-    raw_host = os.environ.get("HOST", "127.0.0.1").strip()
-    return raw_host or "127.0.0.1"
-
-
 def application(environ, start_response):
-    base_path = _resolve_base_path()
+    base_path = resolve_base_path()
     path = _resolve_request_path(environ, base_path)
     method = (environ.get("REQUEST_METHOD", "GET") or "GET").upper()
     filters = _parse_catalog_filters(environ)
@@ -1985,7 +1924,7 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/alertas":
-        reference, alerts = load_alerts(_resolve_alerts_path())
+        reference, alerts = load_alerts(resolve_alerts_path())
         payload = {
             "referencia_funcional": reference,
             "summary": summarize_alerts(alerts),
@@ -1997,7 +1936,7 @@ def application(environ, start_response):
     if path == "/alertas" and method == "POST":
         form_filters = _parse_filters_from_multidict(_read_form_data(environ))
         try:
-            create_alert(form_filters, path=_resolve_alerts_path())
+            create_alert(form_filters, path=resolve_alerts_path())
         except ValueError as exc:
             body = b"".join(_html_response(_alerts_html_response(base_path, form_filters, str(exc))))
             return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
@@ -2012,7 +1951,7 @@ def application(environ, start_response):
             alert_id = segments[1]
             form_filters = _parse_filters_from_multidict(_read_form_data(environ))
             try:
-                update_alert(alert_id, form_filters, path=_resolve_alerts_path())
+                update_alert(alert_id, form_filters, path=resolve_alerts_path())
             except ValueError as exc:
                 body = b"".join(_html_response(_alerts_html_response(base_path, None, f"No se ha actualizado {alert_id}. {exc}")))
                 return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
@@ -2026,7 +1965,7 @@ def application(environ, start_response):
         if len(segments) == 3 and segments[2] == "desactivar":
             alert_id = segments[1]
             try:
-                deactivate_alert(alert_id, path=_resolve_alerts_path())
+                deactivate_alert(alert_id, path=resolve_alerts_path())
             except KeyError:
                 body = b"No encontrado"
                 return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
@@ -2165,9 +2104,9 @@ def application(environ, start_response):
 
 
 def main() -> None:
-    base_path = _resolve_base_path()
-    host = _resolve_host()
-    port = _resolve_port()
+    base_path = resolve_base_path()
+    host = resolve_host()
+    port = resolve_port()
     with make_server(host, port, application) as httpd:
         print(f"Servidor disponible en http://{host}:{port}{base_path or '/'}")
         try:
