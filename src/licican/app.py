@@ -57,8 +57,10 @@ def _page_template(
         color: var(--ink);
       }}
       main {{
-        max-width: 1180px;
+        width: 100%;
+        max-width: none;
         margin: 0 auto;
+        box-sizing: border-box;
         padding: 2.5rem 1.5rem 4rem;
       }}
       .hero, .panel, .metric, .note {{
