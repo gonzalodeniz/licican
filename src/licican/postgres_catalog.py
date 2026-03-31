@@ -146,11 +146,17 @@ def _resolve_database_url() -> str:
     if explicit_url:
         return explicit_url
 
+    raw_password = os.getenv("DB_PASSWORD")
+    if raw_password is None or not raw_password.strip():
+        raise PostgresCatalogError(
+            "No se ha configurado conexión a PostgreSQL. Define LICICAN_DATABASE_URL o las variables DB_*."
+        )
+
     host = os.getenv("DB_HOST", "localhost")
     port = os.getenv("DB_PORT", "15432")
     database = os.getenv("DB_NAME", "licitaciones")
     user = os.getenv("DB_USER", "licitaciones_admin")
-    password = os.getenv("DB_PASSWORD", "Lic1t4c10n3s_2026!")
+    password = raw_password.strip()
     return f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
 

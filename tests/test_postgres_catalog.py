@@ -7,6 +7,7 @@ from unittest.mock import patch
 import psycopg2
 
 from licican.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
 
 
 class _FakeCursor:
@@ -67,8 +68,9 @@ class PostgresCatalogTests(unittest.TestCase):
             }
         ]
 
-        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
-            reference, records = load_opportunity_records(backend="postgres")
+        with patch.dict("os.environ", {"DB_PASSWORD": "secreto"}, clear=False):
+            with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+                reference, records = load_opportunity_records(backend="postgres")
 
         self.assertIn("T-001", reference)
         self.assertEqual(1, len(records))
@@ -120,11 +122,12 @@ class PostgresCatalogTests(unittest.TestCase):
             },
         ]
 
-        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
-            payload = build_catalog(
-                filters=CatalogFilters(procedimiento="Abierto"),
-                backend="postgres",
-            )
+        with patch.dict("os.environ", {"DB_PASSWORD": "secreto"}, clear=False):
+            with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+                payload = build_catalog(
+                    filters=CatalogFilters(procedimiento="Abierto"),
+                    backend="postgres",
+                )
 
         self.assertEqual(2, payload["total_registros_origen"])
         self.assertEqual(2, payload["total_oportunidades_visibles"])
@@ -160,32 +163,56 @@ class PostgresCatalogTests(unittest.TestCase):
             }
         ]
 
-        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
-            payload = build_catalog(
-                filters=CatalogFilters(
-                    palabra_clave="licencias",
-                    presupuesto_min=90000,
-                    presupuesto_max=120000,
-                    procedimiento="Abierto simplificado",
-                    ubicacion="Santa Cruz de Tenerife",
-                ),
-                backend="postgres",
-            )
+        with patch.dict("os.environ", {"DB_PASSWORD": "secreto"}, clear=False):
+            with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+                payload = build_catalog(
+                    filters=CatalogFilters(
+                        palabra_clave="licencias",
+                        presupuesto_min=90000,
+                        presupuesto_max=120000,
+                        procedimiento="Abierto simplificado",
+                        ubicacion="Santa Cruz de Tenerife",
+                    ),
+                    backend="postgres",
+                )
 
         self.assertEqual(["exp-001"], [item["id"] for item in payload["oportunidades"]])
         self.assertEqual("Santa Cruz de Tenerife", payload["oportunidades"][0]["ubicacion"])
 
     def test_build_opportunity_detail_returns_none_when_record_is_not_visible(self) -> None:
         rows = []
-        with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
-            detail = build_opportunity_detail("inexistente", backend="postgres")
+        with patch.dict("os.environ", {"DB_PASSWORD": "secreto"}, clear=False):
+            with patch("licican.postgres_catalog.psycopg2.connect", return_value=_FakeConnection(rows)):
+                detail = build_opportunity_detail("inexistente", backend="postgres")
 
         self.assertIsNone(detail)
 
     def test_build_catalog_raises_controlled_error_when_postgresql_fails(self) -> None:
-        with patch(
-            "licican.postgres_catalog.psycopg2.connect",
-            side_effect=psycopg2.OperationalError("db down"),
+        with patch.dict("os.environ", {"DB_PASSWORD": "secreto"}, clear=False):
+            with patch(
+                "licican.postgres_catalog.psycopg2.connect",
+                side_effect=psycopg2.OperationalError("db down"),
+            ):
+                with self.assertRaisesRegex(Exception, "No se pudo cargar el catalogo desde PostgreSQL"):
+                    build_catalog(backend="postgres")
+
+    def test_build_catalog_requires_postgresql_credentials_when_no_url_is_configured(self) -> None:
+        with patch.dict(
+            "os.environ",
+            {
+                "LICICAN_CATALOG_BACKEND": "postgres",
+                "LICICAN_DATABASE_URL": "",
+                "DATABASE_URL": "",
+                "DB_HOST": "",
+                "DB_PORT": "",
+                "DB_NAME": "",
+                "DB_USER": "",
+                "DB_PASSWORD": "",
+            },
+            clear=False,
         ):
-            with self.assertRaisesRegex(Exception, "No se pudo cargar el catalogo desde PostgreSQL"):
-                build_catalog(backend="postgres")
+            with self.assertRaisesRegex(
+                PostgresCatalogError,
+                "No se ha configurado conexión a PostgreSQL. Define LICICAN_DATABASE_URL o las variables DB_\\*.",
+            ):
+                load_postgres_opportunity_records()
