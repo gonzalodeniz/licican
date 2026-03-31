@@ -88,3 +88,12 @@ def resolve_alerts_path() -> Path:
     if raw_path:
         return Path(raw_path)
     return BASE_DIR / "data" / "alerts.json"
+
+
+def resolve_pipeline_path() -> Path:
+    """Resuelve la ruta del almacén del pipeline."""
+    _ensure_env_loaded()
+    raw_path = os.environ.get("LICICAN_PIPELINE_PATH", "").strip()
+    if raw_path:
+        return Path(raw_path)
+    return BASE_DIR / "data" / "pipeline.json"

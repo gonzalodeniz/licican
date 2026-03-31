@@ -49,7 +49,7 @@ def _navigation_items() -> list[dict[str, str | bool]]:
         {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
         {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
         {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
-        {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "", "upcoming": True},
+        {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
         {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "", "upcoming": True},
     ]
 

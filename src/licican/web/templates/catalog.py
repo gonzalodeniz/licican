@@ -56,12 +56,12 @@ def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
     pagination = catalog["paginacion"]
     uses_atom_consolidation = catalog["referencia_funcional"] == "PB-011"
     coverage_label = "Snapshots .atom consolidados" if uses_atom_consolidation else "Fuentes oficiales MVP aplicadas"
-    coverage_note = "El catálogo consolida todos los snapshots `.atom` versionados presentes en `data/`, aplica el criterio conjunto Canarias + CPV TI de <code>PB-011</code> y conserva trazabilidad al fichero origen vigente." if uses_atom_consolidation else "El catálogo reutiliza la cobertura MVP de <code>PB-007</code>, la clasificación auditable de <code>PB-006</code> y la prioridad de fuentes reales oficiales de <code>PB-009</code>. No representa todavía cobertura total del ecosistema canario ni habilita alertas o pipeline."
+    coverage_note = "El catálogo consolida todos los snapshots `.atom` versionados presentes en `data/`, aplica el criterio conjunto Canarias + CPV TI de <code>PB-011</code> y conserva trazabilidad al fichero origen vigente." if uses_atom_consolidation else "El catálogo reutiliza la cobertura MVP de <code>PB-007</code>, la clasificación auditable de <code>PB-006</code>, la prioridad de fuentes reales oficiales de <code>PB-009</code> y el pipeline funcional de <code>PB-005</code> para iniciar seguimiento desde las superficies visibles."
     filter_form = render_filter_form(base_path, active_filters, available_filters, validation_error, pagination)
     if opportunities:
         rows = "\n".join(
             "<tr>"
-            f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">Ver oferta concreta</a></div></td>'
+            f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">Ver oferta concreta</a>{_render_pipeline_form(base_path, item["id"], "Guardar en pipeline")}</div></td>'
             f'<td data-label="Organismo">{escape(item["organismo"])}</td>'
             f'<td data-label="Ubicación">{escape(item["ubicacion"])}</td>'
             f'<td data-label="Procedimiento">{escape(item["procedimiento"] or "No informado")}</td>'
@@ -78,12 +78,14 @@ def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
         message = "No hay resultados con los filtros activos." if active_filters and validation_error is None else ("No hay oportunidades TI disponibles en los snapshots `.atom` consolidados en este momento." if uses_atom_consolidation else "No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento.")
         catalog_panel = f'<section class="note">{escape(message)}</section>'
     alert_link = build_url(base_path, "/alertas")
+    pipeline_link = build_url(base_path, "/pipeline")
     active_query = _alert_filters_query(active_filters)
     save_link = f'<a class="button-link" href="{escape(alert_link)}{"?" + escape(active_query) if active_filters else ""}">Guardar estos criterios como alerta</a>' if active_filters else ""
     content = f"""
       <section class="note"><strong>Datos consolidados visibles del Excel</strong><br />La aplicación incorpora una superficie funcional alineada con <code>data/licitaciones_ti_canarias.xlsx</code> en las pestañas <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong>. <a class="button-link" href="{escape(build_url(base_path, '/datos-consolidados'))}">Abrir datos consolidados</a></section>
       {filter_form}
       <section class="note"><strong>Alertas tempranas del MVP</strong><br />Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(alert_link)}">la gestión de alertas</a>. {save_link}</section>
+      <section class="note"><strong>Pipeline operativo disponible</strong><br />Cada oportunidad visible del catálogo puede guardarse ya en el <a href="{escape(pipeline_link)}">pipeline de seguimiento</a> con estado inicial <code>Nueva</code> y posteriores transiciones operativas.</section>
       {catalog_panel}
       <p class="note">Referencia funcional activa: <code>{escape(catalog["referencia_funcional"])}</code>. Cada registro mantiene visible su fuente oficial, enlace oficial, fecha de publicación y estado oficial para facilitar verificación por <code>qa-teams</code>.</p>
     """
@@ -127,3 +129,12 @@ def _active_filter_badges(filters: dict[str, object]) -> str:
 
 def _alert_filters_query(filters: dict[str, object]) -> str:
     return urlencode({key: value for key, value in filters.items() if value not in (None, "")})
+
+
+def _render_pipeline_form(base_path: str, opportunity_id: str, label: str) -> str:
+    return (
+        f'<form method="post" action="{escape(build_url(base_path, "/pipeline"))}">'
+        f'<input type="hidden" name="opportunity_id" value="{escape(opportunity_id)}" />'
+        f'<button type="submit">{escape(label)}</button>'
+        "</form>"
+    )
