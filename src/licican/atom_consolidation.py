@@ -5,39 +5,18 @@ from datetime import datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
+from licican.shared.domain_constants import (
+    CANARIAS_KEYWORDS,
+    TI_CPV_PREFIXES,
+    map_procedure,
+    map_status,
+)
 from licican.shared.text import clean_text, normalize_text, slugify
 
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
 SOURCE_NAME = "Plataforma de Contratacion del Sector Publico"
 REFERENCE = "PB-011"
-CANARIAS_KEYWORDS = (
-    "canarias",
-    "gran canaria",
-    "tenerife",
-    "fuerteventura",
-    "lanzarote",
-    "la palma",
-    "la gomera",
-    "el hierro",
-    "la graciosa",
-    "santa cruz de tenerife",
-    "las palmas",
-)
-TI_CPV_PREFIXES = ("72", "48", "302")
-STATUS_LABELS = {
-    "ADJ": "Adjudicada",
-    "AN": "Anulada",
-    "DES": "Desierta",
-    "EV": "En evaluacion",
-    "PUB": "Publicada",
-    "RES": "Resuelta",
-}
-PROCEDURE_LABELS = {
-    "1": "Abierto",
-}
-
-
 @dataclass(frozen=True)
 class ConsolidatedAtomRecord:
     expediente_id: str
@@ -119,10 +98,10 @@ def _parse_entry(entry: ET.Element, source_filename: str) -> _ParsedEntry | None
     organismo = _find_party_name(contract_status) or "No informado"
     ubicacion = _resolve_location_label(geographic_context)
     presupuesto = _resolve_budget(procurement_project)
-    procedimiento = _map_procedure(_find_text_by_path(contract_status, ("TenderingProcess", "ProcedureCode")))
+    procedimiento = map_procedure(_find_text_by_path(contract_status, ("TenderingProcess", "ProcedureCode")))
     fecha_publicacion = updated_at.date().isoformat()
     fecha_limite = _find_text_by_path(contract_status, ("TenderingProcess", "TenderSubmissionDeadlinePeriod", "EndDate")) or "No informado"
-    estado = _map_status(_find_first_text(contract_status, "ContractFolderStatusCode"))
+    estado = map_status(_find_first_text(contract_status, "ContractFolderStatusCode"))
     solvencia = _resolve_technical_solvency(contract_status)
     criterios = tuple(_unique_in_order(_iter_awarding_criteria(contract_status)))
     url_fuente = _find_atom_link(entry)
@@ -254,18 +233,6 @@ def _find_party_name(contract_status: ET.Element) -> str | None:
     if party_name is None:
         return None
     return _find_first_text(party_name, "Name")
-
-
-def _map_status(value: str | None) -> str:
-    if value is None:
-        return "No informado"
-    return STATUS_LABELS.get(value, value)
-
-
-def _map_procedure(value: str | None) -> str | None:
-    if value is None:
-        return None
-    return PROCEDURE_LABELS.get(value, f"Procedimiento {value}")
 
 
 def _find_atom_link(entry: ET.Element) -> str:

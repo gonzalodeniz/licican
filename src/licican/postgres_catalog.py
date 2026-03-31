@@ -8,25 +8,17 @@ from typing import Any
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from licican.shared.domain_constants import (
+    CANARIAS_KEYWORDS,
+    map_procedure,
+    map_status,
+)
 from licican.shared.text import normalize_text, slugify
 
 
 REFERENCE = "T-001 · Carga de datos desde PostgreSQL para la aplicacion"
 SOURCE_NAME = "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias"
 SOURCE_URL = "https://contrataciondelestado.es/"
-CANARIAS_KEYWORDS = (
-    "canarias",
-    "gran canaria",
-    "tenerife",
-    "fuerteventura",
-    "lanzarote",
-    "la palma",
-    "la gomera",
-    "el hierro",
-    "la graciosa",
-    "santa cruz de tenerife",
-    "las palmas",
-)
 LOCATION_LABELS = (
     ("santa cruz de tenerife", "Santa Cruz de Tenerife"),
     ("gran canaria", "Gran Canaria"),
@@ -63,19 +55,6 @@ ADMIN_LOCATION_HINTS = (
     "alcaldia",
     "alcaldía",
 )
-STATUS_LABELS = {
-    "ADJ": "Adjudicada",
-    "AN": "Anulada",
-    "DES": "Desierta",
-    "EV": "En evaluacion",
-    "PUB": "Publicada",
-    "RES": "Resuelta",
-}
-PROCEDURE_LABELS = {
-    "1": "Abierto",
-    "9": "Abierto simplificado",
-}
-
 CATALOG_SQL = """
 WITH latest AS (
     SELECT DISTINCT ON (COALESCE(NULLIF(expediente, ''), id_plataforma))
@@ -191,11 +170,11 @@ def _row_to_record(row: dict[str, Any]) -> dict[str, Any]:
         "descripcion": descripcion,
         "organismo": str(row.get("organo_contratacion") or "No informado").strip(),
         "ubicacion": ubicacion,
-        "procedimiento": _map_procedure(row.get("procedimiento")),
+        "procedimiento": map_procedure(None if row.get("procedimiento") is None else str(row.get("procedimiento"))),
         "presupuesto": _parse_budget(row.get("presupuesto_base")),
         "fecha_publicacion_oficial": _iso_date(row.get("updated_at")) or "No informado",
         "fecha_limite": _iso_date(row.get("fecha_limite_presentacion")) or "No informado",
-        "estado": _map_status(row.get("estado")),
+        "estado": map_status(None if row.get("estado") is None else str(row.get("estado"))),
         "solvencia_tecnica": None,
         "criterios_adjudicacion": (),
         "fuente_oficial": SOURCE_NAME,
@@ -250,24 +229,6 @@ def _extract_location_from_text(normalized: str) -> str | None:
         if keyword in normalized:
             return label
     return None
-
-
-def _map_status(value: Any) -> str:
-    if value is None:
-        return "No informado"
-    normalized = str(value).strip()
-    return STATUS_LABELS.get(normalized, normalized)
-
-
-def _map_procedure(value: Any) -> str | None:
-    if value is None:
-        return None
-    normalized = str(value).strip()
-    if not normalized:
-        return None
-    return PROCEDURE_LABELS.get(normalized, f"Procedimiento {normalized}")
-
-
 def _parse_budget(value: Any) -> int | None:
     if value is None:
         return None
