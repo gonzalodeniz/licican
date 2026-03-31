@@ -10,7 +10,7 @@ Dejar una referencia unica y accionable sobre que capacidades estan disponibles 
 - Fecha de revision: `2026-03-29`
 - Rama revisada: `main`
 - Verificacion ejecutada:
-  - `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+  - `PYTHONPATH=src python3 -m pytest -v`
   - comprobacion directa de rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti` y `/api/clasificacion-ti`
   - comprobacion de que los snapshots Atom del repositorio viven en `data/atom/*.atom` y de que el cargador actual todavia busca `data/*.atom`, lo que deja abierta la reproduccion automatizada de `PB-011`
 

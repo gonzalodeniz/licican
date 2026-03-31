@@ -77,13 +77,13 @@ Cuando la aplicacion opera con `LICICAN_CATALOG_BACKEND=file`, el catalogo y el 
 Desde la raiz del proyecto:
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m pytest -v
 PYTHONPATH=src python3 -m licican.app
 docker compose up -d --build
 ```
 
 Resultado verificado en esta revision:
-- 54 pruebas automatizadas descubiertas en esta revision, con fallos todavia abiertos por la discrepancia de rutas de `PB-011`.
+- 104 pruebas automatizadas ejecutadas en verde con `pytest`.
 - Servidor local disponible en `http://127.0.0.1:<PORT>`, usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.
 - La BBDD PostgreSQL integrada responde en `localhost:15432` por defecto y se puede abrir con `make docker-psql`.

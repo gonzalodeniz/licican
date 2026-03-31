@@ -46,7 +46,7 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 
 ## Hallazgos principales de esta revision
 - `main` contiene implementacion Python versionada en `src/licican/`, datos en `data/` y pruebas automatizadas en `tests/`.
-- `PYTHONPATH=src python3 -m unittest discover -s tests -v` descubre 54 pruebas en esta checkout y no finaliza en verde: la discrepancia principal sigue estando en la carga de `PB-011`, porque las fuentes Atom estan en `data/atom/` y el cargador todavia busca `data/*.atom`.
+- `PYTHONPATH=src python3 -m pytest -v` ejecuta 104 pruebas en verde en esta checkout.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - `docker compose up -d --build` levanta la misma aplicacion en contenedor, publica el puerto configurado en `PORT` y monta `data/` como volumen persistente.

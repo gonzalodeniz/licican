@@ -180,5 +180,5 @@ Aunque formen parte de la vision y del backlog, todavia no existen en esta rama:
 ### Como ejecutar las pruebas tecnicas
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m pytest -v
 ```

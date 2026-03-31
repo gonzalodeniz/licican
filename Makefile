@@ -42,18 +42,18 @@ run:
 
 test:
 	@$(ENSURE_VENV); \
-	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests -v
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m pytest -v
 
 coverage:
 	@$(ENSURE_VENV); \
-	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m coverage run --source=src -m unittest discover -s tests -v && \
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m coverage run --source=src -m pytest -v && \
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m coverage report -m
 
 help:
 	@printf "%s\n" \
 		"Objetivos disponibles:" \
 		"  make run   - Ejecuta la aplicacion local usando PORT o el siguiente puerto libre" \
-		"  make test  - Ejecuta la suite tecnica con unittest" \
+		"  make test  - Ejecuta la suite tecnica con pytest" \
 		"  make coverage - Ejecuta la suite y muestra el informe de cobertura" \
 		"  make docker-build  - Construye la imagen Docker minima" \
 		"  make docker-up     - Levanta el despliegue con docker compose" \

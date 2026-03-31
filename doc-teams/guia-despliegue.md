@@ -22,7 +22,7 @@ Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En con
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
-- `make test` descubre 54 pruebas en esta checkout y sigue mostrando fallos mientras persista la discrepancia de rutas entre `data/atom/` y el cargador que busca `data/*.atom`.
+- `make test` ejecuta 104 pruebas en verde con `pytest`.
 - `make run` arranca el servidor local usando `PORT` desde `.env` y queda a la escucha hasta que se interrumpe el proceso.
 - `docker compose up -d --build` publica la misma aplicacion en un contenedor, levanta la BBDD integrada y monta `data/` como volumen persistente.
 - En la superficie desplegada responden tambien `/alertas` y `/api/alertas`, que almacenan alertas internas sin notificaciones salientes.
