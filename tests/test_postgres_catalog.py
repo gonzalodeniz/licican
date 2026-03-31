@@ -6,7 +6,8 @@ from unittest.mock import patch
 
 import psycopg2
 
-from licican.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.opportunity_catalog import build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.shared.filters import CatalogFilters
 from licican.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
 
 

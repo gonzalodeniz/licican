@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
-from licican.opportunity_catalog import CatalogFilters
+from licican.shared.filters import CatalogFilters
 
 
 class AlertsTests(unittest.TestCase):

@@ -5,7 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from licican.opportunity_catalog import CatalogFilters, build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.opportunity_catalog import build_catalog, build_opportunity_detail, load_opportunity_records
+from licican.shared.filters import CatalogFilters
 
 
 def _atom_entry(

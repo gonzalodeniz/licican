@@ -9,8 +9,9 @@ from urllib.parse import parse_qs
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
 from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path
-from licican.opportunity_catalog import CatalogDataSourceError, CatalogFilters, build_catalog, build_opportunity_detail
+from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
+from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
