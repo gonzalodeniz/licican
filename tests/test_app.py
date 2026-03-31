@@ -202,7 +202,7 @@ class ApplicationTests(unittest.TestCase):
             ],
         }
 
-        with patch("licican.app.build_catalog", return_value=paginated_catalog):
+        with patch("licican.web.router.build_catalog", return_value=paginated_catalog):
             status, _, body = invoke_app("/", "ubicacion=Gran+Canaria")
 
         html = body.decode("utf-8")
@@ -520,7 +520,7 @@ class ApplicationTests(unittest.TestCase):
             "oportunidades": [],
         }
 
-        with patch("licican.app.build_catalog", return_value=empty_catalog):
+        with patch("licican.web.router.build_catalog", return_value=empty_catalog):
             status, headers, body = invoke_app("/")
 
         html = body.decode("utf-8")
