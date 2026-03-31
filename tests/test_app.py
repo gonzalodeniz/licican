@@ -84,6 +84,13 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Mostrando 1-2 de 3", html)
         self.assertIn("Pagina siguiente", html)
         self.assertIn("Ir a la pagina", html)
+        self.assertIn("Menu principal", html)
+        self.assertIn('class="nav-link active" href="/licican"', html)
+        self.assertIn("Datos consolidados", html)
+        self.assertIn("Alertas", html)
+        self.assertIn("proximamente", html)
+        self.assertNotIn('href="/licican/pipeline"', html)
+        self.assertNotIn('href="/licican/permisos"', html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
         status, headers, body = invoke_app("/licican/")
@@ -363,6 +370,15 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Gestión de alertas tempranas", html)
         self.assertIn("Todavía no hay alertas registradas", html)
+        self.assertIn('class="nav-link active" href="/licican/alertas"', html)
+
+    def test_detail_page_keeps_catalog_navigation_active(self) -> None:
+        status, _, body = invoke_app("/oportunidades/pcsp-cabildo-licencias-2026")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertIn('class="nav-link active" href="/licican"', html)
+        self.assertIn("Menu principal", html)
 
     def test_alert_creation_rejects_empty_form(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

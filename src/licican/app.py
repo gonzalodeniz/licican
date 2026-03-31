@@ -27,7 +27,10 @@ def _page_template(
     hero_label: str,
     hero_body: str,
     content: str,
+    current_path: str = "/",
+    base_path: str = "",
 ) -> str:
+    navigation = _navigation_html(base_path, current_path)
     return f"""<!doctype html>
 <html lang="es">
   <head>
@@ -56,12 +59,164 @@ def _page_template(
           linear-gradient(180deg, #f4eee5 0%, var(--bg) 100%);
         color: var(--ink);
       }}
-      main {{
+      .app-shell {{
         width: 100%;
         max-width: none;
         margin: 0 auto;
         box-sizing: border-box;
-        padding: 2.5rem 1.5rem 4rem;
+        padding: 1.35rem 1.5rem;
+      }}
+      .app-frame {{
+        display: grid;
+        grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+        gap: 1.35rem;
+        align-items: start;
+      }}
+      .side-nav,
+      .mobile-nav {{
+        background: color-mix(in srgb, var(--card) 94%, white);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: 0 18px 40px rgb(18 26 35 / 0.08);
+      }}
+      .side-nav {{
+        position: sticky;
+        top: 1.35rem;
+        padding: 1.3rem 1rem;
+      }}
+      .nav-kicker {{
+        margin: 0 0 0.35rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }}
+      .nav-title {{
+        margin: 0 0 1rem;
+        font-size: 1.45rem;
+      }}
+      .nav-copy {{
+        margin: 0 0 1.25rem;
+        color: var(--muted);
+      }}
+      .nav-section {{
+        margin-top: 1.2rem;
+      }}
+      .nav-section-title {{
+        margin: 0 0 0.55rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }}
+      .nav-list {{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.45rem;
+      }}
+      .nav-link,
+      .nav-link-static {{
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 0.75rem;
+        align-items: center;
+        text-decoration: none;
+        border-radius: 18px;
+        padding: 0.8rem 0.9rem;
+        border: 1px solid transparent;
+      }}
+      .nav-link {{
+        color: var(--ink);
+      }}
+      .nav-link:hover {{
+        background: rgb(15 76 92 / 0.06);
+        border-color: rgb(15 76 92 / 0.1);
+      }}
+      .nav-link.active {{
+        background: linear-gradient(135deg, rgb(15 76 92 / 0.16), rgb(15 76 92 / 0.07));
+        border-color: rgb(15 76 92 / 0.28);
+      }}
+      .nav-link-static {{
+        color: var(--muted);
+        background: rgb(88 100 111 / 0.05);
+        border-color: rgb(88 100 111 / 0.12);
+      }}
+      .nav-icon {{
+        width: 2.2rem;
+        height: 2.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: rgb(15 76 92 / 0.1);
+        color: var(--accent-strong);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }}
+      .nav-link.active .nav-icon {{
+        background: var(--accent);
+        color: white;
+      }}
+      .nav-copy-block {{
+        min-width: 0;
+      }}
+      .nav-label {{
+        display: block;
+        font-weight: 700;
+      }}
+      .nav-help {{
+        display: block;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.35;
+      }}
+      .nav-tag {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        background: #f5eac6;
+        color: var(--warn);
+      }}
+      .nav-note {{
+        margin-top: 1.2rem;
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        background: rgb(15 76 92 / 0.06);
+        color: var(--muted);
+        line-height: 1.45;
+      }}
+      .content-shell {{
+        min-width: 0;
+      }}
+      .mobile-nav {{
+        display: none;
+        margin-bottom: 1rem;
+        overflow: hidden;
+      }}
+      .mobile-nav summary {{
+        list-style: none;
+        cursor: pointer;
+        padding: 1rem 1.1rem;
+        font-weight: 700;
+      }}
+      .mobile-nav summary::-webkit-details-marker {{
+        display: none;
+      }}
+      .mobile-nav[open] summary {{
+        border-bottom: 1px solid var(--line);
+      }}
+      .mobile-nav-body {{
+        padding: 0.45rem 0.8rem 0.9rem;
+      }}
+      main {{
+        min-width: 0;
+        padding: 1.15rem 0 3rem;
       }}
       .hero, .panel, .metric, .note {{
         background: color-mix(in srgb, var(--card) 94%, white);
@@ -324,6 +479,21 @@ def _page_template(
         font-size: 0.95em;
       }}
       @media (max-width: 720px) {{
+        .app-shell {{
+          padding: 0.85rem;
+        }}
+        .app-frame {{
+          grid-template-columns: 1fr;
+        }}
+        .side-nav {{
+          display: none;
+        }}
+        .mobile-nav {{
+          display: block;
+        }}
+        main {{
+          padding-top: 0;
+        }}
         table, thead, tbody, th, td, tr {{
           display: block;
         }}
@@ -350,14 +520,21 @@ def _page_template(
     </style>
   </head>
   <body>
-    <main>
-      <section class="hero">
-        <p class="muted">{escape(hero_label)}</p>
-        <h1>{escape(page_heading)}</h1>
-        <p>{hero_body}</p>
-      </section>
-      {content}
-    </main>
+    <div class="app-shell">
+      <div class="app-frame">
+        {navigation}
+        <div class="content-shell">
+          <main>
+            <section class="hero">
+              <p class="muted">{escape(hero_label)}</p>
+              <h1>{escape(page_heading)}</h1>
+              <p>{hero_body}</p>
+            </section>
+            {content}
+          </main>
+        </div>
+      </div>
+    </div>
   </body>
 </html>"""
 
@@ -406,7 +583,127 @@ def _resolve_request_path(environ, base_path: str) -> str:
     return raw_path or "/"
 
 
-def _coverage_html_response() -> str:
+def _navigation_items() -> list[dict[str, str | bool]]:
+    return [
+        {
+            "label": "Catalogo",
+            "description": "Oportunidades, filtros y paginacion",
+            "icon": "CT",
+            "path": "/",
+            "upcoming": False,
+        },
+        {
+            "label": "Datos consolidados",
+            "description": "Excel funcional, lotes y adjudicaciones",
+            "icon": "DC",
+            "path": "/datos-consolidados",
+            "upcoming": False,
+        },
+        {
+            "label": "Alertas",
+            "description": "Criterios guardados y coincidencias activas",
+            "icon": "AL",
+            "path": "/alertas",
+            "upcoming": False,
+        },
+        {
+            "label": "Clasificacion TI",
+            "description": "Reglas auditables y casos frontera",
+            "icon": "TI",
+            "path": "/clasificacion-ti",
+            "upcoming": False,
+        },
+        {
+            "label": "Pipeline",
+            "description": "Seguimiento operativo de oportunidades",
+            "icon": "PL",
+            "path": "",
+            "upcoming": True,
+        },
+        {
+            "label": "Permisos",
+            "description": "Roles y restricciones por superficie",
+            "icon": "PM",
+            "path": "",
+            "upcoming": True,
+        },
+    ]
+
+
+def _path_matches_navigation(current_path: str, item_path: str) -> bool:
+    if item_path == "/":
+        return current_path == "/" or current_path.startswith("/oportunidades/")
+    if item_path == "/datos-consolidados":
+        return current_path == item_path or current_path.startswith(f"{item_path}/")
+    return current_path == item_path or current_path.startswith(f"{item_path}/")
+
+
+def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str | bool]) -> str:
+    label = str(item["label"])
+    description = str(item["description"])
+    icon = str(item["icon"])
+    path = str(item["path"])
+    upcoming = bool(item["upcoming"])
+
+    if upcoming:
+        return f"""
+          <li>
+            <div class="nav-link-static">
+              <span class="nav-icon" aria-hidden="true">{escape(icon)}</span>
+              <span class="nav-copy-block">
+                <span class="nav-label">{escape(label)}</span>
+                <span class="nav-help">{escape(description)}</span>
+              </span>
+              <span class="nav-tag">proximamente</span>
+            </div>
+          </li>
+        """
+
+    class_name = "nav-link active" if _path_matches_navigation(current_path, path) else "nav-link"
+    return f"""
+      <li>
+        <a class="{class_name}" href="{escape(_app_url(base_path, path))}">
+          <span class="nav-icon" aria-hidden="true">{escape(icon)}</span>
+          <span class="nav-copy-block">
+            <span class="nav-label">{escape(label)}</span>
+            <span class="nav-help">{escape(description)}</span>
+          </span>
+          <span class="nav-tag">activo</span>
+        </a>
+      </li>
+    """
+
+
+def _navigation_list_html(base_path: str, current_path: str) -> str:
+    items = "".join(_navigation_item_html(base_path, current_path, item) for item in _navigation_items())
+    return f'<ul class="nav-list">{items}</ul>'
+
+
+def _navigation_html(base_path: str, current_path: str) -> str:
+    list_html = _navigation_list_html(base_path, current_path)
+    return f"""
+      <aside class="side-nav" aria-label="Navegacion principal">
+        <p class="nav-kicker">PB-010</p>
+        <h2 class="nav-title">Licican</h2>
+        <p class="nav-copy">Base de navegacion comun para catalogo, alertas y crecimiento de modulos sin rutas huerfanas.</p>
+        <div class="nav-section">
+          <p class="nav-section-title">Modulos</p>
+          {list_html}
+        </div>
+        <p class="nav-note">
+          La navegacion prioriza superficies ya operativas y deja marcadas como <strong>proximamente</strong> las piezas que todavia no tienen una vista utilizable.
+        </p>
+      </aside>
+      <details class="mobile-nav">
+        <summary>Menu principal</summary>
+        <div class="mobile-nav-body">
+          {list_html}
+        </div>
+      </details>
+    """
+
+
+def _coverage_html_response(base_path: str = "") -> str:
     sources = load_source_coverage()
     summary = summary_by_status(sources)
     rows = "\n".join(
@@ -465,10 +762,12 @@ def _coverage_html_response() -> str:
             "y cuáles siguen pendientes de decisión funcional."
         ),
         content,
+        current_path="/cobertura-fuentes",
+        base_path=base_path,
     )
 
 
-def _real_source_prioritization_html_response() -> str:
+def _real_source_prioritization_html_response(base_path: str = "") -> str:
     reference, sources, out_of_scope = load_real_source_prioritization()
     summary = summarize_prioritization(sources)
     rows = "\n".join(
@@ -537,6 +836,8 @@ def _real_source_prioritization_html_response() -> str:
             "La entrega refuerza credibilidad y trazabilidad sin ampliar todavía cobertura comercial, alertas ni pipeline."
         ),
         content,
+        current_path="/priorizacion-fuentes-reales",
+        base_path=base_path,
     )
 
 
@@ -907,6 +1208,8 @@ def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
             "con pestañas separadas para licitaciones, lotes y adjudicaciones."
         ),
         content,
+        current_path="/datos-consolidados",
+        base_path=base_path,
     )
 
 
@@ -964,6 +1267,8 @@ def _licitacion_excel_detail_html_response(slug: str, base_path: str = "") -> st
             "que alimenta la versión consolidada mostrada al usuario."
         ),
         content,
+        current_path="/datos-consolidados",
+        base_path=base_path,
     )
 
 
@@ -1024,6 +1329,8 @@ def _adjudicacion_excel_detail_html_response(slug: str, base_path: str = "") -> 
             "hereda la trazabilidad del fichero `.atom` origen."
         ),
         content,
+        current_path="/datos-consolidados",
+        base_path=base_path,
     )
 
 
@@ -1197,6 +1504,8 @@ def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1,
             "Solo se publican registros que cumplen simultáneamente criterio geográfico Canarias y criterio TI por CPV, con fuente oficial visible."
         ),
         content,
+        current_path="/",
+        base_path=base_path,
     )
 
 
@@ -1385,6 +1694,8 @@ def _alerts_html_response(
             "En esta primera entrega las coincidencias quedan registradas en la propia aplicación como soporte interno del MVP."
         ),
         content,
+        current_path="/alertas",
+        base_path=base_path,
     )
 
 
@@ -1412,6 +1723,8 @@ def _catalog_data_error_html_response(base_path: str, message: str) -> str:
         "Servicio de datos no disponible",
         "El catalogo y el detalle requieren acceso a la fuente de datos configurada para la aplicacion.",
         content,
+        current_path="/",
+        base_path=base_path,
     )
 
 
@@ -1498,10 +1811,12 @@ def _detail_html_response(opportunity_id: str, base_path: str = "") -> str | Non
             "Cuando existe una rectificacion o modificacion publicada por el origen, se muestra el ultimo dato oficial visible."
         ),
         update_panel + latest_fields,
+        current_path=f"/oportunidades/{quote(opportunity_id)}",
+        base_path=base_path,
     )
 
 
-def _classification_html_response() -> str:
+def _classification_html_response(base_path: str = "") -> str:
     rules = load_rule_set()
     audited_examples = audit_examples(rules)
     example_rows = "\n".join(
@@ -1588,6 +1903,8 @@ def _classification_html_response() -> str:
             "cuáles deben excluirse y qué expedientes requieren revisión adicional antes de aparecer en el catálogo."
         ),
         content,
+        current_path="/clasificacion-ti",
+        base_path=base_path,
     )
 
 
@@ -1775,15 +2092,15 @@ def application(environ, start_response):
         return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/clasificacion-ti":
-        body = b"".join(_html_response(_classification_html_response()))
+        body = b"".join(_html_response(_classification_html_response(base_path)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/cobertura-fuentes":
-        body = b"".join(_html_response(_coverage_html_response()))
+        body = b"".join(_html_response(_coverage_html_response(base_path)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/priorizacion-fuentes-reales":
-        body = b"".join(_html_response(_real_source_prioritization_html_response()))
+        body = b"".join(_html_response(_real_source_prioritization_html_response(base_path)))
         return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/alertas":
