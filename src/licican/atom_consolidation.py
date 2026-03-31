@@ -12,6 +12,14 @@ from licican.shared.domain_constants import (
     map_status,
 )
 from licican.shared.text import clean_text, normalize_text, slugify
+from licican.shared.xml_helpers import (
+    find_first,
+    find_first_text,
+    find_text_by_path,
+    iter_local,
+    iter_texts,
+    local_name,
+)
 
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
@@ -71,20 +79,20 @@ def _is_newer(candidate: _ParsedEntry, current: _ParsedEntry) -> bool:
 
 
 def _parse_entry(entry: ET.Element, source_filename: str) -> _ParsedEntry | None:
-    contract_status = _find_first(entry, "ContractFolderStatus")
+    contract_status = find_first(entry, "ContractFolderStatus")
     if contract_status is None:
         return None
 
-    expediente_id = _find_first_text(contract_status, "ContractFolderID")
+    expediente_id = find_first_text(contract_status, "ContractFolderID")
     updated_text = entry.findtext(f"{{{ATOM_NS}}}updated")
     if not expediente_id or not updated_text:
         return None
 
-    procurement_project = _find_first(contract_status, "ProcurementProject")
+    procurement_project = find_first(contract_status, "ProcurementProject")
     if procurement_project is None:
         return None
 
-    cpvs = tuple(_iter_texts(procurement_project, "ItemClassificationCode"))
+    cpvs = tuple(iter_texts(procurement_project, "ItemClassificationCode"))
     if not _matches_ti(cpvs):
         return None
 
@@ -93,15 +101,15 @@ def _parse_entry(entry: ET.Element, source_filename: str) -> _ParsedEntry | None
         return None
 
     updated_at = datetime.fromisoformat(updated_text)
-    titulo = (_find_first_text(procurement_project, "Name") or entry.findtext(f"{{{ATOM_NS}}}title") or expediente_id).strip()
+    titulo = (find_first_text(procurement_project, "Name") or entry.findtext(f"{{{ATOM_NS}}}title") or expediente_id).strip()
     descripcion = (_first_non_empty((entry.findtext(f"{{{ATOM_NS}}}summary"), titulo)) or titulo).strip()
     organismo = _find_party_name(contract_status) or "No informado"
     ubicacion = _resolve_location_label(geographic_context)
     presupuesto = _resolve_budget(procurement_project)
-    procedimiento = map_procedure(_find_text_by_path(contract_status, ("TenderingProcess", "ProcedureCode")))
+    procedimiento = map_procedure(find_text_by_path(contract_status, ("TenderingProcess", "ProcedureCode")))
     fecha_publicacion = updated_at.date().isoformat()
-    fecha_limite = _find_text_by_path(contract_status, ("TenderingProcess", "TenderSubmissionDeadlinePeriod", "EndDate")) or "No informado"
-    estado = map_status(_find_first_text(contract_status, "ContractFolderStatusCode"))
+    fecha_limite = find_text_by_path(contract_status, ("TenderingProcess", "TenderSubmissionDeadlinePeriod", "EndDate")) or "No informado"
+    estado = map_status(find_first_text(contract_status, "ContractFolderStatusCode"))
     solvencia = _resolve_technical_solvency(contract_status)
     criterios = tuple(_unique_in_order(_iter_awarding_criteria(contract_status)))
     url_fuente = _find_atom_link(entry)
@@ -129,15 +137,15 @@ def _parse_entry(entry: ET.Element, source_filename: str) -> _ParsedEntry | None
 
 
 def _build_geographic_context(contract_status: ET.Element, procurement_project: ET.Element) -> dict[str, tuple[str, ...]]:
-    located_party = _find_first(contract_status, "LocatedContractingParty")
+    located_party = find_first(contract_status, "LocatedContractingParty")
     parent_names: list[str] = []
     if located_party is not None:
-        for parent in _iter_local(located_party, "ParentLocatedParty"):
-            parent_names.extend(_iter_texts(parent, "Name"))
+        for parent in iter_local(located_party, "ParentLocatedParty"):
+            parent_names.extend(iter_texts(parent, "Name"))
 
     return {
-        "codes": tuple(_iter_texts(procurement_project, "CountrySubentityCode")),
-        "subentities": tuple(_iter_texts(procurement_project, "CountrySubentity")),
+        "codes": tuple(iter_texts(procurement_project, "CountrySubentityCode")),
+        "subentities": tuple(iter_texts(procurement_project, "CountrySubentity")),
         "parent_names": tuple(parent_names),
     }
 
@@ -172,12 +180,12 @@ def _resolve_location_label(geographic_context: dict[str, tuple[str, ...]]) -> s
 
 
 def _resolve_budget(procurement_project: ET.Element) -> int | None:
-    budget_amount = _find_first(procurement_project, "BudgetAmount")
+    budget_amount = find_first(procurement_project, "BudgetAmount")
     if budget_amount is None:
         return None
 
     for field_name in ("TotalAmount", "TaxExclusiveAmount", "EstimatedOverallContractAmount"):
-        value = _find_first_text(budget_amount, field_name)
+        value = find_first_text(budget_amount, field_name)
         parsed = _parse_budget(value)
         if parsed is not None:
             return parsed
@@ -197,7 +205,7 @@ def _parse_budget(value: str | None) -> int | None:
 
 
 def _resolve_technical_solvency(contract_status: ET.Element) -> str | None:
-    descriptions = _iter_texts(contract_status, "Description")
+    descriptions = iter_texts(contract_status, "Description")
     collected: list[str] = []
     for description in descriptions:
         normalized = normalize_text(description)
@@ -210,76 +218,38 @@ def _resolve_technical_solvency(contract_status: ET.Element) -> str | None:
 
 
 def _iter_awarding_criteria(contract_status: ET.Element) -> list[str]:
-    awarding_terms = _find_first(contract_status, "AwardingTerms")
+    awarding_terms = find_first(contract_status, "AwardingTerms")
     if awarding_terms is None:
         return []
 
     criteria: list[str] = []
-    for awarding_criteria in _iter_local(awarding_terms, "AwardingCriteria"):
-        description = _find_first_text(awarding_criteria, "Description")
+    for awarding_criteria in iter_local(awarding_terms, "AwardingCriteria"):
+        description = find_first_text(awarding_criteria, "Description")
         if description:
             criteria.append(description)
     return criteria
 
 
 def _find_party_name(contract_status: ET.Element) -> str | None:
-    located_party = _find_first(contract_status, "LocatedContractingParty")
+    located_party = find_first(contract_status, "LocatedContractingParty")
     if located_party is None:
         return None
-    party = _find_first(located_party, "Party")
+    party = find_first(located_party, "Party")
     if party is None:
         return None
-    party_name = _find_first(party, "PartyName")
+    party_name = find_first(party, "PartyName")
     if party_name is None:
         return None
-    return _find_first_text(party_name, "Name")
+    return find_first_text(party_name, "Name")
 
 
 def _find_atom_link(entry: ET.Element) -> str:
     for child in entry:
-        if _local_name(child.tag) == "link":
+        if local_name(child.tag) == "link":
             href = child.attrib.get("href")
             if href:
                 return href
     return ""
-
-
-def _find_text_by_path(root: ET.Element, path: tuple[str, ...]) -> str | None:
-    current = root
-    for item in path:
-        current = _find_first(current, item)
-        if current is None:
-            return None
-    return clean_text(current.text)
-
-
-def _find_first(root: ET.Element, local_name: str) -> ET.Element | None:
-    for child in root:
-        if _local_name(child.tag) == local_name:
-            return child
-    return None
-
-
-def _find_first_text(root: ET.Element, local_name: str) -> str | None:
-    element = _find_first(root, local_name)
-    if element is None:
-        return None
-    return clean_text(element.text)
-
-
-def _iter_local(root: ET.Element, local_name: str) -> list[ET.Element]:
-    return [element for element in root.iter() if _local_name(element.tag) == local_name]
-
-
-def _iter_texts(root: ET.Element, local_name: str) -> list[str]:
-    values: list[str] = []
-    for element in root.iter():
-        if _local_name(element.tag) != local_name:
-            continue
-        value = clean_text(element.text)
-        if value is not None:
-            values.append(value)
-    return values
 
 
 def _first_non_empty(values: tuple[str | None, ...]) -> str | None:
@@ -287,12 +257,6 @@ def _first_non_empty(values: tuple[str | None, ...]) -> str | None:
         if value is not None and value.strip():
             return value
     return None
-
-
-def _local_name(tag: str) -> str:
-    if "}" not in tag:
-        return tag
-    return tag.rsplit("}", 1)[-1]
 
 
 def _unique_in_order(values: list[str]) -> list[str]:
