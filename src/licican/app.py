@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 from html import escape
-from io import BytesIO
 from urllib.parse import parse_qs, quote, urlencode
 from wsgiref.simple_server import make_server
 
@@ -24,6 +22,7 @@ from licican.opportunity_catalog import (
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
+from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 
 
 def _page_template(
@@ -544,15 +543,6 @@ def _page_template(
 </html>"""
 
 
-def _app_url(base_path: str, path: str) -> str:
-    normalized_path = path if path.startswith("/") else f"/{path}"
-    if not base_path:
-        return normalized_path
-    if normalized_path == "/":
-        return base_path
-    return f"{base_path}{normalized_path}"
-
-
 def _resolve_request_path(environ, base_path: str) -> str:
     raw_path = environ.get("PATH_INFO", "/") or "/"
     script_name = normalize_base_path(environ.get("SCRIPT_NAME")) or base_path
@@ -645,7 +635,7 @@ def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str
     class_name = "nav-link active" if _path_matches_navigation(current_path, path) else "nav-link"
     return f"""
       <li>
-        <a class="{class_name}" href="{escape(_app_url(base_path, path))}">
+        <a class="{class_name}" href="{escape(build_url(base_path, path))}">
           <span class="nav-icon" aria-hidden="true">{escape(icon)}</span>
           <span class="nav-copy-block">
             <span class="nav-label">{escape(label)}</span>
@@ -876,18 +866,6 @@ def _parse_catalog_page(environ) -> int:
         return 1
 
 
-def _read_form_data(environ) -> dict[str, list[str]]:
-    content_length = environ.get("CONTENT_LENGTH", "").strip()
-    try:
-        body_length = int(content_length or "0")
-    except ValueError:
-        body_length = 0
-
-    stream = environ.get("wsgi.input", BytesIO())
-    body = stream.read(body_length).decode("utf-8") if body_length > 0 else ""
-    return parse_qs(body, keep_blank_values=True)
-
-
 def _alert_filters_query(filters: dict[str, object]) -> str:
     return urlencode({key: value for key, value in filters.items() if value not in (None, "")})
 
@@ -926,7 +904,7 @@ def _catalog_query_string(filters: dict[str, object], page: int | None = None) -
 
 def _catalog_page_url(base_path: str, filters: dict[str, object], page: int) -> str:
     query = _catalog_query_string(filters, page)
-    path = _app_url(base_path, "/")
+    path = build_url(base_path, "/")
     if not query:
         return path
     return f"{path}?{query}"
@@ -958,7 +936,7 @@ def _pagination_jump_form(base_path: str, filters: dict[str, object], pagination
         if value not in (None, "")
     )
     return f"""
-      <form class="pagination-jump" method="get" action="{escape(_app_url(base_path, '/'))}">
+      <form class="pagination-jump" method="get" action="{escape(build_url(base_path, '/'))}">
         {hidden_fields}
         <label for="catalog-page">Ir a la pagina</label>
         <input id="catalog-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" />
@@ -1031,7 +1009,7 @@ def _display_value(value: object | None) -> str:
 def _tab_link(base_path: str, current_view: str, view: str, label: str) -> str:
     class_name = "tab-link active" if current_view == view else "tab-link"
     return (
-        f'<a class="{class_name}" href="{escape(_app_url(base_path, f"/datos-consolidados?vista={view}"))}">'
+        f'<a class="{class_name}" href="{escape(build_url(base_path, f"/datos-consolidados?vista={view}"))}">'
         f"{escape(label)}</a>"
     )
 
@@ -1102,7 +1080,7 @@ def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
             ("fichero_origen_atom", "Fichero Origen"),
         ]
         actions = [
-            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{item["slug"]}"))}">Ver detalle</a>'
+            f'<a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/licitaciones/{item["slug"]}"))}">Ver detalle</a>'
             for item in rows
         ]
         heading = "Licitaciones TI Canarias"
@@ -1124,7 +1102,7 @@ def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
             ("criterios_adjudicacion", "Criterios Adjudicación"),
         ]
         actions = [
-            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{item["licitacion_slug"]}"))}">Ver licitación</a>'
+            f'<a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/licitaciones/{item["licitacion_slug"]}"))}">Ver licitación</a>'
             for item in rows
         ]
         heading = "Detalle Lotes"
@@ -1146,7 +1124,7 @@ def _datos_consolidados_html_response(view: str, base_path: str = "") -> str:
             ("fichero_origen_atom", "Fichero Origen"),
         ]
         actions = [
-            f'<a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/adjudicaciones/{item["slug"]}"))}">Ver contrato</a>'
+            f'<a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/adjudicaciones/{item["slug"]}"))}">Ver contrato</a>'
             for item in rows
         ]
         heading = "Adjudicaciones"
@@ -1221,7 +1199,7 @@ def _licitacion_excel_detail_html_response(slug: str, base_path: str = "") -> st
     content = f"""
       <section class="panel">
         <div class="panel-body">
-          <p><a href="{escape(_app_url(base_path, '/datos-consolidados?vista=licitaciones'))}">Volver a Licitaciones TI Canarias</a></p>
+          <p><a href="{escape(build_url(base_path, '/datos-consolidados?vista=licitaciones'))}">Volver a Licitaciones TI Canarias</a></p>
           <div class="table-wrap">
             <table>
               <tbody>
@@ -1276,13 +1254,13 @@ def _adjudicacion_excel_detail_html_response(slug: str, base_path: str = "") -> 
     licitacion_link = ""
     if detail["licitacion_slug"] is not None:
         licitacion_link = (
-            f'<p><a class="offer-action" href="{escape(_app_url(base_path, f"/datos-consolidados/licitaciones/{detail["licitacion_slug"]}"))}">'
+            f'<p><a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/licitaciones/{detail["licitacion_slug"]}"))}">'
             "Ver licitación asociada</a></p>"
         )
     content = f"""
       <section class="panel">
         <div class="panel-body">
-          <p><a href="{escape(_app_url(base_path, '/datos-consolidados?vista=adjudicaciones'))}">Volver a Adjudicaciones</a></p>
+          <p><a href="{escape(build_url(base_path, '/datos-consolidados?vista=adjudicaciones'))}">Volver a Adjudicaciones</a></p>
           <p>{escape(_display_value(detail["descripcion"]))}</p>
           <div class="table-wrap">
             <table>
@@ -1332,7 +1310,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1,
       <section class="panel">
         <div class="panel-body">
           <h2>Filtros funcionales</h2>
-          <form method="get" action="{escape(_app_url(base_path, '/'))}">
+          <form method="get" action="{escape(build_url(base_path, '/'))}">
             <div class="filters">
               <div>
                 <label for="palabra_clave">Palabra clave</label>
@@ -1369,7 +1347,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1,
             </div>
             <div class="filter-actions">
               <button type="submit">Aplicar filtros</button>
-              <a class="button-link" href="{escape(_app_url(base_path, '/'))}">Limpiar filtros</a>
+              <a class="button-link" href="{escape(build_url(base_path, '/'))}">Limpiar filtros</a>
             </div>
           </form>
           {_active_filter_badges(active_filters)}
@@ -1383,7 +1361,7 @@ def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1,
         rows = "\n".join(
             (
                 "<tr>"
-                f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(_app_url(base_path, _detail_url(item["id"])))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(_app_url(base_path, _detail_url(item["id"])))}">Ver oferta concreta</a></div></td>'
+                f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(build_url(base_path, _detail_url(item["id"])))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(build_url(base_path, _detail_url(item["id"])))}">Ver oferta concreta</a></div></td>'
                 f'<td data-label="Organismo">{escape(item["organismo"])}</td>'
                 f'<td data-label="Ubicación">{escape(item["ubicacion"])}</td>'
                 f'<td data-label="Procedimiento">{escape(item["procedimiento"] or "No informado")}</td>'
@@ -1455,13 +1433,13 @@ def _catalog_html_response(filters: CatalogFilters | None = None, page: int = 1,
         <strong>Datos consolidados visibles del Excel</strong><br />
         La aplicación incorpora una superficie funcional alineada con <code>data/licitaciones_ti_canarias.xlsx</code> en las pestañas
         <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong>.
-        <a class="button-link" href="{escape(_app_url(base_path, '/datos-consolidados'))}">Abrir datos consolidados</a>
+        <a class="button-link" href="{escape(build_url(base_path, '/datos-consolidados'))}">Abrir datos consolidados</a>
       </section>
       {filter_form}
       <section class="note">
         <strong>Alertas tempranas del MVP</strong><br />
-        Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(_app_url(base_path, '/alertas'))}">la gestión de alertas</a>.
-        {"<a class=\"button-link\" href=\"" + escape(_app_url(base_path, '/alertas')) + ("?" + escape(_alert_filters_query(active_filters)) if active_filters else "") + "\">Guardar estos criterios como alerta</a>" if active_filters else ""}
+        Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(build_url(base_path, '/alertas'))}">la gestión de alertas</a>.
+        {"<a class=\"button-link\" href=\"" + escape(build_url(base_path, '/alertas')) + ("?" + escape(_alert_filters_query(active_filters)) if active_filters else "") + "\">Guardar estos criterios como alerta</a>" if active_filters else ""}
       </section>
       {catalog_panel}
 
@@ -1519,7 +1497,7 @@ def _alerts_html_response(
           </p>
           {_status_note_html(status_message, "ok")}
           {_status_note_html(form_error, "warn")}
-          <form method="post" action="{escape(_app_url(base_path, '/alertas'))}">
+          <form method="post" action="{escape(build_url(base_path, '/alertas'))}">
             <div class="filters">
               <div>
                 <label for="alerta_palabra_clave">Palabra clave</label>
@@ -1556,7 +1534,7 @@ def _alerts_html_response(
             </div>
             <div class="filter-actions">
               <button type="submit">Guardar alerta</button>
-              <a class="button-link" href="{escape(_app_url(base_path, '/alertas'))}">Limpiar formulario</a>
+              <a class="button-link" href="{escape(build_url(base_path, '/alertas'))}">Limpiar formulario</a>
             </div>
           </form>
         </div>
@@ -1570,7 +1548,7 @@ def _alerts_html_response(
             coincidence_items = "".join(
                 (
                     "<li>"
-                    f'<a class="offer-link" href="{escape(_app_url(base_path, _detail_url(match.id)))}">{escape(match.titulo)}</a>'
+                    f'<a class="offer-link" href="{escape(build_url(base_path, _detail_url(match.id)))}">{escape(match.titulo)}</a>'
                     f" · {escape(match.organismo)} · {escape(match.estado)}"
                     "</li>"
                 )
@@ -1589,7 +1567,7 @@ def _alerts_html_response(
           <p class="muted">Creada: {escape(alert.creada_en)} · Última actualización: {escape(alert.actualizada_en)}</p>
           {_active_filter_badges(alert_filters)}
           <h3>Editar alerta</h3>
-          <form method="post" action="{escape(_app_url(base_path, f'/alertas/{alert.id}/editar'))}">
+          <form method="post" action="{escape(build_url(base_path, f'/alertas/{alert.id}/editar'))}">
             <div class="filters">
               <div>
                 <label for="{escape(alert.id)}-palabra_clave">Palabra clave</label>
@@ -1628,7 +1606,7 @@ def _alerts_html_response(
               <button type="submit">Actualizar alerta</button>
             </div>
           </form>
-          {f'<form method="post" action="{escape(_app_url(base_path, f"/alertas/{alert.id}/desactivar"))}"><div class="filter-actions"><button type="submit">Desactivar alerta</button></div></form>' if alert.activa else '<p class="muted">La alerta está desactivada y se conserva solo para trazabilidad del MVP.</p>'}
+          {f'<form method="post" action="{escape(build_url(base_path, f"/alertas/{alert.id}/desactivar"))}"><div class="filter-actions"><button type="submit">Desactivar alerta</button></div></form>' if alert.activa else '<p class="muted">La alerta está desactivada y se conserva solo para trazabilidad del MVP.</p>'}
           <h3>Coincidencias internas registradas</h3>
           <ul>{coincidence_items}</ul>
         </div>
@@ -1687,7 +1665,7 @@ def _catalog_data_error_html_response(base_path: str, message: str) -> str:
             Revisa la conexion a PostgreSQL o la configuracion del backend antes de reintentar.
           </p>
           <p>
-            Ruta afectada del catalogo: <code>{escape(_app_url(base_path, '/api/oportunidades'))}</code>
+            Ruta afectada del catalogo: <code>{escape(build_url(base_path, '/api/oportunidades'))}</code>
           </p>
         </div>
       </section>
@@ -1731,7 +1709,7 @@ def _detail_html_response(opportunity_id: str, base_path: str = "") -> str | Non
     latest_fields = f"""
       <section class="panel">
         <div class="panel-body">
-          <p><a href="{escape(_app_url(base_path, '/'))}">Volver al catalogo</a></p>
+          <p><a href="{escape(build_url(base_path, '/'))}">Volver al catalogo</a></p>
           <div class="summary">
             <article class="metric"><strong>{escape(str(detail["estado"]))}</strong>Estado oficial visible</article>
             <article class="metric"><strong>{escape(str(detail["fecha_limite"]))}</strong>Fecha limite visible</article>
@@ -1881,37 +1859,6 @@ def _classification_html_response(base_path: str = "") -> str:
         current_path="/clasificacion-ti",
         base_path=base_path,
     )
-
-
-def _json_response(payload: dict[str, object]) -> list[bytes]:
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    return [body]
-
-
-def _html_response(content: str) -> list[bytes]:
-    return [content.encode("utf-8")]
-
-
-def _respond(
-    start_response,
-    status: str,
-    content_type: str,
-    body: bytes,
-    extra_headers: list[tuple[str, str]] | None = None,
-) -> list[bytes]:
-    headers = [
-        ("Content-Type", content_type),
-        ("Content-Length", str(len(body))),
-    ]
-    headers.extend(extra_headers or [])
-    start_response(status, headers)
-    return [body]
-
-
-def _redirect_response(start_response, location: str) -> list[bytes]:
-    return _respond(start_response, "303 See Other", "text/plain; charset=utf-8", b"", [("Location", location)])
-
-
 def application(environ, start_response):
     base_path = resolve_base_path()
     path = _resolve_request_path(environ, base_path)
@@ -1920,8 +1867,8 @@ def application(environ, start_response):
     page = _parse_catalog_page(environ)
 
     if path == "/api/datos-consolidados":
-        body = b"".join(_json_response(load_canarias_dataset()))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+        body = b"".join(json_body(load_canarias_dataset()))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/alertas":
         reference, alerts = load_alerts(resolve_alerts_path())
@@ -1930,69 +1877,69 @@ def application(environ, start_response):
             "summary": summarize_alerts(alerts),
             "alerts": [alert.to_payload() for alert in alerts],
         }
-        body = b"".join(_json_response(payload))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+        body = b"".join(json_body(payload))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/alertas" and method == "POST":
-        form_filters = _parse_filters_from_multidict(_read_form_data(environ))
+        form_filters = _parse_filters_from_multidict(read_form_data(environ))
         try:
             create_alert(form_filters, path=resolve_alerts_path())
         except ValueError as exc:
-            body = b"".join(_html_response(_alerts_html_response(base_path, form_filters, str(exc))))
-            return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+            body = b"".join(html_body(_alerts_html_response(base_path, form_filters, str(exc))))
+            return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
         except CatalogDataSourceError as exc:
-            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
-            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
-        return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+creada+y+activa")
+            body = b"".join(html_body(_catalog_data_error_html_response(base_path, str(exc))))
+            return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+        return send_redirect(start_response, build_url(base_path, "/alertas") + "?mensaje=Alerta+creada+y+activa")
 
     if path.startswith("/alertas/") and method == "POST":
         segments = path.strip("/").split("/")
         if len(segments) == 3 and segments[2] == "editar":
             alert_id = segments[1]
-            form_filters = _parse_filters_from_multidict(_read_form_data(environ))
+            form_filters = _parse_filters_from_multidict(read_form_data(environ))
             try:
                 update_alert(alert_id, form_filters, path=resolve_alerts_path())
             except ValueError as exc:
-                body = b"".join(_html_response(_alerts_html_response(base_path, None, f"No se ha actualizado {alert_id}. {exc}")))
-                return _respond(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
+                body = b"".join(html_body(_alerts_html_response(base_path, None, f"No se ha actualizado {alert_id}. {exc}")))
+                return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", body)
             except CatalogDataSourceError as exc:
-                body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
-                return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+                body = b"".join(html_body(_catalog_data_error_html_response(base_path, str(exc))))
+                return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
             except KeyError:
                 body = b"No encontrado"
-                return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-            return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+actualizada")
+                return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+            return send_redirect(start_response, build_url(base_path, "/alertas") + "?mensaje=Alerta+actualizada")
         if len(segments) == 3 and segments[2] == "desactivar":
             alert_id = segments[1]
             try:
                 deactivate_alert(alert_id, path=resolve_alerts_path())
             except KeyError:
                 body = b"No encontrado"
-                return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-            return _redirect_response(start_response, _app_url(base_path, "/alertas") + "?mensaje=Alerta+desactivada")
+                return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+            return send_redirect(start_response, build_url(base_path, "/alertas") + "?mensaje=Alerta+desactivada")
 
     if path.startswith("/api/oportunidades/"):
         opportunity_id = path.removeprefix("/api/oportunidades/")
         try:
             detail = build_opportunity_detail(opportunity_id)
         except CatalogDataSourceError as exc:
-            body = b"".join(_json_response({"error": str(exc)}))
-            return _respond(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
+            body = b"".join(json_body({"error": str(exc)}))
+            return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
         if detail is None:
             body = b"No encontrado"
-            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-        body = b"".join(_json_response(detail))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+            return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(json_body(detail))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/oportunidades":
         try:
             payload = build_catalog(filters=filters, page=page)
         except CatalogDataSourceError as exc:
-            body = b"".join(_json_response({"error": str(exc)}))
-            return _respond(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
+            body = b"".join(json_body({"error": str(exc)}))
+            return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", body)
         status = "400 Bad Request" if payload["error_validacion"] else "200 OK"
-        body = b"".join(_json_response(payload))
-        return _respond(start_response, status, "application/json; charset=utf-8", body)
+        body = b"".join(json_body(payload))
+        return send_response(start_response, status, "application/json; charset=utf-8", body)
 
     if path == "/api/fuentes":
         sources = load_source_coverage()
@@ -2000,8 +1947,8 @@ def application(environ, start_response):
             "sources": [source.__dict__ for source in sources],
             "summary": summary_by_status(sources),
         }
-        body = b"".join(_json_response(payload))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+        body = b"".join(json_body(payload))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/fuentes-prioritarias":
         reference, sources, out_of_scope = load_real_source_prioritization()
@@ -2011,8 +1958,8 @@ def application(environ, start_response):
             "summary": summarize_prioritization(sources),
             "fuera_de_alcance": list(out_of_scope),
         }
-        body = b"".join(_json_response(payload))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+        body = b"".join(json_body(payload))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/api/clasificacion-ti":
         rules = load_rule_set()
@@ -2027,20 +1974,20 @@ def application(environ, start_response):
             },
             "ejemplos_auditados": audit_examples(rules),
         }
-        body = b"".join(_json_response(payload))
-        return _respond(start_response, "200 OK", "application/json; charset=utf-8", body)
+        body = b"".join(json_body(payload))
+        return send_response(start_response, "200 OK", "application/json; charset=utf-8", body)
 
     if path == "/clasificacion-ti":
-        body = b"".join(_html_response(_classification_html_response(base_path)))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(_classification_html_response(base_path)))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/cobertura-fuentes":
-        body = b"".join(_html_response(_coverage_html_response(base_path)))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(_coverage_html_response(base_path)))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/priorizacion-fuentes-reales":
-        body = b"".join(_html_response(_real_source_prioritization_html_response(base_path)))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(_real_source_prioritization_html_response(base_path)))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/alertas":
         query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
@@ -2048,59 +1995,59 @@ def application(environ, start_response):
         try:
             content = _alerts_html_response(base_path, filters, status_message=status_message)
         except CatalogDataSourceError as exc:
-            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
-            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
-        body = b"".join(_html_response(content))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+            body = b"".join(html_body(_catalog_data_error_html_response(base_path, str(exc))))
+            return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(content))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/datos-consolidados":
         query = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=False)
         current_view = (query.get("vista") or ["licitaciones"])[0]
-        body = b"".join(_html_response(_datos_consolidados_html_response(current_view, base_path)))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(_datos_consolidados_html_response(current_view, base_path)))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path.startswith("/datos-consolidados/licitaciones/"):
         slug = path.removeprefix("/datos-consolidados/licitaciones/")
         content = _licitacion_excel_detail_html_response(slug, base_path)
         if content is None:
             body = b"No encontrado"
-            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-        body = b"".join(_html_response(content))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+            return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(html_body(content))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path.startswith("/datos-consolidados/adjudicaciones/"):
         slug = path.removeprefix("/datos-consolidados/adjudicaciones/")
         content = _adjudicacion_excel_detail_html_response(slug, base_path)
         if content is None:
             body = b"No encontrado"
-            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-        body = b"".join(_html_response(content))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+            return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(html_body(content))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path.startswith("/oportunidades/"):
         opportunity_id = path.removeprefix("/oportunidades/")
         try:
             content = _detail_html_response(opportunity_id, base_path)
         except CatalogDataSourceError as exc:
-            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
-            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+            body = b"".join(html_body(_catalog_data_error_html_response(base_path, str(exc))))
+            return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
         if content is None:
             body = b"No encontrado"
-            return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
-        body = b"".join(_html_response(content))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+            return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+        body = b"".join(html_body(content))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     if path == "/":
         try:
             content = _catalog_html_response(filters, page, base_path)
         except CatalogDataSourceError as exc:
-            body = b"".join(_html_response(_catalog_data_error_html_response(base_path, str(exc))))
-            return _respond(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
-        body = b"".join(_html_response(content))
-        return _respond(start_response, "200 OK", "text/html; charset=utf-8", body)
+            body = b"".join(html_body(_catalog_data_error_html_response(base_path, str(exc))))
+            return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", body)
+        body = b"".join(html_body(content))
+        return send_response(start_response, "200 OK", "text/html; charset=utf-8", body)
 
     body = b"No encontrado"
-    return _respond(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
+    return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", body)
 
 
 def main() -> None:
