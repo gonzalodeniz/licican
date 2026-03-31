@@ -7,6 +7,7 @@ from pathlib import Path
 
 from licican.atom_consolidation import load_atom_opportunities
 from licican.postgres_catalog import PostgresCatalogError, load_postgres_opportunity_records
+from licican.shared.text import clean_text
 from licican.source_coverage import load_source_coverage
 from licican.ti_classification import OpportunityCandidate, classify_opportunity, load_rule_set
 
@@ -86,11 +87,11 @@ class CatalogFilters:
 
     def normalized(self) -> "CatalogFilters":
         return CatalogFilters(
-            palabra_clave=_normalize_text(self.palabra_clave),
+            palabra_clave=clean_text(self.palabra_clave),
             presupuesto_min=self.presupuesto_min,
             presupuesto_max=self.presupuesto_max,
-            procedimiento=_normalize_text(self.procedimiento),
-            ubicacion=_normalize_text(self.ubicacion),
+            procedimiento=clean_text(self.procedimiento),
+            ubicacion=clean_text(self.ubicacion),
         )
 
     def active_filters(self) -> dict[str, object]:
@@ -287,13 +288,6 @@ def _classify_record(record: OpportunityRecord, rules) -> str:
     return decision.clasificacion
 
 
-def _normalize_text(value: str | None) -> str | None:
-    if value is None:
-        return None
-    normalized = value.strip()
-    return normalized or None
-
-
 def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], filters: CatalogFilters) -> bool:
     normalized_filters = filters.normalized()
 
@@ -320,12 +314,12 @@ def _matches_filters(record: OpportunityRecord, snapshot: dict[str, object], fil
             return False
 
     if normalized_filters.procedimiento is not None:
-        procedimiento = _normalize_text(str(snapshot["procedimiento"] or ""))
+        procedimiento = clean_text(str(snapshot["procedimiento"] or ""))
         if procedimiento is None or procedimiento.lower() != normalized_filters.procedimiento.lower():
             return False
 
     if normalized_filters.ubicacion is not None:
-        ubicacion = _normalize_text(record.ubicacion)
+        ubicacion = clean_text(record.ubicacion)
         if ubicacion is None or ubicacion.lower() != normalized_filters.ubicacion.lower():
             return False
 

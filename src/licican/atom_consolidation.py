@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-import unicodedata
 import xml.etree.ElementTree as ET
+
+from licican.shared.text import clean_text, normalize_text, slugify
 
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
@@ -128,7 +129,7 @@ def _parse_entry(entry: ET.Element, source_filename: str) -> _ParsedEntry | None
 
     record = ConsolidatedAtomRecord(
         expediente_id=expediente_id,
-        id=_slugify(expediente_id),
+        id=slugify(expediente_id),
         titulo=titulo,
         descripcion=descripcion,
         organismo=organismo,
@@ -163,12 +164,12 @@ def _build_geographic_context(contract_status: ET.Element, procurement_project: 
 
 
 def _matches_canarias(geographic_context: dict[str, tuple[str, ...]]) -> bool:
-    normalized_codes = tuple(_normalize_text(value) for value in geographic_context["codes"])
+    normalized_codes = tuple(normalize_text(value) for value in geographic_context["codes"])
     if any(code.startswith("es7") for code in normalized_codes):
         return True
 
     normalized_texts = tuple(
-        _normalize_text(value)
+        normalize_text(value)
         for value in geographic_context["subentities"] + geographic_context["parent_names"]
     )
     return any(any(keyword in value for keyword in CANARIAS_KEYWORDS) for value in normalized_texts)
@@ -186,7 +187,7 @@ def _resolve_location_label(geographic_context: dict[str, tuple[str, ...]]) -> s
         if value.startswith("ES7"):
             return "Canarias"
     for value in geographic_context["parent_names"]:
-        if any(keyword in _normalize_text(value) for keyword in CANARIAS_KEYWORDS):
+        if any(keyword in normalize_text(value) for keyword in CANARIAS_KEYWORDS):
             return value.strip()
     return "Canarias"
 
@@ -220,7 +221,7 @@ def _resolve_technical_solvency(contract_status: ET.Element) -> str | None:
     descriptions = _iter_texts(contract_status, "Description")
     collected: list[str] = []
     for description in descriptions:
-        normalized = _normalize_text(description)
+        normalized = normalize_text(description)
         if "pliego" in normalized or "solvencia" in normalized or "capacidad" in normalized:
             collected.append(description)
     unique = tuple(_unique_in_order(collected))
@@ -282,7 +283,7 @@ def _find_text_by_path(root: ET.Element, path: tuple[str, ...]) -> str | None:
         current = _find_first(current, item)
         if current is None:
             return None
-    return _clean_text(current.text)
+    return clean_text(current.text)
 
 
 def _find_first(root: ET.Element, local_name: str) -> ET.Element | None:
@@ -296,7 +297,7 @@ def _find_first_text(root: ET.Element, local_name: str) -> str | None:
     element = _find_first(root, local_name)
     if element is None:
         return None
-    return _clean_text(element.text)
+    return clean_text(element.text)
 
 
 def _iter_local(root: ET.Element, local_name: str) -> list[ET.Element]:
@@ -308,7 +309,7 @@ def _iter_texts(root: ET.Element, local_name: str) -> list[str]:
     for element in root.iter():
         if _local_name(element.tag) != local_name:
             continue
-        value = _clean_text(element.text)
+        value = clean_text(element.text)
         if value is not None:
             values.append(value)
     return values
@@ -319,34 +320,6 @@ def _first_non_empty(values: tuple[str | None, ...]) -> str | None:
         if value is not None and value.strip():
             return value
     return None
-
-
-def _clean_text(value: str | None) -> str | None:
-    if value is None:
-        return None
-    cleaned = " ".join(value.split())
-    return cleaned or None
-
-
-def _normalize_text(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value)
-    return normalized.encode("ascii", "ignore").decode("ascii").lower().strip()
-
-
-def _slugify(value: str) -> str:
-    normalized = _normalize_text(value)
-    chunks: list[str] = []
-    current = []
-    for char in normalized:
-        if char.isalnum():
-            current.append(char)
-            continue
-        if current:
-            chunks.append("".join(current))
-            current = []
-    if current:
-        chunks.append("".join(current))
-    return "-".join(chunks) or "expediente-sin-id"
 
 
 def _local_name(tag: str) -> str:

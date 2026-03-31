@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import os
-import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
+from licican.shared.text import normalize_text, slugify
 
 
 REFERENCE = "T-001 · Carga de datos desde PostgreSQL para la aplicacion"
@@ -185,7 +186,7 @@ def _row_to_record(row: dict[str, Any]) -> dict[str, Any]:
     )
 
     return {
-        "id": _slugify(expediente_id),
+        "id": slugify(expediente_id),
         "titulo": titulo,
         "descripcion": descripcion,
         "organismo": str(row.get("organo_contratacion") or "No informado").strip(),
@@ -210,7 +211,7 @@ def _resolve_location_label(
     nuts_code: str | None,
     hierarchy: tuple[str, ...] | list[str],
 ) -> str:
-    normalized_comunidad = _normalize_text(comunidad) if comunidad and comunidad.strip() else None
+    normalized_comunidad = normalize_text(comunidad) if comunidad and comunidad.strip() else None
     if normalized_comunidad and normalized_comunidad != "canarias":
         return comunidad.strip()
 
@@ -227,7 +228,7 @@ def _resolve_location_label(
 
 def _resolve_hierarchy_location(hierarchy: tuple[str, ...] | list[str]) -> str | None:
     for item in hierarchy:
-        normalized = _normalize_text(str(item))
+        normalized = normalize_text(str(item))
         if not normalized or normalized in GENERIC_LOCATION_LABELS:
             continue
         if not any(keyword in normalized for keyword in CANARIAS_KEYWORDS):
@@ -237,7 +238,7 @@ def _resolve_hierarchy_location(hierarchy: tuple[str, ...] | list[str]) -> str |
         return str(item).strip()
 
     for item in hierarchy:
-        normalized = _normalize_text(str(item))
+        normalized = normalize_text(str(item))
         extracted = _extract_location_from_text(normalized)
         if extracted is not None:
             return extracted
@@ -284,24 +285,3 @@ def _iso_date(value: Any) -> str | None:
     if isinstance(value, date):
         return value.isoformat()
     return str(value)
-
-
-def _normalize_text(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value)
-    return normalized.encode("ascii", "ignore").decode("ascii").lower().strip()
-
-
-def _slugify(value: str) -> str:
-    normalized = _normalize_text(value)
-    chunks: list[str] = []
-    current: list[str] = []
-    for char in normalized:
-        if char.isalnum():
-            current.append(char)
-            continue
-        if current:
-            chunks.append("".join(current))
-            current = []
-    if current:
-        chunks.append("".join(current))
-    return "-".join(chunks) or "expediente-sin-id"
