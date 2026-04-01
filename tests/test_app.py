@@ -223,6 +223,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertIn("ubicacion=Gran+Canaria&amp;page=2", html)
         self.assertIn("/licican/?ubicacion=Gran+Canaria&amp;page=2", html)
+        self.assertEqual(1, html.count('class="pagination-bar"'))
+        self.assertLess(html.rfind('<tbody>'), html.rfind('class="pagination-bar"'))
 
     def test_root_reports_adjusted_invalid_page_consistently(self) -> None:
         status, _, body = invoke_app("/", "page=0")
