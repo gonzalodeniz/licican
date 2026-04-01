@@ -348,11 +348,10 @@ main {
 
 .hero {
   margin-bottom: 18px;
-  padding: 18px 20px 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  box-shadow: var(--surface-shadow);
+  padding: 0 0 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .hero > .muted:first-child {
@@ -419,7 +418,7 @@ main {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
   margin: 18px 0 0;
 }
@@ -468,7 +467,7 @@ main {
 
 .filters {
   display: grid;
-  grid-template-columns: minmax(260px, 1.6fr) repeat(4, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   align-items: end;
 }
@@ -804,12 +803,8 @@ ul {
 }
 
 @media (max-width: 1200px) {
-  .summary {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-
   .filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   }
 }
 
@@ -849,22 +844,8 @@ ul {
     padding: 16px;
   }
 
-  .filters,
   .summary {
     grid-template-columns: 1fr;
-  }
-
-  table,
-  thead,
-  tbody,
-  th,
-  td,
-  tr {
-    display: block;
-  }
-
-  thead {
-    display: none;
   }
 
   .table-wrap {
@@ -872,29 +853,13 @@ ul {
     border-bottom: 0;
   }
 
-  tbody tr {
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-table);
-    background: var(--surface);
-    overflow: hidden;
+  table {
+    min-width: 1100px;
   }
 
   td,
   th {
-    padding: 10px 14px;
-    border-bottom: 1px solid #edf2f7;
-  }
-
-  td::before {
-    content: attr(data-label);
-    display: block;
-    margin-bottom: 4px;
-    color: var(--text-soft);
-    font-size: 0.74rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    padding: 11px 14px;
   }
 
   .offer-cell {
