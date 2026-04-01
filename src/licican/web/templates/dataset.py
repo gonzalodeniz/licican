@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_metric, render_tab_nav, render_table
@@ -16,6 +17,7 @@ def render_datos_consolidados(
     actions: list[str] | None,
     rows: list[dict[str, object]],
     base_path: str = "",
+    access_context: AccessContext | None = None,
 ) -> str:
     """Renderiza la vista de datos consolidados."""
     headers = [label for _, label in columns] + (["Detalle"] if actions is not None else [])
@@ -57,6 +59,7 @@ def render_datos_consolidados(
         content,
         current_path="/datos-consolidados",
         base_path=base_path,
+        access_context=access_context,
     )
 
 

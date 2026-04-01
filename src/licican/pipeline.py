@@ -219,10 +219,13 @@ def summarize_pipeline(entries: list[dict[str, object]]) -> dict[str, int]:
 def build_pipeline_payload(
     path: Path = DEFAULT_PIPELINE_PATH,
     catalog_path: Path = DEFAULT_DATA_PATH,
+    usuario_id: str | None = None,
 ) -> dict[str, object]:
     reference, saved_entries = load_pipeline(path)
     entries: list[dict[str, object]] = []
     for saved_entry in saved_entries:
+        if usuario_id is not None and saved_entry.usuario_id != usuario_id:
+            continue
         refreshed_snapshot = _load_detail_snapshot(saved_entry.opportunity_id, catalog_path) or saved_entry.oportunidad
         warning = _warning_message(refreshed_snapshot.estado_oficial)
         entries.append(

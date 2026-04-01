@@ -44,6 +44,8 @@ def invoke_app(
     env_overrides["BASE_PATH"] = "/licican"
     if "LICICAN_CATALOG_BACKEND" not in os.environ:
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
+    if "LICICAN_ROLE" not in os.environ:
+        env_overrides["LICICAN_ROLE"] = "administrador"
     with patch.dict(os.environ, env_overrides, clear=False):
         body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
@@ -89,9 +91,9 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('class="nav-link active" href="/licican"', html)
         self.assertIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
-        self.assertIn("proximamente", html)
+        self.assertIn('href="/licican/kpis"', html)
         self.assertIn('href="/licican/pipeline"', html)
-        self.assertNotIn('href="/licican/permisos"', html)
+        self.assertIn('href="/licican/permisos"', html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
         status, headers, body = invoke_app("/licican/")
@@ -412,6 +414,20 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("La alerta necesita al menos un criterio funcional", html)
 
+    def test_reader_role_hides_operational_navigation_and_blocks_alert_access(self) -> None:
+        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+            status, _, body = invoke_app("/")
+            alerts_status, alerts_headers, alerts_body = invoke_app("/alertas")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertNotIn('href="/licican/alertas"', html)
+        self.assertNotIn('href="/licican/pipeline"', html)
+        self.assertNotIn('href="/licican/kpis"', html)
+        self.assertEqual("403 Forbidden", alerts_status)
+        self.assertEqual("text/html; charset=utf-8", alerts_headers["Content-Type"])
+        self.assertIn("Acceso restringido por rol", alerts_body.decode("utf-8"))
+
     def test_alert_lifecycle_is_visible_from_html_and_api(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
@@ -454,6 +470,53 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(1, api_payload["summary"]["total_alertas"])
         self.assertEqual(0, api_payload["summary"]["alertas_activas"])
         self.assertEqual({"procedimiento": "Abierto"}, api_payload["alerts"][0]["filtros"])
+
+    def test_collaborator_only_sees_own_alerts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            with patch.dict(
+                os.environ,
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "administrador", "LICICAN_USER_ID": "admin-1"},
+                clear=False,
+            ):
+                invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
+            with patch.dict(
+                os.environ,
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"},
+                clear=False,
+            ):
+                invoke_app("/alertas", method="POST", body="procedimiento=Abierto")
+                page_status, _, page_body = invoke_app("/alertas")
+                api_status, _, api_body = invoke_app("/api/alertas")
+
+        self.assertEqual("200 OK", page_status)
+        html = page_body.decode("utf-8")
+        self.assertIn("alerta-002", html)
+        self.assertNotIn("alerta-001", html)
+        payload = json.loads(api_body)
+        self.assertEqual("200 OK", api_status)
+        self.assertEqual(1, payload["summary"]["total_alertas"])
+        self.assertEqual("colab-1", payload["alerts"][0]["usuario_id"])
+
+    def test_collaborator_cannot_edit_alerts_from_other_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            with patch.dict(
+                os.environ,
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "administrador", "LICICAN_USER_ID": "admin-1"},
+                clear=False,
+            ):
+                invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
+            with patch.dict(
+                os.environ,
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"},
+                clear=False,
+            ):
+                status, headers, body = invoke_app("/alertas/alerta-001/editar", method="POST", body="procedimiento=Abierto")
+
+        self.assertEqual("403 Forbidden", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
 
     def test_pipeline_lifecycle_is_visible_from_html_and_api(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -503,6 +566,17 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(1, api_payload["summary"]["total_oportunidades"])
         self.assertEqual(0, api_payload["summary"]["con_advertencia_oficial"])
         self.assertEqual("Evaluando", api_payload["pipeline"][0]["estado_seguimiento"])
+
+    def test_admin_can_access_permissions_page_and_collaborator_kpis(self) -> None:
+        with patch.dict(os.environ, {"LICICAN_ROLE": "administrador"}, clear=False):
+            admin_status, _, admin_body = invoke_app("/permisos")
+        with patch.dict(os.environ, {"LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"}, clear=False):
+            kpi_status, _, kpi_body = invoke_app("/kpis")
+
+        self.assertEqual("200 OK", admin_status)
+        self.assertIn("Matriz funcional de roles y permisos", admin_body.decode("utf-8"))
+        self.assertEqual("200 OK", kpi_status)
+        self.assertIn("KPIs operativos visibles por rol", kpi_body.decode("utf-8"))
 
     def test_unknown_path_returns_404(self) -> None:
         status, headers, body = invoke_app("/desconocido")

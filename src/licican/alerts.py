@@ -33,6 +33,7 @@ class AlertMatch:
 @dataclass(frozen=True)
 class SavedAlert:
     id: str
+    usuario_id: str
     activa: bool
     creada_en: str
     actualizada_en: str
@@ -42,6 +43,7 @@ class SavedAlert:
     def to_payload(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "usuario_id": self.usuario_id,
             "activa": self.activa,
             "creada_en": self.creada_en,
             "actualizada_en": self.actualizada_en,
@@ -92,6 +94,7 @@ def load_alerts(path: Path = DEFAULT_ALERTS_PATH) -> tuple[str, list[SavedAlert]
     alerts = [
         SavedAlert(
             id=item["id"],
+            usuario_id=str(item.get("usuario_id") or "administrador-demo"),
             activa=bool(item.get("activa", True)),
             creada_en=item["creada_en"],
             actualizada_en=item.get("actualizada_en", item["creada_en"]),
@@ -110,6 +113,10 @@ def summarize_alerts(alerts: list[SavedAlert]) -> dict[str, int]:
         "alertas_inactivas": sum(1 for alert in alerts if not alert.activa),
         "coincidencias_activas": sum(len(alert.coincidencias) for alert in alerts if alert.activa),
     }
+
+
+def filter_alerts_by_user(alerts: list[SavedAlert], user_id: str) -> list[SavedAlert]:
+    return [alert for alert in alerts if alert.usuario_id == user_id]
 
 
 def validate_alert_filters(filters: CatalogFilters) -> str | None:
@@ -176,6 +183,7 @@ def create_alert(
     path: Path = DEFAULT_ALERTS_PATH,
     catalog_path: Path = DEFAULT_DATA_PATH,
     now: str | None = None,
+    user_id: str = "administrador-demo",
 ) -> SavedAlert:
     validation_error = validate_alert_filters(filters)
     if validation_error is not None:
@@ -185,6 +193,7 @@ def create_alert(
     timestamp = now or _current_timestamp()
     saved_alert = SavedAlert(
         id=_next_alert_id(alerts),
+        usuario_id=user_id,
         activa=True,
         creada_en=timestamp,
         actualizada_en=timestamp,
@@ -202,6 +211,8 @@ def update_alert(
     path: Path = DEFAULT_ALERTS_PATH,
     catalog_path: Path = DEFAULT_DATA_PATH,
     now: str | None = None,
+    user_id: str | None = None,
+    allow_any_owner: bool = False,
 ) -> SavedAlert:
     validation_error = validate_alert_filters(filters)
     if validation_error is not None:
@@ -212,8 +223,11 @@ def update_alert(
     for index, current_alert in enumerate(alerts):
         if current_alert.id != alert_id:
             continue
+        if not allow_any_owner and user_id is not None and current_alert.usuario_id != user_id:
+            raise PermissionError(alert_id)
         updated_alert = SavedAlert(
             id=current_alert.id,
+            usuario_id=current_alert.usuario_id,
             activa=current_alert.activa,
             creada_en=current_alert.creada_en,
             actualizada_en=timestamp,
@@ -230,14 +244,19 @@ def deactivate_alert(
     alert_id: str,
     path: Path = DEFAULT_ALERTS_PATH,
     now: str | None = None,
+    user_id: str | None = None,
+    allow_any_owner: bool = False,
 ) -> SavedAlert:
     reference, alerts = load_alerts(path)
     timestamp = now or _current_timestamp()
     for index, current_alert in enumerate(alerts):
         if current_alert.id != alert_id:
             continue
+        if not allow_any_owner and user_id is not None and current_alert.usuario_id != user_id:
+            raise PermissionError(alert_id)
         updated_alert = SavedAlert(
             id=current_alert.id,
+            usuario_id=current_alert.usuario_id,
             activa=False,
             creada_en=current_alert.creada_en,
             actualizada_en=timestamp,

@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_metric, render_table
 
 
-def render_prioritization(reference: str, sources, out_of_scope: tuple[str, ...], summary: dict[str, int], base_path: str = "") -> str:
+def render_prioritization(reference: str, sources, out_of_scope: tuple[str, ...], summary: dict[str, int], base_path: str = "", access_context: AccessContext | None = None) -> str:
     """Renderiza la priorización de fuentes reales."""
     rows = [
         (
@@ -51,4 +52,5 @@ def render_prioritization(reference: str, sources, out_of_scope: tuple[str, ...]
         content,
         current_path="/priorizacion-fuentes-reales",
         base_path=base_path,
+        access_context=access_context,
     )

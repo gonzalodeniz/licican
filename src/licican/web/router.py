@@ -6,7 +6,8 @@ from html import escape
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
+from licican.access import AccessContext, has_capability, resolve_access_context
+from licican.alerts import create_alert, deactivate_alert, filter_alerts_by_user, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
 from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
@@ -17,14 +18,16 @@ from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 from licican.web.templates.alerts import render_alerts
+from licican.web.templates.base import page_template
 from licican.web.templates.catalog import render_catalog
 from licican.web.templates.classification import render_classification
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.dataset import render_datos_consolidados
 from licican.web.templates.detail import render_adjudicacion_detail, render_licitacion_detail, render_opportunity_detail
+from licican.web.templates.kpis import render_kpis
+from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
-from licican.web.templates.base import page_template
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 Route = namedtuple("Route", ["method", "pattern", "handler"])
@@ -37,6 +40,7 @@ class Request:
     path: str
     base_path: str
     query: dict[str, list[str]]
+    access_context: AccessContext
 
 
 def _parse_filters_from_multidict(values: dict[str, list[str]]) -> CatalogFilters:
@@ -117,6 +121,59 @@ def _catalog_data_error_html(base_path: str, message: str) -> str:
     )
 
 
+def _access_denied_html(request: Request, capability: str) -> str:
+    content = f"""
+      <section class="note note-warning">
+        <strong>Acceso bloqueado por permisos</strong><br />
+        El rol activo <strong>{escape(request.access_context.role_label)}</strong> no puede ejecutar la accion requerida para <code>{escape(capability)}</code>.
+      </section>
+      <section class="panel">
+        <div class="panel-body">
+          <p>La aplicacion mantiene visibles solo las superficies compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
+        </div>
+      </section>
+    """
+    return page_template(
+        "Licican | Acceso restringido",
+        "Acceso restringido por rol",
+        "PB-013 · Restriccion consistente de acciones",
+        "La accion solicitada no esta disponible para el rol funcional activo.",
+        content,
+        current_path=request.path,
+        base_path=request.base_path,
+        access_context=request.access_context,
+    )
+
+
+def _deny_html(request: Request, start_response, capability: str) -> list[bytes]:
+    return send_response(
+        start_response,
+        "403 Forbidden",
+        "text/html; charset=utf-8",
+        b"".join(html_body(_access_denied_html(request, capability))),
+    )
+
+
+def _deny_json(start_response, capability: str) -> list[bytes]:
+    return send_response(
+        start_response,
+        "403 Forbidden",
+        "application/json; charset=utf-8",
+        b"".join(json_body({"error": f"Acceso restringido por permisos para {capability}."})),
+    )
+
+
+def _visible_alerts(request: Request, alerts):
+    return alerts if request.access_context.is_admin else filter_alerts_by_user(alerts, request.access_context.user_id)
+
+
+def _visible_pipeline_payload(request: Request) -> dict[str, object]:
+    return build_pipeline_payload(
+        path=resolve_pipeline_path(),
+        usuario_id=None if request.access_context.is_admin else request.access_context.user_id,
+    )
+
+
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
     relative_path = filename
     static_path = (STATIC_DIR / relative_path).resolve()
@@ -131,24 +188,31 @@ def handle_api_dataset(request: Request, start_response) -> list[bytes]:
 
 
 def handle_api_alerts(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_alerts"):
+        return _deny_json(start_response, "view_alerts")
     reference, alerts = load_alerts(resolve_alerts_path())
-    payload = {"referencia_funcional": reference, "summary": summarize_alerts(alerts), "alerts": [alert.to_payload() for alert in alerts]}
+    visible_alerts = _visible_alerts(request, alerts)
+    payload = {"referencia_funcional": reference, "summary": summarize_alerts(visible_alerts), "alerts": [alert.to_payload() for alert in visible_alerts]}
     return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
 
 
 def handle_api_pipeline(request: Request, start_response) -> list[bytes]:
-    payload = build_pipeline_payload(path=resolve_pipeline_path())
-    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
+    if not has_capability(request.access_context, "view_pipeline"):
+        return _deny_json(start_response, "view_pipeline")
+    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(_visible_pipeline_payload(request))))
 
 
 def handle_alerts_page(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_alerts"):
+        return _deny_html(request, start_response, "view_alerts")
     filters = _parse_catalog_filters(request)
     status_message = (request.query.get("mensaje") or [None])[0]
     try:
         reference, alerts = load_alerts(resolve_alerts_path())
+        visible_alerts = _visible_alerts(request, alerts)
         available_filters = build_catalog()["filtros_disponibles"]
-        summary = summarize_alerts(alerts)
-        content = render_alerts(reference, alerts, summary, available_filters, request.base_path, filters.normalized().active_filters(), None, status_message)
+        summary = summarize_alerts(visible_alerts)
+        content = render_alerts(reference, visible_alerts, summary, available_filters, request.base_path, filters.normalized().active_filters(), None, status_message, request.access_context)
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
@@ -156,21 +220,25 @@ def handle_alerts_page(request: Request, start_response) -> list[bytes]:
 
 
 def handle_pipeline_page(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_pipeline"):
+        return _deny_html(request, start_response, "view_pipeline")
     status_message = (request.query.get("mensaje") or [None])[0]
-    payload = build_pipeline_payload(path=resolve_pipeline_path())
-    content = render_pipeline(payload, request.base_path, None, status_message)
+    content = render_pipeline(_visible_pipeline_payload(request), request.base_path, None, status_message, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
 def handle_create_alert(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_alerts"):
+        return _deny_html(request, start_response, "manage_alerts")
     form_filters = _parse_filters_from_multidict(read_form_data(request.environ))
     try:
-        create_alert(form_filters, path=resolve_alerts_path())
+        create_alert(form_filters, path=resolve_alerts_path(), user_id=request.access_context.user_id)
     except ValueError as exc:
         reference, alerts = load_alerts(resolve_alerts_path())
         available_filters = build_catalog()["filtros_disponibles"]
-        summary = summarize_alerts(alerts)
-        content = render_alerts(reference, alerts, summary, available_filters, request.base_path, form_filters.normalized().active_filters(), str(exc), None)
+        visible_alerts = _visible_alerts(request, alerts)
+        summary = summarize_alerts(visible_alerts)
+        content = render_alerts(reference, visible_alerts, summary, available_filters, request.base_path, form_filters.normalized().active_filters(), str(exc), None, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
@@ -179,15 +247,26 @@ def handle_create_alert(request: Request, start_response) -> list[bytes]:
 
 
 def handle_update_alert(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_alerts"):
+        return _deny_html(request, start_response, "manage_alerts")
     form_filters = _parse_filters_from_multidict(read_form_data(request.environ))
     try:
-        update_alert(id, form_filters, path=resolve_alerts_path())
+        update_alert(
+            id,
+            form_filters,
+            path=resolve_alerts_path(),
+            user_id=request.access_context.user_id,
+            allow_any_owner=request.access_context.is_admin,
+        )
     except ValueError as exc:
         reference, alerts = load_alerts(resolve_alerts_path())
         available_filters = build_catalog()["filtros_disponibles"]
-        summary = summarize_alerts(alerts)
-        content = render_alerts(reference, alerts, summary, available_filters, request.base_path, {}, f"No se ha actualizado {id}. {exc}", None)
+        visible_alerts = _visible_alerts(request, alerts)
+        summary = summarize_alerts(visible_alerts)
+        content = render_alerts(reference, visible_alerts, summary, available_filters, request.base_path, {}, f"No se ha actualizado {id}. {exc}", None, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
+    except PermissionError:
+        return _deny_html(request, start_response, "manage_alerts")
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
@@ -197,21 +276,31 @@ def handle_update_alert(request: Request, start_response, id: str) -> list[bytes
 
 
 def handle_deactivate_alert(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_alerts"):
+        return _deny_html(request, start_response, "manage_alerts")
     try:
-        deactivate_alert(id, path=resolve_alerts_path())
+        deactivate_alert(
+            id,
+            path=resolve_alerts_path(),
+            user_id=request.access_context.user_id,
+            allow_any_owner=request.access_context.is_admin,
+        )
+    except PermissionError:
+        return _deny_html(request, start_response, "manage_alerts")
     except KeyError:
         return _not_found(start_response)
     return send_redirect(start_response, build_url(request.base_path, "/alertas") + "?mensaje=Alerta+desactivada")
 
 
 def handle_create_pipeline_entry(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_pipeline"):
+        return _deny_html(request, start_response, "manage_pipeline")
     form_data = read_form_data(request.environ)
     opportunity_id = (form_data.get("opportunity_id") or [""])[0].strip()
     try:
-        _, created = add_opportunity_to_pipeline(opportunity_id, path=resolve_pipeline_path())
+        _, created = add_opportunity_to_pipeline(opportunity_id, path=resolve_pipeline_path(), usuario_id=request.access_context.user_id)
     except ValueError as exc:
-        payload = build_pipeline_payload(path=resolve_pipeline_path())
-        content = render_pipeline(payload, request.base_path, str(exc), None)
+        content = render_pipeline(_visible_pipeline_payload(request), request.base_path, str(exc), None, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
     except KeyError:
         return _not_found(start_response)
@@ -221,16 +310,17 @@ def handle_create_pipeline_entry(request: Request, start_response) -> list[bytes
 
 
 def handle_update_pipeline_entry(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_pipeline"):
+        return _deny_html(request, start_response, "manage_pipeline")
     form_data = read_form_data(request.environ)
     state = (form_data.get("estado_seguimiento") or [""])[0]
     try:
-        update_pipeline_entry_status(id, state, path=resolve_pipeline_path())
+        update_pipeline_entry_status(id, state, path=resolve_pipeline_path(), usuario_id=request.access_context.user_id)
     except ValueError as exc:
-        payload = build_pipeline_payload(path=resolve_pipeline_path())
-        content = render_pipeline(payload, request.base_path, str(exc), None)
+        content = render_pipeline(_visible_pipeline_payload(request), request.base_path, str(exc), None, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
     except KeyError:
-        return _not_found(start_response)
+        return _deny_html(request, start_response, "manage_pipeline")
 
     return send_redirect(start_response, build_url(request.base_path, "/pipeline") + "?mensaje=Estado+de+pipeline+actualizado")
 
@@ -284,19 +374,19 @@ def handle_api_classification(request: Request, start_response) -> list[bytes]:
 
 def handle_classification_page(request: Request, start_response) -> list[bytes]:
     rules = load_rule_set()
-    content = render_classification(rules.referencia_funcional, rules, audit_examples(rules), request.base_path)
+    content = render_classification(rules.referencia_funcional, rules, audit_examples(rules), request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
 def handle_coverage_page(request: Request, start_response) -> list[bytes]:
     sources = load_source_coverage()
-    content = render_coverage(sources, summary_by_status(sources), request.base_path)
+    content = render_coverage(sources, summary_by_status(sources), request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
 def handle_prioritization_page(request: Request, start_response) -> list[bytes]:
     reference, sources, out_of_scope = load_real_source_prioritization()
-    content = render_prioritization(reference, sources, out_of_scope, summarize_prioritization(sources), request.base_path)
+    content = render_prioritization(reference, sources, out_of_scope, summarize_prioritization(sources), request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
@@ -322,7 +412,7 @@ def handle_dataset_page(request: Request, start_response) -> list[bytes]:
         actions = [f'<a class="offer-action" href="{escape(build_url(request.base_path, f"/datos-consolidados/adjudicaciones/{item["slug"]}"))}">Ver contrato</a>' for item in rows]
         heading = "Adjudicaciones"
         description = "La hoja de adjudicaciones expone el resultado contractual visible para la muestra actual, incluyendo adjudicatario, importes, lote y trazabilidad al origen cuando la licitación asociada la aporta."
-    content = render_datos_consolidados(dataset, selected_view, heading, description, columns, actions, rows, request.base_path)
+    content = render_datos_consolidados(dataset, selected_view, heading, description, columns, actions, rows, request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
@@ -330,7 +420,7 @@ def handle_licitacion_detail(request: Request, start_response, id: str) -> list[
     detail = build_licitacion_detail(id)
     if detail is None:
         return _not_found(start_response)
-    content = render_licitacion_detail(detail, request.base_path)
+    content = render_licitacion_detail(detail, request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
@@ -338,14 +428,14 @@ def handle_adjudicacion_detail(request: Request, start_response, id: str) -> lis
     detail = build_adjudicacion_detail(id)
     if detail is None:
         return _not_found(start_response)
-    content = render_adjudicacion_detail(detail, request.base_path)
+    content = render_adjudicacion_detail(detail, request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
 def handle_catalog_page(request: Request, start_response) -> list[bytes]:
     try:
         payload = build_catalog(filters=_parse_catalog_filters(request), page=_parse_catalog_page(request))
-        content = render_catalog(payload, request.base_path)
+        content = render_catalog(payload, request.base_path, request.access_context)
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
@@ -360,7 +450,79 @@ def handle_opportunity_detail(request: Request, start_response, id: str) -> list
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     if detail is None:
         return _not_found(start_response)
-    content = render_opportunity_detail(detail, request.base_path)
+    content = render_opportunity_detail(detail, request.base_path, request.access_context)
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_kpis_page(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_kpis"):
+        return _deny_html(request, start_response, "view_kpis")
+    try:
+        catalog = build_catalog()
+        _, alerts = load_alerts(resolve_alerts_path())
+    except CatalogDataSourceError as exc:
+        content = _catalog_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+    visible_alerts = _visible_alerts(request, alerts)
+    alerts_summary = summarize_alerts(visible_alerts)
+    pipeline_payload = _visible_pipeline_payload(request)
+    payload = {
+        "rol_activo": request.access_context.role_label,
+        "alcance": "Indicadores globales" if request.access_context.is_admin else "Indicadores del contexto propio del colaborador",
+        "indicadores": [
+            {
+                "nombre": "Cobertura visible",
+                "valor": catalog["total_oportunidades_catalogo"],
+                "lectura": "Oportunidades TI actualmente visibles en el catalogo consultable.",
+                "alcance": "Consulta general del producto.",
+            },
+            {
+                "nombre": "Adopcion de alertas",
+                "valor": alerts_summary["alertas_activas"],
+                "lectura": "Alertas activas dentro del alcance permitido por el rol.",
+                "alcance": "Global para administracion o propio para colaboracion.",
+            },
+            {
+                "nombre": "Uso de pipeline",
+                "valor": pipeline_payload["summary"]["total_oportunidades"],
+                "lectura": "Oportunidades actualmente seguidas en pipeline dentro del alcance visible.",
+                "alcance": "Global para administracion o propio para colaboracion.",
+            },
+        ],
+    }
+    content = render_kpis(payload, request.base_path, request.access_context)
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_permissions_page(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_permissions"):
+        return _deny_html(request, start_response, "view_permissions")
+    payload = {
+        "rol_activo": request.access_context.role_label,
+        "usuario_activo": request.access_context.user_id,
+        "matriz": [
+            {
+                "rol": "Administrador",
+                "consulta": "Catalogo, detalle, datos consolidados, KPIs, alertas y pipeline.",
+                "gestion": "Puede crear y editar alertas propias o de otros contextos, y operar el pipeline.",
+                "gobierno": "Puede revisar la matriz de permisos y las restricciones visibles.",
+            },
+            {
+                "rol": "Colaborador",
+                "consulta": "Catalogo, detalle, datos consolidados, KPIs y su propio espacio operativo.",
+                "gestion": "Solo puede gestionar sus alertas y su pipeline propio.",
+                "gobierno": "No accede a administracion global de permisos.",
+            },
+            {
+                "rol": "Lector/Invitado",
+                "consulta": "Catalogo, detalle y datos consolidados.",
+                "gestion": "No puede crear ni modificar alertas, pipeline ni configuracion.",
+                "gobierno": "No accede a vistas operativas de permisos ni KPIs.",
+            },
+        ],
+    }
+    content = render_permissions_matrix(payload, request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
@@ -382,6 +544,8 @@ routes = [
     Route("GET", "/clasificacion-ti", handle_classification_page),
     Route("GET", "/cobertura-fuentes", handle_coverage_page),
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
+    Route("GET", "/kpis", handle_kpis_page),
+    Route("GET", "/permisos", handle_permissions_page),
     Route("GET", "/alertas", handle_alerts_page),
     Route("GET", "/pipeline", handle_pipeline_page),
     Route("GET", "/datos-consolidados", handle_dataset_page),
@@ -411,12 +575,14 @@ def _match_pattern(path: str, pattern: str) -> dict[str, str] | None:
 
 def application(environ, start_response):
     base_path = resolve_base_path()
+    query = parse_qs(str(environ.get("QUERY_STRING", "")), keep_blank_values=False)
     request = Request(
         environ=environ,
         method=(environ.get("REQUEST_METHOD", "GET") or "GET").upper(),
         path=_resolve_request_path(environ, base_path),
         base_path=base_path,
-        query=parse_qs(str(environ.get("QUERY_STRING", "")), keep_blank_values=False),
+        query=query,
+        access_context=resolve_access_context(environ, query),
     )
     for route in routes:
         if route.method != request.method:

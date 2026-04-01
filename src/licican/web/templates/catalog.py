@@ -3,6 +3,7 @@ from __future__ import annotations
 from html import escape
 from urllib.parse import urlencode
 
+from licican.access import AccessContext, has_capability
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_badges, render_metric, render_status_note
@@ -47,7 +48,7 @@ def render_pagination(base_path: str, filters: dict[str, object], pagination: di
     return f'<div class="pagination-bar"><div class="pagination-status"><strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong><span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span></div><div class="pagination-actions">{prev_link}{next_link}</div>{jump}</div>'
 
 
-def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
+def render_catalog(catalog: dict[str, object], base_path: str = "", access_context: AccessContext | None = None) -> str:
     """Renderiza la vista completa del catálogo."""
     opportunities = catalog["oportunidades"]
     active_filters = catalog["filtros_activos"]
@@ -57,11 +58,13 @@ def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
     uses_atom_consolidation = catalog["referencia_funcional"] == "PB-011"
     coverage_label = "Snapshots .atom consolidados" if uses_atom_consolidation else "Fuentes oficiales MVP aplicadas"
     coverage_note = "El catálogo consolida todos los snapshots `.atom` versionados presentes en `data/`, aplica el criterio conjunto Canarias + CPV TI de <code>PB-011</code> y conserva trazabilidad al fichero origen vigente." if uses_atom_consolidation else "El catálogo reutiliza la cobertura MVP de <code>PB-007</code>, la clasificación auditable de <code>PB-006</code>, la prioridad de fuentes reales oficiales de <code>PB-009</code> y el pipeline funcional de <code>PB-005</code> para iniciar seguimiento desde las superficies visibles."
+    can_manage_alerts = access_context is None or has_capability(access_context, "manage_alerts")
+    can_manage_pipeline = access_context is None or has_capability(access_context, "manage_pipeline")
     filter_form = render_filter_form(base_path, active_filters, available_filters, validation_error, pagination)
     if opportunities:
         rows = "\n".join(
             "<tr>"
-            f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">Ver oferta concreta</a>{_render_pipeline_form(base_path, item["id"], "Guardar en pipeline")}</div></td>'
+            f'<td data-label="Oferta"><div class="offer-cell"><a class="offer-link" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">{escape(item["titulo"])}</a><a class="offer-action" href="{escape(build_url(base_path, f"/oportunidades/{item["id"]}"))}">Ver oferta concreta</a>{_render_pipeline_form(base_path, item["id"], "Guardar en pipeline") if can_manage_pipeline else ""}</div></td>'
             f'<td data-label="Organismo">{escape(item["organismo"])}</td>'
             f'<td data-label="Ubicación">{escape(item["ubicacion"])}</td>'
             f'<td data-label="Procedimiento">{escape(item["procedimiento"] or "No informado")}</td>'
@@ -80,16 +83,18 @@ def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
     alert_link = build_url(base_path, "/alertas")
     pipeline_link = build_url(base_path, "/pipeline")
     active_query = _alert_filters_query(active_filters)
-    save_link = f'<a class="button-link" href="{escape(alert_link)}{"?" + escape(active_query) if active_filters else ""}">Guardar estos criterios como alerta</a>' if active_filters else ""
+    save_link = f'<a class="button-link" href="{escape(alert_link)}{"?" + escape(active_query) if active_filters else ""}">Guardar estos criterios como alerta</a>' if active_filters and can_manage_alerts else ""
+    alerts_note = f'<section class="note"><strong>Alertas tempranas del MVP</strong><br />Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(alert_link)}">la gestión de alertas</a>. {save_link}</section>' if can_manage_alerts else '<section class="note"><strong>Alertas restringidas por rol</strong><br />El rol activo puede consultar el catálogo, pero no crear ni editar alertas.</section>'
+    pipeline_note = f'<section class="note"><strong>Pipeline operativo disponible</strong><br />Cada oportunidad visible del catálogo puede guardarse ya en el <a href="{escape(pipeline_link)}">pipeline de seguimiento</a> con estado inicial <code>Nueva</code> y posteriores transiciones operativas.</section>' if can_manage_pipeline else '<section class="note"><strong>Pipeline restringido por rol</strong><br />El rol activo mantiene acceso de consulta al catálogo, pero no puede iniciar seguimiento operativo sobre oportunidades.</section>'
     content = f"""
       <section class="note"><strong>Datos consolidados visibles del Excel</strong><br />La aplicación incorpora una superficie funcional alineada con <code>data/licitaciones_ti_canarias.xlsx</code> en las pestañas <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong>. <a class="button-link" href="{escape(build_url(base_path, '/datos-consolidados'))}">Abrir datos consolidados</a></section>
       {filter_form}
-      <section class="note"><strong>Alertas tempranas del MVP</strong><br />Puedes guardar una alerta con estos mismos criterios desde <a href="{escape(alert_link)}">la gestión de alertas</a>. {save_link}</section>
-      <section class="note"><strong>Pipeline operativo disponible</strong><br />Cada oportunidad visible del catálogo puede guardarse ya en el <a href="{escape(pipeline_link)}">pipeline de seguimiento</a> con estado inicial <code>Nueva</code> y posteriores transiciones operativas.</section>
+      {alerts_note}
+      {pipeline_note}
       {catalog_panel}
       <p class="note">Referencia funcional activa: <code>{escape(catalog["referencia_funcional"])}</code>. Cada registro mantiene visible su fuente oficial, enlace oficial, fecha de publicación y estado oficial para facilitar verificación por <code>qa-teams</code>.</p>
     """
-    return page_template("Licican | Catálogo inicial de oportunidades TI", "Catálogo inicial de oportunidades TI de Canarias", "Release 6 · PB-011 · Consolidacion funcional trazable", "Licican muestra aquí un catálogo consultable obtenido a partir de todos los snapshots `.atom` versionados presentes en `data/`. Solo se publican registros que cumplen simultáneamente criterio geográfico Canarias y criterio TI por CPV, con fuente oficial visible.", content, current_path="/", base_path=base_path)
+    return page_template("Licican | Catálogo inicial de oportunidades TI", "Catálogo inicial de oportunidades TI de Canarias", "Release 6 · PB-011 · Consolidacion funcional trazable", "Licican muestra aquí un catálogo consultable obtenido a partir de todos los snapshots `.atom` versionados presentes en `data/`. Solo se publican registros que cumplen simultáneamente criterio geográfico Canarias y criterio TI por CPV, con fuente oficial visible.", content, current_path="/", base_path=base_path, access_context=access_context)
 
 
 def _format_budget(amount: int | None) -> str:

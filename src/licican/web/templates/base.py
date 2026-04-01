@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext, ROLE_ADMIN, ROLE_COLLABORATOR, ROLE_READER
 from licican.web.responses import build_url
 
 
@@ -13,9 +14,10 @@ def page_template(
     content: str,
     current_path: str = "/",
     base_path: str = "",
+    access_context: AccessContext | None = None,
 ) -> str:
     """Compone el layout HTML base de la aplicación."""
-    navigation = _navigation_html(base_path, current_path)
+    navigation = _navigation_html(base_path, current_path, access_context)
     return f"""<!doctype html>
 <html lang="es">
   <head>
@@ -43,15 +45,53 @@ def page_template(
 </html>"""
 
 
-def _navigation_items() -> list[dict[str, str | bool]]:
-    return [
-        {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-        {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
-        {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
-        {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
-        {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-        {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "", "upcoming": True},
-    ]
+def _navigation_items(access_context: AccessContext | None = None) -> list[dict[str, str | bool]]:
+    if access_context is None:
+        return [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
+            {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+            {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
+            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "", "upcoming": True},
+        ]
+
+    by_role = {
+        ROLE_ADMIN: [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
+            {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+            {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
+            {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
+            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
+        ],
+        ROLE_COLLABORATOR: [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
+            {"label": "Alertas", "description": "Criterios propios y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+            {"label": "Pipeline", "description": "Seguimiento operativo propio", "icon": "PL", "path": "/pipeline", "upcoming": False},
+            {"label": "KPIs", "description": "Indicadores de cobertura y uso", "icon": "KP", "path": "/kpis", "upcoming": False},
+        ],
+        ROLE_READER: [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+        ],
+    }
+    return by_role[access_context.role]
+
+
+def _context_html(access_context: AccessContext | None) -> str:
+    if access_context is None:
+        return ""
+    return f"""
+      <div class="nav-section">
+        <p class="nav-section-title">Contexto activo</p>
+        <p class="nav-copy"><strong>Rol:</strong> {escape(access_context.role_label)}<br /><strong>Alcance:</strong> {escape(access_context.scope_label)}<br /><strong>Usuario:</strong> {escape(access_context.user_id)}</p>
+      </div>
+    """
 
 
 def _path_matches_navigation(current_path: str, item_path: str) -> bool:
@@ -96,20 +136,21 @@ def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str
     """
 
 
-def _navigation_html(base_path: str, current_path: str) -> str:
-    items = "".join(_navigation_item_html(base_path, current_path, item) for item in _navigation_items())
+def _navigation_html(base_path: str, current_path: str, access_context: AccessContext | None = None) -> str:
+    items = "".join(_navigation_item_html(base_path, current_path, item) for item in _navigation_items(access_context))
     list_html = f'<ul class="nav-list">{items}</ul>'
     return f"""
       <aside class="side-nav" aria-label="Navegacion principal">
         <p class="nav-kicker">PB-010</p>
         <h2 class="nav-title">Licican</h2>
         <p class="nav-copy">Base de navegacion comun para catalogo, alertas y crecimiento de modulos sin rutas huerfanas.</p>
+        {_context_html(access_context)}
         <div class="nav-section">
           <p class="nav-section-title">Modulos</p>
           {list_html}
         </div>
         <p class="nav-note">
-          La navegacion prioriza superficies ya operativas y deja marcadas como <strong>proximamente</strong> las piezas que todavia no tienen una vista utilizable.
+          La navegacion solo expone superficies operativas compatibles con el rol activo y mantiene la experiencia de consulta cuando una accion queda restringida.
         </p>
       </aside>
       <details class="mobile-nav">
