@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_badges, render_metric, render_status_note
@@ -31,7 +32,7 @@ def render_alert_form(base_path: str, form_active_filters: dict[str, object], av
     """
 
 
-def render_alerts(reference: str, alerts, summary: dict[str, int], available_filters: dict[str, list[str]], base_path: str = "", form_active_filters: dict[str, object] | None = None, form_error: str | None = None, status_message: str | None = None) -> str:
+def render_alerts(reference: str, alerts, summary: dict[str, int], available_filters: dict[str, list[str]], base_path: str = "", form_active_filters: dict[str, object] | None = None, form_error: str | None = None, status_message: str | None = None, access_context: AccessContext | None = None) -> str:
     """Renderiza la gestión completa de alertas."""
     create_form = render_alert_form(base_path, form_active_filters or {}, available_filters, form_error, status_message)
     sections = []
@@ -48,14 +49,16 @@ def render_alerts(reference: str, alerts, summary: dict[str, int], available_fil
             f'<li><a class="offer-link" href="{escape(build_url(base_path, f"/oportunidades/{match.id}"))}">{escape(match.titulo)}</a> · {escape(match.organismo)} · {escape(match.estado)}</li>'
             for match in alert.coincidencias
         ) or "<li>Sin coincidencias accionables registradas en este momento.</li>"
-        sections.append(f'<section class="panel"><div class="panel-body"><div class="summary">{render_metric("Activa" if alert.activa else "Inactiva", "Estado actual")}{render_metric(len(alert.coincidencias), "Coincidencias accionables")}{render_metric(alert.id, "Identificador interno")}</div><p><strong>Criterios actuales:</strong> {_alert_summary_text(alert_filters)}</p><p class="muted">Creada: {escape(alert.creada_en)} · Última actualización: {escape(alert.actualizada_en)}</p><div>{badges}</div><h3>Coincidencias internas registradas</h3><ul>{coincidence_items}</ul></div></section>')
+        owner_metric = render_metric(alert.usuario_id, "Usuario funcional") if access_context is not None and access_context.is_admin else ""
+        sections.append(f'<section class="panel"><div class="panel-body"><div class="summary">{render_metric("Activa" if alert.activa else "Inactiva", "Estado actual")}{render_metric(len(alert.coincidencias), "Coincidencias accionables")}{render_metric(alert.id, "Identificador interno")}{owner_metric}</div><p><strong>Criterios actuales:</strong> {_alert_summary_text(alert_filters)}</p><p class="muted">Creada: {escape(alert.creada_en)} · Última actualización: {escape(alert.actualizada_en)}</p><div>{badges}</div><h3>Coincidencias internas registradas</h3><ul>{coincidence_items}</ul></div></section>')
     alert_list = "".join(sections) if alerts else '<section class="note">Todavía no hay alertas registradas. Guarda la primera para dejar visible el criterio activo del MVP.</section>'
+    scope_note = "Se muestran alertas globales de todos los contextos funcionales." if access_context is not None and access_context.is_admin else "Se muestran solo las alertas del contexto funcional activo."
     content = f"""
       {create_form}
-      <section class="panel"><div class="panel-body"><div class="summary">{render_metric(summary["total_alertas"], "Alertas totales")}{render_metric(summary["alertas_activas"], "Alertas activas")}{render_metric(summary["coincidencias_activas"], "Coincidencias accionables activas")}</div><p class="muted">Referencia funcional activa: <code>{escape(reference)}</code>. Esta vista no envía notificaciones; solo registra coincidencias internas accionables del MVP.</p></div></section>
+      <section class="panel"><div class="panel-body"><div class="summary">{render_metric(summary["total_alertas"], "Alertas totales")}{render_metric(summary["alertas_activas"], "Alertas activas")}{render_metric(summary["coincidencias_activas"], "Coincidencias accionables activas")}</div><p class="muted">Referencia funcional activa: <code>{escape(reference)}</code>. Esta vista no envía notificaciones; solo registra coincidencias internas accionables del MVP.</p><p class="muted">{escape(scope_note)}</p></div></section>
       {alert_list}
     """
-    return page_template("Licican | Alertas tempranas del MVP", "Gestión de alertas tempranas", "Release 2 · PB-004 · Registro interno de anticipación", "Licican permite guardar criterios persistentes para dejar visible qué oportunidades TI deben seguirse sin búsqueda manual recurrente. En esta primera entrega las coincidencias quedan registradas en la propia aplicación como soporte interno del MVP.", content, current_path="/alertas", base_path=base_path)
+    return page_template("Licican | Alertas tempranas del MVP", "Gestión de alertas tempranas", "Release 2 · PB-004 · Registro interno de anticipación", "Licican permite guardar criterios persistentes para dejar visible qué oportunidades TI deben seguirse sin búsqueda manual recurrente. En esta primera entrega las coincidencias quedan registradas en la propia aplicación como soporte interno del MVP.", content, current_path="/alertas", base_path=base_path, access_context=access_context)
 
 
 def _alert_summary_text(filters: dict[str, object]) -> str:

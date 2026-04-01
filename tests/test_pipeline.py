@@ -120,3 +120,26 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(1, payload["summary"]["con_advertencia_oficial"])
         self.assertEqual("desierta", payload["pipeline"][0]["oportunidad"]["estado_oficial"])
         self.assertIn("Se mantiene en el pipeline", payload["pipeline"][0]["advertencia_oficial"])
+
+    def test_build_pipeline_payload_can_filter_by_user(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pipeline_path = Path(tmp_dir) / "pipeline.json"
+            add_opportunity_to_pipeline(
+                "govcan-backup-cloud-2026",
+                path=pipeline_path,
+                catalog_path=Path("data"),
+                now="2026-03-31T10:00:00Z",
+                usuario_id="admin-1",
+            )
+            add_opportunity_to_pipeline(
+                "pcsp-cabildo-licencias-2026",
+                path=pipeline_path,
+                catalog_path=Path("data"),
+                now="2026-03-31T10:05:00Z",
+                usuario_id="colab-1",
+            )
+
+            payload = build_pipeline_payload(path=pipeline_path, catalog_path=Path("data"), usuario_id="colab-1")
+
+        self.assertEqual(1, payload["summary"]["total_oportunidades"])
+        self.assertEqual(["colab-1"], [entry["usuario_id"] for entry in payload["pipeline"]])

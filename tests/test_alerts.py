@@ -130,3 +130,24 @@ class AlertsTests(unittest.TestCase):
             )
 
         self.assertEqual([], list(created_alert.coincidencias))
+
+    def test_collaborator_cannot_update_alert_from_other_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            alerts_path = Path(tmp_dir) / "alerts.json"
+            create_alert(
+                CatalogFilters(palabra_clave="backup"),
+                path=alerts_path,
+                catalog_path=Path("data"),
+                now="2026-03-25T10:00:00Z",
+                user_id="admin-1",
+            )
+
+            with self.assertRaises(PermissionError):
+                update_alert(
+                    "alerta-001",
+                    CatalogFilters(procedimiento="Abierto"),
+                    path=alerts_path,
+                    catalog_path=Path("data"),
+                    now="2026-03-25T11:00:00Z",
+                    user_id="colab-1",
+                )

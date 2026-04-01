@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.templates.base import page_template
 
 
-def render_classification(reference: str, rules, audited_examples: list[dict[str, object]], base_path: str = "") -> str:
+def render_classification(reference: str, rules, audited_examples: list[dict[str, object]], base_path: str = "", access_context: AccessContext | None = None) -> str:
     """Renderiza la vista de clasificación TI."""
     example_rows = "\n".join(
         (
@@ -57,4 +58,5 @@ def render_classification(reference: str, rules, audited_examples: list[dict[str
         content,
         current_path="/clasificacion-ti",
         base_path=base_path,
+        access_context=access_context,
     )

@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_metric, render_table
 
 
-def render_coverage(sources, summary: dict[str, int], base_path: str = "") -> str:
+def render_coverage(sources, summary: dict[str, int], base_path: str = "", access_context: AccessContext | None = None) -> str:
     """Renderiza la vista de cobertura inicial."""
     rows = [
         (
@@ -46,4 +47,5 @@ def render_coverage(sources, summary: dict[str, int], base_path: str = "") -> st
         content,
         current_path="/cobertura-fuentes",
         base_path=base_path,
+        access_context=access_context,
     )

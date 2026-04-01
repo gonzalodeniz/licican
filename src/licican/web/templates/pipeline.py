@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.catalog import _format_budget
@@ -13,6 +14,7 @@ def render_pipeline(
     base_path: str = "",
     error_message: str | None = None,
     status_message: str | None = None,
+    access_context: AccessContext | None = None,
 ) -> str:
     entries = list(payload["pipeline"])
     summary = payload["summary"]
@@ -27,6 +29,7 @@ def render_pipeline(
     else:
         entries_html = '<section class="note">Todavía no hay oportunidades guardadas en el pipeline.</section>'
 
+    scope_note = "Visibilidad global de seguimiento." if access_context is not None and access_context.is_admin else "Visibilidad limitada al contexto funcional activo."
     content = f"""
       {render_status_note(status_message)}
       {render_status_note(error_message, "warn")}
@@ -38,6 +41,7 @@ def render_pipeline(
             {render_metric(summary["estado_nueva"], "En estado Nueva")}
           </div>
           <p class="muted">El pipeline mantiene una única entrada por oportunidad y usuario, conserva el seguimiento aunque el estado oficial del expediente cambie y permite mover cada registro por los estados operativos definidos en <code>PB-005</code>.</p>
+          <p class="muted">{escape(scope_note)}</p>
         </div>
       </section>
       {entries_html}
@@ -51,6 +55,7 @@ def render_pipeline(
         content,
         current_path="/pipeline",
         base_path=base_path,
+        access_context=access_context,
     )
 
 
