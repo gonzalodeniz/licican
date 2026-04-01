@@ -5,7 +5,7 @@ from html import escape
 from licican.access import AccessContext, has_capability
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_metric
+from licican.web.templates.components import render_metric, render_state_badge
 
 
 def render_opportunity_detail(detail: dict[str, object], base_path: str = "", access_context: AccessContext | None = None) -> str:
@@ -41,7 +41,7 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "", ac
           <tr><th>Presupuesto</th><td>{escape(_format_budget(detail["presupuesto"]))}</td></tr>
           <tr><th>Publicación oficial</th><td>{escape(str(detail["fecha_publicacion_oficial"]))}</td></tr>
           <tr><th>Fecha limite</th><td>{escape(str(detail["fecha_limite"]))}</td></tr>
-          <tr><th>Estado oficial del expediente</th><td>{escape(str(detail["estado"]))}</td></tr>
+          <tr><th>Estado oficial del expediente</th><td>{render_state_badge(detail["estado"])}</td></tr>
           <tr><th>Fuente oficial</th><td><a class="source-link" href="{escape(str(detail["url_fuente_oficial"]))}" target="_blank" rel="noopener noreferrer">{escape(str(detail["fuente_oficial"]))}</a></td></tr>
           <tr><th>Fichero .atom origen</th><td>{escape(str(detail["fichero_origen_atom"] or "No informado"))}</td></tr>
         </tbody></table></div>
@@ -71,7 +71,10 @@ def render_licitacion_detail(detail: dict[str, object], base_path: str = "", acc
         ("Fecha Actualización", detail["fecha_actualizacion"]),
         ("Fichero .atom origen", detail["fichero_origen_atom"]),
     ]
-    table_rows = "".join(f"<tr><th>{escape(label)}</th><td>{escape(_display_value(value))}</td></tr>" for label, value in rows)
+    table_rows = "".join(
+        f"<tr><th>{escape(label)}</th><td>{render_state_badge(value) if label == 'Estado' else escape(_display_value(value))}</td></tr>"
+        for label, value in rows
+    )
     extra_link = f'<p><a class="offer-action" href="{escape(str(detail["enlace_placsp"]))}" target="_blank" rel="noopener noreferrer">Abrir expediente en PLACSP</a></p>' if detail["enlace_placsp"] else ""
     content = f'<section class="panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=licitaciones"))}">Volver a Licitaciones TI Canarias</a></p><div class="table-wrap"><table><tbody>{table_rows}</tbody></table></div>{extra_link}</div></section>'
     return page_template("Licican | Detalle de licitación consolidada", str(detail["titulo"]), "PB-012 · Detalle trazable del expediente", "La ficha mantiene visible la correspondencia funcional con el Excel de referencia y deja explícito el fichero `.atom` que alimenta la versión consolidada mostrada al usuario.", content, current_path="/datos-consolidados", base_path=base_path, access_context=access_context)

@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from licican.access import AccessContext, has_capability
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_badges, render_metric, render_status_note
+from licican.web.templates.components import render_badges, render_metric, render_state_badge, render_status_note
 
 
 def render_filter_form(base_path: str, active_filters: dict[str, object], available_filters: dict[str, list[str]], validation_error: str | None, pagination: dict[str, object]) -> str:
@@ -76,7 +76,7 @@ def render_catalog(catalog: dict[str, object], base_path: str = "", access_conte
             f'<td data-label="Presupuesto">{escape(_format_budget(item["presupuesto"]))}</td>'
             f'<td data-label="Publicación oficial">{escape(item["fecha_publicacion_oficial"])}</td>'
             f'<td data-label="Fecha límite">{escape(item["fecha_limite"])}</td>'
-            f'<td data-label="Estado">{escape(item["estado"])}</td>'
+            f'<td data-label="Estado">{render_state_badge(item["estado"])}</td>'
             f'<td data-label="Fuente oficial"><a class="source-link" href="{escape(item["url_fuente_oficial"])}" target="_blank" rel="noopener noreferrer">{escape(item["fuente_oficial"])}</a></td>'
             "</tr>"
             for item in opportunities
