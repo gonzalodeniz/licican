@@ -19,6 +19,10 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "") ->
       {update_panel}
       <section class="panel"><div class="panel-body">
         <p><a href="{escape(build_url(base_path, '/'))}">Volver al catalogo</a></p>
+        <form method="post" action="{escape(build_url(base_path, '/pipeline'))}">
+          <input type="hidden" name="opportunity_id" value="{escape(str(detail["id"]))}" />
+          <button type="submit">Guardar en pipeline</button>
+        </form>
         <div class="summary">
           {render_metric(detail["estado"], "Estado oficial visible")}
           {render_metric(detail["fecha_limite"], "Fecha limite visible")}

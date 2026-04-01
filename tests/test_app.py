@@ -90,7 +90,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
         self.assertIn("proximamente", html)
-        self.assertNotIn('href="/licican/pipeline"', html)
+        self.assertIn('href="/licican/pipeline"', html)
         self.assertNotIn('href="/licican/permisos"', html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
@@ -380,6 +380,19 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Todavía no hay alertas registradas", html)
         self.assertIn('class="nav-link active" href="/licican/alertas"', html)
 
+    def test_pipeline_page_renders_empty_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pipeline_path = Path(tmp_dir) / "pipeline.json"
+            with patch.dict(os.environ, {"LICICAN_PIPELINE_PATH": str(pipeline_path)}, clear=False):
+                status, headers, body = invoke_app("/pipeline")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Pipeline de seguimiento de oportunidades", html)
+        self.assertIn("Todavía no hay oportunidades guardadas en el pipeline.", html)
+        self.assertIn('class="nav-link active" href="/licican/pipeline"', html)
+
     def test_detail_page_keeps_catalog_navigation_active(self) -> None:
         status, _, body = invoke_app("/oportunidades/pcsp-cabildo-licencias-2026")
         html = body.decode("utf-8")
@@ -441,6 +454,55 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(1, api_payload["summary"]["total_alertas"])
         self.assertEqual(0, api_payload["summary"]["alertas_activas"])
         self.assertEqual({"procedimiento": "Abierto"}, api_payload["alerts"][0]["filtros"])
+
+    def test_pipeline_lifecycle_is_visible_from_html_and_api(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pipeline_path = Path(tmp_dir) / "pipeline.json"
+            with patch.dict(os.environ, {"LICICAN_PIPELINE_PATH": str(pipeline_path)}, clear=False):
+                created_status, created_headers, _ = invoke_app(
+                    "/pipeline",
+                    method="POST",
+                    body="opportunity_id=pcsp-cabildo-licencias-2026",
+                )
+                self.assertEqual("303 See Other", created_status)
+                self.assertEqual("/licican/pipeline?mensaje=Oportunidad+guardada+en+el+pipeline", created_headers["Location"])
+
+                duplicate_status, duplicate_headers, _ = invoke_app(
+                    "/pipeline",
+                    method="POST",
+                    body="opportunity_id=pcsp-cabildo-licencias-2026",
+                )
+                self.assertEqual("303 See Other", duplicate_status)
+                self.assertEqual(
+                    "/licican/pipeline?mensaje=La+oportunidad+ya+estaba+guardada+en+el+pipeline",
+                    duplicate_headers["Location"],
+                )
+
+                update_status, update_headers, _ = invoke_app(
+                    "/pipeline/pcsp-cabildo-licencias-2026/estado",
+                    method="POST",
+                    body="estado_seguimiento=Evaluando",
+                )
+                self.assertEqual("303 See Other", update_status)
+                self.assertEqual("/licican/pipeline?mensaje=Estado+de+pipeline+actualizado", update_headers["Location"])
+
+                page_status, page_headers, page_body = invoke_app("/pipeline")
+                api_status, api_headers, api_body = invoke_app("/api/pipeline")
+
+        html = page_body.decode("utf-8")
+        api_payload = json.loads(api_body)
+
+        self.assertEqual("200 OK", page_status)
+        self.assertEqual("text/html; charset=utf-8", page_headers["Content-Type"])
+        self.assertIn("pcsp-cabildo-licencias-2026", html)
+        self.assertIn("Evaluando", html)
+        self.assertIn("Fuente oficial", html)
+
+        self.assertEqual("200 OK", api_status)
+        self.assertEqual("application/json; charset=utf-8", api_headers["Content-Type"])
+        self.assertEqual(1, api_payload["summary"]["total_oportunidades"])
+        self.assertEqual(0, api_payload["summary"]["con_advertencia_oficial"])
+        self.assertEqual("Evaluando", api_payload["pipeline"][0]["estado_seguimiento"])
 
     def test_unknown_path_returns_404(self) -> None:
         status, headers, body = invoke_app("/desconocido")

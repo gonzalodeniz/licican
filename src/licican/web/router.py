@@ -8,8 +8,9 @@ from urllib.parse import parse_qs
 
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path
+from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
+from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
@@ -21,6 +22,7 @@ from licican.web.templates.classification import render_classification
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.dataset import render_datos_consolidados
 from licican.web.templates.detail import render_adjudicacion_detail, render_licitacion_detail, render_opportunity_detail
+from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 from licican.web.templates.base import page_template
 
@@ -134,6 +136,11 @@ def handle_api_alerts(request: Request, start_response) -> list[bytes]:
     return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
 
 
+def handle_api_pipeline(request: Request, start_response) -> list[bytes]:
+    payload = build_pipeline_payload(path=resolve_pipeline_path())
+    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
+
+
 def handle_alerts_page(request: Request, start_response) -> list[bytes]:
     filters = _parse_catalog_filters(request)
     status_message = (request.query.get("mensaje") or [None])[0]
@@ -145,6 +152,13 @@ def handle_alerts_page(request: Request, start_response) -> list[bytes]:
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_pipeline_page(request: Request, start_response) -> list[bytes]:
+    status_message = (request.query.get("mensaje") or [None])[0]
+    payload = build_pipeline_payload(path=resolve_pipeline_path())
+    content = render_pipeline(payload, request.base_path, None, status_message)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
@@ -188,6 +202,37 @@ def handle_deactivate_alert(request: Request, start_response, id: str) -> list[b
     except KeyError:
         return _not_found(start_response)
     return send_redirect(start_response, build_url(request.base_path, "/alertas") + "?mensaje=Alerta+desactivada")
+
+
+def handle_create_pipeline_entry(request: Request, start_response) -> list[bytes]:
+    form_data = read_form_data(request.environ)
+    opportunity_id = (form_data.get("opportunity_id") or [""])[0].strip()
+    try:
+        _, created = add_opportunity_to_pipeline(opportunity_id, path=resolve_pipeline_path())
+    except ValueError as exc:
+        payload = build_pipeline_payload(path=resolve_pipeline_path())
+        content = render_pipeline(payload, request.base_path, str(exc), None)
+        return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
+    except KeyError:
+        return _not_found(start_response)
+
+    message = "Oportunidad guardada en el pipeline" if created else "La oportunidad ya estaba guardada en el pipeline"
+    return send_redirect(start_response, build_url(request.base_path, "/pipeline") + f"?mensaje={message.replace(' ', '+')}")
+
+
+def handle_update_pipeline_entry(request: Request, start_response, id: str) -> list[bytes]:
+    form_data = read_form_data(request.environ)
+    state = (form_data.get("estado_seguimiento") or [""])[0]
+    try:
+        update_pipeline_entry_status(id, state, path=resolve_pipeline_path())
+    except ValueError as exc:
+        payload = build_pipeline_payload(path=resolve_pipeline_path())
+        content = render_pipeline(payload, request.base_path, str(exc), None)
+        return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
+    except KeyError:
+        return _not_found(start_response)
+
+    return send_redirect(start_response, build_url(request.base_path, "/pipeline") + "?mensaje=Estado+de+pipeline+actualizado")
 
 
 def handle_api_opportunities(request: Request, start_response) -> list[bytes]:
@@ -323,9 +368,12 @@ routes = [
     Route("GET", "/static/{filename}", handle_static),
     Route("GET", "/api/datos-consolidados", handle_api_dataset),
     Route("GET", "/api/alertas", handle_api_alerts),
+    Route("GET", "/api/pipeline", handle_api_pipeline),
     Route("POST", "/alertas", handle_create_alert),
     Route("POST", "/alertas/{id}/editar", handle_update_alert),
     Route("POST", "/alertas/{id}/desactivar", handle_deactivate_alert),
+    Route("POST", "/pipeline", handle_create_pipeline_entry),
+    Route("POST", "/pipeline/{id}/estado", handle_update_pipeline_entry),
     Route("GET", "/api/oportunidades/{id}", handle_api_opportunity_detail),
     Route("GET", "/api/oportunidades", handle_api_opportunities),
     Route("GET", "/api/fuentes", handle_api_sources),
@@ -335,6 +383,7 @@ routes = [
     Route("GET", "/cobertura-fuentes", handle_coverage_page),
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
     Route("GET", "/alertas", handle_alerts_page),
+    Route("GET", "/pipeline", handle_pipeline_page),
     Route("GET", "/datos-consolidados", handle_dataset_page),
     Route("GET", "/datos-consolidados/licitaciones/{id}", handle_licitacion_detail),
     Route("GET", "/datos-consolidados/adjudicaciones/{id}", handle_adjudicacion_detail),

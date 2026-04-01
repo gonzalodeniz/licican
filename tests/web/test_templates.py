@@ -11,6 +11,7 @@ from licican.web.templates.components import render_metric, render_status_note, 
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.dataset import render_datos_consolidados
 from licican.web.templates.detail import render_adjudicacion_detail, render_licitacion_detail, render_opportunity_detail
+from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 
 
@@ -64,3 +65,34 @@ class TemplateSmokeTests(unittest.TestCase):
     def test_alert_template_renders_smoke(self) -> None:
         html = render_alert_form("", {}, {"procedimientos": ["Abierto"], "ubicaciones": ["Canarias"]})
         self.assertIn("Guardar alerta", html)
+
+    def test_pipeline_template_renders_smoke(self) -> None:
+        html = render_pipeline(
+            {
+                "referencia_funcional": "PB-005",
+                "estados_disponibles": ["Nueva", "Evaluando"],
+                "summary": {"total_oportunidades": 1, "con_advertencia_oficial": 0, "estado_nueva": 1},
+                "pipeline": [
+                    {
+                        "opportunity_id": "uno",
+                        "estado_seguimiento": "Nueva",
+                        "creada_en": "2026-03-31T10:00:00Z",
+                        "actualizada_en": "2026-03-31T10:00:00Z",
+                        "advertencia_oficial": None,
+                        "oportunidad": {
+                            "titulo": "Oferta",
+                            "organismo": "Cabildo",
+                            "ubicacion": "Canarias",
+                            "procedimiento": "Abierto",
+                            "presupuesto": 1000,
+                            "fecha_publicacion_oficial": "2026-03-31",
+                            "fecha_limite": "2026-04-10",
+                            "estado_oficial": "Abierta",
+                            "url_fuente_oficial": "https://example.test",
+                        },
+                    }
+                ],
+            }
+        )
+        self.assertIn("Pipeline de seguimiento de oportunidades", html)
+        self.assertIn("Actualizar estado", html)
