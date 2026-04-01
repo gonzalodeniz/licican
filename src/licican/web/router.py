@@ -77,6 +77,17 @@ def _parse_catalog_page(request: Request) -> int:
         return 1
 
 
+def _parse_catalog_page_size(request: Request) -> int:
+    candidates = request.query.get("page_size")
+    if not candidates:
+        return 10
+    try:
+        page_size = int(candidates[0])
+    except ValueError:
+        return 10
+    return page_size if page_size in {5, 10, 25, 50} else 10
+
+
 def _resolve_request_path(environ: dict[str, object], base_path: str) -> str:
     raw_path = str(environ.get("PATH_INFO", "/") or "/")
     script_name = normalize_base_path(str(environ.get("SCRIPT_NAME") or "")) or base_path
@@ -192,7 +203,11 @@ def handle_deactivate_alert(request: Request, start_response, id: str) -> list[b
 
 def handle_api_opportunities(request: Request, start_response) -> list[bytes]:
     try:
-        payload = build_catalog(filters=_parse_catalog_filters(request), page=_parse_catalog_page(request))
+        payload = build_catalog(
+            filters=_parse_catalog_filters(request),
+            page=_parse_catalog_page(request),
+            page_size=_parse_catalog_page_size(request),
+        )
     except CatalogDataSourceError as exc:
         return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", b"".join(json_body({"error": str(exc)})))
     status = "400 Bad Request" if payload["error_validacion"] else "200 OK"
@@ -299,7 +314,11 @@ def handle_adjudicacion_detail(request: Request, start_response, id: str) -> lis
 
 def handle_catalog_page(request: Request, start_response) -> list[bytes]:
     try:
-        payload = build_catalog(filters=_parse_catalog_filters(request), page=_parse_catalog_page(request))
+        payload = build_catalog(
+            filters=_parse_catalog_filters(request),
+            page=_parse_catalog_page(request),
+            page_size=_parse_catalog_page_size(request),
+        )
         content = render_catalog(payload, request.base_path)
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))

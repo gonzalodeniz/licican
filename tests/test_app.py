@@ -137,6 +137,16 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(1, payload["paginacion"]["total_paginas"])
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in payload["oportunidades"]))
 
+    def test_api_applies_page_size_from_query_string(self) -> None:
+        status, headers, body = invoke_app("/api/oportunidades", "page_size=5")
+        payload = json.loads(body)
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
+        self.assertEqual(5, payload["paginacion"]["tamano_pagina"])
+        self.assertEqual(1, payload["paginacion"]["total_paginas"])
+        self.assertEqual(3, payload["paginacion"]["resultado_hasta"])
+
     def test_api_applies_functional_filters_from_query_string(self) -> None:
         status, headers, body = invoke_app(
             "/api/oportunidades",
@@ -222,7 +232,13 @@ class ApplicationTests(unittest.TestCase):
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertIn("ubicacion=Gran+Canaria&amp;page=2", html)
-        self.assertIn("/licican/?ubicacion=Gran+Canaria&amp;page=2", html)
+        self.assertIn("page_size=2", html)
+        self.assertIn("/licican/?ubicacion=Gran+Canaria&amp;page=2&amp;page_size=2", html)
+        self.assertIn('<select id="catalog-page-size" name="page_size" onchange="this.form.submit()">', html)
+        self.assertIn('<option value="5">5</option>', html)
+        self.assertIn('<option value="10">10</option>', html)
+        self.assertIn('<option value="25">25</option>', html)
+        self.assertIn('<option value="50">50</option>', html)
         self.assertEqual(1, html.count('class="pagination-bar"'))
         self.assertLess(html.rfind('<tbody>'), html.rfind('class="pagination-bar"'))
 
