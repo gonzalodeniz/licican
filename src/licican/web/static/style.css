@@ -20,7 +20,8 @@
   --warning-text: #7a5b00;
   --danger-bg: #fde8e8;
   --danger-text: #8b2f2f;
-  --shadow-soft: 0 8px 24px rgb(15 23 42 / 0.04);
+  --surface-shadow: 0 12px 30px rgb(15 23 42 / 0.08), 0 2px 8px rgb(15 23 42 / 0.04);
+  --surface-shadow-soft: 0 10px 22px rgb(15 23 42 / 0.05), 0 1px 4px rgb(15 23 42 / 0.03);
   --shadow-sidebar: 0 20px 36px rgb(8 20 32 / 0.18);
   --radius-card: 8px;
   --radius-control: 8px;
@@ -297,7 +298,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--surface-shadow);
 }
 
 .mobile-nav summary {
@@ -347,7 +348,11 @@ main {
 
 .hero {
   margin-bottom: 18px;
-  padding: 0 0 8px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--surface-shadow);
 }
 
 .hero > .muted:first-child {
@@ -375,7 +380,7 @@ main {
   margin-bottom: 16px;
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--surface-shadow);
 }
 
 .panel {
@@ -425,6 +430,7 @@ main {
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface);
+  box-shadow: var(--surface-shadow-soft);
 }
 
 .metric strong {
@@ -664,6 +670,7 @@ button:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface-subtle);
+  box-shadow: var(--surface-shadow);
 }
 
 .pagination-status {
