@@ -7,10 +7,11 @@ Stakeholder funcional, producto o persona usuaria interna que necesita entender 
 La rama `main` expone una entrega minima navegable orientada a descubrimiento inicial y validacion funcional temprana, no un producto de uso final completo.
 
 ## Que si existe hoy
-- Un catalogo de oportunidades TI servido desde PostgreSQL por defecto y visible en `/`, con modo `file` disponible como respaldo para pruebas aisladas.
+- Un catalogo de oportunidades TI servido desde PostgreSQL por defecto y visible en `/`.
+- Un respaldo `file` que usa `data/opportunities.json` cuando no hay snapshots Atom versionados en `data/`.
 - Una API JSON del catalogo en `/api/oportunidades`.
 - Filtros funcionales en el catalogo y en `/api/oportunidades` por palabra clave, presupuesto, procedimiento y ubicacion.
-- Una ficha HTML de detalle por oportunidad en `/oportunidades/<id>`, con trazabilidad al origen funcional vigente de cada registro.
+- Una ficha HTML de detalle por oportunidad en `/oportunidades/<id>`, con trazabilidad al origen funcional vigente de cada registro cuando la fuente lo permite.
 - Una API JSON del detalle en `/api/oportunidades/<id>`.
 - Una gestion HTML de alertas tempranas en `/alertas`.
 - Una API JSON de alertas persistidas y coincidencias internas en `/api/alertas`.
@@ -25,9 +26,8 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Que el catalogo visible solo publica oportunidades clasificadas como TI y dentro de la cobertura vigente.
 - Que el usuario puede filtrar el catalogo, ver los filtros activos y limpiar la busqueda.
 - Que si el rango de presupuesto es invalido, la interfaz solicita corregirlo y no lo presenta como ausencia de resultados.
-- Que cada oportunidad mantiene organismo, ubicacion, estado oficial, fecha limite y referencia a su fuente oficial.
+- Que cada oportunidad mantiene organismo, ubicacion, estado oficial, fecha limite y referencia a su fuente oficial cuando esa informacion existe en el origen.
 - Que la ficha de detalle refleja el ultimo dato oficial visible cuando existe una rectificacion o modificacion publicada.
-- Que cada detalle muestra el origen funcional vigente cuando el backend lo permite y, en modo `file`, el nombre del fichero `.atom` origen de la version consolidada.
 - Que la cobertura inicial del MVP esta acotada a fuentes `MVP`, `Posterior` y `Por definir`.
 - Que la priorizacion de fuentes reales oficiales para recopilacion ya esta visible y ordenada por `Ola 1`, `Ola 2` y `Ola 3`.
 - Que las alertas tempranas reutilizan los mismos filtros que el catalogo, se pueden crear, editar y desactivar, y registran coincidencias internas accionables.
@@ -37,7 +37,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 1. Abre `/` y revisa el listado de oportunidades visibles.
 2. Aplica filtros por palabra clave, procedimiento, ubicacion o presupuesto para comprobar el refinamiento del catalogo.
 3. Prueba un rango invalido con `presupuesto_min` mayor que `presupuesto_max` y verifica que el sistema pide correccion.
-4. Entra en una ficha desde el titulo de una oportunidad para comprobar presupuesto, fecha limite, estado oficial, enlace a la fuente y fichero `.atom` de origen.
+4. Entra en una ficha desde el titulo de una oportunidad para comprobar presupuesto, fecha limite, estado oficial y enlace a la fuente cuando existan.
 5. Abre `/alertas` para revisar como se guardan, editan y desactivan alertas con los mismos filtros del catalogo.
 6. Abre `/cobertura-fuentes` para confirmar que la cobertura comunicada sigue siendo parcial y priorizada.
 7. Abre `/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen oficial.
@@ -49,6 +49,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - La superficie funcional de `PB-012` con las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 - Aunque el changelog de `2026-03-29` la menciona como validada, esa superficie de `PB-012` no aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
 - Aunque el changelog de `2026-03-31` menciona `pipeline` como validado, esa superficie tampoco aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
+- Snapshots Atom versionados en `data/`; la reproduccion completa de `PB-011` necesita muestras temporales o externas.
 
 ## Como interpretar la documentacion funcional
 Los documentos de `product-manager/` siguen siendo la fuente funcional para vision, backlog, historias y casos de uso. Deben leerse como alcance esperado del producto, no como evidencia de que esas funcionalidades ya esten disponibles en esta entrega. Cuando contradigan a `main`, prevalece la evidencia reproducible de la rama actual.
@@ -58,8 +59,8 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 - La priorizacion de fuentes reales oficiales ya es accesible en una superficie propia, pero solo ordena la recopilacion; no activa pipeline.
 - Los filtros actuales actuan solo sobre el catalogo visible y su API; no existe todavia una persistencia de preferencias separada del registro de alertas internas.
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.
-- El backend PostgreSQL es el modo operativo por defecto y el modo `file` queda como apoyo de pruebas; eso no implica cobertura total ni pipeline.
-- La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su reproduccion automatizada queda condicionada por la discrepancia entre `data/atom/` y el cargador que busca `data/*.atom`.
+- El backend PostgreSQL es el modo operativo por defecto y el modo `file` queda como apoyo de pruebas; cuando no hay Atom versionado en `data/`, ese respaldo se apoya en `data/opportunities.json`.
+- La consolidacion de `PB-011` sigue siendo la referencia funcional, pero su reproduccion automatizada depende de aportar muestras Atom al arbol o de usar las pruebas temporales del proyecto.
 - La metadata tecnica del paquete sigue describiendo una release anterior mas limitada que la visible hoy en `main`.
 - `product-manager/` sigue arrastrando algunos textos anteriores a la integracion de `PB-011`; la evidencia reproducible de `main` y el changelog de `2026-03-29` deben tomarse como referencia para el estado vigente, salvo en `PB-012`, donde el changelog entra en contradiccion con el codigo y prevalece `main`.
 - Las alertas visibles en `main` son internas: registran coincidencias accionables, pero todavia no envian notificaciones salientes.

@@ -49,7 +49,7 @@ PYTHONPATH=src python3 -m pytest -v
 ```
 
 Resultado esperado en esta revision:
-- 104 pruebas ejecutadas en verde con `pytest`.
+- 111 pruebas ejecutadas en verde con `pytest`.
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 
@@ -67,7 +67,7 @@ make run
 ```
 
 Resultado esperado en esta revision:
-- mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor definido en `.env`
+- mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor definido en `.env`, o el siguiente puerto libre si el solicitado esta ocupado
 
 4. Arranca la aplicacion en contenedor:
 
@@ -103,7 +103,7 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 
 ## Que queda instalado realmente
 - Paquete `licican` en modo editable.
-- Aplicacion WSGI local con backend PostgreSQL por defecto para catalogo y detalle, modo `file` para apoyo, filtros funcionales, ficha de detalle con origen visible, alertas internas, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
+- Aplicacion WSGI local con backend PostgreSQL por defecto para catalogo y detalle, modo `file` para apoyo, filtros funcionales, ficha de detalle con origen visible cuando exista, alertas internas, cobertura, priorizacion de fuentes reales y clasificacion TI auditables.
 - Acceso a datos versionados en `data/`, configuracion de base de datos y a la suite automatizada en `tests/`.
 - Imagen Docker minima con la misma superficie funcional, apta para despliegue local en contenedor.
 
@@ -114,8 +114,8 @@ curl -i http://127.0.0.1:<PORT>/api/clasificacion-ti
 
 ## Limitaciones y dependencias abiertas
 - La instalacion deja operativa una entrega minima de descubrimiento, no el MVP completo descrito en backlog.
-- Los datos del catalogo se sirven desde PostgreSQL por defecto; el modo `file` sigue existiendo para apoyo y pruebas aisladas.
-- La carga Atom de `PB-011` sigue condicionada por una discrepancia de rutas: los ficheros estan en `data/atom/` y el cargador actual busca `data/*.atom`.
+- Los datos del catalogo se sirven desde PostgreSQL por defecto; el modo `file` sigue existiendo para apoyo y pruebas aisladas, y usa `data/opportunities.json` si no hay snapshots Atom versionados disponibles.
+- La carga Atom de `PB-011` sigue condicionada por la disponibilidad de snapshots `.atom`; si quieres probar esa ruta, debes aportar esos ficheros al directorio de entrada o trabajar con datos temporales.
 - `pyproject.toml` sigue describiendo una release mas limitada que la realmente visible; verifica siempre contra esta guia, el codigo y las pruebas.
 - La priorizacion de fuentes reales ya forma parte de la instalacion utilizable, pero no activa pipeline.
 - Las alertas disponibles en `main` registran coincidencias internas y siguen sin emitir notificaciones salientes.

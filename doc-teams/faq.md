@@ -7,7 +7,7 @@ Personas usuarias internas, equipo tecnico y administracion que necesitan aclara
 Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio, levanta la BBDD integrada y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
-Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQL por defecto, filtros funcionales sobre ese catalogo, ficha de detalle con origen funcional visible, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
+Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQL por defecto, filtros funcionales sobre ese catalogo, ficha de detalle con origen funcional visible cuando la fuente lo aporta, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
 
 ## Que rutas estan verificadas?
 - `/`
@@ -27,7 +27,7 @@ Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQ
 En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada, aunque el changelog de `2026-03-31` lo mencione como validado.
 
 ## PB-011 ya esta operativo en `main`?
-La intencion funcional sigue documentada, pero en esta checkout la evidencia automatizada no se reproduce completa: los snapshots viven en `data/atom/` y el cargador actual sigue buscando `data/*.atom`. Hasta que esa discrepancia se resuelva, la trazabilidad de `PB-011` debe tratarse como condicionada y no como validacion cerrada.
+La intencion funcional sigue documentada y el codigo soporta la consolidacion Atom, pero en esta checkout no hay snapshots `.atom` versionados en `data/`. La reproducibilidad completa depende de aportar muestras temporales o externas; el respaldo versionado visible para el modo `file` es `data/opportunities.json`.
 
 ## La aplicacion ya usa PostgreSQL por defecto?
 Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `LICICAN_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
@@ -47,14 +47,14 @@ Si. La principal contradiccion vigente es doble: `pyproject.toml` sigue describi
 Ademas, el changelog de `2026-03-29` registra `PB-012` como validada sin que la superficie correspondiente aparezca en `main`, asi que esa entrada debe leerse con cautela hasta que el codigo la respalde.
 
 ## Por que algunos textos de producto no coinciden con esta documentacion?
-Porque esta FAQ toma como referencia el codigo, las rutas y las pruebas ejecutables en `main`. En esta revision, las alertas si se observan en `src/` y `tests/`, y la consolidacion `.atom` ya esta integrada, asi que la contradiccion residual queda en algunos textos funcionales de producto que todavia no se han sincronizado.
+Porque esta FAQ toma como referencia el codigo, las rutas y las pruebas ejecutables en `main`. En esta revision, las alertas si se observan en `src/` y `tests/`, y la consolidacion Atom ya esta integrada, asi que la contradiccion residual queda en algunos textos funcionales de producto que todavia no se han sincronizado.
 
 ## Existe ya la priorizacion de fuentes reales de `PB-009` en `main`?
 Si. En la app verificada, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias` responden `200 OK` y muestran `BOC`, `BOP Las Palmas` y `BOE` agrupadas por olas.
 Si algun documento de producto sigue describiendo `PB-009` como pendiente de fusion, esa nota debe considerarse desactualizada frente a `main`.
 
 ## La ficha de detalle aplica rectificaciones o modificaciones oficiales?
-Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas, y ademas expone el fichero `.atom` de origen cuando procede de la consolidacion.
+Si. El detalle visible resuelve el ultimo dato oficial publicado cuando el expediente tiene actualizaciones versionadas, y ademas expone el fichero de origen cuando procede de la consolidacion o de una fuente que lo incluya.
 
 ## Por que la metadata del paquete no menciona la clasificacion TI?
 Porque `pyproject.toml` sigue describiendo el paquete solo como cobertura inicial de fuentes. Esa descripcion ha quedado por detras del estado real de `main`, que ya incluye catalogo inicial, ficha de detalle y la superficie auditable de `PB-006`.
@@ -66,7 +66,7 @@ Si. La instalacion editable deja operativa la aplicacion local y permite ejecuta
 Desde la raiz del proyecto, `make docker-psql` abre una sesion interactiva `psql` contra `postgres-licitaciones`.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m pytest -v` ejecuta 104 pruebas en verde en esta revision.
+Si. `PYTHONPATH=src python3 -m pytest -v` ejecuta 111 pruebas en verde en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.

@@ -22,11 +22,11 @@ Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En con
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
-- `make test` ejecuta 104 pruebas en verde con `pytest`.
-- `make run` arranca el servidor local usando `PORT` desde `.env` y queda a la escucha hasta que se interrumpe el proceso.
+- `make test` ejecuta 111 pruebas en verde con `pytest`.
+- `make run` arranca el servidor local usando `PORT` desde `.env` y, si el puerto esta ocupado, avanza al siguiente libre.
 - `docker compose up -d --build` publica la misma aplicacion en un contenedor, levanta la BBDD integrada y monta `data/` como volumen persistente.
 - En la superficie desplegada responden tambien `/alertas` y `/api/alertas`, que almacenan alertas internas sin notificaciones salientes.
-- El detalle de oportunidad muestra el origen funcional vigente y, en modo `file`, el fichero `.atom` origen cuando la consolidacion funcional puede resolverse.
+- El detalle de oportunidad muestra el origen funcional vigente y, en modo `file`, el respaldo `data/opportunities.json` cuando no hay snapshots Atom versionados.
 
 ## Conclusion operativa
 Solo debe considerarse soportado el arranque local de validacion y el despliegue local en contenedor con Compose. No hay base documental suficiente para prometer despliegue en servidor, orquestador o plataforma gestionada.
@@ -48,7 +48,7 @@ Solo debe considerarse soportado el arranque local de validacion y el despliegue
 - La priorizacion de fuentes reales ya puede desplegarse junto con el resto de la entrega minima, pero sigue siendo una funcionalidad de recopilacion, no una capa operativa completa.
 - Las alertas visibles son internas y no sustituyen una capa de notificacion o automatizacion de seguimiento.
 - La entrega documentada aqui usa PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` y `data/opportunities.json` quedan como respaldo operativo cuando se fuerza ese modo.
-- La consolidacion Atom sigue sujeta a la discrepancia de rutas entre `data/atom/` y el patron que usa el cargador.
+- La consolidacion Atom sigue sujeta a la disponibilidad de snapshots `.atom`; si no hay ficheros Atom en `data/`, la ruta `file` usa el respaldo JSON.
 
 ## Riesgos
 - Documentar hoy un despliegue real seria inventar decisiones tecnicas no presentes en el repositorio.

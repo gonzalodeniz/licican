@@ -46,13 +46,13 @@ Resultado esperado:
 - dentro del contenedor la aplicacion escucha en `HOST=0.0.0.0`
 
 ## Resultado esperado en esta revision
-- `make test` ejecuta 104 pruebas en verde con `pytest`.
-- `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`.
+- `make test` ejecuta 111 pruebas en verde con `pytest`.
+- `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`, o el siguiente puerto libre si el solicitado esta ocupado.
 - `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT` y levanta la BBDD integrada.
 - `make docker-psql` abre una terminal `psql` contra `postgres-licitaciones`.
 - La aplicacion usa PostgreSQL como backend por defecto; el modo `file` queda reservado para pruebas aisladas o escenarios de respaldo.
 - Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/priorizacion-fuentes-reales`, `/api/fuentes-prioritarias`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
-- La ficha de detalle muestra el fichero `.atom` origen cuando la consolidacion de `PB-011` puede resolverse con la ruta esperada.
+- La ficha de detalle muestra el fichero `.atom` origen cuando la consolidacion de `PB-011` recibe snapshots Atom de entrada; si no hay ficheros Atom en `data/`, el respaldo visible es `data/opportunities.json`.
 
 ## Verificaciones operativas minimas
 - Abrir `http://127.0.0.1:<PORT>/` para revisar el catalogo inicial de oportunidades TI.
@@ -60,7 +60,7 @@ Resultado esperado:
 - Consultar `http://127.0.0.1:<PORT>/api/oportunidades?procedimiento=Abierto` para verificar filtrado funcional en API.
 - Consultar `http://127.0.0.1:<PORT>/api/oportunidades?presupuesto_min=120000&presupuesto_max=90000` para verificar que la API devuelve `400` con validacion explicita de rango.
 - Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible.
-- Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible y fichero `.atom` origen.
+- Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible y fichero de origen cuando exista consolidacion Atom.
 - Abrir `http://127.0.0.1:<PORT>/alertas` para crear una alerta interna, comprobar que no admite formularios vacios y verificar su edicion o desactivacion.
 - Abrir `http://127.0.0.1:<PORT>/cobertura-fuentes` para revisar la cobertura inicial del MVP.
 - Abrir `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen.
@@ -75,7 +75,7 @@ Resultado esperado:
 
 ## Parada controlada
 - Interrumpe el proceso con `Ctrl+C`.
-- La aplicacion imprime `Servidor detenido de forma controlada.`.
+- La aplicacion imprime `Servidor detenido de forma controlada.`
 
 ## Operacion no disponible
 No existe en `main`:
@@ -98,7 +98,7 @@ La entrada del changelog de `2026-03-31` menciona `pipeline` como validado, pero
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.
 - Las alertas de `PB-004` ya se pueden operar localmente desde `/alertas` y `/api/alertas`; lo que sigue sin estar disponible es el pipeline.
 - La entrega administrable revisada ya opera sobre PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` conserva la ruta de apoyo basada en fichero.
-- La carga Atom sigue condicionada por la discrepancia de rutas entre `data/atom/` y el patron que usa el cargador.
+- La carga Atom sigue condicionada por la disponibilidad de snapshots `.atom`; si no hay ficheros Atom en `data/`, el respaldo operativo es `data/opportunities.json`.
 - No debe asumirse operativa la validacion de `PB-012` que aparece en el changelog de `2026-03-29` mientras `main` no exponga sus rutas y pruebas asociadas.
 - La BBDD integrada se publica en `DB_PORT` y puede abrirse por terminal con `make docker-psql`.
 
