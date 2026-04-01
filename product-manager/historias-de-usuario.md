@@ -100,7 +100,8 @@
   5. Si la oportunidad pasa a estado oficial `anulada`, `desierta` o `desistida`, el pipeline mantiene el registro del usuario y muestra una advertencia visible.
 - Dependencias funcionales: PB-001, PB-002
 - Prioridad: P1
-- Estado: `nuevo`
+- Estado: `validado`
+- Nota de estado: `qa-teams` valido la issue #7 el 2026-03-31 sobre la rama `developer-teams/issue-7-pipeline-seguimiento`. La historia queda en `validado` mientras `product-manager` mantiene abierta la issue hasta disponer de evidencia de integracion en `main` y borrado de rama o dejar constancia administrativa del bloqueo.
 
 ## HU-06 Disponer de reglas auditables de relevancia TI
 - Backlog relacionado: PB-006
@@ -191,7 +192,8 @@
   6. El rediseño no degrada la navegacion hacia catalogo, detalle, filtros ni alertas ya disponibles.
 - Dependencias funcionales: PB-001, PB-002, PB-003
 - Prioridad: P1
-- Estado: `nuevo`
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la navegacion de la issue #10 y la entrega quedo integrada en `main`; `product-manager` la cerro administrativamente el 2026-03-30.
 
 ## HU-11 Consolidar licitaciones TI Canarias desde snapshots `.atom` versionados
 - Backlog relacionado: PB-011
@@ -230,8 +232,8 @@
   6. Si un dato no viene informado en origen, la interfaz lo muestra como no informado o equivalente claro.
 - Dependencias funcionales: PB-011, PB-002
 - Prioridad: P0
-- Estado: `validado`
-- Nota de estado: `qa-teams` valido la reentrega de la issue #12 el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`. La historia no puede cerrarse administrativamente hasta que `developer-teams` deje evidencia de fusion en `main` y borrado de rama.
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la reentrega de la issue #12 el 2026-03-29. `developer-teams` integro la rama en `main` y la elimino el 2026-03-30; `product-manager` reconcilia la historia como cerrada.
 
 ## HU-13 Gestionar acceso por rol a las acciones del sistema
 - Backlog relacionado: PB-013

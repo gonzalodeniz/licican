@@ -1,13 +1,15 @@
 # Borradores de issues de GitHub
 
 ## Estado actual
+- Las unicas issues funcionales abiertas a fecha 2026-04-01 son `#7`, `#8`, `#13` y `#16`.
+- La issue de `PB-005` ya fue validada por `qa-teams` el 2026-03-31 en la issue #7 y debe mantenerse en `Estado operativo: validado` mientras siga abierta por integracion o cierre administrativo.
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26 y ya quedo cerrada administrativamente el 2026-03-30 tras validacion, integracion en `main` y borrado de rama.
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
-- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26, `qa-teams` la valido el 2026-03-29 y actualmente sigue abierta en `Estado operativo: validado` por falta de evidencia de fusion en `main` y borrado de rama.
-- La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos.
+- La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26, `qa-teams` la valido el 2026-03-29, `developer-teams` la integro en `main` el 2026-03-30 y ya no debe tratarse como issue abierta.
+- La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos y pasa a ser la siguiente issue funcional elegible.
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
-- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones.
+- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones y queda por detras de `PB-013`.
 - La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue tecnica `T-003` ya fue creada en GitHub como issue #18 para unificar utilidades de texto compartidas.
 - La issue tecnica `T-004` ya fue creada en GitHub como issue #19 para centralizar constantes de dominio compartidas.
@@ -88,8 +90,8 @@ Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si la primera iteracion debe cubrir solo las tres pestañas indicadas o dejar preparada tambien la extension posterior a `Modificaciones`.
 - Que subconjunto minimo de columnas del Excel debe priorizarse primero si la interfaz no puede absorberlas todas en una unica pantalla sin degradar legibilidad.
 
-Bloqueo administrativo actual:
-- `qa-teams` ya valido la entrega el 2026-03-29, pero la issue no debe cerrarse hasta que `developer-teams` deje en la propia issue la evidencia explicita de fusion en `main` y borrado de la rama `developer-teams/issue-12-pb-012-vistas-excel`.
+Estado administrativo actual:
+- La issue #12 ya fue reconciliada como cerrada tras validacion, merge en `main` y borrado de rama.
 
 ## Issue creada: Navegacion principal responsive con menu lateral de iconos
 
@@ -167,6 +169,9 @@ Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si el primer corte funcional debe resolver autenticacion real o puede apoyarse inicialmente en roles simulados para validar el comportamiento visible.
 - Que vistas de KPI pueden exponerse a `Colaborador` sin abrir informacion sensible de negocio o de otros usuarios.
 
+Prioridad operativa vigente:
+- Es la siguiente issue funcional elegible de producto una vez reflejado que `PB-005` ya esta `validado`.
+
 ## Issue creada: Paginacion de resultados del catalogo
 
 Titulo sugerido: `[product-manager] PB-014 Paginacion de resultados del catalogo`
@@ -207,6 +212,9 @@ Estado operativo: nuevo
 Contexto funcional:
 - El panel debe servir de control operativo para conservar datos y prevenir borrados no deseados de oportunidades activas.
 - La tabla archivada debe mantener la misma estructura de datos para no romper trazabilidad ni consultas futuras.
+
+Dependencia operativa vigente:
+- Esta issue no debe adelantarse a `PB-013` y conviene retomarla cuando `PB-005` ya haya completado su integracion o su cierre administrativo.
 
 ## Issue creada: Corregir el filtrado de licitaciones tras PostgreSQL
 
