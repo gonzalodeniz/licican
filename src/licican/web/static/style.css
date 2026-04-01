@@ -38,10 +38,12 @@
 
 html {
   font-size: 16px;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
   background: var(--background);
   color: var(--text-main);
   font-family: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -103,32 +105,35 @@ code {
 
 .app-shell {
   width: 100%;
-  padding: 20px;
+  min-height: 100vh;
+  padding: 0;
 }
 
 .app-frame {
-  max-width: var(--content-max);
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-  gap: 28px;
-  align-items: start;
+  gap: 0;
+  align-items: stretch;
 }
 
 .content-shell {
   min-width: 0;
+  padding: 24px 28px 40px;
 }
 
 main {
   min-width: 0;
-  padding: 8px 0 40px;
+  padding: 0;
 }
 
 .side-nav {
   position: sticky;
-  top: 20px;
+  top: 0;
+  min-height: 100vh;
   padding: 20px 16px 18px;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--sidebar);
   color: var(--text-inverse);
   box-shadow: var(--shadow-sidebar);
@@ -811,11 +816,13 @@ ul {
 @media (max-width: 960px) {
   .app-shell {
     padding: 14px;
+    min-height: auto;
   }
 
   .app-frame {
     grid-template-columns: 1fr;
     gap: 16px;
+    min-height: auto;
   }
 
   .side-nav {
@@ -824,6 +831,10 @@ ul {
 
   .mobile-nav {
     display: block;
+  }
+
+  .content-shell {
+    padding: 0;
   }
 
   main {
