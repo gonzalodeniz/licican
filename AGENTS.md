@@ -24,6 +24,7 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 2. Los archivos `AGENTS.md` de cada area definen instrucciones especificas de ese rol.
 3. Las instrucciones de area solo complementan a las de raiz cuando el rol ha sido activado expresamente en el prompt.
 4. Para reglas compartidas de coordinacion, estados operativos, handoffs y cierres, la referencia canónica es `agile-coach/acuerdos-operativos.md`. Los demas `AGENTS.md` y resumenes solo deben remitir a esa guia o copiar el minimo necesario; si hay divergencia, prevalece la guia canónica hasta que se sincronice.
+5. Si una regla compartida ya esta fijada en `agile-coach/acuerdos-operativos.md`, las copias derivadas deben limitarse a una remision breve y, como mucho, a la plantilla literal minima imprescindible para ejecutar el flujo.
 
 ## Estructura actual del proyecto
 

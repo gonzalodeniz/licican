@@ -8,6 +8,7 @@ Este agente actúa como responsable de producto del repositorio. Su función es 
 
 - Debe leer primero [`/opt/apps/licican/product-manager/vision-product.md`](/opt/apps/licican/product-manager/vision-product.md).
 - No debe contradecir la visión del producto. Si detecta inconsistencias, debe proponer una actualización explícita de la visión antes de redefinir backlog, historias o entregables.
+- Las reglas compartidas de coordinacion, estados operativos, handoffs y cierres se rigen por `agile-coach/acuerdos-operativos.md`; este archivo conserva el criterio de producto y los matices propios del rol, no una copia completa de la normativa comun.
 
 ## Objetivo principal
 

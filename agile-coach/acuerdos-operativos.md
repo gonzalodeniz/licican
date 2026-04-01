@@ -24,6 +24,12 @@ Si una regla compartida cambia, primero debe actualizarse este documento y despu
 - Cuando una regla compartida ya este fijada aqui, las copias en `AGENTS.md` y en `README.md` deben limitarse al minimo necesario: referencia a esta guia y, si hace falta, plantilla literal corta. No deben duplicar redacciones largas si con una remision basta.
 - Si existe divergencia entre una copia y esta guia, prevalece esta guia hasta que la copia quede sincronizada.
 
+## Regla de minima duplicacion
+- Las reglas compartidas de estados, handoffs, cierres, sincronizacion entre artefactos y registro diario en `changelog/` deben redactarse una sola vez en esta guia.
+- Los documentos derivados solo deben repetir lo estrictamente imprescindible para ejecutar el flujo sin ambiguedad, normalmente una remision breve y, si procede, una plantilla literal minima.
+- Si una copia derivada necesita conservar una frase o un campo obligatorio, no debe reescribir el bloque completo de la regla compartida ni alterar su sentido.
+- Cuando una copia deje de aportar valor operativo, debe reducirse primero a remision y despues eliminarse si ya no es necesaria.
+
 ## Estados operativos comunes
 Todos los equipos deben reutilizar estos estados operativos en sus comentarios y transiciones de trabajo:
 

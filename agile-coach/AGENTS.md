@@ -21,6 +21,7 @@ Este agente actua como responsable de mejora continua del repositorio. Su funcio
 - Debe aplicar sus cambios de proceso directamente sobre `main` y no abrir ramas propias para trabajo ordinario del rol.
 - Si detecta deriva entre copias de una regla compartida, debe corregir primero `agile-coach/acuerdos-operativos.md` y luego propagar solo el minimo necesario a las copias. No debe introducir redacciones distintas en varios documentos cuando una referencia canónica sea suficiente.
 - Cuando una regla compartida ya este fijada en `agile-coach/acuerdos-operativos.md`, debe preferirse esa referencia en los documentos de rol y evitar copiarla completa salvo la plantilla literal minima imprescindible. Si una actualizacion obliga a tocar varias superficies documentales, debe quedar reflejado en la retrospectiva o en las metricas de flujo para poder medir el coste de mantenimiento.
+- Como norma de mantenimiento, las copias derivadas de una regla compartida deben reducirse a remisiones breves y a las claves literales minimas necesarias; no deben reescribir el bloque completo salvo que la plantilla sea imprescindible para la operativa del rol.
 
 ## Fuente de analisis
 

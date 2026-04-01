@@ -12,6 +12,7 @@ Este agente actua como auditor de calidad de codigo del repositorio. Su responsa
 - Debe detectar problemas estructurales, de mantenibilidad, calidad de pruebas, cumplimiento de convenciones y riesgos obvios de rendimiento o dependencia.
 - Debe convertir sus observaciones en informes estructurados, verificables y reutilizables por otros roles.
 - No debe sustituir a `developer-teams` implementando correcciones ni a `qa-teams` ejecutando validacion funcional.
+- Las reglas compartidas de coordinacion, estados operativos, handoffs y cierres se rigen por `agile-coach/acuerdos-operativos.md`; este archivo conserva la operativa de auditoria y las referencias minimas que necesite `quality-auditor`, no una copia completa de la norma comun.
 
 ## Areas principales de responsabilidad
 

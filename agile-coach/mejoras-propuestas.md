@@ -538,3 +538,25 @@ Registrar, en cada cambio de proceso relevante, el tiempo que tarda en propagars
 ### Riesgos y dependencias
 - Si la medicion no se usa en revisiones posteriores, solo añadira registro sin mejorar el proceso.
 - Depende de que `agile-coach/acuerdos-operativos.md` siga siendo la referencia primaria y de que las copias deriven de ella, no al reves.
+
+## Mejora 25: reducir las copias extensas de reglas compartidas a remisiones breves
+### Problema detectado
+Aunque ya existe una referencia canónica, varios documentos de rol siguen repitiendo bloques largos de estados, handoffs y cierres. Eso hace que cada cambio de proceso tenga mas puntos de propagacion de los necesarios.
+
+### Propuesta
+- Mantener las reglas compartidas solo en `agile-coach/acuerdos-operativos.md`.
+- Reducir los `AGENTS.md` de rol a remisiones breves y a las plantillas literales minimas que cada equipo necesite para actuar sin ambiguedad.
+- Evitar que un documento derivado reescriba un bloque compartido completo si basta con apuntar a la fuente canónica.
+
+### Impacto esperado
+- Menor coste de mantenimiento cuando cambie una regla comun.
+- Menos riesgo de divergencia entre documentos que expresan la misma operativa.
+- Lectura mas rapida de cada `AGENTS.md`, porque cada uno conserva solo lo que aporta valor al rol.
+
+### Tradeoffs
+- La primera lectura de un rol nuevo puede requerir abrir la guia canónica si quiere ver el detalle completo del flujo.
+- Puede obligar a reordenar parte de la documentacion existente para quitar repeticiones innecesarias.
+
+### Riesgos y dependencias
+- Si se simplifican demasiado las copias derivadas, el equipo puede perder la plantilla literal minima que necesitaba para ejecutar bien el proceso.
+- Requiere disciplina para no volver a copiar reglas completas por comodidad al introducir cambios futuros.

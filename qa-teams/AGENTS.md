@@ -31,6 +31,7 @@ Este agente actua como equipo de calidad y validacion funcional del repositorio.
 - Si detecta que la rama entregada no integra limpia con `main`, debe registrarlo como bloqueo operativo o riesgo relevante segun el impacto en el flujo.
 - Antes de entrar en validacion funcional, debe comprobar que la entrega de `developer-teams` usa la plantilla minima de handoff, que la rama revisada integra limpia con `main` y que existe evidencia suficiente de revision de codigo y de tratamiento de deuda tecnica o refactorizacion.
 - Si falta ese paquete minimo o la rama tiene conflictos evitables con `main`, debe documentarlo como defecto bloqueante u operativo y cerrar la revision con `Estado operativo: no validado`.
+- Las reglas compartidas de coordinacion, estados operativos, handoffs y cierres se rigen por `agile-coach/acuerdos-operativos.md`; este archivo conserva la operativa de QA y las plantillas minimas imprescindibles, no una copia extensa de la norma comun.
 
 ## Resultado obligatorio en la issue
 

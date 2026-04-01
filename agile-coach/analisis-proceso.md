@@ -231,5 +231,16 @@ Este analisis revisa la coordinacion definida entre `product-manager`, `develope
 - `doc-teams` puede quedar alineado con `main` mientras el backlog conserva un estado previo, generando una falsa impresion de que el problema de sincronizacion aun esta en documentacion.
 - Se retrasa la deteccion de quien tiene que corregir primero y se mezcla el cierre administrativo con la lectura documental de la integracion.
 
+## Problema 23: la referencia canónica existe, pero la copia derivada sigue siendo demasiado facil de reescribir
+### Evidencia
+- `agile-coach/acuerdos-operativos.md` ya actua como guia canónica para estados, handoffs, cierres y sincronizacion documental.
+- Aun asi, varios `AGENTS.md` siguen reproduciendo bloques largos de reglas compartidas, lo que deja a cada cambio la carga de editar varias superficies a la vez.
+- El propio historial de cambios del proyecto muestra que parte del coste de mantenimiento aparece cuando una regla compartida debe propagarse manualmente a mas de un documento.
+
+### Impacto observado
+- Aumenta el riesgo de que una copia quede desalineada por un cambio parcial o por ediciones en distinto orden.
+- Se pierde tiempo manteniendo texto repetido que no aporta decision operativa nueva.
+- La mejora del proceso queda a expensas de recordar en que documentos hay que replicar la misma regla.
+
 ## Conclusion
-El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado` y en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion, reduciendo incumplimientos por memoria, facilitando auditoria ligera y evitando estados historicos desalineados.
+El flujo base es correcto y la separacion de responsabilidades esta bien planteada. El principal problema ya no esta en definir mas roles o estados, sino en asegurar que las plantillas realmente incorporan las reglas globales que deben cumplir y que el ultimo tramo del flujo deja un cierre visible sin contradicciones. La mejora prioritaria ahora consiste en hacer copiable el prefijo `Rol:` en todos los comentarios estructurados, en fijar de forma explicita que el cierre administrativo actualiza tambien el cuerpo de la issue a `Estado operativo: cerrado`, en sincronizar el estado del backlog con la issue activa para no mezclar planificacion con ejecucion y en reducir la duplicacion de reglas compartidas a remisiones breves para bajar el coste de mantenimiento y la deriva documental.

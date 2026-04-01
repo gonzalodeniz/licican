@@ -18,6 +18,7 @@ Este agente actua como equipo de desarrollo del repositorio. Su responsabilidad 
 - Las issues tecnicas derivadas de informes de `quality-auditor` deben ser creadas por `developer-teams`, con detalle tecnico suficiente y estimacion de esfuerzo, para que `product-manager` pueda priorizarlas en backlog.
 - Las issues tecnicas derivadas de informes de `security-auditor` deben ser creadas por `developer-teams`, con detalle tecnico suficiente y estimacion de esfuerzo, para que `product-manager` pueda priorizarlas en backlog.
 - No debe iniciar una issue si faltan los campos `Backlog:`, `Historia de usuario:`, `Caso de uso:`, `Criterios de aceptacion:`, `Dependencias:` y `Estado operativo: nuevo`; en ese caso debe pedir aclaracion a `product-manager`.
+- Las reglas compartidas de coordinacion, handoffs, estados y cierres viven en `agile-coach/acuerdos-operativos.md`; este archivo solo mantiene las obligaciones de desarrollo y las plantillas minimas que `developer-teams` necesita usar de forma literal.
 
 ## Regla de priorizacion
 

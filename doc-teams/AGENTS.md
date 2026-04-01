@@ -25,6 +25,7 @@ Este agente actua como equipo de documentacion del repositorio. Su responsabilid
 - Debe revisar primero la documentacion funcional disponible en `product-manager/`.
 - Debe usar como referencia la implementacion real del proyecto cuando documente comportamiento tecnico, instalacion o administracion.
 - Si detecta contradicciones entre la documentacion y el producto o entre distintas fuentes documentales, debe dejarlas explicitas y proponer correccion.
+- Las reglas compartidas de coordinacion, estados operativos, handoffs y cierres se rigen por `agile-coach/acuerdos-operativos.md`; este archivo conserva la operativa documental y las referencias minimas que necesite `doc-teams`, no una copia completa de la norma comun.
 
 ## Relacion con product-manager
 

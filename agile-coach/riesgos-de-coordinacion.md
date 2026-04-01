@@ -97,3 +97,8 @@ Registrar los riesgos de coordinacion que siguen activos tras los ajustes de pro
 - Senal observable: la issue `#12` figura en `Estado operativo: validado` en GitHub, pero `product-manager/product-backlog.md` sigue mostrando `PB-012` como `no validado`.
 - Impacto: la entrega aceptada puede seguir pareciendo bloqueada, se retrasa el cierre administrativo y se confunde a quien consulta el backlog para decidir la siguiente accion.
 - Mitigacion acordada: cuando `qa-teams` cambie el estado de una issue a `validado`, `product-manager` debe sincronizar el backlog en el mismo ciclo operativo y no dejarlo en un estado anterior por inercia; si la issue sigue abierta, el backlog debe permanecer en `validado` hasta el cierre real.
+
+## Riesgo 20: reaparicion de duplicidad en reglas compartidas por copiar en lugar de remitir
+- Senal observable: una regla comun cambia en la guia canónica, pero una o varias copias derivadas siguen repitiendo el bloque completo en vez de limitarse a una remision breve.
+- Impacto: se multiplican las superficies que hay que revisar, aumenta la probabilidad de deriva y se pierde parte del beneficio de tener una fuente de verdad unica.
+- Mitigacion acordada: mantener las reglas compartidas solo en `agile-coach/acuerdos-operativos.md` y reducir los `AGENTS.md` de rol a remisiones cortas mas la plantilla literal minima necesaria.
