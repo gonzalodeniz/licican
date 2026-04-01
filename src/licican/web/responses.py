@@ -59,5 +59,5 @@ def build_url(base_path: str, path: str) -> str:
     if not base_path:
         return normalized_path
     if normalized_path == "/":
-        return base_path
+        return f"{base_path}/"
     return f"{base_path}{normalized_path}"

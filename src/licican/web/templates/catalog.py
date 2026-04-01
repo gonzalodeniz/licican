@@ -38,12 +38,17 @@ def render_pagination(base_path: str, filters: dict[str, object], pagination: di
         return ""
     prev_link = ""
     if pagination["pagina_anterior"] is not None:
-        prev_link = f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_anterior"])))}">Pagina anterior</a>'
+        prev_link = f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_anterior"]), int(pagination["tamano_pagina"])))}">Pagina anterior</a>'
     next_link = ""
     if pagination["pagina_siguiente"] is not None:
-        next_link = f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_siguiente"])))}">Pagina siguiente</a>'
+        next_link = f'<a class="button-link" href="{escape(_catalog_page_url(base_path, filters, int(pagination["pagina_siguiente"]), int(pagination["tamano_pagina"])))}">Pagina siguiente</a>'
     hidden_fields = "".join(f'<input type="hidden" name="{escape(str(key))}" value="{escape(str(value))}" />' for key, value in filters.items() if value not in (None, ""))
-    jump = f'<form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/"))}">{hidden_fields}<label for="catalog-page">Ir a la pagina</label><input id="catalog-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" /><button type="submit">Ir</button></form>'
+    page_size_options = "".join(
+        f'<option value="{value}"' + (" selected" if int(pagination["tamano_pagina"]) == value else "") + f">{value}</option>"
+        for value in (5, 10, 25, 50)
+    )
+    page_size_control = f'<label for="catalog-page-size">Resultados por pagina</label><select id="catalog-page-size" name="page_size" onchange="this.form.submit()">{page_size_options}</select>'
+    jump = f'<form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/"))}">{hidden_fields}{page_size_control}<label for="catalog-page">Ir a la pagina</label><input id="catalog-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" /><button type="submit">Ir</button></form>'
     return f'<div class="pagination-bar"><div class="pagination-status"><strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong><span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span></div><div class="pagination-actions">{prev_link}{next_link}</div>{jump}</div>'
 
 
@@ -73,7 +78,7 @@ def render_catalog(catalog: dict[str, object], base_path: str = "") -> str:
             "</tr>"
             for item in opportunities
         )
-        catalog_panel = f'<section class="panel"><div class="panel-body"><div class="summary">{render_metric(catalog["total_oportunidades_catalogo"], "Oportunidades TI visibles")}{render_metric(len(catalog["cobertura_aplicada"]), coverage_label)}{render_metric(catalog["total_oportunidades_visibles"], "Oportunidades TI antes de filtrar")}</div>{render_pagination(base_path, active_filters, pagination)}<p class="muted">{coverage_note}</p></div><div class="table-wrap"><table><thead><tr><th>Oferta</th><th>Organismo</th><th>Ubicación</th><th>Procedimiento</th><th>Presupuesto</th><th>Publicación oficial</th><th>Fecha límite</th><th>Estado</th><th>Fuente oficial</th></tr></thead><tbody>{rows}</tbody></table></div><div class="panel-body">{render_pagination(base_path, active_filters, pagination)}</div></section>'
+        catalog_panel = f'<section class="panel"><div class="panel-body"><div class="summary">{render_metric(catalog["total_oportunidades_catalogo"], "Oportunidades TI visibles")}{render_metric(len(catalog["cobertura_aplicada"]), coverage_label)}{render_metric(catalog["total_oportunidades_visibles"], "Oportunidades TI antes de filtrar")}</div><p class="muted">{coverage_note}</p></div><div class="table-wrap"><table><thead><tr><th>Oferta</th><th>Organismo</th><th>Ubicación</th><th>Procedimiento</th><th>Presupuesto</th><th>Publicación oficial</th><th>Fecha límite</th><th>Estado</th><th>Fuente oficial</th></tr></thead><tbody>{rows}</tbody></table></div><div class="panel-body">{render_pagination(base_path, active_filters, pagination)}</div></section>'
     else:
         message = "No hay resultados con los filtros activos." if active_filters and validation_error is None else ("No hay oportunidades TI disponibles en los snapshots `.atom` consolidados en este momento." if uses_atom_consolidation else "No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento.")
         catalog_panel = f'<section class="note">{escape(message)}</section>'
@@ -98,8 +103,8 @@ def _format_budget(amount: int | None) -> str:
     return f"{amount:,.0f}".replace(",", ".") + " EUR"
 
 
-def _catalog_page_url(base_path: str, filters: dict[str, object], page: int) -> str:
-    query = urlencode({**{key: value for key, value in filters.items() if value not in (None, "")}, "page": page})
+def _catalog_page_url(base_path: str, filters: dict[str, object], page: int, page_size: int) -> str:
+    query = urlencode({**{key: value for key, value in filters.items() if value not in (None, "")}, "page": page, "page_size": page_size})
     return f"{build_url(base_path, '/')}" + (f"?{query}" if query else "")
 
 

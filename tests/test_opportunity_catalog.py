@@ -101,14 +101,15 @@ class OpportunityCatalogTests(unittest.TestCase):
             [
                 "pcsp-cabildo-licencias-2026",
                 "govcan-backup-cloud-2026",
+                "cabildo-redes-2026",
             ],
             [item["id"] for item in catalog["oportunidades"]],
         )
         self.assertEqual(1, catalog["paginacion"]["pagina_actual"])
-        self.assertEqual(2, catalog["paginacion"]["tamano_pagina"])
-        self.assertEqual(2, catalog["paginacion"]["total_paginas"])
+        self.assertEqual(10, catalog["paginacion"]["tamano_pagina"])
+        self.assertEqual(1, catalog["paginacion"]["total_paginas"])
         self.assertEqual(1, catalog["paginacion"]["resultado_desde"])
-        self.assertEqual(2, catalog["paginacion"]["resultado_hasta"])
+        self.assertEqual(3, catalog["paginacion"]["resultado_hasta"])
         self.assertEqual(3, len(catalog["cobertura_aplicada"]))
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in catalog["oportunidades"]))
 
@@ -207,10 +208,10 @@ class OpportunityCatalogTests(unittest.TestCase):
             catalog["error_validacion"],
         )
         self.assertEqual(3, catalog["total_oportunidades_catalogo"])
-        self.assertEqual(2, len(catalog["oportunidades"]))
+        self.assertEqual(3, len(catalog["oportunidades"]))
 
     def test_build_catalog_returns_requested_page_slice(self) -> None:
-        catalog = build_catalog(page=2, backend="file")
+        catalog = build_catalog(page=2, page_size=2, backend="file")
 
         self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in catalog["oportunidades"]])
         self.assertEqual(2, catalog["paginacion"]["pagina_actual"])
@@ -228,10 +229,13 @@ class OpportunityCatalogTests(unittest.TestCase):
     def test_build_catalog_clamps_page_out_of_range(self) -> None:
         catalog = build_catalog(page=9, backend="file")
 
-        self.assertEqual(2, catalog["paginacion"]["pagina_actual"])
+        self.assertEqual(1, catalog["paginacion"]["pagina_actual"])
         self.assertTrue(catalog["paginacion"]["ajustada"])
         self.assertEqual("fuera_de_rango", catalog["paginacion"]["motivo_ajuste"])
-        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in catalog["oportunidades"]])
+        self.assertEqual(
+            ["pcsp-cabildo-licencias-2026", "govcan-backup-cloud-2026", "cabildo-redes-2026"],
+            [item["id"] for item in catalog["oportunidades"]],
+        )
 
     def test_load_opportunity_records_consolidates_latest_snapshot_from_atom_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
