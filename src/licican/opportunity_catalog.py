@@ -15,7 +15,7 @@ from licican.ti_classification import OpportunityCandidate, classify_opportunity
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_PATH = BASE_DIR / "data"
-DEFAULT_CATALOG_PAGE_SIZE = 2
+DEFAULT_CATALOG_PAGE_SIZE = 10
 
 
 @dataclass(frozen=True)

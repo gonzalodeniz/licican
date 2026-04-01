@@ -81,10 +81,10 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Adjudicaciones", html)
         self.assertIn('/licican/datos-consolidados', html)
         self.assertIn('<link rel="stylesheet" href="/licican/static/style.css"', html)
-        self.assertIn("Pagina 1 de 2", html)
-        self.assertIn("Mostrando 1-2 de 3", html)
-        self.assertIn("Pagina siguiente", html)
-        self.assertIn("Ir a la pagina", html)
+        self.assertNotIn("Pagina 1 de 1", html)
+        self.assertNotIn("Mostrando 1-3 de 3", html)
+        self.assertNotIn("Pagina siguiente", html)
+        self.assertNotIn("Ir a la pagina", html)
         self.assertIn("Menu principal", html)
         self.assertIn('class="nav-link active" href="/licican/"', html)
         self.assertIn("Datos consolidados", html)
@@ -93,15 +93,16 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn('href="/licican/pipeline"', html)
         self.assertNotIn('href="/licican/permisos"', html)
 
-    def test_root_pagination_next_page_renders_second_slice(self) -> None:
+    def test_root_pagination_keeps_single_page_when_results_fit(self) -> None:
         status, headers, body = invoke_app("/", "page=2")
         html = body.decode("utf-8")
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
-        self.assertIn("Pagina 2 de 2", html)
+        self.assertIn("La pagina solicitada (2) no existe. Se muestra la pagina 1.", html)
+        self.assertIn("pcsp-cabildo-licencias-2026", html)
+        self.assertIn("govcan-backup-cloud-2026", html)
         self.assertIn("cabildo-redes-2026", html)
-        self.assertNotIn("pcsp-cabildo-licencias-2026", html)
         self.assertNotIn("Pagina siguiente", html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
@@ -132,8 +133,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("2026-03-22", payload["oportunidades"][0]["fecha_publicacion_oficial"])
         self.assertEqual(97000, payload["oportunidades"][0]["presupuesto"])
         self.assertEqual(1, payload["paginacion"]["pagina_actual"])
-        self.assertEqual(2, payload["paginacion"]["tamano_pagina"])
-        self.assertEqual(2, payload["paginacion"]["total_paginas"])
+        self.assertEqual(10, payload["paginacion"]["tamano_pagina"])
+        self.assertEqual(1, payload["paginacion"]["total_paginas"])
         self.assertTrue(all(item["clasificacion_ti"] == "TI" for item in payload["oportunidades"]))
 
     def test_api_applies_functional_filters_from_query_string(self) -> None:
@@ -149,16 +150,18 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(["pcsp-cabildo-licencias-2026"], [item["id"] for item in payload["oportunidades"]])
         self.assertEqual("licencias", payload["filtros_activos"]["palabra_clave"])
 
-    def test_api_allows_requesting_a_specific_page(self) -> None:
+    def test_api_clamps_out_of_range_page_with_default_page_size(self) -> None:
         status, headers, body = invoke_app("/api/oportunidades", "page=2")
         payload = json.loads(body)
 
         self.assertEqual("200 OK", status)
         self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
-        self.assertEqual(2, payload["paginacion"]["pagina_actual"])
-        self.assertEqual(3, payload["paginacion"]["resultado_desde"])
+        self.assertEqual(1, payload["paginacion"]["pagina_actual"])
+        self.assertEqual(1, payload["paginacion"]["resultado_desde"])
         self.assertEqual(3, payload["paginacion"]["resultado_hasta"])
-        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
+        self.assertEqual(["pcsp-cabildo-licencias-2026", "govcan-backup-cloud-2026", "cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
+        self.assertTrue(payload["paginacion"]["ajustada"])
+        self.assertEqual("fuera_de_rango", payload["paginacion"]["motivo_ajuste"])
 
     def test_api_normalizes_invalid_page_requests(self) -> None:
         status, _, body = invoke_app("/api/oportunidades", "page=99")
@@ -167,8 +170,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertTrue(payload["paginacion"]["ajustada"])
         self.assertEqual("fuera_de_rango", payload["paginacion"]["motivo_ajuste"])
-        self.assertEqual(2, payload["paginacion"]["pagina_actual"])
-        self.assertEqual(["cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
+        self.assertEqual(1, payload["paginacion"]["pagina_actual"])
+        self.assertEqual(["pcsp-cabildo-licencias-2026", "govcan-backup-cloud-2026", "cabildo-redes-2026"], [item["id"] for item in payload["oportunidades"]])
 
     def test_root_preserves_filters_in_pagination_links(self) -> None:
         paginated_catalog = {
