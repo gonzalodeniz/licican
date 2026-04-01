@@ -75,7 +75,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Publicación oficial", html)
         self.assertIn("Fuente oficial", html)
         self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
-        self.assertIn('action="/licican"', html)
+        self.assertIn('action="/licican/"', html)
         self.assertIn("Licitaciones TI Canarias", html)
         self.assertIn("Detalle Lotes", html)
         self.assertIn("Adjudicaciones", html)
@@ -86,12 +86,23 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Pagina siguiente", html)
         self.assertIn("Ir a la pagina", html)
         self.assertIn("Menu principal", html)
-        self.assertIn('class="nav-link active" href="/licican"', html)
+        self.assertIn('class="nav-link active" href="/licican/"', html)
         self.assertIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
         self.assertIn("proximamente", html)
         self.assertNotIn('href="/licican/pipeline"', html)
         self.assertNotIn('href="/licican/permisos"', html)
+
+    def test_root_pagination_next_page_renders_second_slice(self) -> None:
+        status, headers, body = invoke_app("/", "page=2")
+        html = body.decode("utf-8")
+
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Pagina 2 de 2", html)
+        self.assertIn("cabildo-redes-2026", html)
+        self.assertNotIn("pcsp-cabildo-licencias-2026", html)
+        self.assertNotIn("Pagina siguiente", html)
 
     def test_catalog_page_accepts_prefixed_base_path_route(self) -> None:
         status, headers, body = invoke_app("/licican/")
@@ -101,7 +112,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
         self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
-        self.assertIn('href="/licican"', html)
+        self.assertIn('href="/licican/"', html)
 
     def test_static_route_serves_css_file(self) -> None:
         status, headers, body = invoke_app("/static/style.css")
@@ -208,6 +219,7 @@ class ApplicationTests(unittest.TestCase):
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertIn("ubicacion=Gran+Canaria&amp;page=2", html)
+        self.assertIn("/licican/?ubicacion=Gran+Canaria&amp;page=2", html)
 
     def test_root_reports_adjusted_invalid_page_consistently(self) -> None:
         status, _, body = invoke_app("/", "page=0")
@@ -385,7 +397,7 @@ class ApplicationTests(unittest.TestCase):
         html = body.decode("utf-8")
 
         self.assertEqual("200 OK", status)
-        self.assertIn('class="nav-link active" href="/licican"', html)
+        self.assertIn('class="nav-link active" href="/licican/"', html)
         self.assertIn("Menu principal", html)
 
     def test_alert_creation_rejects_empty_form(self) -> None:

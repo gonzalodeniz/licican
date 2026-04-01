@@ -10,7 +10,7 @@ class ResponsesTests(unittest.TestCase):
     def test_build_url_respects_base_path(self) -> None:
         self.assertEqual("/licican/alertas", build_url("/licican", "/alertas"))
         self.assertEqual("/alertas", build_url("", "/alertas"))
-        self.assertEqual("/licican", build_url("/licican", "/"))
+        self.assertEqual("/licican/", build_url("/licican", "/"))
 
     def test_read_form_data_parses_urlencoded_body(self) -> None:
         environ = {
