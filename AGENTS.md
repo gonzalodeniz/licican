@@ -31,30 +31,154 @@ Si el prompt no activa uno de esos roles de forma explicita, no deben asumirse n
 ```text
 /
 |-- AGENTS.md
+|-- Dockerfile
 |-- Makefile
 |-- README.md
+|-- bin/
+|   `-- importar_licitaciones.py
+|-- docker-compose.yml
 |-- pyproject.toml
+|-- requirements.txt
 |-- bbdd/
 |   |-- .env
 |   |-- .env.example
-|   |-- 01-schema.sql
 |   |-- Dockerfile
 |   |-- README.md
 |   |-- docker-compose-bbdd.yml
-|   |-- importar_licitaciones.py
+|   |-- initdb/
+|   |   `-- 01-schema.sql
 |   `-- requirements.txt
 |-- changelog/
+|   |-- README.md
+|   `-- 2026-03-17.md ... 2026-04-02.md
 |-- data/
-|-- src/
-|   `-- licican/
-|-- tests/
+|   |-- alerts.json
+|   |-- licitaciones_ti_canarias.xlsx
+|   |-- opportunities.json
+|   |-- real_source_prioritization.json
+|   |-- source_coverage.json
+|   `-- ti_classification_rules.json
 |-- product-manager/
+|   |-- AGENTS.md
+|   |-- casos-de-uso.md
+|   |-- definicion-de-hecho.md
+|   |-- epicas/
+|   |   |-- README.md
+|   |   |-- e-01-descubrimiento-y-relevancia.md
+|   |   |-- e-02-ingestion-y-trazabilidad-del-dato-oficial.md
+|   |   |-- e-03-retencion-y-seguimiento-operativo.md
+|   |   `-- e-04-experiencia-transversal-y-gobierno.md
+|   |-- especificacion-funcional-gestion-licitaciones.md
+|   |-- historias-de-usuario.md
+|   |-- issues-github.md
+|   |-- product-backlog.md
+|   |-- prompt-product-manager.md
+|   |-- refinamiento-funcional.md
+|   |-- roadmap.md
+|   `-- vision-product.md
 |-- developer-teams/
+|   |-- AGENTS.md
+|   `-- prompt-developer-teams.md
 |-- qa-teams/
+|   |-- AGENTS.md
+|   `-- prompt-qa-teams.md
 |-- doc-teams/
+|   |-- AGENTS.md
+|   |-- README.md
+|   |-- faq.md
+|   |-- glosario.md
+|   |-- guia-despliegue.md
+|   |-- guia-instalacion.md
+|   |-- manual-administracion.md
+|   |-- manual-tecnico.md
+|   |-- manual-usuario.md
+|   |-- matriz-trazabilidad.md
+|   `-- prompt-doc-teams.md
 |-- agile-coach/
+|   |-- AGENTS.md
+|   |-- acuerdos-operativos.md
+|   |-- analisis-proceso.md
+|   |-- mejoras-propuestas.md
+|   |-- metricas-flujo.md
+|   |-- prompt-agile-coach.md
+|   |-- retrospectiva.md
+|   `-- riesgos-de-coordinacion.md
 |-- quality-auditor/
+|   |-- AGENTS.md
+|   |-- informes/
+|   |   `-- 2026-03-28.md
+|   `-- prompt-quality-auditor.md
 |-- security-auditor/
+|   |-- AGENTS.md
+|   |-- informes/
+|   |   `-- 2026-03-28.md
+|   `-- prompt-security-auditor.md
+|-- src/
+|   |-- licican/
+|   |   |-- __init__.py
+|   |   |-- access.py
+|   |   |-- alerts.py
+|   |   |-- app.py
+|   |   |-- atom_consolidation.py
+|   |   |-- canarias_dataset.py
+|   |   |-- config.py
+|   |   |-- opportunity_catalog.py
+|   |   |-- pipeline.py
+|   |   |-- postgres_catalog.py
+|   |   |-- real_source_prioritization.py
+|   |   |-- shared/
+|   |   |   |-- __init__.py
+|   |   |   |-- domain_constants.py
+|   |   |   |-- filters.py
+|   |   |   |-- text.py
+|   |   |   `-- xml_helpers.py
+|   |   |-- source_coverage.py
+|   |   |-- ti_classification.py
+|   |   `-- web/
+|   |       |-- __init__.py
+|   |       |-- responses.py
+|   |       |-- router.py
+|   |       |-- static/
+|   |       |   `-- style.css
+|   |       `-- templates/
+|   |           |-- __init__.py
+|   |           |-- alerts.py
+|   |           |-- base.py
+|   |           |-- catalog.py
+|   |           |-- classification.py
+|   |           |-- components.py
+|   |           |-- coverage.py
+|   |           |-- dataset.py
+|   |           |-- detail.py
+|   |           |-- kpis.py
+|   |           |-- permissions.py
+|   |           |-- pipeline.py
+|   |           `-- prioritization.py
+|   `-- licican.egg-info/
+|       |-- PKG-INFO
+|       |-- SOURCES.txt
+|       |-- dependency_links.txt
+|       `-- top_level.txt
+|-- tests/
+|   |-- shared/
+|   |   |-- __init__.py
+|   |   |-- test_domain_constants.py
+|   |   |-- test_filters.py
+|   |   |-- test_text.py
+|   |   `-- test_xml_helpers.py
+|   |-- web/
+|   |   |-- __init__.py
+|   |   |-- test_responses.py
+|   |   `-- test_templates.py
+|   |-- test_alerts.py
+|   |-- test_app.py
+|   |-- test_config.py
+|   |-- test_opportunity_catalog.py
+|   |-- test_pipeline.py
+|   |-- test_postgres_catalog.py
+|   |-- test_real_source_prioritization.py
+|   |-- test_source_coverage.py
+|   `-- test_ti_classification.py
 |-- 1_rol-product-manager.sh
 |-- 2_rol-developer-teams.sh
 |-- 3_rol-qa-teams.sh
