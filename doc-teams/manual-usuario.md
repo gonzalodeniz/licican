@@ -15,7 +15,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Una API JSON del detalle en `/api/oportunidades/<id>`.
 - Una gestion HTML de alertas tempranas en `/alertas`.
 - Una API JSON de alertas persistidas y coincidencias internas en `/api/alertas`.
-- Una gestion administrativa de usuarios en `/usuarios`.
+- Una gestion administrativa de usuarios en `/usuarios`, persistida en PostgreSQL.
 - Una API JSON de usuarios en `/api/usuarios`.
 - Una vista HTML de cobertura inicial del MVP en `/cobertura-fuentes`.
 - Una salida JSON de esa cobertura en `/api/fuentes`.
@@ -34,7 +34,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Que la priorizacion de fuentes reales oficiales para recopilacion ya esta visible y ordenada por `Ola 1`, `Ola 2` y `Ola 3`.
 - Que las alertas tempranas reutilizan los mismos filtros que el catalogo, se pueden crear, editar y desactivar, y registran coincidencias internas accionables.
 - Que la regla de relevancia TI muestra inclusiones, exclusiones y casos frontera auditables.
-- Que la gestion administrativa de usuarios permite listar cuentas, aplicar filtros, crear usuarios, ver detalle y ejecutar acciones de alta, edicion, activacion, desactivacion, baja logica, reenvio de invitacion y reinicio de acceso segun el rol activo.
+- Que la gestion administrativa de usuarios permite listar cuentas, aplicar filtros, crear usuarios, ver detalle y ejecutar acciones de alta, edicion, activacion, desactivacion, baja logica, reenvio de invitacion y reinicio de acceso segun el rol activo, con persistencia en PostgreSQL.
 
 ## Recorrido recomendado para una revision funcional
 1. Abre `/` y revisa el listado de oportunidades visibles.
@@ -60,7 +60,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 
 ## Limitaciones relevantes para usuario
 - Las superficies actuales permiten descubrimiento inicial, filtrado funcional, revision de detalle y gestion interna de alertas, pero no cubren todavia seguimiento operativo ni pipeline.
-- La gestion administrativa de usuarios esta disponible para roles con permisos, pero no existe todavia autenticacion real contra proveedor externo, SSO ni MFA.
+- La gestion administrativa de usuarios esta disponible para roles con permisos y persiste en PostgreSQL, pero no existe todavia autenticacion real contra proveedor externo, SSO ni MFA.
 - La priorizacion de fuentes reales oficiales ya es accesible en una superficie propia, pero solo ordena la recopilacion; no activa pipeline.
 - Los filtros actuales actuan solo sobre el catalogo visible y su API; no existe todavia una persistencia de preferencias separada del registro de alertas internas.
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.

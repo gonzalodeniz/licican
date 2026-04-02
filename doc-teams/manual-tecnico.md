@@ -18,7 +18,7 @@ Equipo tecnico que necesita conocer la implementacion actual de `main`, sus ruta
 - `Issue #14`: backend PostgreSQL operativo por defecto para catalogo y detalle, con modo `file` disponible para pruebas aisladas.
 - Despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, incluyendo PostgreSQL integrada.
 
-La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defecto mediante la issue tecnica #14. El modo `file` sigue disponible para pruebas aisladas y usa `data/opportunities.json` cuando no hay snapshots Atom versionados en `data/`. La ruta Atom de `PB-011` permanece soportada por el codigo, pero esta checkout no versiona snapshots `.atom`; por tanto, la evidencia reproducible de esa consolidacion depende de pruebas temporales o de aportar ficheros Atom externos. `PB-016` ya aporta gestion administrativa de usuarios con persistencia JSON en `data/users.json` y control de acceso por rol simulado. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
+La version actual de `main` sirve catalogo y detalle desde PostgreSQL por defecto mediante la issue tecnica #14. El modo `file` sigue disponible para pruebas aisladas y usa `data/opportunities.json` cuando no hay snapshots Atom versionados en `data/`. La ruta Atom de `PB-011` permanece soportada por el codigo, pero esta checkout no versiona snapshots `.atom`; por tanto, la evidencia reproducible de esa consolidacion depende de pruebas temporales o de aportar ficheros Atom externos. `PB-016` ya aporta gestion administrativa de usuarios con persistencia en PostgreSQL, control de acceso por rol simulado y trazabilidad basica de cambios. La descripcion de paquete en `pyproject.toml` sigue mencionando solo cobertura de fuentes. Esa metadata ya no resume por completo el comportamiento observable de la rama.
 La issue tecnica #17 ya esta integrada en `main` y corrige la resolucion de ubicacion en PostgreSQL para no degradar etiquetas geograficas especificas a `Canarias`.
 
 ## Artefactos tecnicos presentes
@@ -31,6 +31,7 @@ La issue tecnica #17 ya esta integrada en `main` y corrige la resolucion de ubic
 - Priorizacion de fuentes reales oficiales: `src/licican/real_source_prioritization.py`
 - Carga y evaluacion de reglas TI: `src/licican/ti_classification.py`
 - Datos versionados: `data/opportunities.json`, `data/source_coverage.json`, `data/real_source_prioritization.json`, `data/ti_classification_rules.json`
+- Esquema y semillas PostgreSQL: `bbdd/initdb/01-schema.sql`
 - Respaldo de alertas: `data/alerts.json`
 - Excel de referencia para `PB-012`: `data/licitaciones_ti_canarias.xlsx`
 - Suite tecnica: `tests/test_app.py`, `tests/test_alerts.py`, `tests/test_opportunity_catalog.py`, `tests/test_real_source_prioritization.py`, `tests/test_source_coverage.py`, `tests/test_ti_classification.py`
@@ -80,7 +81,7 @@ Con el backend PostgreSQL por defecto, la carga procede de la tabla `licitacion`
 - [source_coverage.py](/opt/apps/licican/src/licican/source_coverage.py) valida estados de cobertura permitidos (`MVP`, `Posterior`, `Por definir`) y resume conteos.
 - [real_source_prioritization.py](/opt/apps/licican/src/licican/real_source_prioritization.py) valida las olas permitidas (`Ola 1`, `Ola 2`, `Ola 3`), ordena las fuentes por prioridad y resume la distribucion por ola.
 - [ti_classification.py](/opt/apps/licican/src/licican/ti_classification.py) normaliza texto, aplica reglas funcionales y audita ejemplos con tres salidas posibles: `TI`, `No TI` y `Caso frontera`.
-- [users.py](/opt/apps/licican/src/licican/users.py) persiste usuarios en JSON, valida duplicados, aplica guardias sobre el ultimo administrador activo y registra trazabilidad basica de las acciones.
+- [users.py](/opt/apps/licican/src/licican/users.py) persiste usuarios en PostgreSQL, valida duplicados, aplica guardias sobre el ultimo administrador activo y registra trazabilidad basica de las acciones.
 
 ## Verificacion reproducible
 Desde la raiz del proyecto:
@@ -98,7 +99,7 @@ Resultado verificado en esta revision:
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.
 - La BBDD PostgreSQL integrada responde en `localhost:15432` por defecto y se puede abrir con `make docker-psql`.
 - Las rutas `http://127.0.0.1:<PORT>/alertas` y `http://127.0.0.1:<PORT>/api/alertas` responden con la gestion interna de alertas tempranas del MVP.
-- Las rutas `http://127.0.0.1:<PORT>/usuarios` y `http://127.0.0.1:<PORT>/api/usuarios` responden con la gestion administrativa de usuarios basada en datos versionados.
+- Las rutas `http://127.0.0.1:<PORT>/usuarios` y `http://127.0.0.1:<PORT>/api/usuarios` responden con la gestion administrativa de usuarios basada en PostgreSQL.
 - Las rutas `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` y `http://127.0.0.1:<PORT>/api/fuentes-prioritarias` siguen disponibles para la priorizacion de fuentes reales.
 - La ruta `http://127.0.0.1:<PORT>/oportunidades/<id>` expone el fichero `.atom` origen de la oportunidad cuando la consolidacion Atom recibe ficheros de entrada.
 - El backend PostgreSQL por defecto devuelve error controlado si la base no esta disponible y el modo `file` sigue accesible para verificacion aislada.
@@ -113,7 +114,7 @@ Resultado verificado en esta revision:
 
 ## Limitaciones tecnicas actuales
 - No existe autenticacion real, SSO ni MFA; el control de acceso sigue siendo por rol simulado en la capa actual.
-- La gestion de usuarios persiste en `data/users.json` o en la ruta indicada por `LICICAN_USERS_PATH`; si no existe, el sistema recrea una semilla de ejemplo.
+- La gestion de usuarios persiste en PostgreSQL y utiliza la semilla registrada en `bbdd/initdb/01-schema.sql` como referencia inicial; si la base no responde, el sistema expone un error controlado.
 - `PB-012` no esta expuesto en la superficie tecnica revisada, asi que no debe documentarse como disponible aunque el changelog la haya citado como validada.
 - El changelog de `2026-03-31` menciona `pipeline` como validado, pero el codigo y las pruebas de `main` no exponen todavia esa superficie.
 - No hay autenticacion real, tareas programadas ni integracion externa.

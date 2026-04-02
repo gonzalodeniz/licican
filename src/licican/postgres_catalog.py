@@ -8,6 +8,7 @@ from typing import Any
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from licican.config import resolve_database_url
 from licican.shared.domain_constants import (
     CANARIAS_KEYWORDS,
     map_procedure,
@@ -127,7 +128,10 @@ class PostgresCatalogConfig:
 
 
 def load_postgres_opportunity_records() -> tuple[str, list[dict[str, Any]]]:
-    config = PostgresCatalogConfig(database_url=_resolve_database_url())
+    try:
+        config = PostgresCatalogConfig(database_url=resolve_database_url())
+    except ValueError as exc:
+        raise PostgresCatalogError(str(exc)) from exc
     keyword_patterns = [f"%{keyword}%" for keyword in CANARIAS_KEYWORDS]
 
     try:
@@ -139,27 +143,6 @@ def load_postgres_opportunity_records() -> tuple[str, list[dict[str, Any]]]:
         raise PostgresCatalogError("No se pudo consultar PostgreSQL para cargar el catalogo.") from exc
 
     return REFERENCE, [_row_to_record(row) for row in rows]
-
-
-def _resolve_database_url() -> str:
-    explicit_url = os.getenv("LICICAN_DATABASE_URL") or os.getenv("DATABASE_URL")
-    if explicit_url:
-        return explicit_url
-
-    raw_password = os.getenv("DB_PASSWORD")
-    if raw_password is None or not raw_password.strip():
-        raise PostgresCatalogError(
-            "No se ha configurado conexión a PostgreSQL. Define LICICAN_DATABASE_URL o las variables DB_*."
-        )
-
-    host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "15432")
-    database = os.getenv("DB_NAME", "licitaciones")
-    user = os.getenv("DB_USER", "licitaciones_admin")
-    password = raw_password.strip()
-    return f"postgresql://{user}:{password}@{host}:{port}/{database}"
-
-
 def _row_to_record(row: dict[str, Any]) -> dict[str, Any]:
     expediente_id = str(row["expediente_id"])
     titulo = str(row.get("titulo") or expediente_id).strip()

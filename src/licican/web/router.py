@@ -9,14 +9,14 @@ from urllib.parse import parse_qs
 from licican.access import AccessContext, has_capability, resolve_access_context
 from licican.alerts import create_alert, deactivate_alert, filter_alerts_by_user, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path, resolve_users_path
+from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
 from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
-from licican.users import UserFilters, build_users_payload, change_user_state, create_user, resend_invitation, reset_access, update_user
+from licican.users import UsersDatabaseError, UserFilters, build_users_payload, change_user_state, create_user, resend_invitation, reset_access, update_user
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 from licican.web.templates.alerts import render_alerts
 from licican.web.templates.base import page_template
@@ -220,11 +220,33 @@ def _visible_pipeline_payload(request: Request) -> dict[str, object]:
 
 def _visible_users_payload(request: Request, selected_user_id: str | None = None) -> dict[str, object]:
     return build_users_payload(
-        path=resolve_users_path(),
         filters=_parse_user_filters(request),
         page=_parse_users_page(request),
         page_size=_parse_users_page_size(request),
         selected_user_id=selected_user_id,
+    )
+
+
+def _users_data_error_html(base_path: str, message: str) -> str:
+    content = f"""
+      <section class="note note-warning">
+        <strong>Base de datos de usuarios no disponible</strong><br />
+        {escape(message)}
+      </section>
+      <section class="panel">
+        <div class="panel-body">
+          <p>La gestion de usuarios depende de PostgreSQL y no puede renderizarse mientras la conexion no responda.</p>
+        </div>
+      </section>
+    """
+    return page_template(
+        "Licican | Usuarios temporalmente no disponibles",
+        "Usuarios temporalmente no disponibles",
+        "Servicio de datos no disponible",
+        "El modulo de gestion de usuarios requiere acceso a la base de datos configurada.",
+        content,
+        current_path="/usuarios",
+        base_path=base_path,
     )
 
 
@@ -291,6 +313,9 @@ def handle_users_page(request: Request, start_response, id: str | None = None) -
             selected_user_id = request.path.rsplit("/", 1)[-1]
         payload = _visible_users_payload(request, selected_user_id=selected_user_id)
         content = render_users(payload, request.base_path, None, status_message, request.access_context)
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     except Exception as exc:
         content = render_users(_visible_users_payload(request), request.base_path, str(exc), status_message, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
@@ -327,10 +352,12 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
             superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
-            path=resolve_users_path(),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, str(exc))
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+creado+y+registrado")
 
 
@@ -348,12 +375,14 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
-            path=resolve_users_path(),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)
     except KeyError:
         return _not_found(start_response)
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Usuario+actualizado")
 
 
@@ -363,11 +392,14 @@ def handle_change_user_state(request: Request, start_response, id: str) -> list[
     form_data = read_form_data(request.environ)
     state = (form_data.get("estado") or [""])[0]
     try:
-        change_user_state(id, state, path=resolve_users_path())
+        change_user_state(id, state)
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado el estado de {id}. {exc}", selected_user_id=id)
     except KeyError:
         return _not_found(start_response)
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Estado+de+usuario+actualizado")
 
 
@@ -375,11 +407,14 @@ def handle_resend_user_invitation(request: Request, start_response, id: str) -> 
     if not has_capability(request.access_context, "manage_users"):
         return _deny_html(request, start_response, "manage_users")
     try:
-        resend_invitation(id, path=resolve_users_path())
+        resend_invitation(id)
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha reenviado la invitacion de {id}. {exc}", selected_user_id=id)
     except KeyError:
         return _not_found(start_response)
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Invitacion+reenviada")
 
 
@@ -387,11 +422,14 @@ def handle_reset_user_access(request: Request, start_response, id: str) -> list[
     if not has_capability(request.access_context, "manage_users"):
         return _deny_html(request, start_response, "manage_users")
     try:
-        reset_access(id, path=resolve_users_path())
+        reset_access(id)
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha reiniciado el acceso de {id}. {exc}", selected_user_id=id)
     except KeyError:
         return _not_found(start_response)
+    except UsersDatabaseError as exc:
+        content = _users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Acceso+reiniciado")
 
 
@@ -706,14 +744,20 @@ def handle_permissions_page(request: Request, start_response) -> list[bytes]:
 def handle_api_users(request: Request, start_response) -> list[bytes]:
     if not has_capability(request.access_context, "view_users"):
         return _deny_json(start_response, "view_users")
-    payload = _visible_users_payload(request)
+    try:
+        payload = _visible_users_payload(request)
+    except UsersDatabaseError as exc:
+        return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", b"".join(json_body({"error": str(exc)})))
     return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
 
 
 def handle_api_user_detail(request: Request, start_response, id: str) -> list[bytes]:
     if not has_capability(request.access_context, "view_users"):
         return _deny_json(start_response, "view_users")
-    payload = _visible_users_payload(request, selected_user_id=id)
+    try:
+        payload = _visible_users_payload(request, selected_user_id=id)
+    except UsersDatabaseError as exc:
+        return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", b"".join(json_body({"error": str(exc)})))
     user = payload.get("usuario_seleccionado")
     if user is None:
         return _not_found(start_response)

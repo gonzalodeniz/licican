@@ -6,7 +6,7 @@ Centralizar la documentacion oficial de `Licican` separando con claridad el cont
 ## Estado documental de referencia
 Fecha de revision: `2026-04-02`.
 
-Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, la issue tecnica #17 (`T-002`) que corrige la resolucion de ubicacion en PostgreSQL y la issue #28, que añade gestion administrativa de usuarios con persistencia JSON y trazabilidad basica por rol.
+Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, la issue tecnica #17 (`T-002`) que corrige la resolucion de ubicacion en PostgreSQL y la issue #28, que añade gestion administrativa de usuarios con persistencia en PostgreSQL y trazabilidad basica por rol.
 La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pero esta checkout no versiona snapshots `.atom` en `data/`; por eso, la carga reproducible desde el arbol actual cae en el respaldo `data/opportunities.json` salvo que se aporten ficheros Atom temporales o externos.
 
 - Vista HTML del catalogo inicial de oportunidades TI (`PB-001`) en `/`.
@@ -35,7 +35,7 @@ La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pe
 - La issue tecnica `#17` queda documentada como integrada en `main`; este estado ya forma parte de la fotografia vigente de la rama principal.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/`, configuracion de `PORT` via `.env`, variables `DB_*` para PostgreSQL y una BBDD integrada con volumen persistente.
 
-Las alertas tempranas y la gestion administrativa de usuarios ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion real ni un despliegue productivo endurecido.
+Las alertas tempranas y la gestion administrativa de usuarios ya estan implementadas y verificables en `main`; esta ultima persiste en PostgreSQL. Lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion real ni un despliegue productivo endurecido.
 
 ## Audiencias cubiertas
 - Usuario final o stakeholder funcional: [manual-usuario.md](manual-usuario.md)

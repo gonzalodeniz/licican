@@ -162,6 +162,120 @@ CREATE TABLE IF NOT EXISTS fichero_procesado (
 
 COMMENT ON TABLE  fichero_procesado IS 'Registro de ficheros ATOM ya importados para evitar reprocesarlos';
 COMMENT ON COLUMN fichero_procesado.nombre_fichero IS 'Nombre del fichero (basename), ej: licitacionesPerfilesContratanteCompleto3_20260327_202106.atom';
+
+-- ============================================================
+-- Tablas de gestión administrativa de usuarios
+-- ============================================================
+CREATE TABLE IF NOT EXISTS usuario (
+    id                      TEXT        NOT NULL,
+    nombre                  TEXT        NOT NULL,
+    apellidos               TEXT        NOT NULL,
+    email                   TEXT        NOT NULL,
+    rol_principal           TEXT        NOT NULL,
+    estado                  TEXT        NOT NULL,
+    observaciones_internas   TEXT        NOT NULL DEFAULT '',
+    fecha_alta              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ultimo_acceso           TIMESTAMPTZ,
+    invitacion_pendiente     BOOLEAN     NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT usuario_pk PRIMARY KEY (id),
+    CONSTRAINT usuario_email_uk UNIQUE (email),
+    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica')),
+    CONSTRAINT usuario_nombre_ck CHECK (btrim(nombre) <> ''),
+    CONSTRAINT usuario_apellidos_ck CHECK (btrim(apellidos) <> ''),
+    CONSTRAINT usuario_email_ck CHECK (btrim(email) <> ''),
+    CONSTRAINT usuario_rol_ck CHECK (btrim(rol_principal) <> '')
+);
+
+CREATE INDEX idx_usuario_estado ON usuario (estado);
+CREATE INDEX idx_usuario_rol_principal ON usuario (rol_principal);
+CREATE INDEX idx_usuario_email ON usuario (email);
+CREATE INDEX idx_usuario_fecha_alta ON usuario (fecha_alta);
+
+CREATE TABLE IF NOT EXISTS usuario_superficie (
+    usuario_id              TEXT        NOT NULL,
+    superficie              TEXT        NOT NULL,
+    orden                   INTEGER     NOT NULL DEFAULT 0,
+
+    CONSTRAINT usuario_superficie_pk PRIMARY KEY (usuario_id, orden),
+    CONSTRAINT usuario_superficie_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
+    CONSTRAINT usuario_superficie_uk UNIQUE (usuario_id, superficie),
+    CONSTRAINT usuario_superficie_ck CHECK (btrim(superficie) <> '')
+);
+
+CREATE INDEX idx_usuario_superficie_superficie ON usuario_superficie (superficie);
+
+CREATE TABLE IF NOT EXISTS usuario_historial (
+    id                      BIGSERIAL   NOT NULL,
+    usuario_id              TEXT        NOT NULL,
+    accion                  TEXT        NOT NULL,
+    fecha                   TIMESTAMPTZ NOT NULL,
+    detalle                 TEXT        NOT NULL,
+
+    CONSTRAINT usuario_historial_pk PRIMARY KEY (id),
+    CONSTRAINT usuario_historial_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
+    CONSTRAINT usuario_historial_uk UNIQUE (usuario_id, fecha, accion, detalle),
+    CONSTRAINT usuario_historial_accion_ck CHECK (btrim(accion) <> ''),
+    CONSTRAINT usuario_historial_detalle_ck CHECK (btrim(detalle) <> '')
+);
+
+CREATE INDEX idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
+
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
+VALUES
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador de plataforma', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'administrador funcional', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'responsable', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'colaborador', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO usuario_superficie (usuario_id, superficie, orden)
+VALUES
+    ('usr-001', 'Catalogo', 0),
+    ('usr-001', 'Usuarios', 1),
+    ('usr-001', 'Permisos', 2),
+    ('usr-001', 'KPIs', 3),
+    ('usr-002', 'Catalogo', 0),
+    ('usr-002', 'Alertas', 1),
+    ('usr-002', 'Pipeline', 2),
+    ('usr-003', 'Catalogo', 0),
+    ('usr-003', 'Datos consolidados', 1),
+    ('usr-004', 'Catalogo', 0),
+    ('usr-004', 'Alertas', 1)
+ON CONFLICT (usuario_id, superficie) DO NOTHING;
+
+INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
+VALUES
+    ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
+    ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
+    ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
+    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
+    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de colaborador.'),
+    ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
+ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
+
+COMMENT ON TABLE usuario IS 'Cuentas administrativas de la aplicación Licican';
+COMMENT ON COLUMN usuario.id IS 'Identificador funcional estable de la cuenta';
+COMMENT ON COLUMN usuario.nombre IS 'Nombre de pila del usuario';
+COMMENT ON COLUMN usuario.apellidos IS 'Apellidos del usuario';
+COMMENT ON COLUMN usuario.email IS 'Correo electrónico único de la cuenta';
+COMMENT ON COLUMN usuario.rol_principal IS 'Rol funcional principal asignado';
+COMMENT ON COLUMN usuario.estado IS 'Estado operativo de la cuenta: activo, inactivo, pendiente, bloqueado o baja logica';
+COMMENT ON COLUMN usuario.observaciones_internas IS 'Notas internas no visibles para el acceso de usuario final';
+COMMENT ON COLUMN usuario.fecha_alta IS 'Fecha de alta administrativa de la cuenta';
+COMMENT ON COLUMN usuario.ultimo_acceso IS 'Último acceso registrado por la plataforma';
+COMMENT ON COLUMN usuario.invitacion_pendiente IS 'Indica si la cuenta aún debe activar la invitación';
+
+COMMENT ON TABLE usuario_superficie IS 'Superficies, modulos o ámbitos accesibles para cada usuario';
+COMMENT ON COLUMN usuario_superficie.usuario_id IS 'Identificador de la cuenta asociada';
+COMMENT ON COLUMN usuario_superficie.superficie IS 'Superficie o módulo funcional autorizado';
+COMMENT ON COLUMN usuario_superficie.orden IS 'Orden de presentación de la superficie en el backoffice';
+
+COMMENT ON TABLE usuario_historial IS 'Trazabilidad histórica de cambios sobre cuentas de usuario';
+COMMENT ON COLUMN usuario_historial.usuario_id IS 'Identificador de la cuenta afectada por el evento';
+COMMENT ON COLUMN usuario_historial.accion IS 'Tipo de evento registrado sobre la cuenta';
+COMMENT ON COLUMN usuario_historial.fecha IS 'Momento UTC del evento';
+COMMENT ON COLUMN usuario_historial.detalle IS 'Descripción operativa del cambio o acceso';
 -- ============================================================
 -- Comentarios descriptivos
 -- ============================================================

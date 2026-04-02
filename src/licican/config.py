@@ -99,10 +99,19 @@ def resolve_pipeline_path() -> Path:
     return BASE_DIR / "data" / "pipeline.json"
 
 
-def resolve_users_path() -> Path:
-    """Resuelve la ruta del almacén de usuarios."""
+def resolve_database_url(default_database: str = "licitaciones") -> str:
+    """Resuelve la URL de conexión a PostgreSQL compartida por la aplicación."""
     _ensure_env_loaded()
-    raw_path = os.environ.get("LICICAN_USERS_PATH", "").strip()
-    if raw_path:
-        return Path(raw_path)
-    return BASE_DIR / "data" / "users.json"
+    explicit_url = os.environ.get("LICICAN_DATABASE_URL") or os.environ.get("DATABASE_URL")
+    if explicit_url:
+        return explicit_url.strip()
+
+    raw_password = os.environ.get("DB_PASSWORD", "").strip()
+    if not raw_password:
+        raise ValueError("No se ha configurado conexión a PostgreSQL. Define LICICAN_DATABASE_URL o las variables DB_*.")
+
+    host = os.environ.get("DB_HOST", "localhost").strip() or "localhost"
+    port = os.environ.get("DB_PORT", "15432").strip() or "15432"
+    database = os.environ.get("DB_NAME", default_database).strip() or default_database
+    user = os.environ.get("DB_USER", "licitaciones_admin").strip() or "licitaciones_admin"
+    return f"postgresql://{user}:{raw_password}@{host}:{port}/{database}"

@@ -37,7 +37,7 @@ La intencion funcional sigue documentada y el codigo soporta la consolidacion At
 Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `LICICAN_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
 
 ## Ya existe gestion de usuarios en `main`?
-Si. La issue #28 ya quedo validada e integrada en `main`. La superficie `/usuarios` permite listar, filtrar, crear, editar y cambiar de estado cuentas, y la API `/api/usuarios` expone el listado y el detalle seleccionable. Lo que no existe aun es autenticacion real contra un proveedor externo, SSO o MFA.
+Si. La issue #28 ya quedo validada e integrada en `main`. La superficie `/usuarios` permite listar, filtrar, crear, editar y cambiar de estado cuentas, y la API `/api/usuarios` expone el listado y el detalle seleccionable. La persistencia se hace en PostgreSQL. Lo que no existe aun es autenticacion real contra un proveedor externo, SSO o MFA.
 
 ## PB-012 ya esta operativo en `main`?
 No segun la evidencia tecnica revisada en esta documentacion. El changelog de `2026-03-29` la registra como validada, pero en `main` no aparecen rutas, vistas ni pruebas para `/datos-consolidados` ni para las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.

@@ -12,7 +12,7 @@ Usuario interno del proyecto que necesita interpretar de forma consistente la te
 - `Clasificacion TI auditable`: superficie visible que expone reglas, exclusiones, casos frontera y ejemplos verificables antes del catalogo.
 - `Filtro funcional`: criterio aplicable sobre el catalogo visible y su API para reducir resultados por palabra clave, presupuesto, procedimiento o ubicacion.
 - `Snapshot .atom`: fichero Atom utilizado por `PB-011`; esta definicion aplica a muestras temporales o externas, porque el repositorio actual no versiona snapshots `.atom` en `data/`.
-- `Gestion de usuarios`: modulo administrativo disponible en `main` para listar, filtrar, crear, editar y cambiar de estado cuentas de usuario, con detalle y trazabilidad basica en `data/users.json`.
+- `Gestion de usuarios`: modulo administrativo disponible en `main` para listar, filtrar, crear, editar y cambiar de estado cuentas de usuario, con detalle y trazabilidad basica persistida en PostgreSQL.
 - `Pipeline`: seguimiento del estado de trabajo de una oportunidad por parte del usuario; sigue siendo capacidad planificada y no esta disponible en `main` revisado, aunque el changelog de `2026-03-31` la menciona como validada.
 - `Alerta temprana`: capacidad disponible en `main` para crear, editar y desactivar alertas internas reutilizando los filtros del catalogo y registrando coincidencias accionables; no incluye notificaciones salientes.
 

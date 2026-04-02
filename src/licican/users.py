@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import date, datetime, timezone
 from typing import Iterable
 
-from licican.config import BASE_DIR
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+from licican.config import resolve_database_url
 
 
-DEFAULT_USERS_PATH = BASE_DIR / "data" / "users.json"
 DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios"
 USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado", "baja logica")
 USER_ROLES = (
@@ -20,6 +20,159 @@ USER_ROLES = (
     "lector",
 )
 DEFAULT_SURFACES = ("Catalogo", "Datos consolidados", "Alertas", "Pipeline", "KPIs", "Permisos")
+
+USERS_SELECT_SQL = """
+SELECT
+    id,
+    nombre,
+    apellidos,
+    email,
+    rol_principal,
+    estado,
+    observaciones_internas,
+    fecha_alta,
+    ultimo_acceso,
+    invitacion_pendiente
+FROM usuario
+ORDER BY apellidos, nombre, email, id
+"""
+
+USER_SURFACES_SELECT_SQL = """
+SELECT
+    usuario_id,
+    superficie,
+    orden
+FROM usuario_superficie
+ORDER BY usuario_id, orden, superficie
+"""
+
+USER_HISTORY_SELECT_SQL = """
+SELECT
+    usuario_id,
+    accion,
+    fecha,
+    detalle
+FROM usuario_historial
+ORDER BY usuario_id, fecha, id
+"""
+
+USER_INSERT_SQL = """
+INSERT INTO usuario (
+    id,
+    nombre,
+    apellidos,
+    email,
+    rol_principal,
+    estado,
+    observaciones_internas,
+    fecha_alta,
+    ultimo_acceso,
+    invitacion_pendiente
+)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+"""
+
+USER_UPDATE_SQL = """
+UPDATE usuario
+SET nombre = %s,
+    apellidos = %s,
+    email = %s,
+    rol_principal = %s,
+    estado = %s,
+    observaciones_internas = %s,
+    ultimo_acceso = %s,
+    invitacion_pendiente = %s
+WHERE id = %s
+"""
+
+USER_DELETE_SURFACES_SQL = """
+DELETE FROM usuario_superficie
+WHERE usuario_id = %s
+"""
+
+USER_INSERT_SURFACE_SQL = """
+INSERT INTO usuario_superficie (usuario_id, superficie, orden)
+VALUES (%s, %s, %s)
+"""
+
+USER_INSERT_HISTORY_SQL = """
+INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
+VALUES (%s, %s, %s, %s)
+"""
+
+USER_SCHEMA_BOOTSTRAP_SQL = """
+CREATE TABLE IF NOT EXISTS usuario (
+    id                    TEXT        NOT NULL,
+    nombre                TEXT        NOT NULL,
+    apellidos             TEXT        NOT NULL,
+    email                 TEXT        NOT NULL,
+    rol_principal         TEXT        NOT NULL,
+    estado                TEXT        NOT NULL,
+    observaciones_internas TEXT        NOT NULL DEFAULT '',
+    fecha_alta            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ultimo_acceso         TIMESTAMPTZ,
+    invitacion_pendiente  BOOLEAN     NOT NULL DEFAULT FALSE,
+    CONSTRAINT usuario_pk PRIMARY KEY (id),
+    CONSTRAINT usuario_email_uk UNIQUE (email),
+    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica'))
+);
+CREATE TABLE IF NOT EXISTS usuario_superficie (
+    usuario_id TEXT NOT NULL,
+    superficie  TEXT NOT NULL,
+    orden       INTEGER NOT NULL DEFAULT 0,
+    CONSTRAINT usuario_superficie_pk PRIMARY KEY (usuario_id, orden),
+    CONSTRAINT usuario_superficie_uk UNIQUE (usuario_id, superficie),
+    CONSTRAINT usuario_superficie_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS usuario_historial (
+    id         BIGSERIAL NOT NULL,
+    usuario_id TEXT NOT NULL,
+    accion     TEXT NOT NULL,
+    fecha      TIMESTAMPTZ NOT NULL,
+    detalle    TEXT NOT NULL,
+    CONSTRAINT usuario_historial_pk PRIMARY KEY (id),
+    CONSTRAINT usuario_historial_uk UNIQUE (usuario_id, fecha, accion, detalle),
+    CONSTRAINT usuario_historial_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_usuario_estado ON usuario (estado);
+CREATE INDEX IF NOT EXISTS idx_usuario_rol_principal ON usuario (rol_principal);
+CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario (email);
+CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
+CREATE INDEX IF NOT EXISTS idx_usuario_superficie_superficie ON usuario_superficie (superficie);
+CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
+VALUES
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador de plataforma', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'administrador funcional', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'responsable', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'colaborador', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO usuario_superficie (usuario_id, superficie, orden)
+VALUES
+    ('usr-001', 'Catalogo', 0),
+    ('usr-001', 'Usuarios', 1),
+    ('usr-001', 'Permisos', 2),
+    ('usr-001', 'KPIs', 3),
+    ('usr-002', 'Catalogo', 0),
+    ('usr-002', 'Alertas', 1),
+    ('usr-002', 'Pipeline', 2),
+    ('usr-003', 'Catalogo', 0),
+    ('usr-003', 'Datos consolidados', 1),
+    ('usr-004', 'Catalogo', 0),
+    ('usr-004', 'Alertas', 1)
+ON CONFLICT (usuario_id, superficie) DO NOTHING;
+INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
+VALUES
+    ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
+    ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
+    ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
+    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
+    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de colaborador.'),
+    ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
+ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
+"""
+
+_SCHEMA_BOOTSTRAPPED = False
 
 
 @dataclass(frozen=True)
@@ -98,8 +251,38 @@ class UserFilters:
         return payload
 
 
-def _current_timestamp() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+class UsersDatabaseError(RuntimeError):
+    pass
+
+
+def _current_timestamp() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
+
+
+def _format_timestamp(value: datetime | date | str | None) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return cleaned or None
+    if isinstance(value, datetime):
+        normalized = value.astimezone(timezone.utc).replace(microsecond=0)
+        return normalized.isoformat().replace("+00:00", "Z")
+    if isinstance(value, date):
+        return value.isoformat()
+    return str(value)
+
+
+def _parse_timestamp(value: str | datetime | None) -> datetime:
+    if value is None:
+        return _current_timestamp()
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc).replace(microsecond=0)
+    cleaned = value.strip().replace("Z", "+00:00")
+    parsed = datetime.fromisoformat(cleaned)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).replace(microsecond=0)
 
 
 def _clean_text(value: str | None) -> str | None:
@@ -131,149 +314,139 @@ def _normalize_state(raw: str) -> str:
     return raw.strip().lower()
 
 
-def _default_history(action: str, detail: str, now: str | None = None) -> tuple[UserEvent, ...]:
-    return (UserEvent(accion=action, fecha=now or _current_timestamp(), detalle=detail),)
-
-
-def _seed_users() -> list[dict[str, object]]:
-    return [
-        {
-            "id": "usr-001",
-            "nombre": "Ana",
-            "apellidos": "Lopez",
-            "email": "ana.lopez@licican.local",
-            "rol_principal": "administrador de plataforma",
-            "estado": "activo",
-            "superficies": ["Catalogo", "Usuarios", "Permisos", "KPIs"],
-            "observaciones_internas": "Cuenta administrativa principal.",
-            "fecha_alta": "2026-04-01T09:00:00Z",
-            "ultimo_acceso": "2026-04-02T08:10:00Z",
-            "invitacion_pendiente": False,
-            "historial": [
-                {"accion": "alta", "fecha": "2026-04-01T09:00:00Z", "detalle": "Alta inicial de la cuenta administrativa."},
-                {"accion": "acceso", "fecha": "2026-04-02T08:10:00Z", "detalle": "Acceso de verificacion en el entorno de producto."},
-            ],
-        },
-        {
-            "id": "usr-002",
-            "nombre": "Carlos",
-            "apellidos": "Mendez",
-            "email": "carlos.mendez@licican.local",
-            "rol_principal": "administrador funcional",
-            "estado": "activo",
-            "superficies": ["Catalogo", "Alertas", "Pipeline"],
-            "observaciones_internas": "Apoyo funcional de operaciones.",
-            "fecha_alta": "2026-04-01T10:15:00Z",
-            "ultimo_acceso": "2026-04-02T07:50:00Z",
-            "invitacion_pendiente": False,
-            "historial": [
-                {"accion": "alta", "fecha": "2026-04-01T10:15:00Z", "detalle": "Alta de administracion funcional."}
-            ],
-        },
-        {
-            "id": "usr-003",
-            "nombre": "Laura",
-            "apellidos": "Gonzalez",
-            "email": "laura.gonzalez@licican.local",
-            "rol_principal": "responsable",
-            "estado": "pendiente",
-            "superficies": ["Catalogo", "Datos consolidados"],
-            "observaciones_internas": "Invitacion pendiente de activacion.",
-            "fecha_alta": "2026-04-02T08:30:00Z",
-            "ultimo_acceso": None,
-            "invitacion_pendiente": True,
-            "historial": [
-                {"accion": "alta", "fecha": "2026-04-02T08:30:00Z", "detalle": "Invitacion inicial enviada."}
-            ],
-        },
-        {
-            "id": "usr-004",
-            "nombre": "Mario",
-            "apellidos": "Perez",
-            "email": "mario.perez@licican.local",
-            "rol_principal": "colaborador",
-            "estado": "inactivo",
-            "superficies": ["Catalogo", "Alertas"],
-            "observaciones_internas": "Usuario en pausa operativa.",
-            "fecha_alta": "2026-03-30T11:00:00Z",
-            "ultimo_acceso": "2026-03-31T15:15:00Z",
-            "invitacion_pendiente": False,
-            "historial": [
-                {"accion": "alta", "fecha": "2026-03-30T11:00:00Z", "detalle": "Alta inicial de colaborador."},
-                {"accion": "desactivacion", "fecha": "2026-04-01T12:00:00Z", "detalle": "Cuenta desactivada temporalmente."},
-            ],
-        },
-    ]
-
-
-def _default_payload() -> dict[str, object]:
-    return {
-        "referencia_funcional": DEFAULT_REFERENCE,
-        "users": _seed_users(),
-    }
-
-
-def _user_from_payload(payload: dict[str, object]) -> ManagedUser:
-    historial = tuple(
-        UserEvent(
-            accion=str(item.get("accion") or "evento"),
-            fecha=str(item.get("fecha") or _current_timestamp()),
-            detalle=str(item.get("detalle") or ""),
-        )
-        for item in payload.get("historial", [])
-    )
-    return ManagedUser(
-        id=str(payload["id"]),
-        nombre=str(payload.get("nombre") or ""),
-        apellidos=str(payload.get("apellidos") or ""),
-        email=str(payload.get("email") or ""),
-        rol_principal=str(payload.get("rol_principal") or ""),
-        estado=str(payload.get("estado") or "pendiente"),
-        superficies=tuple(str(item) for item in payload.get("superficies", []) if str(item).strip()),
-        observaciones_internas=str(payload.get("observaciones_internas") or ""),
-        fecha_alta=str(payload.get("fecha_alta") or _current_timestamp()),
-        ultimo_acceso=None if payload.get("ultimo_acceso") in (None, "") else str(payload.get("ultimo_acceso")),
-        invitacion_pendiente=bool(payload.get("invitacion_pendiente", False)),
-        historial=historial,
-    )
-
-
-def load_users(path: Path = DEFAULT_USERS_PATH) -> tuple[str, list[ManagedUser]]:
-    if not path.is_file():
-        payload = _default_payload()
-        return payload["referencia_funcional"], [_user_from_payload(item) for item in payload["users"]]
-
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    reference = str(payload.get("referencia_funcional") or DEFAULT_REFERENCE)
-    users = [_user_from_payload(item) for item in payload.get("users", [])]
-    return reference, users
-
-
-def _save_users(reference: str, users: list[ManagedUser], path: Path) -> None:
-    payload = {"referencia_funcional": reference, "users": [user.to_payload() for user in users]}
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def _next_user_id(users: list[ManagedUser]) -> str:
-    numbers = []
-    for user in users:
-        if user.id.startswith("usr-"):
-            try:
-                numbers.append(int(user.id.split("-", 1)[1]))
-            except ValueError:
-                continue
-    next_number = (max(numbers) if numbers else 0) + 1
-    existing_ids = {user.id for user in users}
-    while True:
-        candidate = f"usr-{next_number:03d}"
-        if candidate not in existing_ids:
-            return candidate
-        next_number += 1
-
-
 def _is_admin_role(role: str) -> bool:
     return _normalize_role(role).startswith("administrador")
+
+
+def _connect():
+    try:
+        return psycopg2.connect(resolve_database_url())
+    except psycopg2.Error as exc:
+        raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
+
+
+def _ensure_schema(connection) -> None:
+    global _SCHEMA_BOOTSTRAPPED
+    if _SCHEMA_BOOTSTRAPPED:
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(USER_SCHEMA_BOOTSTRAP_SQL)
+    _SCHEMA_BOOTSTRAPPED = True
+
+
+def _default_history(action: str, detail: str, now: datetime | None = None) -> tuple[UserEvent, ...]:
+    return (_event(action, detail, now),)
+
+
+def _event(action: str, detail: str, now: datetime | None = None) -> UserEvent:
+    return UserEvent(accion=action, fecha=_format_timestamp(now or _current_timestamp()) or "", detalle=detail)
+
+
+def _user_from_record(record: dict[str, object]) -> ManagedUser:
+    return ManagedUser(
+        id=str(record["id"]),
+        nombre=str(record.get("nombre") or ""),
+        apellidos=str(record.get("apellidos") or ""),
+        email=str(record.get("email") or ""),
+        rol_principal=str(record.get("rol_principal") or ""),
+        estado=str(record.get("estado") or "pendiente"),
+        superficies=(),
+        observaciones_internas=str(record.get("observaciones_internas") or ""),
+        fecha_alta=_format_timestamp(record.get("fecha_alta")) or _format_timestamp(_current_timestamp()) or "",
+        ultimo_acceso=_format_timestamp(record.get("ultimo_acceso")),
+        invitacion_pendiente=bool(record.get("invitacion_pendiente", False)),
+        historial=(),
+    )
+
+
+def _load_aggregated_rows() -> tuple[str, list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
+    try:
+        with _connect() as connection:
+            _ensure_schema(connection)
+            with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(USERS_SELECT_SQL)
+                users = list(cursor.fetchall())
+                cursor.execute(USER_SURFACES_SELECT_SQL)
+                surfaces = list(cursor.fetchall())
+                cursor.execute(USER_HISTORY_SELECT_SQL)
+                history = list(cursor.fetchall())
+    except psycopg2.Error as exc:
+        raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
+    return DEFAULT_REFERENCE, users, surfaces, history
+
+
+def _assemble_users(
+    user_rows: list[dict[str, object]],
+    surface_rows: list[dict[str, object]],
+    history_rows: list[dict[str, object]],
+) -> list[ManagedUser]:
+    users = [_user_from_record(row) for row in user_rows]
+    users_by_id = {user.id: user for user in users}
+
+    surfaces_by_user: dict[str, list[tuple[int, str]]] = {user_id: [] for user_id in users_by_id}
+    for row in surface_rows:
+        user_id = str(row.get("usuario_id") or "")
+        if not user_id:
+            continue
+        surfaces_by_user.setdefault(user_id, []).append((int(row.get("orden") or 0), str(row.get("superficie") or "")))
+
+    history_by_user: dict[str, list[tuple[datetime, UserEvent]]] = {user_id: [] for user_id in users_by_id}
+    for row in history_rows:
+        user_id = str(row.get("usuario_id") or "")
+        if not user_id:
+            continue
+        history_by_user.setdefault(user_id, []).append(
+            (
+                _parse_timestamp(row.get("fecha")),
+                UserEvent(
+                    accion=str(row.get("accion") or "evento"),
+                    fecha=_format_timestamp(row.get("fecha")) or "",
+                    detalle=str(row.get("detalle") or ""),
+                ),
+            )
+        )
+
+    assembled: list[ManagedUser] = []
+    for user in users:
+        surfaces = tuple(surface for _, surface in sorted(surfaces_by_user.get(user.id, []), key=lambda item: (item[0], item[1])))
+        history = tuple(event for _, event in sorted(history_by_user.get(user.id, []), key=lambda item: item[0]))
+        assembled.append(
+            ManagedUser(
+                id=user.id,
+                nombre=user.nombre,
+                apellidos=user.apellidos,
+                email=user.email,
+                rol_principal=user.rol_principal,
+                estado=user.estado,
+                superficies=surfaces,
+                observaciones_internas=user.observaciones_internas,
+                fecha_alta=user.fecha_alta,
+                ultimo_acceso=user.ultimo_acceso,
+                invitacion_pendiente=user.invitacion_pendiente,
+                historial=history,
+            )
+        )
+    return assembled
+
+
+def load_users() -> tuple[str, list[ManagedUser]]:
+    reference, user_rows, surface_rows, history_rows = _load_aggregated_rows()
+    return reference, _assemble_users(user_rows, surface_rows, history_rows)
+
+
+def _ensure_admin_guard(users: list[ManagedUser], candidate_user: ManagedUser, new_role: str, new_state: str) -> None:
+    current_is_active_admin = _is_admin_role(candidate_user.rol_principal) and candidate_user.estado == "activo"
+    candidate_would_be_active_admin = _is_admin_role(new_role) and new_state == "activo"
+    if current_is_active_admin and not candidate_would_be_active_admin and _active_admin_count(users, candidate_user.id) == 0:
+        raise ValueError("No se puede dejar el sistema sin ningun usuario administrador activo.")
+
+
+def _active_admin_count(users: list[ManagedUser], exclude_user_id: str | None = None) -> int:
+    return sum(
+        1
+        for user in users
+        if user.id != exclude_user_id and _is_admin_role(user.rol_principal) and user.estado == "activo"
+    )
 
 
 def _validate_user_fields(
@@ -318,36 +491,13 @@ def _validate_user_fields(
     return nombre, apellidos, normalized_email, _normalize_role(rol_principal), surfaces, _normalize_state(estado)
 
 
-def _active_admin_count(users: list[ManagedUser], exclude_user_id: str | None = None) -> int:
-    return sum(
-        1
-        for user in users
-        if user.id != exclude_user_id and _is_admin_role(user.rol_principal) and user.estado == "activo"
-    )
-
-
-def _ensure_admin_guard(users: list[ManagedUser], candidate_user: ManagedUser, new_role: str, new_state: str) -> None:
-    current_is_active_admin = _is_admin_role(candidate_user.rol_principal) and candidate_user.estado == "activo"
-    candidate_would_be_active_admin = _is_admin_role(new_role) and new_state == "activo"
-    if current_is_active_admin and not candidate_would_be_active_admin and _active_admin_count(users, candidate_user.id) == 0:
-        raise ValueError("No se puede dejar el sistema sin ningun usuario administrador activo.")
-
-
-def _event(action: str, detail: str, now: str | None = None) -> UserEvent:
-    return UserEvent(accion=action, fecha=now or _current_timestamp(), detalle=detail)
-
-
-def _replace_user(users: list[ManagedUser], updated_user: ManagedUser) -> list[ManagedUser]:
-    return [updated_user if user.id == updated_user.id else user for user in users]
-
-
 def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
     return {
         "usuarios_totales": len(users),
         "usuarios_activos": sum(1 for user in users if user.estado == "activo"),
         "usuarios_inactivos": sum(1 for user in users if user.estado == "inactivo"),
         "invitaciones_pendientes": sum(1 for user in users if user.estado == "pendiente" or user.invitacion_pendiente),
-        "roles_definidos": len({user.rol_principal for user in users}),
+        "roles_definidos": len({user.rol_principal for user in users}) if users else len(USER_ROLES),
     }
 
 
@@ -370,19 +520,15 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
         result = [user for user in result if user.rol_principal == normalized.rol]
     if normalized.superficie:
         query = normalized.superficie.lower()
-        result = [
-            user
-            for user in result
-            if any(query in surface.lower() for surface in user.superficies)
-        ]
+        result = [user for user in result if any(query in surface.lower() for surface in user.superficies)]
     return sorted(result, key=lambda user: (user.apellidos.lower(), user.nombre.lower(), user.email.lower()))
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
     return {
         "estados": list(USER_STATUSES),
-        "roles": sorted({user.rol_principal for user in users}),
-        "superficies": sorted({surface for user in users for surface in user.superficies}),
+        "roles": sorted({user.rol_principal for user in users}) or list(USER_ROLES),
+        "superficies": sorted({surface for user in users for surface in user.superficies}) or list(DEFAULT_SURFACES),
     }
 
 
@@ -422,13 +568,12 @@ def paginate_users(users: list[ManagedUser], page: int, page_size: int) -> dict[
 
 
 def build_users_payload(
-    path: Path = DEFAULT_USERS_PATH,
     filters: UserFilters | None = None,
     page: int = 1,
     page_size: int = 10,
     selected_user_id: str | None = None,
 ) -> dict[str, object]:
-    reference, users = load_users(path)
+    reference, users = load_users()
     active_filters = (filters or UserFilters()).normalized()
     filtered = filter_users(users, active_filters)
     pagination = paginate_users(filtered, page, page_size)
@@ -455,10 +600,9 @@ def create_user(
     superficies: Iterable[str],
     estado: str = "pendiente",
     observaciones_internas: str = "",
-    now: str | None = None,
-    path: Path = DEFAULT_USERS_PATH,
+    now: str | datetime | None = None,
 ) -> ManagedUser:
-    reference, users = load_users(path)
+    _, users = load_users()
     nombre, apellidos, normalized_email, normalized_role, normalized_surfaces, normalized_state = _validate_user_fields(
         users,
         nombre,
@@ -468,7 +612,7 @@ def create_user(
         superficies,
         estado,
     )
-    timestamp = now or _current_timestamp()
+    timestamp = _parse_timestamp(now)
     new_user = ManagedUser(
         id=_next_user_id(users),
         nombre=nombre,
@@ -478,12 +622,12 @@ def create_user(
         estado=normalized_state,
         superficies=normalized_surfaces,
         observaciones_internas=_clean_text(observaciones_internas) or "",
-        fecha_alta=timestamp,
+        fecha_alta=_format_timestamp(timestamp) or "",
         ultimo_acceso=None,
         invitacion_pendiente=normalized_state == "pendiente",
         historial=_default_history("alta", "Alta inicial de la cuenta.", timestamp),
     )
-    _save_users(reference, [*users, new_user], path)
+    _persist_user(new_user)
     return new_user
 
 
@@ -497,11 +641,10 @@ def update_user(
     superficies: Iterable[str],
     estado: str,
     observaciones_internas: str = "",
-    now: str | None = None,
-    path: Path = DEFAULT_USERS_PATH,
+    now: str | datetime | None = None,
 ) -> ManagedUser:
-    reference, users = load_users(path)
-    for index, current in enumerate(users):
+    _, users = load_users()
+    for current in users:
         if current.id != user_id:
             continue
         nombre, apellidos, normalized_email, normalized_role, normalized_surfaces, normalized_state = _validate_user_fields(
@@ -515,7 +658,7 @@ def update_user(
             user_id=user_id,
         )
         _ensure_admin_guard(users, current, normalized_role, normalized_state)
-        timestamp = now or _current_timestamp()
+        timestamp = _parse_timestamp(now)
         updated = ManagedUser(
             id=current.id,
             nombre=nombre,
@@ -533,8 +676,7 @@ def update_user(
                 _event("edicion", "Datos basicos, rol o superficies actualizados.", timestamp),
             ),
         )
-        users[index] = updated
-        _save_users(reference, users, path)
+        _replace_user_record(updated)
         return updated
     raise KeyError(user_id)
 
@@ -543,18 +685,17 @@ def change_user_state(
     user_id: str,
     state: str,
     *,
-    path: Path = DEFAULT_USERS_PATH,
-    now: str | None = None,
+    now: str | datetime | None = None,
 ) -> ManagedUser:
-    reference, users = load_users(path)
+    _, users = load_users()
     normalized_state = _normalize_state(state)
     if normalized_state not in USER_STATUSES:
         raise ValueError("El estado indicado no es valido.")
-    for index, current in enumerate(users):
+    for current in users:
         if current.id != user_id:
             continue
         _ensure_admin_guard(users, current, current.rol_principal, normalized_state)
-        timestamp = now or _current_timestamp()
+        timestamp = _parse_timestamp(now)
         updated = ManagedUser(
             id=current.id,
             nombre=current.nombre,
@@ -572,8 +713,7 @@ def change_user_state(
                 _event("cambio_estado", f"Estado cambiado a {normalized_state}.", timestamp),
             ),
         )
-        users[index] = updated
-        _save_users(reference, users, path)
+        _replace_user_record(updated)
         return updated
     raise KeyError(user_id)
 
@@ -581,12 +721,11 @@ def change_user_state(
 def resend_invitation(
     user_id: str,
     *,
-    path: Path = DEFAULT_USERS_PATH,
-    now: str | None = None,
+    now: str | datetime | None = None,
 ) -> ManagedUser:
-    reference, users = load_users(path)
-    timestamp = now or _current_timestamp()
-    for index, current in enumerate(users):
+    _, users = load_users()
+    timestamp = _parse_timestamp(now)
+    for current in users:
         if current.id != user_id:
             continue
         if current.estado != "pendiente":
@@ -608,8 +747,7 @@ def resend_invitation(
                 _event("reenvio_invitacion", "Se reenvio la invitacion de activacion.", timestamp),
             ),
         )
-        users[index] = updated
-        _save_users(reference, users, path)
+        _replace_user_record(updated)
         return updated
     raise KeyError(user_id)
 
@@ -617,12 +755,11 @@ def resend_invitation(
 def reset_access(
     user_id: str,
     *,
-    path: Path = DEFAULT_USERS_PATH,
-    now: str | None = None,
+    now: str | datetime | None = None,
 ) -> ManagedUser:
-    reference, users = load_users(path)
-    timestamp = now or _current_timestamp()
-    for index, current in enumerate(users):
+    _, users = load_users()
+    timestamp = _parse_timestamp(now)
+    for current in users:
         if current.id != user_id:
             continue
         if current.estado == "pendiente":
@@ -644,7 +781,94 @@ def reset_access(
                 _event("reinicio_acceso", "Se reinicio el acceso o la contrasena.", timestamp),
             ),
         )
-        users[index] = updated
-        _save_users(reference, users, path)
+        _replace_user_record(updated)
         return updated
     raise KeyError(user_id)
+
+
+def _replace_user_record(updated_user: ManagedUser) -> None:
+    try:
+        with _connect() as connection:
+            _ensure_schema(connection)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    USER_UPDATE_SQL,
+                    (
+                        updated_user.nombre,
+                        updated_user.apellidos,
+                        updated_user.email,
+                        updated_user.rol_principal,
+                        updated_user.estado,
+                        updated_user.observaciones_internas,
+                        _parse_timestamp(updated_user.ultimo_acceso) if updated_user.ultimo_acceso else None,
+                        updated_user.invitacion_pendiente,
+                        updated_user.id,
+                    ),
+                )
+                cursor.execute(USER_DELETE_SURFACES_SQL, (updated_user.id,))
+                for order, surface in enumerate(updated_user.superficies):
+                    cursor.execute(USER_INSERT_SURFACE_SQL, (updated_user.id, surface, order))
+                cursor.execute(
+                    USER_INSERT_HISTORY_SQL,
+                    (
+                        updated_user.id,
+                        updated_user.historial[-1].accion,
+                        _parse_timestamp(updated_user.historial[-1].fecha),
+                        updated_user.historial[-1].detalle,
+                    ),
+                )
+    except psycopg2.Error as exc:
+        raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
+
+
+def _persist_user(new_user: ManagedUser) -> None:
+    try:
+        with _connect() as connection:
+            _ensure_schema(connection)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    USER_INSERT_SQL,
+                    (
+                        new_user.id,
+                        new_user.nombre,
+                        new_user.apellidos,
+                        new_user.email,
+                        new_user.rol_principal,
+                        new_user.estado,
+                        new_user.observaciones_internas,
+                        _parse_timestamp(new_user.fecha_alta),
+                        None,
+                        new_user.invitacion_pendiente,
+                    ),
+                )
+                for order, surface in enumerate(new_user.superficies):
+                    cursor.execute(USER_INSERT_SURFACE_SQL, (new_user.id, surface, order))
+                for event in new_user.historial:
+                    cursor.execute(
+                        USER_INSERT_HISTORY_SQL,
+                        (
+                            new_user.id,
+                            event.accion,
+                            _parse_timestamp(event.fecha),
+                            event.detalle,
+                        ),
+                    )
+    except psycopg2.Error as exc:
+        raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
+
+
+def _next_user_id(users: list[ManagedUser]) -> str:
+    numbers = []
+    for user in users:
+        if user.id.startswith("usr-"):
+            try:
+                numbers.append(int(user.id.split("-", 1)[1]))
+            except ValueError:
+                continue
+    next_number = (max(numbers) if numbers else 0) + 1
+    existing_ids = {user.id for user in users}
+    while True:
+        candidate = f"usr-{next_number:03d}"
+        if candidate not in existing_ids:
+            return candidate
+        next_number += 1

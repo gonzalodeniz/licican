@@ -14,7 +14,7 @@ En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. 
 - Un fichero `.env` con `PORT` definido. Si no existe, puede copiarse desde [`.env.example`](/opt/apps/licican/.env.example).
 - Un fichero `.env` con `DB_PORT` definido si se quiere exponer la BBDD integrada en un puerto distinto; por defecto se usa `15432`.
 - Un fichero `.env` con `LICICAN_CATALOG_BACKEND` definido si se quiere forzar `file`; por defecto se usa PostgreSQL.
-- Un fichero `.env` con `LICICAN_USERS_PATH` definido si se quiere guardar el almacén de usuarios en una ruta alternativa; por defecto se usa `data/users.json`.
+- Un fichero `.env` con `LICICAN_DATABASE_URL` o con las variables `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD` definido si se quiere personalizar la conexion a PostgreSQL.
 - Si se quieren guardar alertas en una ruta alternativa, configurar `LICICAN_ALERTS_PATH`; por defecto se usa `data/alerts.json`.
 - Para el despliegue en contenedor, disponer de `docker` y `docker compose`.
 
@@ -98,7 +98,7 @@ La entrada del changelog de `2026-03-31` menciona `pipeline` como validado, pero
 ## Riesgos operativos
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
 - Comunicar que el producto ya ofrece pipeline induciria a error; las alertas visibles son internas y no envian notificaciones salientes, y la entrada del changelog de `2026-03-31` no cambia ese estado tecnico observable.
-- La gestion de usuarios se apoya en `data/users.json` o en la ruta que indique `LICICAN_USERS_PATH`; si el fichero no existe, la aplicacion recrea una semilla inicial de ejemplo.
+- La gestion de usuarios se apoya en PostgreSQL, con las tablas `usuario`, `usuario_superficie` y `usuario_historial`; si la base no responde, la aplicacion devuelve un error controlado.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
 - La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con pipeline ni otras capacidades de seguimiento.
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.

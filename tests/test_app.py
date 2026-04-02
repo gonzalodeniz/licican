@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 import psycopg2
 
 from licican.app import application, main
+from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
 def invoke_app(
@@ -47,12 +48,18 @@ def invoke_app(
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     if "LICICAN_ROLE" not in os.environ:
         env_overrides["LICICAN_ROLE"] = "administrador"
+    if "DB_PASSWORD" not in os.environ:
+        env_overrides["DB_PASSWORD"] = "test-password"
     with patch.dict(os.environ, env_overrides, clear=False):
         body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
 
 
 class ApplicationTests(unittest.TestCase):
+    def _patch_users_db(self, state: SeededUsersState | None = None):
+        current_state = state or SeededUsersState.seed()
+        return patch("licican.users.psycopg2.connect", side_effect=lambda *args, **kwargs: fake_users_connect(current_state))
+
     def test_api_returns_controlled_error_when_postgresql_is_unavailable(self) -> None:
         with patch.dict(os.environ, {"LICICAN_CATALOG_BACKEND": "postgres"}, clear=False):
             with patch(
@@ -720,10 +727,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn("No hay resultados con los filtros activos.", html)
 
     def test_users_page_renders_summary_table_and_navigation_for_admin(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            users_path = Path(tmp_dir) / "users.json"
-            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
-                status, headers, body = invoke_app("/usuarios")
+        with self._patch_users_db():
+            status, headers, body = invoke_app("/usuarios")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
@@ -736,36 +741,29 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
 
     def test_users_page_denied_to_reader_role(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            users_path = Path(tmp_dir) / "users.json"
-            with patch.dict(
-                os.environ,
-                {"LICICAN_USERS_PATH": str(users_path), "LICICAN_ROLE": "lector"},
-                clear=False,
-            ):
-                status, headers, body = invoke_app("/usuarios")
+        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+            status, headers, body = invoke_app("/usuarios")
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
 
     def test_user_creation_route_redirects_and_persists_account(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            users_path = Path(tmp_dir) / "users.json"
-            form_data = urlencode(
-                {
-                    "nombre": "Eva",
-                    "apellidos": "Santos",
-                    "email": "eva.santos@licican.local",
-                    "rol_principal": "responsable",
-                    "estado": "pendiente",
-                    "superficies": "Catalogo, Alertas",
-                    "observaciones_internas": "Alta desde pruebas",
-                }
-            )
-            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
-                status, headers, _ = invoke_app("/usuarios", method="POST", body=form_data)
-                page_status, _, page_body = invoke_app("/usuarios")
+        state = SeededUsersState.seed()
+        form_data = urlencode(
+            {
+                "nombre": "Eva",
+                "apellidos": "Santos",
+                "email": "eva.santos@licican.local",
+                "rol_principal": "responsable",
+                "estado": "pendiente",
+                "superficies": "Catalogo, Alertas",
+                "observaciones_internas": "Alta desde pruebas",
+            }
+        )
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios")
 
         html = page_body.decode("utf-8")
         self.assertEqual("303 See Other", status)
@@ -777,10 +775,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("pendiente", html)
 
     def test_user_detail_page_shows_selected_user_history(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            users_path = Path(tmp_dir) / "users.json"
-            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
-                status, headers, body = invoke_app("/usuarios/usr-003")
+        with self._patch_users_db():
+            status, headers, body = invoke_app("/usuarios/usr-003")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
