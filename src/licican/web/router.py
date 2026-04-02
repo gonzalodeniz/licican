@@ -9,13 +9,14 @@ from urllib.parse import parse_qs
 from licican.access import AccessContext, has_capability, resolve_access_context
 from licican.alerts import create_alert, deactivate_alert, filter_alerts_by_user, load_alerts, summarize_alerts, update_alert
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
-from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
+from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path, resolve_users_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
 from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
+from licican.users import UserFilters, build_users_payload, change_user_state, create_user, resend_invitation, reset_access, update_user
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 from licican.web.templates.alerts import render_alerts
 from licican.web.templates.base import page_template
@@ -28,6 +29,7 @@ from licican.web.templates.kpis import render_kpis
 from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
+from licican.web.templates.users import render_users
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 Route = namedtuple("Route", ["method", "pattern", "handler"])
@@ -84,6 +86,37 @@ def _parse_catalog_page(request: Request) -> int:
 
 
 def _parse_catalog_page_size(request: Request) -> int:
+    candidates = request.query.get("page_size")
+    if not candidates:
+        return 10
+    try:
+        page_size = int(candidates[0])
+    except ValueError:
+        return 10
+    return page_size if page_size in {5, 10, 25, 50} else 10
+
+
+def _parse_user_filters(request: Request) -> UserFilters:
+    query = request.query
+    return UserFilters(
+        busqueda=(query.get("busqueda") or [None])[0],
+        estado=(query.get("estado") or [None])[0],
+        rol=(query.get("rol") or [None])[0],
+        superficie=(query.get("superficie") or [None])[0],
+    )
+
+
+def _parse_users_page(request: Request) -> int:
+    candidates = request.query.get("page")
+    if not candidates:
+        return 1
+    try:
+        return int(candidates[0])
+    except ValueError:
+        return 1
+
+
+def _parse_users_page_size(request: Request) -> int:
     candidates = request.query.get("page_size")
     if not candidates:
         return 10
@@ -185,6 +218,16 @@ def _visible_pipeline_payload(request: Request) -> dict[str, object]:
     )
 
 
+def _visible_users_payload(request: Request, selected_user_id: str | None = None) -> dict[str, object]:
+    return build_users_payload(
+        path=resolve_users_path(),
+        filters=_parse_user_filters(request),
+        page=_parse_users_page(request),
+        page_size=_parse_users_page_size(request),
+        selected_user_id=selected_user_id,
+    )
+
+
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
     relative_path = filename
     static_path = (STATIC_DIR / relative_path).resolve()
@@ -236,6 +279,121 @@ def handle_pipeline_page(request: Request, start_response) -> list[bytes]:
     status_message = (request.query.get("mensaje") or [None])[0]
     content = render_pipeline(_visible_pipeline_payload(request), request.base_path, None, status_message, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_users_page(request: Request, start_response, id: str | None = None) -> list[bytes]:
+    if not has_capability(request.access_context, "view_users"):
+        return _deny_html(request, start_response, "view_users")
+    status_message = (request.query.get("mensaje") or [None])[0]
+    selected_user_id = id
+    try:
+        if selected_user_id is None and request.path != "/usuarios":
+            selected_user_id = request.path.rsplit("/", 1)[-1]
+        payload = _visible_users_payload(request, selected_user_id=selected_user_id)
+        content = render_users(payload, request.base_path, None, status_message, request.access_context)
+    except Exception as exc:
+        content = render_users(_visible_users_payload(request), request.base_path, str(exc), status_message, request.access_context)
+        return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
+    return {
+        "nombre": (form_data.get("nombre") or [""])[0],
+        "apellidos": (form_data.get("apellidos") or [""])[0],
+        "email": (form_data.get("email") or [""])[0],
+        "rol_principal": (form_data.get("rol_principal") or [""])[0],
+        "estado": (form_data.get("estado") or ["pendiente"])[0],
+        "superficies": (form_data.get("superficies") or [""])[0],
+        "observaciones_internas": (form_data.get("observaciones_internas") or [""])[0],
+    }
+
+
+def _users_error_response(request: Request, start_response, message: str, status: str = "400 Bad Request", selected_user_id: str | None = None) -> list[bytes]:
+    content = render_users(_visible_users_payload(request, selected_user_id=selected_user_id), request.base_path, message, None, request.access_context)
+    return send_response(start_response, status, "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_create_user(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return _deny_html(request, start_response, "manage_users")
+    form_data = _user_form_values(read_form_data(request.environ))
+    try:
+        create_user(
+            nombre=str(form_data["nombre"]),
+            apellidos=str(form_data["apellidos"]),
+            email=str(form_data["email"]),
+            rol_principal=str(form_data["rol_principal"]),
+            superficies=str(form_data["superficies"]),
+            estado=str(form_data["estado"]),
+            observaciones_internas=str(form_data["observaciones_internas"]),
+            path=resolve_users_path(),
+        )
+    except ValueError as exc:
+        return _users_error_response(request, start_response, str(exc))
+    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+creado+y+registrado")
+
+
+def handle_update_user(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return _deny_html(request, start_response, "manage_users")
+    form_data = _user_form_values(read_form_data(request.environ))
+    try:
+        update_user(
+            id,
+            nombre=str(form_data["nombre"]),
+            apellidos=str(form_data["apellidos"]),
+            email=str(form_data["email"]),
+            rol_principal=str(form_data["rol_principal"]),
+            superficies=str(form_data["superficies"]),
+            estado=str(form_data["estado"]),
+            observaciones_internas=str(form_data["observaciones_internas"]),
+            path=resolve_users_path(),
+        )
+    except ValueError as exc:
+        return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)
+    except KeyError:
+        return _not_found(start_response)
+    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Usuario+actualizado")
+
+
+def handle_change_user_state(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return _deny_html(request, start_response, "manage_users")
+    form_data = read_form_data(request.environ)
+    state = (form_data.get("estado") or [""])[0]
+    try:
+        change_user_state(id, state, path=resolve_users_path())
+    except ValueError as exc:
+        return _users_error_response(request, start_response, f"No se ha actualizado el estado de {id}. {exc}", selected_user_id=id)
+    except KeyError:
+        return _not_found(start_response)
+    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Estado+de+usuario+actualizado")
+
+
+def handle_resend_user_invitation(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return _deny_html(request, start_response, "manage_users")
+    try:
+        resend_invitation(id, path=resolve_users_path())
+    except ValueError as exc:
+        return _users_error_response(request, start_response, f"No se ha reenviado la invitacion de {id}. {exc}", selected_user_id=id)
+    except KeyError:
+        return _not_found(start_response)
+    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Invitacion+reenviada")
+
+
+def handle_reset_user_access(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return _deny_html(request, start_response, "manage_users")
+    try:
+        reset_access(id, path=resolve_users_path())
+    except ValueError as exc:
+        return _users_error_response(request, start_response, f"No se ha reiniciado el acceso de {id}. {exc}", selected_user_id=id)
+    except KeyError:
+        return _not_found(start_response)
+    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Acceso+reiniciado")
+
 
 
 def handle_create_alert(request: Request, start_response) -> list[bytes]:
@@ -545,16 +703,40 @@ def handle_permissions_page(request: Request, start_response) -> list[bytes]:
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
+def handle_api_users(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_users"):
+        return _deny_json(start_response, "view_users")
+    payload = _visible_users_payload(request)
+    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
+
+
+def handle_api_user_detail(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "view_users"):
+        return _deny_json(start_response, "view_users")
+    payload = _visible_users_payload(request, selected_user_id=id)
+    user = payload.get("usuario_seleccionado")
+    if user is None:
+        return _not_found(start_response)
+    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(user)))
+
+
 routes = [
     Route("GET", "/static/{filename}", handle_static),
     Route("GET", "/api/datos-consolidados", handle_api_dataset),
     Route("GET", "/api/alertas", handle_api_alerts),
     Route("GET", "/api/pipeline", handle_api_pipeline),
+    Route("GET", "/api/usuarios/{id}", handle_api_user_detail),
+    Route("GET", "/api/usuarios", handle_api_users),
     Route("POST", "/alertas", handle_create_alert),
     Route("POST", "/alertas/{id}/editar", handle_update_alert),
     Route("POST", "/alertas/{id}/desactivar", handle_deactivate_alert),
     Route("POST", "/pipeline", handle_create_pipeline_entry),
     Route("POST", "/pipeline/{id}/estado", handle_update_pipeline_entry),
+    Route("POST", "/usuarios", handle_create_user),
+    Route("POST", "/usuarios/{id}", handle_update_user),
+    Route("POST", "/usuarios/{id}/estado", handle_change_user_state),
+    Route("POST", "/usuarios/{id}/invitacion", handle_resend_user_invitation),
+    Route("POST", "/usuarios/{id}/reiniciar", handle_reset_user_access),
     Route("GET", "/api/oportunidades/{id}", handle_api_opportunity_detail),
     Route("GET", "/api/oportunidades", handle_api_opportunities),
     Route("GET", "/api/fuentes", handle_api_sources),
@@ -565,6 +747,8 @@ routes = [
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
     Route("GET", "/kpis", handle_kpis_page),
     Route("GET", "/permisos", handle_permissions_page),
+    Route("GET", "/usuarios/{id}", handle_users_page),
+    Route("GET", "/usuarios", handle_users_page),
     Route("GET", "/alertas", handle_alerts_page),
     Route("GET", "/pipeline", handle_pipeline_page),
     Route("GET", "/datos-consolidados", handle_dataset_page),

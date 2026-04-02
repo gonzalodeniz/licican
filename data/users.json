@@ -1,0 +1,110 @@
+{
+  "referencia_funcional": "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios",
+  "users": [
+    {
+      "id": "usr-001",
+      "nombre": "Ana",
+      "apellidos": "Lopez",
+      "email": "ana.lopez@licican.local",
+      "rol_principal": "administrador de plataforma",
+      "estado": "activo",
+      "superficies": [
+        "Catalogo",
+        "Usuarios",
+        "Permisos",
+        "KPIs"
+      ],
+      "observaciones_internas": "Cuenta administrativa principal.",
+      "fecha_alta": "2026-04-01T09:00:00Z",
+      "ultimo_acceso": "2026-04-02T08:10:00Z",
+      "invitacion_pendiente": false,
+      "historial": [
+        {
+          "accion": "alta",
+          "fecha": "2026-04-01T09:00:00Z",
+          "detalle": "Alta inicial de la cuenta administrativa."
+        },
+        {
+          "accion": "acceso",
+          "fecha": "2026-04-02T08:10:00Z",
+          "detalle": "Acceso de verificacion en el entorno de producto."
+        }
+      ]
+    },
+    {
+      "id": "usr-002",
+      "nombre": "Carlos",
+      "apellidos": "Mendez",
+      "email": "carlos.mendez@licican.local",
+      "rol_principal": "administrador funcional",
+      "estado": "activo",
+      "superficies": [
+        "Catalogo",
+        "Alertas",
+        "Pipeline"
+      ],
+      "observaciones_internas": "Apoyo funcional de operaciones.",
+      "fecha_alta": "2026-04-01T10:15:00Z",
+      "ultimo_acceso": "2026-04-02T07:50:00Z",
+      "invitacion_pendiente": false,
+      "historial": [
+        {
+          "accion": "alta",
+          "fecha": "2026-04-01T10:15:00Z",
+          "detalle": "Alta de administracion funcional."
+        }
+      ]
+    },
+    {
+      "id": "usr-003",
+      "nombre": "Laura",
+      "apellidos": "Gonzalez",
+      "email": "laura.gonzalez@licican.local",
+      "rol_principal": "responsable",
+      "estado": "pendiente",
+      "superficies": [
+        "Catalogo",
+        "Datos consolidados"
+      ],
+      "observaciones_internas": "Invitacion pendiente de activacion.",
+      "fecha_alta": "2026-04-02T08:30:00Z",
+      "ultimo_acceso": null,
+      "invitacion_pendiente": true,
+      "historial": [
+        {
+          "accion": "alta",
+          "fecha": "2026-04-02T08:30:00Z",
+          "detalle": "Invitacion inicial enviada."
+        }
+      ]
+    },
+    {
+      "id": "usr-004",
+      "nombre": "Mario",
+      "apellidos": "Perez",
+      "email": "mario.perez@licican.local",
+      "rol_principal": "colaborador",
+      "estado": "inactivo",
+      "superficies": [
+        "Catalogo",
+        "Alertas"
+      ],
+      "observaciones_internas": "Usuario en pausa operativa.",
+      "fecha_alta": "2026-03-30T11:00:00Z",
+      "ultimo_acceso": "2026-03-31T15:15:00Z",
+      "invitacion_pendiente": false,
+      "historial": [
+        {
+          "accion": "alta",
+          "fecha": "2026-03-30T11:00:00Z",
+          "detalle": "Alta inicial de colaborador."
+        },
+        {
+          "accion": "desactivacion",
+          "fecha": "2026-04-01T12:00:00Z",
+          "detalle": "Cuenta desactivada temporalmente."
+        }
+      ]
+    }
+  ]
+}

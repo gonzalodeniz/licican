@@ -9,6 +9,7 @@ from io import BytesIO
 from pathlib import Path
 import tempfile
 from unittest.mock import patch
+from urllib.parse import urlencode
 
 import psycopg2
 
@@ -717,3 +718,74 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Corrige el rango de presupuesto.", html)
         self.assertIn("El presupuesto mínimo no puede ser mayor que el presupuesto máximo.", html)
         self.assertNotIn("No hay resultados con los filtros activos.", html)
+
+    def test_users_page_renders_summary_table_and_navigation_for_admin(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            users_path = Path(tmp_dir) / "users.json"
+            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
+                status, headers, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Gestion de usuarios", html)
+        self.assertIn("Usuarios totales", html)
+        self.assertIn("Ana Lopez", html)
+        self.assertIn("Nuevo usuario", html)
+        self.assertIn('href="/licican/usuarios"', html)
+        self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
+
+    def test_users_page_denied_to_reader_role(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            users_path = Path(tmp_dir) / "users.json"
+            with patch.dict(
+                os.environ,
+                {"LICICAN_USERS_PATH": str(users_path), "LICICAN_ROLE": "lector"},
+                clear=False,
+            ):
+                status, headers, body = invoke_app("/usuarios")
+
+        self.assertEqual("403 Forbidden", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
+
+    def test_user_creation_route_redirects_and_persists_account(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            users_path = Path(tmp_dir) / "users.json"
+            form_data = urlencode(
+                {
+                    "nombre": "Eva",
+                    "apellidos": "Santos",
+                    "email": "eva.santos@licican.local",
+                    "rol_principal": "responsable",
+                    "estado": "pendiente",
+                    "superficies": "Catalogo, Alertas",
+                    "observaciones_internas": "Alta desde pruebas",
+                }
+            )
+            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
+                status, headers, _ = invoke_app("/usuarios", method="POST", body=form_data)
+                page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Usuario+creado+y+registrado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn("Eva Santos", html)
+        self.assertIn("eva.santos@licican.local", html)
+        self.assertIn("usr-005", html)
+        self.assertIn("pendiente", html)
+
+    def test_user_detail_page_shows_selected_user_history(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            users_path = Path(tmp_dir) / "users.json"
+            with patch.dict(os.environ, {"LICICAN_USERS_PATH": str(users_path)}, clear=False):
+                status, headers, body = invoke_app("/usuarios/usr-003")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Detalle y edicion", html)
+        self.assertIn("Laura Gonzalez", html)
+        self.assertIn("Reenviar invitacion", html)
+        self.assertIn("Historial de cambios", html)

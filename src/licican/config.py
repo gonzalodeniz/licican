@@ -97,3 +97,12 @@ def resolve_pipeline_path() -> Path:
     if raw_path:
         return Path(raw_path)
     return BASE_DIR / "data" / "pipeline.json"
+
+
+def resolve_users_path() -> Path:
+    """Resuelve la ruta del almacén de usuarios."""
+    _ensure_env_loaded()
+    raw_path = os.environ.get("LICICAN_USERS_PATH", "").strip()
+    if raw_path:
+        return Path(raw_path)
+    return BASE_DIR / "data" / "users.json"
