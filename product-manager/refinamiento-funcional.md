@@ -4,12 +4,12 @@
 La vision sigue siendo consistente con la propuesta de valor central. No se detectan contradicciones de fondo, pero si una necesidad permanente de acotar el lenguaje de "centralizacion" para no confundir cobertura progresiva con cobertura total.
 La prioridad funcional vigente se mantiene en la operativizacion del dato real disponible en `data/`: `PB-011` ya esta validado, integrado en `main` y cerrado administrativamente, `PB-012` ya quedo validado, integrado en `main` y cerrado administrativamente, y `PB-010` ya quedo cerrada administrativamente tras su validacion de navegacion.
 `PB-004` deja de formar parte del trabajo abierto: tras la validacion explicita de `qa-teams` en la issue #6 el 2026-03-25, `developer-teams` integro la entrega en `main` y elimino la rama tecnica el 2026-03-26, por lo que producto debe tratarla ya como funcionalidad vigente.
-`PB-005` tambien deja de ser una pieza "nueva": `qa-teams` la valido en la issue #7 el 2026-03-31 y producto la mantiene en `validado` hasta cerrar la integracion o dejar constancia administrativa del bloqueo.
+`PB-005` deja de ser pieza abierta: la issue #7 fue cerrada administrativamente en GitHub el 2026-04-01.
+`PB-013` deja de ser la siguiente iteracion candidata: la issue #13 fue cerrada en GitHub el 2026-04-01 y el modelo funcional de permisos pasa a estado vigente.
 
 ## Huecos de definicion detectados en esta revision
-- La inconsistencia principal detectada en esta revision es de trazabilidad operativa: varios artefactos seguian describiendo `PB-012` como pendiente y `PB-005` como `nuevo`, cuando GitHub ya refleja `PB-012` cerrada y `PB-005` validada por `qa-teams`.
-- El siguiente hueco relevante ya no es funcional en `PB-012`, sino operativo en la issue #7: producto debe reflejar que el pipeline esta `validado` mientras siga abierta por integracion o cierre administrativo.
-- El siguiente hueco accionable de producto queda en la priorizacion: `PB-013` debe pasar a ser la siguiente issue funcional elegible, por delante de `PB-015`.
+- La inconsistencia principal detectada en esta revision es de trazabilidad operativa: varios artefactos seguian describiendo `PB-005` y `PB-013` como trabajo abierto cuando GitHub ya las refleja cerradas.
+- El siguiente hueco accionable de producto queda en la priorizacion: `PB-015` debe pasar a ser la siguiente issue funcional elegible, por delante de `PB-008`.
 - Aparece una necesidad de gobierno de datos: el producto mantiene `PB-015` como trabajo posterior para parametrizar la antiguedad de conservacion y archivado de licitaciones.
 - Aparece una dependencia de priorizacion tecnica: los informes de auditoria de calidad y seguridad del 2026-03-28 deben convertirse en issues tecnicas por `developer-teams` antes de que producto pueda ordenar su capacidad frente al roadmap funcional.
 
@@ -23,7 +23,8 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-004` ya fue validado por `qa-teams` en la issue #6 el 2026-03-25, integrado en `main` por `developer-teams` el 2026-03-26 y debe tratarse ya como alcance vigente.
 - `PB-011` ya fue validado por `qa-teams` en la issue #11 el 2026-03-27, integrado en `main` por `developer-teams` el 2026-03-28 y cerrado administrativamente por `product-manager` ese mismo dia.
 - `PB-012` ya fue validado por `qa-teams` en la issue #12 el 2026-03-29, integrado en `main` por `developer-teams` el 2026-03-30 y debe tratarse ya como alcance cerrado.
-- `PB-005` ya fue validado por `qa-teams` en la issue #7 el 2026-03-31; producto no debe seguir tratandolo como trabajo nuevo aunque la issue permanezca abierta.
+- `PB-005` ya fue validado por `qa-teams` en la issue #7 el 2026-03-31 y la issue ya se encuentra cerrada administrativamente.
+- `PB-013` ya quedo reconciliado como trabajo cerrado en GitHub y no debe seguir apareciendo como siguiente implementacion abierta.
 
 ## Huecos funcionales cerrados en esta revision
 - Queda definida la regla funcional para expedientes mixtos donde TI no es el unico componente.
@@ -45,13 +46,12 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `qa-teams` valido la entrega integrada en `main` de `PB-009` el 2026-03-24 y `product-manager` cerro la issue #9 el 2026-03-25.
 - `qa-teams` valido `PB-004` el 2026-03-25 y `developer-teams` dejo constancia de integracion y borrado de rama el 2026-03-26.
 - `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama.
-- `qa-teams` valido `PB-005` el 2026-03-31 sobre la rama `developer-teams/issue-7-pipeline-seguimiento`; la prioridad operativa de producto pasa a reflejarlo como `validado` y a dejar trazado el bloqueo administrativo si la issue sigue abierta.
-- Con `PB-011`, `PB-012` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es arrancar `PB-013` antes de `PB-015`.
+- `qa-teams` valido `PB-005` el 2026-03-31 sobre la rama `developer-teams/issue-7-pipeline-seguimiento`; la issue ya se encuentra cerrada administrativamente en GitHub.
+- Con `PB-011`, `PB-012`, `PB-005`, `PB-013` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es arrancar `PB-015`.
 - `T-002` ya quedo validado por `qa-teams`, integrado en `main` por `developer-teams` y cerrado administrativamente por `product-manager`.
-- `PB-015` aparece como nueva pieza funcional para gobierno de datos, pero queda por detras de `PB-013`; `PB-014` ya quedo cerrada tras su integracion.
+- `PB-015` aparece como nueva pieza funcional para gobierno de datos y pasa a ser la siguiente issue funcional abierta; `PB-014` ya quedo cerrada tras su integracion.
 - `PB-010` deja de ser una pieza funcional abierta y pasa a historial cerrado de navegacion transversal.
-- `PB-013` aparece como nuevo hueco ejecutable: el modelo de roles y permisos ya esta definido por producto y puede arrancar cuando producto lo priorice sobre `PB-015` u otras piezas posteriores.
-- Se detecto y corrige una inconsistencia de alcance: `PB-013` no debe quedar bloqueada por `PB-005`, porque su primera iteracion se aplica a superficies ya disponibles y la extension a pipeline debe heredar la misma matriz mas adelante.
+- `PB-013` deja de ser hueco ejecutable pendiente y pasa a baseline funcional ya entregada.
 - Los informes de `quality-auditor` y `security-auditor` del 2026-03-28 quedan aceptados como entrada formal de priorizacion; falta que `developer-teams` materialice sus hallazgos accionables en issues tecnicas separadas para poder ordenarlas frente a `PB-010`, `PB-005` y `PB-008`.
 - Producto debe reservar capacidad visible para esos hallazgos antes de comprometer nueva expansion funcional posterior a `PB-012`.
 
@@ -69,7 +69,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implicitas.
 - La regla TI ya puede validarse de forma observable antes de construir el catalogo, pero su casuistica seguira refinandose con ejemplos reales.
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
-- La primera iteracion de permisos de `PB-013` debe gobernar catalogo, detalle, filtros, vistas consolidadas, alertas y administracion visible; pipeline se incorpora despues sin redefinir la matriz funcional.
+- La primera iteracion de permisos de `PB-013` ya gobierna catalogo, detalle, filtros, vistas consolidadas, alertas y administracion visible; pipeline se incorpora despues sin redefinir la matriz funcional.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
 - Una alerta vacia no es valida: debe incluir al menos un criterio funcional entre palabra clave, presupuesto, procedimiento o ubicacion.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
@@ -170,10 +170,10 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Riesgo de opacidad si el detalle no expone el fichero origen y `qa-teams` no puede reconciliar aplicacion con Excel y snapshots.
 - Riesgo de inconsistencia de experiencia si cada nueva vista incorpora navegacion propia en lugar de una estructura principal comun y responsive.
 - Riesgo operativo si la documentacion de producto no refleja con rapidez las integraciones ya realizadas en `main` y sigue guiando al equipo con prioridades desfasadas.
-- Riesgo operativo si producto no mantiene sincronizado que `PB-005` esta `validado` pero abierto y que `PB-013` es la siguiente implementacion funcional elegible.
+- Riesgo operativo si producto no mantiene sincronizado que `PB-015` es la siguiente implementacion funcional elegible y que `PB-008` queda despues como definicion documental.
 - Riesgo funcional si el crecimiento de alertas, pipeline o futuras vistas no aplica de forma consistente el modelo de roles y permisos ya definido.
 - Riesgo de roadmap sesgado si los hallazgos tecnicos y de seguridad del 2026-03-28 no se convierten pronto en trabajo trazable y compiten de forma invisible con nuevas funcionalidades.
-- Riesgo de planificacion irreal si `PB-013` se mantiene ligada a dependencias aun no visibles y se retrasa un control de acceso que ya puede acotarse sobre superficies existentes.
+- Riesgo de planificacion irreal si `PB-015` se arranca sin explicitar bien el efecto sobre archivado, trazabilidad y licitaciones con seguimiento activo.
 
 ## Supuestos explicitos
 - El primer objetivo es demostrar que la centralizacion y el filtrado ahorran tiempo al usuario.
@@ -185,9 +185,8 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Que datos minimos deben gobernar una futura decision de monetizacion o plan de pago.
 
 ## Recomendacion operativa para `developer-teams`
-- Completar la integracion o dejar bloqueo explicito de la issue #7, ya validada por `qa-teams`, para que producto pueda cerrarla administrativamente cuando proceda.
-- A continuacion, tomar `PB-013` como siguiente issue funcional elegible.
-- Mantener `PB-015` y `PB-008` por detras de `PB-013`.
+- A continuacion, tomar `PB-015` como siguiente issue funcional elegible.
+- Mantener `PB-008` por detras de `PB-015`.
 - Crear las issues tecnicas separadas derivadas de los informes de `quality-auditor` y `security-auditor` del 2026-03-28 para que producto pueda priorizarlas de forma explicita.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
@@ -204,6 +203,6 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-011` queda validado por `qa-teams`, integrado en `main` y cerrado administrativamente.
 - `PB-012` completa esa iteracion haciendo visible en aplicacion la salida alineada con el Excel y la trazabilidad al fichero origen, y queda cerrada administrativamente.
 - `PB-010` queda como iteracion cerrada de base de interfaz posterior a la consolidacion visible del dato.
-- `PB-013` convierte en trabajo ejecutable la matriz de permisos definida en la especificacion consolidada sobre las superficies ya disponibles, dejando pipeline como extension posterior.
-- `PB-005` deja de ser modulo posterior pendiente y pasa a entrega validada pendiente solo de integracion o cierre administrativo.
+- `PB-013` queda absorbida como capacidad vigente de la matriz de permisos sobre las superficies ya disponibles, dejando pipeline como extension posterior.
+- `PB-005` deja de ser modulo posterior pendiente y pasa a entrega ya cerrada administrativamente.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.

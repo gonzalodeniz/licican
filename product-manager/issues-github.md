@@ -1,15 +1,15 @@
 # Borradores de issues de GitHub
 
 ## Estado actual
-- Las unicas issues funcionales abiertas a fecha 2026-04-01 son `#7`, `#8`, `#13` y `#16`.
-- La issue de `PB-005` ya fue validada por `qa-teams` el 2026-03-31 en la issue #7 y debe mantenerse en `Estado operativo: validado` mientras siga abierta por integracion o cierre administrativo.
+- Las unicas issues funcionales abiertas a fecha 2026-04-02 son `#8` y `#16`.
+- La issue de `PB-005` ya no esta abierta: fue validada por `qa-teams` el 2026-03-31 en la issue #7 y cerrada en GitHub el 2026-04-01.
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26 y ya quedo cerrada administrativamente el 2026-03-30 tras validacion, integracion en `main` y borrado de rama.
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-012` ya fue creada en GitHub como issue #12 el 2026-03-26, `qa-teams` la valido el 2026-03-29, `developer-teams` la integro en `main` el 2026-03-30 y ya no debe tratarse como issue abierta.
-- La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 para convertir en trabajo ejecutable el modelo de roles y permisos y pasa a ser la siguiente issue funcional elegible.
+- La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 y fue cerrada en GitHub el 2026-04-01.
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
-- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones y queda por detras de `PB-013`.
+- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones y pasa a ser la siguiente issue funcional elegible.
 - La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue tecnica `T-003` ya fue creada en GitHub como issue #18 para unificar utilidades de texto compartidas.
 - La issue tecnica `T-004` ya fue creada en GitHub como issue #19 para centralizar constantes de dominio compartidas.
@@ -150,7 +150,7 @@ Criterios de aceptacion:
 6. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
 7. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
 Dependencias: PB-010 y PB-004
-Estado operativo: nuevo
+Estado operativo: cerrado
 
 Contexto funcional:
 - La especificacion funcional consolidada ya define una matriz de permisos para `Administrador`, `Colaborador` y `Lector/Invitado`, pero ese alcance no estaba todavia trazado como issue ejecutable.
@@ -169,8 +169,8 @@ Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si el primer corte funcional debe resolver autenticacion real o puede apoyarse inicialmente en roles simulados para validar el comportamiento visible.
 - Que vistas de KPI pueden exponerse a `Colaborador` sin abrir informacion sensible de negocio o de otros usuarios.
 
-Prioridad operativa vigente:
-- Es la siguiente issue funcional elegible de producto una vez reflejado que `PB-005` ya esta `validado`.
+Estado administrativo actual:
+- La issue #13 ya fue reconciliada como cerrada en GitHub el 2026-04-01.
 
 ## Issue creada: Paginacion de resultados del catalogo
 
@@ -185,8 +185,8 @@ Criterios de aceptacion:
 3. El usuario puede avanzar, retroceder y saltar a una pagina concreta.
 4. La paginacion conserva los filtros activos y el orden de listado.
 5. Si la pagina solicitada es inexistente o invalida, el sistema responde con un comportamiento controlado y consistente.
-Dependencias: PB-001, PB-003, issue #14
-Estado operativo: validado
+Dependencias: PB-001, PB-003, issue #14 integrada en `main`
+Estado operativo: cerrado
 
 Contexto funcional:
 - El catalogo necesita manejar mejor volumentes mayores de resultados sin perder filtros ni contexto.
@@ -206,7 +206,7 @@ Criterios de aceptacion:
 4. Las licitaciones cerradas que estuvieron activas se trasladan a una tabla `licitaciones archivadas`.
 5. La tabla archivada conserva los mismos datos que la tabla principal.
 6. El panel deja visible que registros se conservaran, archivaran o mantendran activos.
-Dependencias: issue #14, PB-005
+Dependencias: issue #14 integrada en `main`, PB-005 cerrada administrativamente
 Estado operativo: nuevo
 
 Contexto funcional:
@@ -214,7 +214,7 @@ Contexto funcional:
 - La tabla archivada debe mantener la misma estructura de datos para no romper trazabilidad ni consultas futuras.
 
 Dependencia operativa vigente:
-- Esta issue no debe adelantarse a `PB-013` y conviene retomarla cuando `PB-005` ya haya completado su integracion o su cierre administrativo.
+- Esta issue pasa a ser la siguiente prioridad funcional abierta porque `PB-005` y `PB-013` ya quedaron cerradas administrativamente.
 
 ## Issue creada: Corregir el filtrado de licitaciones tras PostgreSQL
 
@@ -229,8 +229,8 @@ Criterios de aceptacion:
 3. Los filtros combinados devuelven resultados coherentes con el backend `file` cuando se comparan sobre la misma muestra.
 4. El filtrado no depende de datos embebidos obsoletos ni de rutas internas de la implementacion anterior.
 5. Existen pruebas de regresion especificas sobre PostgreSQL para la combinacion de filtros mas usada.
-Dependencias: PB-003, issue #14
-Estado operativo: nuevo
+Dependencias: PB-003, issue #14 integrada en `main`
+Estado operativo: cerrado
 
 Contexto funcional:
 - La migracion a PostgreSQL ha dejado una regresion visible en el filtrado que debe corregirse antes de abrir nueva expansion funcional.

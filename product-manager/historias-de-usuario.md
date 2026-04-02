@@ -100,8 +100,8 @@
   5. Si la oportunidad pasa a estado oficial `anulada`, `desierta` o `desistida`, el pipeline mantiene el registro del usuario y muestra una advertencia visible.
 - Dependencias funcionales: PB-001, PB-002
 - Prioridad: P1
-- Estado: `validado`
-- Nota de estado: `qa-teams` valido la issue #7 el 2026-03-31 sobre la rama `developer-teams/issue-7-pipeline-seguimiento`. La historia queda en `validado` mientras `product-manager` mantiene abierta la issue hasta disponer de evidencia de integracion en `main` y borrado de rama o dejar constancia administrativa del bloqueo.
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la issue #7 el 2026-03-31 y la issue fue cerrada administrativamente en GitHub el 2026-04-01.
 
 ## HU-06 Disponer de reglas auditables de relevancia TI
 - Backlog relacionado: PB-006
@@ -251,7 +251,8 @@
   5. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 - Dependencias funcionales: PB-010, PB-004
 - Prioridad: P1
-- Estado: `nuevo`
+- Estado: `cerrado`
+- Nota de estado: la issue #13 figura cerrada en GitHub desde el 2026-04-01 y esta historia queda reconciliada como entrega integrada.
 - Nota de alcance: la primera iteracion de `PB-013` gobierna las superficies ya disponibles; las reglas de pipeline se aplicaran en la evolucion de `PB-005` sin redefinir la matriz de permisos.
 
 ## HU-14 Paginacion de resultados del catalogo
@@ -270,7 +271,8 @@
   5. Si la pagina solicitada es inexistente o invalida, el sistema responde con un comportamiento controlado y consistente.
 - Dependencias funcionales: PB-001, PB-003
 - Prioridad: P1
-- Estado: `nuevo`
+- Estado: `cerrado`
+- Nota de estado: la issue #15 ya fue cerrada en GitHub y esta historia queda reconciliada como entrega integrada.
 
 ## HU-15 Configurar conservacion y archivado de licitaciones
 - Backlog relacionado: PB-015
@@ -287,6 +289,6 @@
   4. Las licitaciones cerradas que estuvieron activas se trasladan a una tabla `licitaciones archivadas`.
   5. La tabla archivada conserva los mismos datos que la tabla principal.
   6. El panel deja visible que registros se conservaran, archivaran o mantendran activos.
-- Dependencias funcionales: issue #14, PB-005
+- Dependencias funcionales: issue #14 integrada en `main`, PB-005 cerrada administrativamente
 - Prioridad: P1
 - Estado: `nuevo`

@@ -370,7 +370,7 @@
 - Disparador: El responsable de operacion abre el panel de control de retencion.
 - Precondiciones:
   - Existe configuracion operativa de retencion disponible.
-  - La fuente de datos y la gestion de seguimiento activo estan disponibles o preparadas.
+  - La fuente de datos y la gestion de seguimiento activo ya estan disponibles en `main`.
 - Flujo principal:
   1. El responsable abre el panel de control.
   2. El sistema muestra el umbral de conservacion configurado.
