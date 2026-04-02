@@ -4,9 +4,9 @@
 Centralizar la documentacion oficial de `Licican` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-04-01`.
+Fecha de revision: `2026-04-02`.
 
-Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, y mantiene el modo `file` como respaldo explicito para pruebas aisladas. La issue tecnica #17 (`T-002`) ya esta integrada en `main` y corrige la resolucion de ubicacion en PostgreSQL para no degradar ubicaciones geograficas especificas a `Canarias`.
+Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora la issue tecnica #14, que activa PostgreSQL como backend operativo por defecto para catalogo y detalle, la issue tecnica #17 (`T-002`) que corrige la resolucion de ubicacion en PostgreSQL y la issue #28, que añade gestion administrativa de usuarios con persistencia JSON y trazabilidad basica por rol.
 La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pero esta checkout no versiona snapshots `.atom` en `data/`; por eso, la carga reproducible desde el arbol actual cae en el respaldo `data/opportunities.json` salvo que se aporten ficheros Atom temporales o externos.
 
 - Vista HTML del catalogo inicial de oportunidades TI (`PB-001`) en `/`.
@@ -16,6 +16,8 @@ La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pe
 - API JSON del detalle trazable en `/api/oportunidades/<id>`.
 - Vista HTML de alertas tempranas (`PB-004`) en `/alertas`.
 - API JSON de alertas persistidas y coincidencias internas en `/api/alertas`.
+- Vista HTML de gestion administrativa de usuarios (`PB-016`) en `/usuarios`.
+- API JSON de gestion administrativa de usuarios en `/api/usuarios`.
 - Vista HTML de cobertura inicial del MVP (`PB-007`) en `/cobertura-fuentes`.
 - API JSON de cobertura de fuentes en `/api/fuentes`.
 - Vista HTML de clasificacion TI auditable (`PB-006`) en `/clasificacion-ti`.
@@ -33,7 +35,7 @@ La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pe
 - La issue tecnica `#17` queda documentada como integrada en `main`; este estado ya forma parte de la fotografia vigente de la rama principal.
 - Existe un despliegue local en contenedor con `Dockerfile` y `docker-compose.yml`, con persistencia de `data/`, configuracion de `PORT` via `.env`, variables `DB_*` para PostgreSQL y una BBDD integrada con volumen persistente.
 
-Las alertas tempranas ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion ni un despliegue productivo endurecido.
+Las alertas tempranas y la gestion administrativa de usuarios ya estan implementadas y verificables en `main`; lo que sigue sin existir es el pipeline de seguimiento. Parte de la documentacion funcional de `product-manager/` sigue arrastrando textos anteriores a la integracion de `PB-011` o al estado ya visible de `PB-004`, asi que esa fuente debe leerse con cautela frente a la evidencia tecnica actual. Tampoco hay autenticacion real ni un despliegue productivo endurecido.
 
 ## Audiencias cubiertas
 - Usuario final o stakeholder funcional: [manual-usuario.md](manual-usuario.md)
@@ -47,15 +49,16 @@ Las alertas tempranas ya estan implementadas y verificables en `main`; lo que si
 
 ## Hallazgos principales de esta revision
 - `main` contiene implementacion Python versionada en `src/licican/`, datos en `data/` y pruebas automatizadas en `tests/`.
-- `PYTHONPATH=src python3 -m pytest -v` ejecuta 111 pruebas en verde en esta checkout.
+- `PYTHONPATH=src python3 -m pytest -v` ejecuta 131 pruebas en verde en esta checkout.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, si ese puerto ya esta ocupado, avanza al siguiente libre.
 - `docker compose up -d --build` levanta la misma aplicacion en contenedor, publica el puerto configurado en `PORT` y monta `data/` como volumen persistente.
-- Las rutas verificables hoy son `/`, `/api/oportunidades`, `/oportunidades/<id>`, `/api/oportunidades/<id>`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti`, `/api/clasificacion-ti`, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
+- Las rutas verificables hoy son `/`, `/api/oportunidades`, `/oportunidades/<id>`, `/api/oportunidades/<id>`, `/alertas`, `/api/alertas`, `/usuarios`, `/usuarios/<id>`, `/api/usuarios`, `/api/usuarios/<id>`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti`, `/api/clasificacion-ti`, `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - Las rutas verificables de `PB-009` hoy son `/priorizacion-fuentes-reales` y `/api/fuentes-prioritarias`.
 - El catalogo visible publica oportunidades TI desde PostgreSQL por defecto y, si se fuerza `LICICAN_CATALOG_BACKEND=file`, usa el respaldo `data/opportunities.json` cuando no hay snapshots Atom versionados disponibles en `data/`.
 - El catalogo permite filtrar por `palabra_clave`, `presupuesto_min`, `presupuesto_max`, `procedimiento` y `ubicacion`.
 - Si el usuario informa un rango de presupuesto invalido, la vista HTML muestra una correccion explicita y la API responde `400 Bad Request` con `error_validacion`.
+- La gestion de usuarios permite listar, filtrar, crear, editar y cambiar de estado cuentas de usuario, ademas de abrir detalle y consultar la trazabilidad basica del registro seleccionado.
 - La entrega consolidada de `PB-011` sigue soportada por el codigo, pero en esta checkout solo puede reproducirse de forma completa con muestras Atom aportadas externamente o en pruebas temporales; el arbol versionado actual no incluye snapshots `.atom`.
 - Existe una contradiccion documental residual en `product-manager/`: varios documentos seguian describiendo `PB-011` como pendiente de integracion antes de esta sincronizacion, por lo que esa fuente debe revisarse frente a `main`.
 - Existe otra desalineacion abierta: el changelog de `2026-03-31` registra `pipeline` como validado, pero `main` no expone esa superficie ni tiene pruebas que la demuestren.

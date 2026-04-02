@@ -15,6 +15,8 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Una API JSON del detalle en `/api/oportunidades/<id>`.
 - Una gestion HTML de alertas tempranas en `/alertas`.
 - Una API JSON de alertas persistidas y coincidencias internas en `/api/alertas`.
+- Una gestion administrativa de usuarios en `/usuarios`.
+- Una API JSON de usuarios en `/api/usuarios`.
 - Una vista HTML de cobertura inicial del MVP en `/cobertura-fuentes`.
 - Una salida JSON de esa cobertura en `/api/fuentes`.
 - Una vista HTML de priorizacion de fuentes reales oficiales en `/priorizacion-fuentes-reales`.
@@ -32,20 +34,22 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 - Que la priorizacion de fuentes reales oficiales para recopilacion ya esta visible y ordenada por `Ola 1`, `Ola 2` y `Ola 3`.
 - Que las alertas tempranas reutilizan los mismos filtros que el catalogo, se pueden crear, editar y desactivar, y registran coincidencias internas accionables.
 - Que la regla de relevancia TI muestra inclusiones, exclusiones y casos frontera auditables.
+- Que la gestion administrativa de usuarios permite listar cuentas, aplicar filtros, crear usuarios, ver detalle y ejecutar acciones de alta, edicion, activacion, desactivacion, baja logica, reenvio de invitacion y reinicio de acceso segun el rol activo.
 
 ## Recorrido recomendado para una revision funcional
 1. Abre `/` y revisa el listado de oportunidades visibles.
 2. Aplica filtros por palabra clave, procedimiento, ubicacion o presupuesto para comprobar el refinamiento del catalogo.
 3. Prueba un rango invalido con `presupuesto_min` mayor que `presupuesto_max` y verifica que el sistema pide correccion.
 4. Entra en una ficha desde el titulo de una oportunidad para comprobar presupuesto, fecha limite, estado oficial y enlace a la fuente cuando existan.
-5. Abre `/alertas` para revisar como se guardan, editan y desactivan alertas con los mismos filtros del catalogo.
-6. Abre `/cobertura-fuentes` para confirmar que la cobertura comunicada sigue siendo parcial y priorizada.
-7. Abre `/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen oficial.
-8. Abre `/clasificacion-ti` para entender por que una oportunidad entra, se excluye o queda como caso frontera.
+5. Abre `/usuarios` para revisar el listado, el alta, el detalle y las acciones administrativas de cuentas.
+6. Abre `/alertas` para revisar como se guardan, editan y desactivan alertas con los mismos filtros del catalogo.
+7. Abre `/cobertura-fuentes` para confirmar que la cobertura comunicada sigue siendo parcial y priorizada.
+8. Abre `/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen oficial.
+9. Abre `/clasificacion-ti` para entender por que una oportunidad entra, se excluye o queda como caso frontera.
 
 ## Que no esta disponible hoy en `main`
 - Pipeline de seguimiento.
-- Gestion de usuarios o autenticacion.
+- Autenticacion real, SSO o MFA.
 - La superficie funcional de `PB-012` con las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
 - Aunque el changelog de `2026-03-29` la menciona como validada, esa superficie de `PB-012` no aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
 - Aunque el changelog de `2026-03-31` menciona `pipeline` como validado, esa superficie tampoco aparece todavia en las rutas ni en las pruebas visibles de `main`; no debe comunicarse como disponible para usuario final hasta que el codigo la refleje.
@@ -56,6 +60,7 @@ Los documentos de `product-manager/` siguen siendo la fuente funcional para visi
 
 ## Limitaciones relevantes para usuario
 - Las superficies actuales permiten descubrimiento inicial, filtrado funcional, revision de detalle y gestion interna de alertas, pero no cubren todavia seguimiento operativo ni pipeline.
+- La gestion administrativa de usuarios esta disponible para roles con permisos, pero no existe todavia autenticacion real contra proveedor externo, SSO ni MFA.
 - La priorizacion de fuentes reales oficiales ya es accesible en una superficie propia, pero solo ordena la recopilacion; no activa pipeline.
 - Los filtros actuales actuan solo sobre el catalogo visible y su API; no existe todavia una persistencia de preferencias separada del registro de alertas internas.
 - La cobertura visible sigue siendo parcial y no debe interpretarse como rastreo exhaustivo de todo el ecosistema canario.

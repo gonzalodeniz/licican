@@ -7,7 +7,7 @@ Personas usuarias internas, equipo tecnico y administracion que necesitan aclara
 Si. `make run` levanta un servidor local usando `PORT` desde `.env` y, por defecto, `8000` si no se define. Tambien existe una ruta de contenedor local con `docker compose up -d --build`, que publica el mismo servicio, levanta la BBDD integrada y monta `data/` como volumen persistente.
 
 ## Entonces que entrega existe realmente hoy?
-Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQL por defecto, filtros funcionales sobre ese catalogo, ficha de detalle con origen funcional visible cuando la fuente lo aporta, gestion interna de alertas, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
+Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQL por defecto, filtros funcionales sobre ese catalogo, ficha de detalle con origen funcional visible cuando la fuente lo aporta, gestion interna de alertas, gestion administrativa de usuarios, cobertura inicial del MVP, priorizacion de fuentes reales oficiales por olas y clasificacion TI auditable.
 
 ## Que rutas estan verificadas?
 - `/`
@@ -16,6 +16,10 @@ Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQ
 - `/api/oportunidades/<id>`
 - `/alertas`
 - `/api/alertas`
+- `/usuarios`
+- `/usuarios/<id>`
+- `/api/usuarios`
+- `/api/usuarios/<id>`
 - `/cobertura-fuentes`
 - `/api/fuentes`
 - `/priorizacion-fuentes-reales`
@@ -23,14 +27,17 @@ Existe una entrega minima de descubrimiento con catalogo servido desde PostgreSQ
 - `/clasificacion-ti`
 - `/api/clasificacion-ti`
 
-## El producto ya tiene catalogo de oportunidades, filtros, alertas o pipeline?
-En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada, aunque el changelog de `2026-03-31` lo mencione como validado.
+## El producto ya tiene catalogo de oportunidades, filtros, alertas, usuarios o pipeline?
+En `main` ya existen catalogo consolidado, filtros funcionales, ficha de detalle, alertas internas, gestion administrativa de usuarios y priorizacion de fuentes reales oficiales por olas. No existe todavia pipeline en la superficie tecnica revisada, aunque el changelog de `2026-03-31` lo mencione como validado.
 
 ## PB-011 ya esta operativo en `main`?
 La intencion funcional sigue documentada y el codigo soporta la consolidacion Atom, pero en esta checkout no hay snapshots `.atom` versionados en `data/`. La reproducibilidad completa depende de aportar muestras temporales o externas; el respaldo versionado visible para el modo `file` es `data/opportunities.json`.
 
 ## La aplicacion ya usa PostgreSQL por defecto?
 Si. La issue tecnica #14 ya quedo validada, integrada en `main` y cerrada administrativamente, de modo que PostgreSQL es el backend operativo por defecto para catalogo y detalle. `LICICAN_CATALOG_BACKEND=file` sigue disponible para pruebas aisladas o respaldo.
+
+## Ya existe gestion de usuarios en `main`?
+Si. La issue #28 ya quedo validada e integrada en `main`. La superficie `/usuarios` permite listar, filtrar, crear, editar y cambiar de estado cuentas, y la API `/api/usuarios` expone el listado y el detalle seleccionable. Lo que no existe aun es autenticacion real contra un proveedor externo, SSO o MFA.
 
 ## PB-012 ya esta operativo en `main`?
 No segun la evidencia tecnica revisada en esta documentacion. El changelog de `2026-03-29` la registra como validada, pero en `main` no aparecen rutas, vistas ni pruebas para `/datos-consolidados` ni para las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
@@ -66,7 +73,7 @@ Si. La instalacion editable deja operativa la aplicacion local y permite ejecuta
 Desde la raiz del proyecto, `make docker-psql` abre una sesion interactiva `psql` contra `postgres-licitaciones`.
 
 ## Hay pruebas automatizadas disponibles?
-Si. `PYTHONPATH=src python3 -m pytest -v` ejecuta 111 pruebas en verde en esta revision.
+Si. `PYTHONPATH=src python3 -m pytest -v` ejecuta 131 pruebas en verde en esta revision.
 
 ## Se puede desplegar en produccion con lo que hay ahora?
 No hay base documental suficiente para afirmarlo. Solo esta verificado el arranque local con `wsgiref` y el despliegue local en contenedor.
