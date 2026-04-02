@@ -4,7 +4,7 @@
 Persona responsable de preparar el entorno local, arrancar la entrega minima actual y verificar que las superficies visibles responden como se espera.
 
 ## Alcance operativo actual
-En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. Su alcance operativo es de validacion local y demostracion funcional temprana; no equivale a una operacion productiva completa.
+En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. Su alcance operativo es de validacion local y demostracion funcional temprana; no equivale a una operacion productiva completa, aunque ya expone catalogo, detalle, datos consolidados, pipeline, alertas, usuarios, KPIs y permisos.
 
 ## Prerequisitos
 - Acceso al arbol del proyecto en `/opt/apps/licican`.
@@ -16,6 +16,7 @@ En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. 
 - Un fichero `.env` con `LICICAN_CATALOG_BACKEND` definido si se quiere forzar `file`; por defecto se usa PostgreSQL.
 - Un fichero `.env` con `LICICAN_DATABASE_URL` o con las variables `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD` definido si se quiere personalizar la conexion a PostgreSQL.
 - Si se quieren guardar alertas en una ruta alternativa, configurar `LICICAN_ALERTS_PATH`; por defecto se usa `data/alerts.json`.
+- Si se quieren guardar oportunidades de seguimiento en una ruta alternativa, configurar `LICICAN_PIPELINE_PATH`; por defecto se usa `data/pipeline.json`.
 - Para el despliegue en contenedor, disponer de `docker` y `docker compose`.
 
 ## Arranque local reproducible
@@ -46,6 +47,9 @@ Resultado esperado:
 - `data/` persiste fuera de la imagen porque se monta como volumen
 - dentro del contenedor la aplicacion escucha en `HOST=0.0.0.0`
 - la gestion de usuarios responde en `http://127.0.0.1:<PORT>/usuarios` y la API en `http://127.0.0.1:<PORT>/api/usuarios`
+- el pipeline responde en `http://127.0.0.1:<PORT>/pipeline` y la API en `http://127.0.0.1:<PORT>/api/pipeline`
+- los datos consolidados responden en `http://127.0.0.1:<PORT>/datos-consolidados` y la API en `http://127.0.0.1:<PORT>/api/datos-consolidados`
+- los KPIs y la matriz de permisos responden en `http://127.0.0.1:<PORT>/kpis` y `http://127.0.0.1:<PORT>/permisos`
 
 ## Resultado esperado en esta revision
 - `make test` ejecuta 131 pruebas en verde con `pytest`.
@@ -53,7 +57,7 @@ Resultado esperado:
 - `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT` y levanta la BBDD integrada.
 - `make docker-psql` abre una terminal `psql` contra `postgres-licitaciones`.
 - La aplicacion usa PostgreSQL como backend por defecto; el modo `file` queda reservado para pruebas aisladas o escenarios de respaldo.
-- Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/priorizacion-fuentes-reales`, `/api/fuentes-prioritarias`, `/clasificacion-ti` y `/api/clasificacion-ti` responden `200 OK`.
+- Mientras el proceso esta levantado, las rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/datos-consolidados`, `/api/datos-consolidados`, `/datos-consolidados/licitaciones/114-2025`, `/datos-consolidados/adjudicaciones/2565-2024-pt1-pccntr-4934579`, `/pipeline`, `/api/pipeline`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/priorizacion-fuentes-reales`, `/api/fuentes-prioritarias`, `/clasificacion-ti`, `/api/clasificacion-ti`, `/kpis` y `/permisos` responden `200 OK`.
 - Mientras el proceso esta levantado, las rutas `/usuarios`, `/usuarios/usr-003`, `/api/usuarios` y `/api/usuarios/usr-003` tambien responden segun el rol de acceso y el estado de los datos de ejemplo.
 - La ficha de detalle muestra el fichero `.atom` origen cuando la consolidacion de `PB-011` recibe snapshots Atom de entrada; si no hay ficheros Atom en `data/`, el respaldo visible es `data/opportunities.json`.
 
@@ -64,8 +68,12 @@ Resultado esperado:
 - Consultar `http://127.0.0.1:<PORT>/api/oportunidades?presupuesto_min=120000&presupuesto_max=90000` para verificar que la API devuelve `400` con validacion explicita de rango.
 - Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible.
 - Abrir `http://127.0.0.1:<PORT>/oportunidades/pcsp-cabildo-licencias-2026` para revisar una ficha de detalle con rectificacion visible y fichero de origen cuando exista consolidacion Atom.
+- Abrir `http://127.0.0.1:<PORT>/datos-consolidados` para revisar las tres pestañas del Excel versionado.
+- Abrir `http://127.0.0.1:<PORT>/pipeline` para guardar una oportunidad y comprobar que el seguimiento evita duplicados.
 - Abrir `http://127.0.0.1:<PORT>/alertas` para crear una alerta interna, comprobar que no admite formularios vacios y verificar su edicion o desactivacion.
 - Abrir `http://127.0.0.1:<PORT>/usuarios` para revisar el listado, la creacion y el detalle de cuentas de usuario.
+- Abrir `http://127.0.0.1:<PORT>/kpis` para revisar el resumen de cobertura, adopcion y uso.
+- Abrir `http://127.0.0.1:<PORT>/permisos` para revisar la matriz funcional por rol.
 - Abrir `http://127.0.0.1:<PORT>/cobertura-fuentes` para revisar la cobertura inicial del MVP.
 - Abrir `http://127.0.0.1:<PORT>/priorizacion-fuentes-reales` para revisar la secuencia de recopilacion por olas y la trazabilidad minima al origen.
 - Abrir `http://127.0.0.1:<PORT>/clasificacion-ti` para revisar la regla TI auditable.
@@ -88,24 +96,19 @@ No existe en `main`:
 - observabilidad o healthcheck dedicado
 - procedimiento de backup o rollback
 - despliegue productivo endurecido
-- pipeline de seguimiento
 - gestion externa real de identidades, SSO o MFA
-- superficie funcional de `PB-012`
-- superficie documental o tecnica de `PB-012` aunque el changelog de `2026-03-29` la cite como validada; hasta ver esa evidencia en `main`, la operacion debe seguir tratandola como no disponible
-
-La entrada del changelog de `2026-03-31` menciona `pipeline` como validado, pero en `main` no existe todavia esa superficie.
+- notificaciones salientes de alertas
 
 ## Riesgos operativos
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
-- Comunicar que el producto ya ofrece pipeline induciria a error; las alertas visibles son internas y no envian notificaciones salientes, y la entrada del changelog de `2026-03-31` no cambia ese estado tecnico observable.
+- Comunicar que el producto ya ofrece notificaciones salientes induciria a error; las alertas visibles son internas y no envian notificaciones salientes.
 - La gestion de usuarios se apoya en PostgreSQL, con las tablas `usuario`, `usuario_superficie` y `usuario_historial`; si la base no responde, la aplicacion devuelve un error controlado.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
-- La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con pipeline ni otras capacidades de seguimiento.
+- La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, y el pipeline ya puede operarse desde `/pipeline` y `/api/pipeline`.
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.
-- Las alertas de `PB-004` ya se pueden operar localmente desde `/alertas` y `/api/alertas`; lo que sigue sin estar disponible es el pipeline.
+- Las alertas de `PB-004` ya se pueden operar localmente desde `/alertas` y `/api/alertas`.
 - La entrega administrable revisada ya opera sobre PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` conserva la ruta de apoyo basada en fichero.
 - La carga Atom sigue condicionada por la disponibilidad de snapshots `.atom`; si no hay ficheros Atom en `data/`, el respaldo operativo es `data/opportunities.json`.
-- No debe asumirse operativa la validacion de `PB-012` que aparece en el changelog de `2026-03-29` mientras `main` no exponga sus rutas y pruebas asociadas.
 - La BBDD integrada se publica en `DB_PORT` y puede abrirse por terminal con `make docker-psql`.
 
 ## Dependencias abiertas para administracion

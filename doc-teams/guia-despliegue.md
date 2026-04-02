@@ -4,7 +4,7 @@
 Persona responsable de publicar o exponer `Licican` fuera de un entorno local de desarrollo.
 
 ## Estado actual del despliegue
-La rama `main` contiene una aplicacion arrancable en local con PostgreSQL como backend operativo por defecto, modo `file` disponible para pruebas aisladas, gestion administrativa de usuarios persistida en PostgreSQL y una ruta reproducible de contenedor con `Dockerfile` y `docker-compose.yml` que levanta la aplicacion y la BBDD PostgreSQL integrada. Esto cubre despliegue local reproducible, pero no implica aun una publicacion productiva endurecida.
+La rama `main` contiene una aplicacion arrancable en local con PostgreSQL como backend operativo por defecto, modo `file` disponible para pruebas aisladas, gestion administrativa de usuarios persistida en PostgreSQL y una ruta reproducible de contenedor con `Dockerfile` y `docker-compose.yml` que levanta la aplicacion y la BBDD PostgreSQL integrada. Esto cubre despliegue local reproducible, pero no implica aun una publicacion productiva endurecida. La misma entrega expone tambien datos consolidados, pipeline, KPIs y la matriz de permisos.
 
 ## Verificacion previa obligatoria
 Antes de plantear cualquier publicacion, confirma desde la raiz del proyecto:
@@ -18,7 +18,7 @@ timeout 2s make run
 docker compose up -d --build
 ```
 
-Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En contenedor, la app usa `HOST=0.0.0.0` para aceptar conexiones externas al puerto publicado.
+Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En contenedor, la app usa `HOST=0.0.0.0` para aceptar conexiones externas al puerto publicado. Si vas a operar pipeline o alertas en una ruta distinta, revisa tambien `LICICAN_PIPELINE_PATH` y `LICICAN_ALERTS_PATH`.
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
@@ -27,6 +27,9 @@ Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En con
 - `docker compose up -d --build` publica la misma aplicacion en un contenedor, levanta la BBDD integrada y monta `data/` como volumen persistente.
 - En la superficie desplegada responden tambien `/alertas` y `/api/alertas`, que almacenan alertas internas sin notificaciones salientes.
 - En la superficie desplegada responden tambien `/usuarios` y `/api/usuarios`, que gestionan cuentas de usuario con almacenamiento en PostgreSQL.
+- En la superficie desplegada responden tambien `/datos-consolidados` y `/api/datos-consolidados`, con licitaciones, lotes y adjudicaciones trazables al Excel versionado.
+- En la superficie desplegada responden tambien `/pipeline` y `/api/pipeline`, con seguimiento por oportunidad y usuario.
+- En la superficie desplegada responden tambien `/kpis` y `/permisos`, utiles para administracion y control de acceso.
 - El detalle de oportunidad muestra el origen funcional vigente y, en modo `file`, el respaldo `data/opportunities.json` cuando no hay snapshots Atom versionados.
 
 ## Conclusion operativa
@@ -46,8 +49,7 @@ Solo debe considerarse soportado el arranque local de validacion y el despliegue
 - Incorporar operativa de proceso, observabilidad y recuperacion.
 - Revisar de nuevo esta guia cuando el alcance supere la demo local actual.
 - Si se quiere pasar de contenedor local a produccion, endurecer la imagen, definir usuario/volumenes finales y documentar supervision, observabilidad y rollback.
-- La priorizacion de fuentes reales ya puede desplegarse junto con el resto de la entrega minima, pero sigue siendo una funcionalidad de recopilacion, no una capa operativa completa.
-- Las alertas visibles son internas y no sustituyen una capa de notificacion o automatizacion de seguimiento.
+- La priorizacion de fuentes reales ya puede desplegarse junto con el resto de la entrega minima, y el pipeline ya es una capa operativa visible; las alertas siguen siendo internas y no sustituyen una capa de notificacion o automatizacion de seguimiento.
 - La gestion de usuarios disponible en `main` no incluye autenticacion real, SSO ni MFA; el control sigue siendo por rol simulado y por la semilla registrada en PostgreSQL.
 - La entrega documentada aqui usa PostgreSQL por defecto; `LICICAN_CATALOG_BACKEND=file` y `data/opportunities.json` quedan como respaldo operativo cuando se fuerza ese modo.
 - La consolidacion Atom sigue sujeta a la disponibilidad de snapshots `.atom`; si no hay ficheros Atom en `data/`, la ruta `file` usa el respaldo JSON.
