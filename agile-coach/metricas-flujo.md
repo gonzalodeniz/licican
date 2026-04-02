@@ -70,6 +70,11 @@ Medir si el proceso entre equipos mejora en velocidad, claridad y estabilidad si
 - Senal que aporta: mide el coste de mantenimiento de las reglas duplicadas y detecta ventanas en las que la documentacion derivada puede quedar desfasada respecto a la referencia canónica.
 - Regla de uso: si esta propagacion se alarga de forma recurrente, revisar si la copia derivada aporta valor operativo suficiente o si puede sustituirse por una remision breve a la guia canónica.
 
+## 16. Copias derivadas con bloque compartido completo
+- Definicion: numero o porcentaje de documentos operativos que siguen reproduciendo un bloque completo de reglas compartidas en lugar de una remision breve a `agile-coach/acuerdos-operativos.md`.
+- Senal que aporta: detecta si la reduccion de duplicidad documental se esta aplicando de forma real o si solo cambia la redaccion sin bajar el coste de mantenimiento.
+- Regla de uso: si esta metrica no baja tras una actualizacion de proceso, revisar si la copia derivada puede reducirse aun mas o eliminarse sin perder la plantilla minima que necesita el rol.
+
 ## Regla de uso
 - Revisar estas metricas al cierre de cada iteracion relevante o cuando se acumulen varias issues cerradas.
 - Si una metrica empeora de forma sostenida, revisar primero el handoff asociado antes de cambiar responsabilidades entre equipos.

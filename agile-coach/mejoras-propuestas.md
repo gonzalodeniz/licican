@@ -525,6 +525,7 @@ Aunque las reglas compartidas ya tienen una referencia canónica, cada cambio si
 
 ### Propuesta
 Registrar, en cada cambio de proceso relevante, el tiempo que tarda en propagarse la regla desde `agile-coach/acuerdos-operativos.md` hasta las copias derivadas que sigan siendo necesarias. Si la propagacion obliga a editar muchas superficies o se alarga mas de lo razonable dentro del mismo ciclo, revisar si alguna copia sigue aportando valor operativo o si puede reducirse a una remision breve.
+La metrica 16 complementa esta medicion al comprobar si una copia sigue reproduciendo bloques completos en vez de simplificar de verdad.
 
 ### Impacto esperado
 - Hace visible el coste real de mantener reglas compartidas en varios documentos.

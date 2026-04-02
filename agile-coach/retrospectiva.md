@@ -15,7 +15,7 @@
 ## Mejora prioritaria
 - Mantener `agile-coach/acuerdos-operativos.md` como referencia primaria.
 - Dejar en los `AGENTS.md` de rol solo la referencia breve o la plantilla literal minima imprescindible.
-- Medir el tiempo de propagacion de cada regla compartida con la nueva metrica 15.
+- Medir el tiempo de propagacion de cada regla compartida con la nueva metrica 15 y comprobar que la metrica 16 baja cuando una copia se reduce de verdad.
 
 ## Tradeoffs
 - Menos duplicacion significa menos autosuficiencia en cada documento de rol.
@@ -27,4 +27,4 @@
 
 ## Seguimiento
 - Usar esta retrospectiva como referencia ligera cuando se vuelva a tocar una regla compartida.
-- Revisar la metrica 15 en cualquier iteracion donde cambien estados operativos, handoffs o plantillas literales.
+- Revisar las metricas 15 y 16 en cualquier iteracion donde cambien estados operativos, handoffs o plantillas literales.
