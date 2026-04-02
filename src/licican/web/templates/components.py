@@ -35,6 +35,22 @@ def render_metric(value: object, label: str) -> str:
     return f'<article class="metric"><strong>{escape(str(value))}</strong>{escape(label)}</article>'
 
 
+def render_state_badge(value: object) -> str:
+    """Renderiza un badge visual para estados funcionales."""
+    text = escape(str(value))
+    normalized = str(value).strip().lower()
+
+    tone = "neutral"
+    if normalized in {"resuelta", "adjudicada", "activa", "mvp", "global"}:
+        tone = "success"
+    elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva"}:
+        tone = "danger"
+    elif normalized in {"nueva", "evaluando", "preparando oferta", "presentada", "posterior", "por definir", "propio"}:
+        tone = "warning"
+
+    return f'<span class="status-badge {tone}">{text}</span>'
+
+
 def render_status_note(message: str | None, tone: str = "ok") -> str:
     """Renderiza una nota de estado."""
     if message is None:

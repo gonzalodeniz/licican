@@ -5,7 +5,7 @@ from html import escape
 from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_metric, render_tab_nav, render_table
+from licican.web.templates.components import render_metric, render_state_badge, render_tab_nav, render_table
 
 
 def render_datos_consolidados(
@@ -24,7 +24,7 @@ def render_datos_consolidados(
     body_rows: list[str] = []
     for index, row in enumerate(rows):
         cells = "".join(
-            f'<td data-label="{escape(label)}">{escape(_display_value(row.get(key)))}</td>'
+            f'<td data-label="{escape(label)}">{render_state_badge(row.get(key)) if label == "Estado" else escape(_display_value(row.get(key)))}</td>'
             for key, label in columns
         )
         if actions is not None:

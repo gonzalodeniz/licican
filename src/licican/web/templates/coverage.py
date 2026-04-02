@@ -4,7 +4,7 @@ from html import escape
 
 from licican.access import AccessContext
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_metric, render_table
+from licican.web.templates.components import render_metric, render_state_badge, render_table
 
 
 def render_coverage(sources, summary: dict[str, int], base_path: str = "", access_context: AccessContext | None = None) -> str:
@@ -14,7 +14,7 @@ def render_coverage(sources, summary: dict[str, int], base_path: str = "", acces
             "<tr>"
             f'<td data-label="Fuente oficial">{escape(source.nombre)}</td>'
             f'<td data-label="Categoría">{escape(source.categoria)}</td>'
-            f'<td data-label="Estado">{escape(source.estado)}</td>'
+            f'<td data-label="Estado">{render_state_badge(source.estado)}</td>'
             f'<td data-label="Alcance">{escape(source.alcance)}</td>'
             f'<td data-label="Justificación funcional">{escape(source.descripcion)}</td>'
             f'<td data-label="Trazabilidad">{escape(source.referencia_funcional)}</td>'

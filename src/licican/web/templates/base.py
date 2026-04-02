@@ -22,6 +22,7 @@ def page_template(
 <html lang="es">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{escape(document_title)}</title>
     <link rel="stylesheet" href="{escape(build_url(base_path, '/static/style.css'))}" />
   </head>
