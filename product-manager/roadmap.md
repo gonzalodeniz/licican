@@ -15,6 +15,7 @@
 - `PB-013` ya no forma parte del trabajo pendiente: la issue #13 fue cerrada en GitHub el 2026-04-01 y su capacidad queda absorbida en el estado vigente del producto.
 - Siguiente recomendacion para `developer-teams`: tomar `PB-015` como siguiente issue funcional elegible, porque sus dependencias ya estan resueltas y ordena el gobierno de retencion del dato operativo.
 - `PB-008` queda despues de `PB-015` como siguiente trabajo documental de medicion.
+- `PB-016` queda como siguiente evolucion funcional de gobierno de usuarios y accesos una vez queden ordenados `PB-015` y `PB-008`.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -172,12 +173,27 @@
   - `PB-014` ya quedo cerrado tras su integracion.
   - `PB-015` pasa a ser la siguiente prioridad funcional abierta tras el cierre administrativo de `PB-005` y `PB-013`.
 
+## Release 9: Gobierno de usuarios y accesos
+- Objetivo: Administrar cuentas de usuario, roles y permisos desde un modulo institucional y trazable.
+- Alcance:
+  - PB-016 Gestion de usuarios y accesos de plataforma.
+- Criterios de salida:
+  - El usuario con permisos suficientes puede listar, crear, editar y controlar cuentas desde un unico modulo.
+  - Los cambios de rol, estado y permisos quedan auditados.
+  - El sistema impide dejar la plataforma sin administradores activos.
+  - La interfaz mantiene una lectura sobria y coherente con el resto del backoffice.
+- Riesgo principal:
+  - Que el producto crezca en volumen de cuentas sin una herramienta administrativa interna que evite gestion manual y errores de acceso.
+- Estado operativo actual:
+  - `PB-016` esta documentado y preparado como siguiente paso funcional de gobierno, pero sigue por detras de `PB-015` y `PB-008` en la prioridad operativa.
+
 ## Dependencias abiertas de roadmap
 - Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
 - Definir en una iteracion posterior si las oportunidades modificadas deben generar historial visible de cambios, no solo el ultimo dato oficial.
 - Decidir en una iteracion posterior si los KPIs de alertas deben exigirse ya con dato real o pueden arrancar con definicion documental y recogida manual temporal.
 - Confirmar que modulos deben formar parte de la navegacion principal visible desde la primera entrega de `PB-010` y cuales deben quedar ocultos o marcados como `proximamente`.
 - Confirmar si la referencia funcional al Excel debe cubrir en una iteracion posterior tambien la hoja `Modificaciones` cuando existan datos disponibles.
+- Concretar el modelo persistente de cuentas y auditoria necesario para arrancar `PB-016` sin ambiguedad de acceso.
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.

@@ -292,3 +292,28 @@
 - Dependencias funcionales: issue #14 integrada en `main`, PB-005 cerrada administrativamente
 - Prioridad: P1
 - Estado: `nuevo`
+
+## HU-16 Gestionar usuarios de plataforma
+- Backlog relacionado: PB-016
+- Caso de uso relacionado: CU-16
+- Issue relacionado: #28
+- Historia:
+  Como administrador de plataforma, administrador funcional o responsable con permisos suficientes,
+  quiero poder gestionar cuentas de usuario, roles, permisos y accesos desde un unico modulo,
+  para controlar de forma trazable quien puede operar en Licican y con que alcance.
+- Alcance funcional acotado:
+  - La gestion es sobre cuentas internas de la plataforma.
+  - La baja logica reemplaza a la eliminacion fisica.
+  - La gestion masiva queda fuera del MVP.
+- Criterios de aceptacion:
+  1. El modulo muestra un listado paginado de usuarios con nombre completo, email, rol principal, superficies asignadas, estado, ultimo acceso y acciones por fila.
+  2. El usuario con permisos suficientes puede crear una cuenta con datos validos y verla reflejada en el listado y en el detalle.
+  3. El sistema bloquea emails duplicados con un mensaje de error claro.
+  4. El usuario con permisos suficientes puede editar datos basicos, cambiar el rol principal y ajustar permisos o superficies.
+  5. El usuario con permisos suficientes puede activar, desactivar, reactivar o dar baja logica a una cuenta con confirmacion previa en acciones sensibles.
+  6. El usuario con permisos suficientes puede reenviar invitacion a cuentas pendientes y reiniciar acceso o contraseña cuando corresponda.
+  7. El detalle de usuario muestra estado actual, ultimo acceso e historial o trazabilidad de cambios.
+  8. El sistema impide dejar la plataforma sin ningun administrador activo.
+- Dependencias funcionales: PB-013, persistencia de usuarios, auditoria de cambios, autenticacion o contexto de sesion
+- Prioridad: P2
+- Estado: `nuevo`

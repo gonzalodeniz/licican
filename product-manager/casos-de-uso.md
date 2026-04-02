@@ -386,3 +386,37 @@
   - RB-53 Las licitaciones con seguimiento activo no se eliminan.
   - RB-54 Las licitaciones cerradas y archivables se trasladan a una tabla de archivadas con la misma estructura de datos.
   - RB-55 La configuracion puede expresarse en dias totales desde la creacion o en antiguedad de las cerradas.
+
+## CU-16 Administrar cuentas de usuario
+- Backlog relacionado: PB-016
+- Historias relacionadas: HU-16
+- Actor principal: Administrador de plataforma, administrador funcional o responsable con permisos de gestion de usuarios.
+- Objetivo: Gestionar cuentas, roles, permisos y estados de acceso de los usuarios de Licican desde un modulo centralizado y trazable.
+- Disparador: El responsable abre el modulo `Gestion de usuarios`.
+- Precondiciones:
+  - Existe un contexto de sesion con permisos suficientes para la gestion de usuarios.
+  - El sistema dispone de persistencia para cuentas, estados y trazabilidad.
+- Flujo principal:
+  1. El responsable abre el modulo de gestion de usuarios.
+  2. El sistema muestra un listado paginado con filtros, KPIs y acciones por fila.
+  3. El responsable crea o edita una cuenta segun necesidad.
+  4. El sistema valida datos, roles, superficies y restricciones de acceso.
+  5. El responsable activa, desactiva, reactiva, reenvia invitaciones o reinicia acceso segun el estado de la cuenta.
+  6. El sistema deja trazabilidad del cambio y actualiza el detalle del usuario.
+- Flujos alternativos:
+  - A1. Si el email ya existe, el sistema bloquea la alta o la edicion y muestra un error claro.
+  - A2. Si se intenta desactivar al ultimo administrador activo, el sistema bloquea la accion.
+  - A3. Si la cuenta esta pendiente de activacion, el sistema permite reenviar la invitacion pero no permite acceso operativo.
+  - A4. Si el responsable no tiene permisos suficientes para asignar un rol o superficie restringida, la accion se impide.
+  - A5. Si se solicita una baja logica, el sistema conserva el historico y retira la cuenta del uso activo.
+- Postcondiciones:
+  - La cuenta queda actualizada y la accion relevante permanece auditada.
+- Reglas de negocio relacionadas:
+  - RB-56 El email debe ser unico y valido.
+  - RB-57 La alta, edicion, activacion, desactivacion, reactivacion y baja logica deben quedar auditadas.
+  - RB-58 Un usuario inactivo, bloqueado o pendiente no debe poder acceder hasta que su estado lo permita.
+  - RB-59 El sistema no puede quedar sin ningun administrador activo.
+  - RB-60 La baja logica debe preferirse a la eliminacion fisica.
+  - RB-61 Los roles o superficies sensibles solo pueden asignarse con permisos suficientes.
+  - RB-62 El ultimo acceso debe ser visible o quedar como no disponible si nunca ha iniciado sesion.
+  - RB-63 Las acciones sensibles requieren confirmacion previa antes de ejecutarse.

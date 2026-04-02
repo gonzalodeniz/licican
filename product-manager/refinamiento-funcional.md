@@ -11,6 +11,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La inconsistencia principal detectada en esta revision es de trazabilidad operativa: varios artefactos seguian describiendo `PB-005` y `PB-013` como trabajo abierto cuando GitHub ya las refleja cerradas.
 - El siguiente hueco accionable de producto queda en la priorizacion: `PB-015` debe pasar a ser la siguiente issue funcional elegible, por delante de `PB-008`.
 - Aparece una necesidad de gobierno de datos: el producto mantiene `PB-015` como trabajo posterior para parametrizar la antiguedad de conservacion y archivado de licitaciones.
+- Aparece una necesidad de gobierno de usuarios: `PB-016` debe planificarse como el siguiente bloque de administracion de cuentas, roles, permisos y baja logica una vez ordenados `PB-015` y `PB-008`.
 - Aparece una dependencia de priorizacion tecnica: los informes de auditoria de calidad y seguridad del 2026-03-28 deben convertirse en issues tecnicas por `developer-teams` antes de que producto pueda ordenar su capacidad frente al roadmap funcional.
 
 ## Estado funcional confirmado en el repositorio
@@ -34,6 +35,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Queda definido que una alerta del MVP necesita al menos un criterio funcional informado y no puede guardarse vacia.
 - Queda definido que el alta inicial en pipeline crea siempre el estado `Nueva`.
 - Queda definido que `PB-008` puede avanzar como definicion funcional de KPIs aunque la instrumentacion completa llegue en una iteracion posterior.
+- Queda definido que `PB-016` requiere un modelo persistente de cuentas y auditoria antes de abrir gestion operativa de usuarios.
 - Queda incorporada como prioridad explicita la recopilacion desde fuentes reales oficiales nominadas, ya que `PB-007` solo cerraba cobertura funcional y no orden de implementacion de fuentes reales.
 - Queda definido que el rediseño de interfaz solicitado debe materializarse como un item funcional trazable y no como una observacion informal para desarrollo.
 - Queda corregida la lectura funcional de `PB-004`: el trabajo ya no esta pendiente ni de desarrollo ni de integracion; pasa a referencia funcional ya entregada.
@@ -50,6 +52,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Con `PB-011`, `PB-012`, `PB-005`, `PB-013` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es arrancar `PB-015`.
 - `T-002` ya quedo validado por `qa-teams`, integrado en `main` por `developer-teams` y cerrado administrativamente por `product-manager`.
 - `PB-015` aparece como nueva pieza funcional para gobierno de datos y pasa a ser la siguiente issue funcional abierta; `PB-014` ya quedo cerrada tras su integracion.
+- `PB-016` queda preparada como siguiente pieza de gobierno de usuarios, pero solo despues de `PB-015` y `PB-008`.
 - `PB-010` deja de ser una pieza funcional abierta y pasa a historial cerrado de navegacion transversal.
 - `PB-013` deja de ser hueco ejecutable pendiente y pasa a baseline funcional ya entregada.
 - Los informes de `quality-auditor` y `security-auditor` del 2026-03-28 quedan aceptados como entrada formal de priorizacion; falta que `developer-teams` materialice sus hallazgos accionables en issues tecnicas separadas para poder ordenarlas frente a `PB-010`, `PB-005` y `PB-008`.
@@ -171,6 +174,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Riesgo de inconsistencia de experiencia si cada nueva vista incorpora navegacion propia en lugar de una estructura principal comun y responsive.
 - Riesgo operativo si la documentacion de producto no refleja con rapidez las integraciones ya realizadas en `main` y sigue guiando al equipo con prioridades desfasadas.
 - Riesgo operativo si producto no mantiene sincronizado que `PB-015` es la siguiente implementacion funcional elegible y que `PB-008` queda despues como definicion documental.
+- Riesgo operativo si el producto abre `PB-016` sin definir bien persistencia, auditoria y bloqueo del ultimo administrador activo.
 - Riesgo funcional si el crecimiento de alertas, pipeline o futuras vistas no aplica de forma consistente el modelo de roles y permisos ya definido.
 - Riesgo de roadmap sesgado si los hallazgos tecnicos y de seguridad del 2026-03-28 no se convierten pronto en trabajo trazable y compiten de forma invisible con nuevas funcionalidades.
 - Riesgo de planificacion irreal si `PB-015` se arranca sin explicitar bien el efecto sobre archivado, trazabilidad y licitaciones con seguimiento activo.
@@ -187,6 +191,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 ## Recomendacion operativa para `developer-teams`
 - A continuacion, tomar `PB-015` como siguiente issue funcional elegible.
 - Mantener `PB-008` por detras de `PB-015`.
+- Planificar `PB-016` como la siguiente evolucion de gobierno de usuarios una vez se ordenen `PB-015` y `PB-008`.
 - Crear las issues tecnicas separadas derivadas de los informes de `quality-auditor` y `security-auditor` del 2026-03-28 para que producto pueda priorizarlas de forma explicita.
 - Mantener visible en el catalogo la fuente oficial y evitar mensajes que sugieran cobertura total del ecosistema canario.
 - Garantizar como minimo por oportunidad recopilada la visibilidad de origen oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando exista.
@@ -206,3 +211,4 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-013` queda absorbida como capacidad vigente de la matriz de permisos sobre las superficies ya disponibles, dejando pipeline como extension posterior.
 - `PB-005` deja de ser modulo posterior pendiente y pasa a entrega ya cerrada administrativamente.
 - `PB-008` prepara la base de decision para evolucion posterior sin bloquear el MVP.
+- `PB-016` queda ya explicitado como siguiente bloque de gobierno de usuarios una vez resueltos retencion y medicion.
