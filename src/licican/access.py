@@ -31,6 +31,8 @@ CAPABILITY_MATRIX = {
             "manage_pipeline",
             "view_kpis",
             "view_permissions",
+            "view_users",
+            "manage_users",
         }
     ),
     ROLE_COLLABORATOR: frozenset(
