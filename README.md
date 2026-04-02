@@ -111,7 +111,7 @@ La rama `main` ya integra ocho piezas funcionales y operativas verificables del 
 Si no existe `.env`, copia `.env.example` y ajusta al menos `PORT` antes de arrancar.
 
 El arranque local usa el puerto definido en `.env` mediante `PORT`. Si no se define, la aplicacion cae al valor por defecto `8000`.
-El servidor local escucha en `127.0.0.1` por defecto. En contenedor o Compose se usa `HOST=0.0.0.0`.
+El servidor local escucha en `HOST`, con `127.0.0.1` por defecto. Si necesitas exponerlo fuera de la maquina local, usa `HOST=0.0.0.0`.
 La carga del catalogo y del detalle usa PostgreSQL por defecto. Si necesitas forzar temporalmente la fuente historica basada en ficheros para pruebas locales, exporta `LICICAN_CATALOG_BACKEND=file`.
 
 Configuracion local por defecto del backend PostgreSQL:

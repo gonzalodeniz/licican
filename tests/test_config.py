@@ -51,3 +51,8 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual("0.0.0.0", config.resolve_host())
             self.assertEqual(8080, config.resolve_port())
             self.assertEqual(Path("/tmp/alerts.json"), config.resolve_alerts_path())
+
+    def test_resolve_host_defaults_to_loopback_when_missing(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            config._ENV_LOADED = True
+            self.assertEqual("127.0.0.1", config.resolve_host())

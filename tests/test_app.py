@@ -734,7 +734,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Gestion de usuarios", html)
-        self.assertIn("Usuarios totales", html)
+        self.assertNotIn("Usuarios totales", html)
         self.assertIn("Ana Lopez", html)
         self.assertIn("Nuevo usuario", html)
         self.assertIn('href="/licican/usuarios"', html)
