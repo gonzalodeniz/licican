@@ -896,6 +896,7 @@ def handle_kpis_page(request: Request, start_response) -> list[bytes]:
     try:
         catalog = build_catalog()
         _, alerts = load_alerts(resolve_alerts_path())
+        source_coverage = load_source_coverage()
     except CatalogDataSourceError as exc:
         content = _catalog_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
@@ -903,36 +904,59 @@ def handle_kpis_page(request: Request, start_response) -> list[bytes]:
     visible_alerts = _visible_alerts(request, alerts)
     alerts_summary = summarize_alerts(visible_alerts)
     pipeline_payload = _visible_pipeline_payload(request)
+    coverage_summary = summary_by_status(source_coverage)
+    coverage_visible = len(catalog["cobertura_aplicada"])
+    coverage_mvp = coverage_summary["MVP"]
+    active_alert_users = len({alert.usuario_id for alert in visible_alerts if alert.activa})
     if request.access_context.is_admin:
         alcance_general = "Indicadores globales"
-        alcance_operativo = "Global para administracion."
     elif request.access_context.is_manager:
         alcance_general = "Indicadores del contexto operativo"
-        alcance_operativo = "Operativo para manager."
     else:
         alcance_general = "Indicadores del contexto propio"
-        alcance_operativo = "Propio para colaboracion o invitado."
     payload = {
         "rol_activo": request.access_context.role_label,
         "alcance": alcance_general,
+        "modo_captura": "Mixto: cobertura visible automatizada y adopción/uso con primera consolidación manual si falta instrumentación completa.",
+        "resumen": {
+            "fuentes_mvp": f"{coverage_visible}/{coverage_mvp}",
+            "cobertura_visible": f"{coverage_visible} fuentes",
+            "alertas_activas": f"{alerts_summary['alertas_activas']} alertas",
+            "pipeline_visible": f"{pipeline_payload['summary']['total_oportunidades']} oportunidades",
+        },
         "indicadores": [
             {
-                "nombre": "Cobertura visible",
-                "valor": catalog["total_oportunidades_catalogo"],
-                "lectura": "Oportunidades TI actualmente visibles en el catalogo consultable.",
-                "alcance": "Consulta general del producto.",
+                "nombre": "Cobertura de fuentes priorizadas",
+                "valor_label": "Cobertura actual",
+                "valor_actual": f"{coverage_visible}/{coverage_mvp}" if coverage_mvp else "Sin referencia",
+                "definicion": "Porcentaje de fuentes MVP priorizadas que producen datos visibles y trazables en la ventana de evaluacion.",
+                "formula": "fuentes_MVP_con_datos / fuentes_MVP_priorizadas x 100",
+                "umbral_inicial": "90 por ciento",
+                "decision": "Si cae por debajo del umbral, frenar expansion y estabilizar trazabilidad e ingestion.",
+                "captura": "Automatica sobre la cobertura visible del catalogo y la configuracion del MVP.",
+                "limitacion": "La medicion actual usa la cobertura visible del producto y no sustituye una telemetria completa de disponibilidad.",
             },
             {
-                "nombre": "Adopcion de alertas",
-                "valor": alerts_summary["alertas_activas"],
-                "lectura": "Alertas activas dentro del alcance permitido por el rol.",
-                "alcance": alcance_operativo,
+                "nombre": "Adopcion de alertas activas",
+                "valor_label": "Usuarios con alerta activa",
+                "valor_actual": f"{active_alert_users} usuarios" if alerts_summary["alertas_activas"] else "Sin alertas activas",
+                "definicion": "Porcentaje de usuarios activos semanales que disponen de al menos una alerta activa.",
+                "formula": "usuarios_activos_con_alerta_activa / usuarios_activos_semanales x 100",
+                "umbral_inicial": "30 por ciento",
+                "decision": "Si baja del umbral, simplificar onboarding y configuracion de alertas.",
+                "captura": "Consolidacion operativa de alertas activas y usuarios con alerta en la captura actual.",
+                "limitacion": "No existe todavia telemetria completa de usuarios activos semanales; la primera captura puede ser manual.",
             },
             {
-                "nombre": "Uso de pipeline",
-                "valor": pipeline_payload["summary"]["total_oportunidades"],
-                "lectura": "Oportunidades actualmente seguidas en pipeline dentro del alcance visible.",
-                "alcance": alcance_operativo,
+                "nombre": "Uso recurrente de consulta",
+                "valor_label": "Captura actual",
+                "valor_actual": "Pendiente de consolidacion manual",
+                "definicion": "Frecuencia semanal de consultas de catalogo o detalle por usuario activo.",
+                "formula": "consultas_catalogo_o_detalle_semana / usuarios_activos_semanales",
+                "umbral_inicial": "1 interaccion semanal por usuario activo",
+                "decision": "Si baja del umbral, revisar relevancia, navegacion y encaje funcional antes de ampliar cobertura.",
+                "captura": "Consolidacion manual temporal o instrumentacion posterior de sesiones.",
+                "limitacion": "La aplicacion aun no recoge una telemetria fina de consultas de catalogo o detalle, por lo que la primera medicion puede ser manual.",
             },
         ],
     }

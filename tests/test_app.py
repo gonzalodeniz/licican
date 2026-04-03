@@ -674,7 +674,11 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('class="table-wrap permissions-table-wrap"', admin_html)
         self.assertIn("Matriz funcional de roles y permisos", admin_html)
         self.assertEqual("200 OK", kpi_status)
-        self.assertIn("KPIs operativos visibles por rol", kpi_body.decode("utf-8"))
+        kpi_html = kpi_body.decode("utf-8")
+        self.assertIn("KPIs iniciales de cobertura, adopción y uso", kpi_html)
+        self.assertIn("Cobertura de fuentes priorizadas", kpi_html)
+        self.assertIn("Umbral inicial", kpi_html)
+        self.assertIn("Decisión asociada", kpi_html)
 
     def test_admin_can_access_retention_page(self) -> None:
         payload = {
