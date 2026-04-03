@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from licican.auth import service as auth_service
 from licican import users as users_module
 
 
@@ -29,9 +30,11 @@ class SeededUsersState:
                     "email": "ana.lopez@licican.local",
                     "rol_principal": "administrador",
                     "estado": "activo",
-                    "fecha_alta": _ts("2026-04-01T09:00:00Z"),
-                    "ultimo_acceso": _ts("2026-04-02T08:10:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-04-01T09:00:00Z"),
+                "ultimo_acceso": _ts("2026-04-02T08:10:00Z"),
+                "invitacion_pendiente": False,
+                "username": "ana.lopez@licican.local",
+                "password_hash": "hash-ana",
                 },
                 "usr-002": {
                     "id": "usr-002",
@@ -40,9 +43,11 @@ class SeededUsersState:
                     "email": "carlos.mendez@licican.local",
                     "rol_principal": "manager",
                     "estado": "activo",
-                    "fecha_alta": _ts("2026-04-01T10:15:00Z"),
-                    "ultimo_acceso": _ts("2026-04-02T07:50:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-04-01T10:15:00Z"),
+                "ultimo_acceso": _ts("2026-04-02T07:50:00Z"),
+                "invitacion_pendiente": False,
+                "username": "carlos.mendez@licican.local",
+                "password_hash": "hash-carlos",
                 },
                 "usr-003": {
                     "id": "usr-003",
@@ -51,9 +56,11 @@ class SeededUsersState:
                     "email": "laura.gonzalez@licican.local",
                     "rol_principal": "colaborador",
                     "estado": "pendiente",
-                    "fecha_alta": _ts("2026-04-02T08:30:00Z"),
-                    "ultimo_acceso": None,
-                    "invitacion_pendiente": True,
+                "fecha_alta": _ts("2026-04-02T08:30:00Z"),
+                "ultimo_acceso": None,
+                "invitacion_pendiente": True,
+                "username": "laura.gonzalez@licican.local",
+                "password_hash": None,
                 },
                 "usr-004": {
                     "id": "usr-004",
@@ -62,9 +69,11 @@ class SeededUsersState:
                     "email": "mario.perez@licican.local",
                     "rol_principal": "invitado",
                     "estado": "inactivo",
-                    "fecha_alta": _ts("2026-03-30T11:00:00Z"),
-                    "ultimo_acceso": _ts("2026-03-31T15:15:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-03-30T11:00:00Z"),
+                "ultimo_acceso": _ts("2026-03-31T15:15:00Z"),
+                "invitacion_pendiente": False,
+                "username": "mario.perez@licican.local",
+                "password_hash": "hash-mario",
                 },
             },
             history={
@@ -145,6 +154,12 @@ class SeededUsersState:
             fecha_alta,
             ultimo_acceso,
             invitacion_pendiente,
+            username,
+            password_hash,
+            nombre_completo,
+            rol,
+            activo,
+            updated_at,
         ) = params
         if user_id in self.users:
             raise AssertionError("user id already exists in test state")
@@ -160,6 +175,12 @@ class SeededUsersState:
             "fecha_alta": fecha_alta,
             "ultimo_acceso": ultimo_acceso,
             "invitacion_pendiente": bool(invitacion_pendiente),
+            "username": None if username is None else str(username),
+            "password_hash": None if password_hash is None else str(password_hash),
+            "nombre_completo": str(nombre_completo),
+            "rol": str(rol),
+            "activo": bool(activo),
+            "updated_at": updated_at,
         }
 
     def update_user(self, params: tuple[Any, ...]) -> None:
@@ -171,6 +192,12 @@ class SeededUsersState:
             estado,
             ultimo_acceso,
             invitacion_pendiente,
+            username,
+            password_hash,
+            nombre_completo,
+            rol,
+            activo,
+            updated_at,
             user_id,
         ) = params
         record = self.users[str(user_id)]
@@ -183,6 +210,12 @@ class SeededUsersState:
                 "estado": str(estado),
                 "ultimo_acceso": ultimo_acceso,
                 "invitacion_pendiente": bool(invitacion_pendiente),
+                "username": None if username is None else str(username),
+                "password_hash": None if password_hash is None else str(password_hash),
+                "nombre_completo": str(nombre_completo),
+                "rol": str(rol),
+                "activo": bool(activo),
+                "updated_at": updated_at,
             }
         )
 
@@ -201,39 +234,75 @@ class SeededUsersState:
         record = self.users.get(str(user_id))
         return deepcopy(record) if record is not None else None
 
+    def delete_user(self, user_id: str) -> None:
+        self.users.pop(str(user_id), None)
+        self.history.pop(str(user_id), None)
+
 
 class _FakeCursor:
     def __init__(self, state: SeededUsersState):
         self.state = state
         self.rows: list[dict[str, Any]] = []
+        self.row: dict[str, Any] | None = None
 
     def execute(self, sql, params=None):
         normalized = str(sql).strip()
         if normalized == users_module.USERS_SELECT_SQL.strip():
             self.rows = self.state.user_rows()
+            self.row = None
             return
         if normalized == users_module.USER_HISTORY_SELECT_SQL.strip():
             self.rows = self.state.history_rows()
+            self.row = None
             return
         if normalized == users_module.USER_INSERT_SQL.strip():
             self.state.insert_user(params)
             self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_UPDATE_SQL.strip():
             self.state.update_user(params)
             self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_INSERT_HISTORY_SQL.strip():
             self.state.insert_history(params)
             self.rows = []
+            self.row = None
+            return
+        if normalized == users_module.USER_DELETE_SQL.strip():
+            self.state.delete_user(str(params[0]))
+            self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_SCHEMA_BOOTSTRAP_SQL.strip():
             self.rows = []
+            self.row = None
+            return
+        if normalized == auth_service.AUTH_USER_BOOTSTRAP_SQL.strip():
+            self.rows = []
+            self.row = None
+            return
+        if normalized == auth_service.AUTH_USER_SELECT_SQL.strip():
+            self.rows = []
+            self.row = None
+            return
+        if normalized in {
+            auth_service.AUTH_USER_INSERT_SQL.strip(),
+            auth_service.AUTH_USER_UPDATE_SUPERADMIN_SQL.strip(),
+            auth_service.AUTH_USER_DEACTIVATE_SQL.strip(),
+            auth_service.AUTH_USER_LAST_LOGIN_SQL.strip(),
+        }:
+            self.rows = []
+            self.row = None
             return
         raise AssertionError(f"SQL inesperado en prueba: {normalized}")
 
     def fetchall(self):
         return self.rows
+
+    def fetchone(self):
+        return self.row
 
     def __enter__(self):
         return self

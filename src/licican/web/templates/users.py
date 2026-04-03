@@ -34,12 +34,28 @@ def render_users(
           </div>
         </section>
         """
+    users_table_block = ""
+    if not selected_user_panel:
+        users_table_block = f"""
+        <section class="panel" id="users-table-panel">
+          <div class="panel-body users-table-panel-body">
+            <div class="pagination-status">
+              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+            </div>
+            {_render_pagination(base_path, filters, pagination)}
+            {users_table}
+            {_render_pagination(base_path, filters, pagination)}
+          </div>
+        </section>
+        """
 
     content = f"""
-        <section class="users-view" aria-label="Gestion de usuarios">
+        <section class="users-view" aria-label="Gestion de usuarios" data-users-index-url="{escape(build_url(base_path, '/usuarios'))}">
         <div class="users-create-toggle">
           <button type="button" id="toggle-users-create" aria-controls="users-create-panel" aria-expanded="false">Nuevo usuario</button>
         </div>
+        <div class="users-toast-region" id="users-toast-region" aria-live="polite" aria-atomic="true"></div>
         <section class="panel" id="users-create-panel" hidden>
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
@@ -74,17 +90,7 @@ def render_users(
           </div>
         </section>
         {selected_user_block}
-        <section class="panel" id="users-table-panel">
-          <div class="panel-body users-table-panel-body">
-            <div class="pagination-status">
-              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-            </div>
-            {_render_pagination(base_path, filters, pagination)}
-            {users_table}
-            {_render_pagination(base_path, filters, pagination)}
-          </div>
-        </section>
+        {users_table_block}
       </section>
       <script>
         (function () {{
@@ -107,6 +113,154 @@ def render_users(
               button.setAttribute('aria-expanded', 'false');
             }}
           }});
+
+          const usersView = document.querySelector('.users-view');
+          const toastRegion = document.getElementById('users-toast-region');
+          let activeDeleteToggle = null;
+
+          function getDeleteToggle(userId) {{
+            return document.getElementById('delete-toggle-' + userId);
+          }}
+
+          function showToast(message, tone) {{
+            if (!toastRegion) {{
+              return;
+            }}
+
+            const toast = document.createElement('div');
+            toast.className = 'users-toast ' + (tone ? 'users-toast-' + tone : 'users-toast-success');
+            toast.setAttribute('role', 'status');
+            toast.textContent = message;
+            toastRegion.appendChild(toast);
+
+            window.setTimeout(function () {{
+              toast.classList.add('is-visible');
+            }}, 10);
+
+            window.setTimeout(function () {{
+              toast.classList.remove('is-visible');
+              window.setTimeout(function () {{
+                if (toast.parentNode) {{
+                  toast.parentNode.removeChild(toast);
+                }}
+              }}, 180);
+            }}, 2800);
+          }}
+
+          function hideConfirm(userId, restoreFocus) {{
+            const toggle = getDeleteToggle(userId) || activeDeleteToggle;
+            if (!toggle) {{
+              return;
+            }}
+
+            const trigger = toggle.querySelector('[data-delete-toggle]');
+            const confirmation = toggle.querySelector('.delete-toggle-confirmation');
+            if (confirmation) {{
+              confirmation.hidden = true;
+            }}
+            if (trigger) {{
+              trigger.hidden = false;
+              trigger.setAttribute('aria-expanded', 'false');
+            }}
+            toggle.classList.remove('is-confirming-delete');
+            if (activeDeleteToggle === toggle) {{
+              activeDeleteToggle = null;
+            }}
+            if (restoreFocus !== false && trigger) {{
+              trigger.focus();
+            }}
+          }}
+
+          function showConfirm(userId, userName) {{
+            const toggle = getDeleteToggle(userId);
+            if (!toggle) {{
+              return;
+            }}
+
+            if (activeDeleteToggle && activeDeleteToggle !== toggle) {{
+              hideConfirm(activeDeleteToggle.dataset.userId, false);
+            }}
+
+            const trigger = toggle.querySelector('[data-delete-toggle]');
+            const confirmation = toggle.querySelector('.delete-toggle-confirmation');
+            const userNameLabel = toggle.querySelector('.delete-toggle-user-name');
+            const cancelButton = toggle.querySelector('[data-delete-cancel]');
+
+            if (userNameLabel) {{
+              userNameLabel.textContent = userName || toggle.dataset.userName || '';
+            }}
+            if (trigger) {{
+              trigger.hidden = true;
+              trigger.setAttribute('aria-expanded', 'true');
+            }}
+            if (confirmation) {{
+              confirmation.hidden = false;
+            }}
+            toggle.classList.add('is-confirming-delete');
+            activeDeleteToggle = toggle;
+            if (cancelButton) {{
+              cancelButton.focus();
+            }}
+          }}
+
+          async function deleteUser(userId) {{
+            const toggle = getDeleteToggle(userId);
+            if (!toggle) {{
+              return;
+            }}
+
+            const deleteUrl = toggle.dataset.deleteUrl || '';
+            if (!deleteUrl) {{
+              return;
+            }}
+
+            const confirmButton = toggle.querySelector('[data-delete-confirm]');
+            const cancelButton = toggle.querySelector('[data-delete-cancel]');
+            if (confirmButton) {{
+              confirmButton.disabled = true;
+            }}
+            if (cancelButton) {{
+              cancelButton.disabled = true;
+            }}
+
+            try {{
+              const response = await fetch(deleteUrl, {{
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {{
+                  'X-Requested-With': 'fetch',
+                }},
+              }});
+
+              if (!response.ok) {{
+                throw new Error('La respuesta de borrado no fue correcta.');
+              }}
+
+              const row = document.getElementById('user-row-' + userId);
+              if (row) {{
+                row.remove();
+                if (activeDeleteToggle === toggle) {{
+                  activeDeleteToggle = null;
+                }}
+                showToast('Usuario eliminado correctamente.', 'success');
+                return;
+              }}
+
+              window.location.assign(usersView ? usersView.dataset.usersIndexUrl || '/usuarios' : '/usuarios');
+            }} catch (error) {{
+              showToast('No se ha podido eliminar el usuario. Inténtalo de nuevo.', 'error');
+              if (confirmButton) {{
+                confirmButton.disabled = false;
+              }}
+              if (cancelButton) {{
+                cancelButton.disabled = false;
+              }}
+            }}
+          }}
+
+          window.showConfirm = showConfirm;
+          window.hideConfirm = hideConfirm;
+          window.deleteUser = deleteUser;
         }})();
       </script>
     """
@@ -182,6 +336,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     )
     return f"""
         <h2>Detalle y edicion</h2>
+        <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
@@ -191,64 +346,99 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
             <div><label for="editar_rol">Rol principal</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
+            <div><label for="editar_nueva_contrasena">Nueva contrasena</label><input id="editar_nueva_contrasena" name="nueva_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
+            <div><label for="editar_confirmar_contrasena">Confirmar nueva contrasena</label><input id="editar_confirmar_contrasena" name="confirmar_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
           </div>
           <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
-          <div class="filter-actions"><button type="submit">Guardar cambios</button></div>
+          <div class="filter-actions">
+            <button type="submit">Guardar cambios</button>
+            <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Cancelar</a>
+          </div>
         </form>
+        <div class="inline-actions">
+          <a class="button-link" href="#editar_nueva_contrasena">Cambiar contrasena</a>
+        </div>
+        {_render_selected_user_actions(base_path, selected_user)}
         <h3>Historial de cambios</h3>
         {history_table}
     """
 
 
+def _render_selected_user_actions(base_path: str, selected_user: dict[str, object]) -> str:
+    actions = _build_action_controls(base_path, selected_user)
+    if not actions:
+        return ""
+    return f'<div class="inline-actions">{ "".join(actions) }</div>'
+
+
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
-    actions: list[str] = []
-    actions.append(f'<a class="offer-action" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Ver detalle</a>')
-    actions.append(_action_form(base_path, user["id"], "Editar", None, query_href=f"/usuarios/{user['id']}"))
-    if user["estado"] != "activo":
-        actions.append(_action_form(base_path, user["id"], "Activar", "activo"))
-        if user["estado"] in {"inactivo", "baja logica"}:
-            actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
-    else:
-        actions.append(_action_form(base_path, user["id"], "Desactivar", "inactivo"))
-        actions.append(_action_form(base_path, user["id"], "Baja logica", "baja logica"))
-    if user["estado"] == "pendiente":
-        actions.append(_action_button_form(base_path, user["id"], "Reenviar invitacion", "invitacion"))
-    if user["estado"] in {"activo", "bloqueado"}:
-        actions.append(_action_button_form(base_path, user["id"], "Reiniciar acceso", "reiniciar"))
+    actions = _build_action_controls(base_path, user)
     return (
-        "<tr>"
+        f'<tr id="user-row-{escape(str(user["id"]))}">'
         f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
         f'<td data-label="Email">{escape(str(user["email"]))}</td>'
         f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
-        f'<td data-label="Acciones"><div class="inline-actions">{"".join(actions)}</div></td>'
+        f'<td data-label="Acciones"><div class="actions-cell">{"".join(actions)}</div></td>'
         "</tr>"
     )
 
 
+def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
+    actions: list[str] = []
+    actions.append(f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Modificar</a>')
+    if user["estado"] == "activo":
+        actions.append(_action_form(base_path, user["id"], "Dar de baja", "inactivo"))
+    else:
+        actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
+    actions.append(_delete_toggle_fragment(base_path, user))
+    return actions
+
+
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
     if query_href is not None:
-        return f'<a class="button-link" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
+        return f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
     assert state is not None
+    button_class = "btn-action btn-danger-outline" if state == "inactivo" else "btn-action btn-success-outline"
     return (
         f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/estado"))}">'
         f'<input type="hidden" name="estado" value="{escape(state)}" />'
-        f'<button type="submit">{escape(label)}</button>'
+        f'<button type="submit" class="{button_class}">{escape(label)}</button>'
         "</form>"
     )
 
 
-def _action_button_form(base_path: str, user_id: str, label: str, action: str) -> str:
-    return (
-        f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/{action}"))}">'
-        f'<button type="submit">{escape(label)}</button>'
-        "</form>"
-    )
+def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
+    raw_user_id = str(user["id"])
+    user_id = escape(raw_user_id)
+    user_name = escape(str(user["nombre_completo"]))
+    delete_url = escape(build_url(base_path, f"/usuarios/{raw_user_id}/borrar"))
+    return f"""
+      <div class="delete-toggle" id="delete-toggle-{user_id}" data-user-id="{user_id}" data-user-name="{user_name}" data-delete-url="{delete_url}">
+        <button
+          type="button"
+          class="btn-action btn-contextual delete-toggle-trigger"
+          data-delete-toggle
+          data-user-id="{user_id}"
+          data-user-name="{user_name}"
+          data-delete-url="{delete_url}"
+          aria-controls="delete-confirm-{user_id}"
+          aria-expanded="false"
+          onclick="showConfirm(this.dataset.userId, this.dataset.userName)"
+          aria-label="Más opciones"
+        >···</button>
+        <div class="delete-toggle-confirmation" id="delete-confirm-{user_id}" hidden>
+          <span class="delete-toggle-message">¿Confirmar eliminación de <strong class="delete-toggle-user-name">{user_name}</strong>?</span>
+          <button type="button" class="btn-action btn-danger-outline delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)">Confirmar</button>
+          <button type="button" class="btn-action btn-neutral delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)">Cancelar</button>
+        </div>
+      </div>
+    """
 
 
 def _state_options() -> list[str]:
-    return ["pendiente", "activo", "inactivo", "bloqueado", "baja logica"]
+    return ["pendiente", "activo", "inactivo", "bloqueado"]
 
 
 def _role_options() -> list[str]:

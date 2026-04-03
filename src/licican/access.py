@@ -38,6 +38,8 @@ CAPABILITY_MATRIX = {
             "manage_pipeline",
             "view_kpis",
             "view_permissions",
+            "view_retention",
+            "manage_retention",
             "view_users",
             "manage_users",
         }
@@ -107,7 +109,9 @@ def _normalize_role(raw_role: str | None) -> str:
         "administrador funcional": ROLE_MANAGER,
         "responsable": ROLE_MANAGER,
         "manager": ROLE_MANAGER,
+        "gestor": ROLE_MANAGER,
         "colaborador": ROLE_COLLABORATOR,
+        "consultor": ROLE_COLLABORATOR,
         "lector": ROLE_INVITED,
         "lector/invitado": ROLE_INVITED,
         "invitado": ROLE_INVITED,
@@ -147,6 +151,7 @@ def resolve_access_context(
         role_label=ROLE_LABELS[role],
         user_id=user_id,
         capabilities=CAPABILITY_MATRIX[role],
+        display_name=user_id,
     )
 
 

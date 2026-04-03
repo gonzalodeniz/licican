@@ -5,6 +5,7 @@ import io
 import json
 import unittest
 from contextlib import redirect_stdout
+from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
 import tempfile
@@ -12,8 +13,10 @@ from unittest.mock import patch
 from urllib.parse import urlencode
 
 import psycopg2
+from itsdangerous import URLSafeSerializer
 
 from licican.app import application, main
+from licican.auth.config import DEFAULT_SESSION_SECRET_KEY
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
@@ -24,6 +27,8 @@ def invoke_app(
     method: str = "GET",
     body: str = "",
     content_type: str = "application/x-www-form-urlencoded",
+    authenticated: bool = True,
+    cookies: str = "",
 ) -> tuple[str, dict[str, str], bytes]:
     captured: dict[str, object] = {}
 
@@ -44,12 +49,41 @@ def invoke_app(
         environ["SCRIPT_NAME"] = script_name
     env_overrides = {}
     env_overrides["BASE_PATH"] = "/licican"
+    if "LOGIN_AUTOMATICO" not in os.environ:
+        env_overrides["LOGIN_AUTOMATICO"] = "true"
+    if "LOGIN_SUPERADMIN_ENABLED" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_ENABLED"] = "true"
+    if "LOGIN_SUPERADMIN_NAME" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_NAME"] = "admin"
+    if "LOGIN_SUPERADMIN_PASS" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_PASS"] = "admin12345"
+    if "SESSION_SECRET_KEY" not in os.environ:
+        env_overrides["SESSION_SECRET_KEY"] = "test-session-secret"
     if "LICICAN_CATALOG_BACKEND" not in os.environ:
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     if "LICICAN_ROLE" not in os.environ:
         env_overrides["LICICAN_ROLE"] = "administrador"
     if "DB_PASSWORD" not in os.environ:
         env_overrides["DB_PASSWORD"] = "test-password"
+    if authenticated and not cookies:
+        role = os.environ.get("LICICAN_ROLE", "administrador")
+        username = os.environ.get("LICICAN_USER_ID", "admin-1")
+        session_payload = {
+            "username": username,
+            "rol": role,
+            "nombre_completo": username,
+            "is_superadmin": role == "administrador" and username == "admin-1",
+            "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "csrf_token": "csrf-test-token",
+            "auto_login_active": False,
+        }
+        signer = URLSafeSerializer(
+            os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
+            salt="licican.session",
+        )
+        cookies = f"licican_session={signer.dumps(session_payload)}"
+    if cookies:
+        environ["HTTP_COOKIE"] = cookies
     with patch.dict(os.environ, env_overrides, clear=False):
         body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
@@ -102,6 +136,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
         self.assertIn('href="/licican/kpis"', html)
+        self.assertIn('href="/licican/conservacion"', html)
         self.assertIn('href="/licican/pipeline"', html)
         self.assertIn('href="/licican/permisos"', html)
 
@@ -540,7 +575,7 @@ class ApplicationTests(unittest.TestCase):
                 invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "manager", "LICICAN_USER_ID": "manager-1"},
                 clear=False,
             ):
                 invoke_app("/alertas", method="POST", body="procedimiento=Abierto")
@@ -554,7 +589,7 @@ class ApplicationTests(unittest.TestCase):
         payload = json.loads(api_body)
         self.assertEqual("200 OK", api_status)
         self.assertEqual(1, payload["summary"]["total_alertas"])
-        self.assertEqual("colab-1", payload["alerts"][0]["usuario_id"])
+        self.assertEqual("manager-1", payload["alerts"][0]["usuario_id"])
 
     def test_collaborator_cannot_edit_alerts_from_other_owner(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -641,6 +676,31 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", kpi_status)
         self.assertIn("KPIs operativos visibles por rol", kpi_body.decode("utf-8"))
 
+    def test_admin_can_access_retention_page(self) -> None:
+        payload = {
+            "politica": {"antiguedad_dias": 180, "modo": "desde_creacion", "modo_label": "Dias desde la creacion", "actualizada_en": "2026-04-03T09:00:00Z"},
+            "resumen": {"conservar": 2, "archivar": 1, "mantener_activas": 1, "archivadas_existentes": 0},
+            "modos_disponibles": [{"valor": "desde_creacion", "etiqueta": "Dias desde la creacion"}],
+            "grupos": {"conservar": [], "archivar": [], "mantener_activas": []},
+        }
+
+        with patch("licican.web.router.build_retention_payload", return_value=payload):
+            status, headers, body = invoke_app("/conservacion")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Panel de control de conservacion y archivado", html)
+        self.assertIn('class="nav-link active" href="/licican/conservacion"', html)
+
+    def test_retention_page_denied_to_reader_role(self) -> None:
+        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+            status, headers, body = invoke_app("/conservacion")
+
+        self.assertEqual("403 Forbidden", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
+
     def test_unknown_path_returns_404(self) -> None:
         status, headers, body = invoke_app("/desconocido")
 
@@ -658,7 +718,7 @@ class ApplicationTests(unittest.TestCase):
     def test_main_handles_keyboard_interrupt_with_controlled_shutdown(self) -> None:
         stdout = io.StringIO()
 
-        with patch.dict(os.environ, {"BASE_PATH": "/licican", "PORT": "8123"}, clear=False):
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "HOST": "127.0.0.1", "PORT": "8123"}, clear=False):
             with patch("licican.app.make_server") as make_server_mock:
                 server = make_server_mock.return_value.__enter__.return_value
                 server.serve_forever.side_effect = KeyboardInterrupt
@@ -766,6 +826,21 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-table-panel"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
+        self.assertIn('class="actions-cell"', html)
+        self.assertIn("Modificar", html)
+        self.assertIn("Dar de baja", html)
+        self.assertIn("Reactivar", html)
+        self.assertIn('aria-label="Más opciones"', html)
+        self.assertNotIn("Cambiar contrasena", html)
+        self.assertIn("Confirmar eliminación de", html)
+        self.assertIn("data-delete-toggle", html)
+        self.assertIn("showConfirm(this.dataset.userId, this.dataset.userName)", html)
+        self.assertIn("deleteUser(this.closest('.delete-toggle').dataset.userId)", html)
+        self.assertIn("hideConfirm(this.closest('.delete-toggle').dataset.userId)", html)
+        self.assertNotIn("confirm(", html)
+        self.assertNotIn("Reenviar invitacion", html)
+        self.assertNotIn("Reiniciar acceso", html)
+        self.assertNotIn("Baja logica", html)
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
@@ -827,7 +902,77 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Detalle y edicion", html)
         self.assertIn("Laura Gonzalez", html)
+        self.assertIn('id="users-selected-panel"', html)
+        self.assertNotIn('id="users-table-panel"', html)
+        self.assertIn("Nueva contrasena", html)
+        self.assertIn("Confirmar nueva contrasena", html)
+        self.assertIn('href="#editar_nueva_contrasena"', html)
+        self.assertIn(">Cancelar</a>", html)
+        self.assertIn("Modificar", html)
+        self.assertIn("Reactivar", html)
+        self.assertIn("Cambiar contrasena", html)
+        self.assertIn('aria-label="Más opciones"', html)
+        self.assertIn("Confirmar eliminación de", html)
+        self.assertIn("data-delete-toggle", html)
+        self.assertIn("showConfirm(this.dataset.userId, this.dataset.userName)", html)
+        self.assertIn("deleteUser(this.closest('.delete-toggle').dataset.userId)", html)
+        self.assertIn("hideConfirm(this.closest('.delete-toggle').dataset.userId)", html)
+        self.assertNotIn("confirm(", html)
         self.assertIn("Fecha de alta: 02-04-2026 08:30", html)
         self.assertIn("02-04-2026 08:30", html)
-        self.assertIn("Reenviar invitacion", html)
         self.assertIn("Historial de cambios", html)
+
+    def test_user_update_route_redirects_back_to_list_after_save(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode(
+            {
+                "nombre": "Laura",
+                "apellidos": "Gonzalez",
+                "email": "laura.gonzalez@licican.local",
+                "rol_principal": "colaborador",
+                "estado": "activo",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
+            }
+        )
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-003", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Usuario+actualizado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-selected-panel"', html)
+        self.assertIn("Laura Gonzalez", html)
+
+    def test_user_delete_route_redirects_back_to_list_after_delete(self) -> None:
+        state = SeededUsersState.seed()
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-004/borrar", method="POST")
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Usuario+eliminado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertNotIn("Mario Perez", html)
+        self.assertNotIn("usr-004", html)
+
+    def test_user_state_route_redirects_back_to_list_after_activation(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode({"estado": "activo"})
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-003/estado", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Estado+de+usuario+actualizado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-selected-panel"', html)

@@ -4,14 +4,16 @@ import os
 import unittest
 from unittest.mock import patch
 
+import bcrypt
+
 from licican.users import (
     UserFilters,
     build_users_payload,
     change_user_state,
     create_user,
+    delete_user,
     load_users,
-    resend_invitation,
-    reset_access,
+    update_user,
 )
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
@@ -91,16 +93,6 @@ class UsersModuleTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "sin ningun usuario administrador activo"):
                 change_user_state("usr-005", "inactivo")
 
-    def test_resend_invitation_requires_pending_user(self) -> None:
-        with self._patch_users_db():
-            with self.assertRaisesRegex(ValueError, "pendientes de activacion"):
-                resend_invitation("usr-001")
-
-            updated = resend_invitation("usr-003")
-
-        self.assertTrue(updated.invitacion_pendiente)
-        self.assertEqual("pendiente", updated.estado)
-
     def test_build_users_payload_applies_filters_and_selection(self) -> None:
         with self._patch_users_db():
             payload = build_users_payload(
@@ -113,24 +105,44 @@ class UsersModuleTests(unittest.TestCase):
         self.assertEqual("usr-003", payload["usuario_seleccionado"]["id"])
         self.assertEqual({"busqueda": "laura", "estado": "pendiente"}, payload["filtros_activos"])
 
-    def test_reset_access_rejects_pending_accounts(self) -> None:
-        with self._patch_users_db():
-            with self.assertRaisesRegex(ValueError, "pendiente de activacion"):
-                reset_access("usr-003")
+    def test_update_user_allows_changing_password(self) -> None:
+        state = SeededUsersState.seed()
+        previous_hash = str(state.users["usr-002"]["password_hash"])
 
-    def test_user_storage_remains_consistent_after_operations(self) -> None:
+        with self._patch_users_db(state):
+            updated = update_user(
+                "usr-002",
+                nombre="Carlos",
+                apellidos="Mendez",
+                email="carlos.mendez@licican.local",
+                rol_principal="manager",
+                estado="activo",
+                nueva_contrasena="nueva-clave-123",
+                confirmar_contrasena="nueva-clave-123",
+            )
+
+        self.assertNotEqual(previous_hash, updated.password_hash)
+        self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(updated.password_hash).encode("utf-8")))
+        self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(state.users["usr-002"]["password_hash"]).encode("utf-8")))
+
+    def test_update_user_rejects_password_confirmation_mismatch(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "confirmacion de contrasena no coincide"):
+                update_user(
+                    "usr-002",
+                    nombre="Carlos",
+                    apellidos="Mendez",
+                    email="carlos.mendez@licican.local",
+                    rol_principal="manager",
+                    estado="activo",
+                    nueva_contrasena="nueva-clave-123",
+                    confirmar_contrasena="otra-clave-123",
+                )
+
+    def test_delete_user_removes_record_and_history(self) -> None:
         state = SeededUsersState.seed()
         with self._patch_users_db(state):
-            create_user(
-                nombre="Eva",
-                apellidos="Santos",
-                email="eva.santos@licican.local",
-                rol_principal="manager",
-            )
-            change_user_state("usr-004", "activo")
-            updated = resend_invitation("usr-003")
+            delete_user("usr-004")
 
-        self.assertEqual("activo", state.users["usr-004"]["estado"])
-        self.assertEqual("pendiente", state.users["usr-003"]["estado"])
-        self.assertTrue(updated.invitacion_pendiente)
-        self.assertGreaterEqual(len(state.history_rows()), 9)
+        self.assertNotIn("usr-004", state.users)
+        self.assertNotIn("usr-004", state.history)
