@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from collections import namedtuple
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from html import escape
+import logging
 from pathlib import Path
 from urllib.parse import parse_qs
 
 from licican.access import AccessContext, has_capability, resolve_access_context
 from licican.alerts import create_alert, deactivate_alert, filter_alerts_by_user, load_alerts, summarize_alerts, update_alert
+from licican.auth.config import get_auth_settings
+from licican.auth.csrf import ensure_csrf_token, validate_csrf_token
+from licican.auth.rate_limiter import rate_limiter
+from licican.auth.service import AuthenticationError, authenticate_user, synchronize_superadmin_account
+from licican.auth.session import SessionState, clear_session, load_session, now_iso, persist_session_headers, timeout_exceeded
 from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
 from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
@@ -30,9 +37,13 @@ from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 from licican.web.templates.users import render_users
+from licican.web.templates.login import render_login
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 Route = namedtuple("Route", ["method", "pattern", "handler"])
+LOGGER = logging.getLogger(__name__)
+PUBLIC_PATH_PREFIXES = ("/static/",)
+PUBLIC_PATHS = frozenset({"/login"})
 
 
 @dataclass(frozen=True)
@@ -43,6 +54,73 @@ class Request:
     base_path: str
     query: dict[str, list[str]]
     access_context: AccessContext
+    session_state: SessionState
+
+    @property
+    def session(self) -> dict[str, object]:
+        return self.session_state.session
+
+
+def _is_public_path(path: str) -> bool:
+    return path in PUBLIC_PATHS or any(path.startswith(prefix) for prefix in PUBLIC_PATH_PREFIXES)
+
+
+def _is_authenticated(session: dict[str, object]) -> bool:
+    return bool(session.get("username"))
+
+
+def _secure_request(environ: dict[str, object]) -> bool:
+    scheme = str(environ.get("wsgi.url_scheme", "http") or "http").lower()
+    forwarded_proto = str(environ.get("HTTP_X_FORWARDED_PROTO", "") or "").lower()
+    return scheme == "https" or forwarded_proto == "https"
+
+
+def _client_ip(environ: dict[str, object]) -> str:
+    forwarded_for = str(environ.get("HTTP_X_FORWARDED_FOR", "") or "").strip()
+    if forwarded_for:
+        return forwarded_for.split(",", 1)[0].strip()
+    return str(environ.get("REMOTE_ADDR", "") or "unknown")
+
+
+def _redirect(start_response, location: str) -> list[bytes]:
+    return send_response(
+        start_response,
+        "302 Found",
+        "text/plain; charset=utf-8",
+        b"",
+        extra_headers=[("Location", location)],
+    )
+
+
+def _forbidden(start_response, message: str = "CSRF invalido") -> list[bytes]:
+    return send_response(start_response, "403 Forbidden", "text/plain; charset=utf-8", message.encode("utf-8"))
+
+
+def _activate_superadmin_session(request: Request) -> Request:
+    settings = get_auth_settings()
+    synchronize_superadmin_account(settings)
+    request.session.clear()
+    request.session.update(
+        {
+            "username": settings.login_superadmin_name,
+            "rol": "administrador",
+            "nombre_completo": "Superadministrador",
+            "is_superadmin": True,
+            "last_activity": now_iso(),
+            "auto_login_active": True,
+        }
+    )
+    ensure_csrf_token(request.session)
+    request.session_state.should_persist = True
+    return Request(
+        environ=request.environ,
+        method=request.method,
+        path=request.path,
+        base_path=request.base_path,
+        query=request.query,
+        access_context=resolve_access_context(request.environ, request.query, session_user=request.session),
+        session_state=request.session_state,
+    )
 
 
 def _parse_filters_from_multidict(values: dict[str, list[str]]) -> CatalogFilters:
@@ -247,6 +325,91 @@ def _users_data_error_html(base_path: str, message: str) -> str:
         current_path="/usuarios",
         base_path=base_path,
     )
+
+
+def handle_login_page(request: Request, start_response) -> list[bytes]:
+    if _is_authenticated(request.session):
+        return _redirect(start_response, build_url(request.base_path, "/"))
+    ensure_csrf_token(request.session)
+    request.session_state.should_persist = True
+    reason = (request.query.get("reason") or [None])[0]
+    content = render_login(
+        base_path=request.base_path,
+        csrf_token=str(request.session.get("csrf_token") or ""),
+        reason=reason,
+    )
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_login_submit(request: Request, start_response) -> list[bytes]:
+    form_data = read_form_data(request.environ)
+    if not validate_csrf_token(request.session, (form_data.get("csrf_token") or [None])[0]):
+        return _forbidden(start_response)
+
+    client_ip = _client_ip(request.environ)
+    if rate_limiter.is_limited(client_ip):
+        return send_response(
+            start_response,
+            "429 Too Many Requests",
+            "text/html; charset=utf-8",
+            b"".join(
+                html_body(
+                    render_login(
+                        base_path=request.base_path,
+                        csrf_token=ensure_csrf_token(request.session),
+                        error_message="Demasiados intentos. Espere unos minutos.",
+                    )
+                )
+            ),
+        )
+
+    settings = get_auth_settings()
+    username = (form_data.get("username") or [""])[0]
+    password = (form_data.get("password") or [""])[0]
+    try:
+        user = authenticate_user(username, password, settings)
+    except AuthenticationError as exc:
+        if exc.code != "database_error":
+            rate_limiter.register_failure(client_ip)
+        request.session_state.should_persist = True
+        return send_response(
+            start_response,
+            "401 Unauthorized",
+            "text/html; charset=utf-8",
+            b"".join(
+                html_body(
+                    render_login(
+                        base_path=request.base_path,
+                        csrf_token=ensure_csrf_token(request.session),
+                        error_message=str(exc),
+                    )
+                )
+            ),
+        )
+
+    rate_limiter.reset(client_ip)
+    request.session.clear()
+    ensure_csrf_token(request.session)
+    request.session.update(
+        {
+            "username": user.username,
+            "rol": user.rol,
+            "nombre_completo": user.nombre_completo,
+            "is_superadmin": user.is_superadmin,
+            "last_activity": now_iso(),
+            "auto_login_active": False,
+        }
+    )
+    request.session_state.should_persist = True
+    return _redirect(start_response, build_url(request.base_path, "/"))
+
+
+def handle_logout(request: Request, start_response) -> list[bytes]:
+    form_data = read_form_data(request.environ)
+    if not validate_csrf_token(request.session, (form_data.get("csrf_token") or [None])[0]):
+        return _forbidden(start_response)
+    clear_session(request.session_state)
+    return _redirect(start_response, build_url(request.base_path, "/login?reason=logout"))
 
 
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
@@ -777,6 +940,9 @@ def handle_api_user_detail(request: Request, start_response, id: str) -> list[by
 
 routes = [
     Route("GET", "/static/{filename}", handle_static),
+    Route("GET", "/login", handle_login_page),
+    Route("POST", "/login", handle_login_submit),
+    Route("POST", "/logout", handle_logout),
     Route("GET", "/api/datos-consolidados", handle_api_dataset),
     Route("GET", "/api/alertas", handle_api_alerts),
     Route("GET", "/api/pipeline", handle_api_pipeline),
@@ -832,21 +998,82 @@ def _match_pattern(path: str, pattern: str) -> dict[str, str] | None:
 
 
 def application(environ, start_response):
+    settings = get_auth_settings()
+    try:
+        synchronize_superadmin_account(settings)
+    except AuthenticationError:
+        LOGGER.warning("No se pudo sincronizar el superadmin al procesar la petición.")
     base_path = resolve_base_path()
     query = parse_qs(str(environ.get("QUERY_STRING", "")), keep_blank_values=False)
+    session_state = load_session(environ, settings)
+    secure_request = _secure_request(environ)
     request = Request(
         environ=environ,
         method=(environ.get("REQUEST_METHOD", "GET") or "GET").upper(),
         path=_resolve_request_path(environ, base_path),
         base_path=base_path,
         query=query,
-        access_context=resolve_access_context(environ, query),
+        access_context=resolve_access_context(environ, query, session_user=session_state.session),
+        session_state=session_state,
     )
+
+    if _is_authenticated(request.session):
+        if timeout_exceeded(str(request.session.get("last_activity") or ""), settings.session_timeout_minutes):
+            clear_session(session_state)
+            if settings.automatic_login_effective and not _is_public_path(request.path):
+                request = _activate_superadmin_session(request)
+            else:
+                return _redirect(
+                    lambda status, headers: start_response(
+                        status,
+                        headers + persist_session_headers(session_state, settings, secure_request=secure_request),
+                    ),
+                    build_url(base_path, "/login?reason=timeout"),
+                )
+        else:
+            request.session["last_activity"] = now_iso()
+            request.session_state.should_persist = True
+            request = Request(
+                environ=request.environ,
+                method=request.method,
+                path=request.path,
+                base_path=request.base_path,
+                query=request.query,
+                access_context=resolve_access_context(environ, query, session_user=request.session),
+                session_state=request.session_state,
+            )
+    elif not _is_public_path(request.path):
+        if settings.automatic_login_effective:
+            request = _activate_superadmin_session(request)
+        else:
+            ensure_csrf_token(request.session)
+            request.session_state.should_persist = True
+            return _redirect(
+                lambda status, headers: start_response(
+                    status,
+                    headers + persist_session_headers(session_state, settings, secure_request=secure_request),
+                ),
+                build_url(base_path, "/login"),
+            )
+
+    def secured_start_response(status: str, headers: list[tuple[str, str]]) -> None:
+        response_headers = list(headers)
+        response_headers.extend(
+            [
+                ("X-Content-Type-Options", "nosniff"),
+                ("X-Frame-Options", "DENY"),
+            ]
+        )
+        if _is_authenticated(request.session):
+            response_headers.append(("Cache-Control", "no-store, no-cache"))
+        response_headers.extend(persist_session_headers(session_state, settings, secure_request=secure_request))
+        start_response(status, response_headers)
+
     for route in routes:
         if route.method != request.method:
             continue
         params = _match_pattern(request.path, route.pattern)
         if params is None:
             continue
-        return route.handler(request, start_response, **params)
-    return _not_found(start_response)
+        return route.handler(request, secured_start_response, **params)
+    return _not_found(secured_start_response)

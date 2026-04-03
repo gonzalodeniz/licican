@@ -18,6 +18,7 @@ def page_template(
 ) -> str:
     """Compone el layout HTML base de la aplicación."""
     navigation = _navigation_html(base_path, current_path, access_context)
+    auto_login_notice = _auto_login_notice_html(access_context)
     return f"""<!doctype html>
 <html lang="es">
   <head>
@@ -32,6 +33,7 @@ def page_template(
         {navigation}
         <div class="content-shell">
           <main>
+            {auto_login_notice}
             <section class="hero">
               <p class="muted">{escape(hero_label)}</p>
               <h1>{escape(page_heading)}</h1>
@@ -92,14 +94,41 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
     return by_role[access_context.role]
 
 
-def _context_html(access_context: AccessContext | None) -> str:
+def _context_html(base_path: str, access_context: AccessContext | None) -> str:
     if access_context is None:
         return ""
+    user_menu = _user_menu_html(base_path, access_context)
     return f"""
       <div class="nav-section">
         <p class="nav-section-title">Contexto activo</p>
         <p class="nav-copy"><strong>Rol:</strong> {escape(access_context.role_label)}<br /><strong>Alcance:</strong> {escape(access_context.scope_label)}<br /><strong>Usuario:</strong> {escape(access_context.user_id)}</p>
+        {user_menu}
       </div>
+    """
+
+
+def _user_menu_html(base_path: str, access_context: AccessContext) -> str:
+    if not access_context.csrf_token:
+        return ""
+    badge = " · superadmin" if access_context.is_superadmin else ""
+    return f"""
+      <div class="user-menu">
+        <p class="nav-copy"><strong>Sesión:</strong> {escape(access_context.display_name or access_context.user_id)}{escape(badge)}</p>
+        <form method="post" action="{escape(build_url(base_path, '/logout'))}">
+          <input type="hidden" name="csrf_token" value="{escape(access_context.csrf_token)}" />
+          <button class="button button-secondary button-small" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+    """
+
+
+def _auto_login_notice_html(access_context: AccessContext | None) -> str:
+    if access_context is None or not access_context.auto_login_active:
+        return ""
+    return """
+      <section class="note note-warning auth-mode-note">
+        <strong>Sesión automática activa (entorno desarrollo)</strong>
+      </section>
     """
 
 
@@ -153,7 +182,7 @@ def _navigation_html(base_path: str, current_path: str, access_context: AccessCo
         <p class="nav-kicker">PB-010</p>
         <h2 class="nav-title">Licican</h2>
         <p class="nav-copy">Base de navegacion comun para catalogo, alertas y crecimiento de modulos sin rutas huerfanas.</p>
-        {_context_html(access_context)}
+        {_context_html(base_path, access_context)}
         <div class="nav-section">
           <p class="nav-section-title">Modulos</p>
           {list_html}
@@ -165,6 +194,7 @@ def _navigation_html(base_path: str, current_path: str, access_context: AccessCo
       <details class="mobile-nav">
         <summary>Menu principal</summary>
         <div class="mobile-nav-body">
+          {_context_html(base_path, access_context)}
           {list_html}
         </div>
       </details>

@@ -5,6 +5,7 @@ import io
 import json
 import unittest
 from contextlib import redirect_stdout
+from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
 import tempfile
@@ -12,8 +13,10 @@ from unittest.mock import patch
 from urllib.parse import urlencode
 
 import psycopg2
+from itsdangerous import URLSafeSerializer
 
 from licican.app import application, main
+from licican.auth.config import DEFAULT_SESSION_SECRET_KEY
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
@@ -24,6 +27,8 @@ def invoke_app(
     method: str = "GET",
     body: str = "",
     content_type: str = "application/x-www-form-urlencoded",
+    authenticated: bool = True,
+    cookies: str = "",
 ) -> tuple[str, dict[str, str], bytes]:
     captured: dict[str, object] = {}
 
@@ -44,12 +49,41 @@ def invoke_app(
         environ["SCRIPT_NAME"] = script_name
     env_overrides = {}
     env_overrides["BASE_PATH"] = "/licican"
+    if "LOGIN_AUTOMATICO" not in os.environ:
+        env_overrides["LOGIN_AUTOMATICO"] = "true"
+    if "LOGIN_SUPERADMIN_ENABLED" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_ENABLED"] = "true"
+    if "LOGIN_SUPERADMIN_NAME" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_NAME"] = "admin"
+    if "LOGIN_SUPERADMIN_PASS" not in os.environ:
+        env_overrides["LOGIN_SUPERADMIN_PASS"] = "admin12345"
+    if "SESSION_SECRET_KEY" not in os.environ:
+        env_overrides["SESSION_SECRET_KEY"] = "test-session-secret"
     if "LICICAN_CATALOG_BACKEND" not in os.environ:
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     if "LICICAN_ROLE" not in os.environ:
         env_overrides["LICICAN_ROLE"] = "administrador"
     if "DB_PASSWORD" not in os.environ:
         env_overrides["DB_PASSWORD"] = "test-password"
+    if authenticated and not cookies:
+        role = os.environ.get("LICICAN_ROLE", "administrador")
+        username = os.environ.get("LICICAN_USER_ID", "admin-1")
+        session_payload = {
+            "username": username,
+            "rol": role,
+            "nombre_completo": username,
+            "is_superadmin": role == "administrador" and username == "admin-1",
+            "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "csrf_token": "csrf-test-token",
+            "auto_login_active": False,
+        }
+        signer = URLSafeSerializer(
+            os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
+            salt="licican.session",
+        )
+        cookies = f"licican_session={signer.dumps(session_payload)}"
+    if cookies:
+        environ["HTTP_COOKIE"] = cookies
     with patch.dict(os.environ, env_overrides, clear=False):
         body = b"".join(application(environ, start_response))
     return captured["status"], captured["headers"], body
@@ -540,7 +574,7 @@ class ApplicationTests(unittest.TestCase):
                 invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "manager", "LICICAN_USER_ID": "manager-1"},
                 clear=False,
             ):
                 invoke_app("/alertas", method="POST", body="procedimiento=Abierto")
@@ -554,7 +588,7 @@ class ApplicationTests(unittest.TestCase):
         payload = json.loads(api_body)
         self.assertEqual("200 OK", api_status)
         self.assertEqual(1, payload["summary"]["total_alertas"])
-        self.assertEqual("colab-1", payload["alerts"][0]["usuario_id"])
+        self.assertEqual("manager-1", payload["alerts"][0]["usuario_id"])
 
     def test_collaborator_cannot_edit_alerts_from_other_owner(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -658,7 +692,7 @@ class ApplicationTests(unittest.TestCase):
     def test_main_handles_keyboard_interrupt_with_controlled_shutdown(self) -> None:
         stdout = io.StringIO()
 
-        with patch.dict(os.environ, {"BASE_PATH": "/licican", "PORT": "8123"}, clear=False):
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "HOST": "127.0.0.1", "PORT": "8123"}, clear=False):
             with patch("licican.app.make_server") as make_server_mock:
                 server = make_server_mock.return_value.__enter__.return_value
                 server.serve_forever.side_effect = KeyboardInterrupt

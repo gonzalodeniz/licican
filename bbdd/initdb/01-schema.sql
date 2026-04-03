@@ -180,6 +180,14 @@ CREATE TABLE IF NOT EXISTS usuario (
     fecha_alta              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso           TIMESTAMPTZ,
     invitacion_pendiente     BOOLEAN     NOT NULL DEFAULT FALSE,
+    username                TEXT,
+    password_hash           TEXT,
+    nombre_completo         TEXT,
+    rol                     TEXT        NOT NULL DEFAULT 'consultor',
+    activo                  BOOLEAN     NOT NULL DEFAULT TRUE,
+    ultimo_login            TIMESTAMPTZ,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT usuario_pk PRIMARY KEY (id),
     CONSTRAINT usuario_email_uk UNIQUE (email),
@@ -187,13 +195,17 @@ CREATE TABLE IF NOT EXISTS usuario (
     CONSTRAINT usuario_nombre_ck CHECK (btrim(nombre) <> ''),
     CONSTRAINT usuario_apellidos_ck CHECK (btrim(apellidos) <> ''),
     CONSTRAINT usuario_email_ck CHECK (btrim(email) <> ''),
-    CONSTRAINT usuario_rol_ck CHECK (btrim(rol_principal) <> '')
+    CONSTRAINT usuario_rol_ck CHECK (btrim(rol_principal) <> ''),
+    CONSTRAINT usuario_rol_auth_ck CHECK (btrim(rol) <> '')
 );
 
 CREATE INDEX idx_usuario_estado ON usuario (estado);
 CREATE INDEX idx_usuario_rol_principal ON usuario (rol_principal);
 CREATE INDEX idx_usuario_email ON usuario (email);
 CREATE INDEX idx_usuario_fecha_alta ON usuario (fecha_alta);
+CREATE UNIQUE INDEX idx_usuario_auth_username ON usuario (username) WHERE username IS NOT NULL;
+CREATE INDEX idx_usuario_auth_activo ON usuario (activo);
+CREATE INDEX idx_usuario_auth_ultimo_login ON usuario (ultimo_login);
 
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id                      BIGSERIAL   NOT NULL,
@@ -240,6 +252,14 @@ COMMENT ON COLUMN usuario.observaciones_internas IS 'Notas internas no visibles 
 COMMENT ON COLUMN usuario.fecha_alta IS 'Fecha de alta administrativa de la cuenta';
 COMMENT ON COLUMN usuario.ultimo_acceso IS 'Último acceso registrado por la plataforma';
 COMMENT ON COLUMN usuario.invitacion_pendiente IS 'Indica si la cuenta aún debe activar la invitación';
+COMMENT ON COLUMN usuario.username IS 'Identificador de inicio de sesión';
+COMMENT ON COLUMN usuario.password_hash IS 'Hash bcrypt de la contraseña de acceso';
+COMMENT ON COLUMN usuario.nombre_completo IS 'Nombre completo usado en la sesión autenticada';
+COMMENT ON COLUMN usuario.rol IS 'Rol de autenticación: administrador, consultor o gestor';
+COMMENT ON COLUMN usuario.activo IS 'Indica si la cuenta puede autenticarse';
+COMMENT ON COLUMN usuario.ultimo_login IS 'Último acceso autenticado registrado';
+COMMENT ON COLUMN usuario.created_at IS 'Fecha de creación de la cuenta de autenticación';
+COMMENT ON COLUMN usuario.updated_at IS 'Fecha de última actualización de la cuenta de autenticación';
 
 COMMENT ON TABLE usuario_historial IS 'Trazabilidad histórica de cambios sobre cuentas de usuario';
 COMMENT ON COLUMN usuario_historial.usuario_id IS 'Identificador de la cuenta afectada por el evento';

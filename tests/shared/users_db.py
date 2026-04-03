@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from licican.auth import service as auth_service
 from licican import users as users_module
 
 
@@ -214,34 +215,61 @@ class _FakeCursor:
     def __init__(self, state: SeededUsersState):
         self.state = state
         self.rows: list[dict[str, Any]] = []
+        self.row: dict[str, Any] | None = None
 
     def execute(self, sql, params=None):
         normalized = str(sql).strip()
         if normalized == users_module.USERS_SELECT_SQL.strip():
             self.rows = self.state.user_rows()
+            self.row = None
             return
         if normalized == users_module.USER_HISTORY_SELECT_SQL.strip():
             self.rows = self.state.history_rows()
+            self.row = None
             return
         if normalized == users_module.USER_INSERT_SQL.strip():
             self.state.insert_user(params)
             self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_UPDATE_SQL.strip():
             self.state.update_user(params)
             self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_INSERT_HISTORY_SQL.strip():
             self.state.insert_history(params)
             self.rows = []
+            self.row = None
             return
         if normalized == users_module.USER_SCHEMA_BOOTSTRAP_SQL.strip():
             self.rows = []
+            self.row = None
+            return
+        if normalized == auth_service.AUTH_USER_BOOTSTRAP_SQL.strip():
+            self.rows = []
+            self.row = None
+            return
+        if normalized == auth_service.AUTH_USER_SELECT_SQL.strip():
+            self.rows = []
+            self.row = None
+            return
+        if normalized in {
+            auth_service.AUTH_USER_INSERT_SQL.strip(),
+            auth_service.AUTH_USER_UPDATE_SUPERADMIN_SQL.strip(),
+            auth_service.AUTH_USER_DEACTIVATE_SQL.strip(),
+            auth_service.AUTH_USER_LAST_LOGIN_SQL.strip(),
+        }:
+            self.rows = []
+            self.row = None
             return
         raise AssertionError(f"SQL inesperado en prueba: {normalized}")
 
     def fetchall(self):
         return self.rows
+
+    def fetchone(self):
+        return self.row
 
     def __enter__(self):
         return self
