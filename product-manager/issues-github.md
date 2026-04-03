@@ -67,6 +67,8 @@ Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Si el primer corte funcional de medicion se apoyara en datos manuales de seguimiento mientras se habilita la instrumentacion automatica.
 - Si el KPI de uso debe centrarse en catalogo, detalle, alertas o una combinacion simple de las tres superficies.
 
+Estado administrativo actual: cerrada tras validacion, merge en `main` y borrado de rama tecnica.
+
 ## Issue creada: Consolidar fuentes `.atom` versionadas de `/data` para licitaciones TI Canarias
 
 Titulo sugerido: `[product-manager] PB-011 Consolidar fuentes .atom versionadas de /data para licitaciones TI Canarias`
