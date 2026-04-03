@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-from typing import Iterable
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -13,14 +12,11 @@ from licican.config import resolve_database_url
 DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios"
 USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado", "baja logica")
 USER_ROLES = (
-    "administrador de plataforma",
-    "administrador funcional",
-    "responsable",
+    "administrador",
+    "manager",
     "colaborador",
-    "lector",
+    "invitado",
 )
-DEFAULT_SURFACES = ("Catalogo", "Datos consolidados", "Alertas", "Pipeline", "KPIs", "Permisos")
-
 USERS_SELECT_SQL = """
 SELECT
     id,
@@ -35,15 +31,6 @@ SELECT
     invitacion_pendiente
 FROM usuario
 ORDER BY apellidos, nombre, email, id
-"""
-
-USER_SURFACES_SELECT_SQL = """
-SELECT
-    usuario_id,
-    superficie,
-    orden
-FROM usuario_superficie
-ORDER BY usuario_id, orden, superficie
 """
 
 USER_HISTORY_SELECT_SQL = """
@@ -85,16 +72,6 @@ SET nombre = %s,
 WHERE id = %s
 """
 
-USER_DELETE_SURFACES_SQL = """
-DELETE FROM usuario_superficie
-WHERE usuario_id = %s
-"""
-
-USER_INSERT_SURFACE_SQL = """
-INSERT INTO usuario_superficie (usuario_id, superficie, orden)
-VALUES (%s, %s, %s)
-"""
-
 USER_INSERT_HISTORY_SQL = """
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES (%s, %s, %s, %s)
@@ -116,14 +93,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     CONSTRAINT usuario_email_uk UNIQUE (email),
     CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica'))
 );
-CREATE TABLE IF NOT EXISTS usuario_superficie (
-    usuario_id TEXT NOT NULL,
-    superficie  TEXT NOT NULL,
-    orden       INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT usuario_superficie_pk PRIMARY KEY (usuario_id, orden),
-    CONSTRAINT usuario_superficie_uk UNIQUE (usuario_id, superficie),
-    CONSTRAINT usuario_superficie_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE
-);
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id         BIGSERIAL NOT NULL,
     usuario_id TEXT NOT NULL,
@@ -138,36 +107,21 @@ CREATE INDEX IF NOT EXISTS idx_usuario_estado ON usuario (estado);
 CREATE INDEX IF NOT EXISTS idx_usuario_rol_principal ON usuario (rol_principal);
 CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario (email);
 CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
-CREATE INDEX IF NOT EXISTS idx_usuario_superficie_superficie ON usuario_superficie (superficie);
 CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
 INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador de plataforma', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'administrador funcional', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'responsable', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'colaborador', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
 ON CONFLICT (id) DO NOTHING;
-INSERT INTO usuario_superficie (usuario_id, superficie, orden)
-VALUES
-    ('usr-001', 'Catalogo', 0),
-    ('usr-001', 'Usuarios', 1),
-    ('usr-001', 'Permisos', 2),
-    ('usr-001', 'KPIs', 3),
-    ('usr-002', 'Catalogo', 0),
-    ('usr-002', 'Alertas', 1),
-    ('usr-002', 'Pipeline', 2),
-    ('usr-003', 'Catalogo', 0),
-    ('usr-003', 'Datos consolidados', 1),
-    ('usr-004', 'Catalogo', 0),
-    ('usr-004', 'Alertas', 1)
-ON CONFLICT (usuario_id, superficie) DO NOTHING;
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES
     ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
     ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
     ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
     ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
-    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de colaborador.'),
+    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de invitado.'),
     ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
 ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
 """
@@ -193,7 +147,6 @@ class ManagedUser:
     email: str
     rol_principal: str
     estado: str
-    superficies: tuple[str, ...]
     observaciones_internas: str
     fecha_alta: str
     ultimo_acceso: str | None
@@ -213,7 +166,6 @@ class ManagedUser:
             "email": self.email,
             "rol_principal": self.rol_principal,
             "estado": self.estado,
-            "superficies": list(self.superficies),
             "observaciones_internas": self.observaciones_internas,
             "fecha_alta": self.fecha_alta,
             "ultimo_acceso": self.ultimo_acceso,
@@ -227,14 +179,12 @@ class UserFilters:
     busqueda: str | None = None
     estado: str | None = None
     rol: str | None = None
-    superficie: str | None = None
 
     def normalized(self) -> "UserFilters":
         return UserFilters(
             busqueda=_clean_text(self.busqueda),
             estado=_clean_text(self.estado),
             rol=_clean_text(self.rol),
-            superficie=_clean_text(self.superficie),
         )
 
     def active_filters(self) -> dict[str, str]:
@@ -246,8 +196,6 @@ class UserFilters:
             payload["estado"] = normalized.estado
         if normalized.rol:
             payload["rol"] = normalized.rol
-        if normalized.superficie:
-            payload["superficie"] = normalized.superficie
         return payload
 
 
@@ -292,22 +240,20 @@ def _clean_text(value: str | None) -> str | None:
     return cleaned or None
 
 
-def _split_surfaces(raw: str | Iterable[str] | None) -> tuple[str, ...]:
-    if raw is None:
-        return ()
-    if isinstance(raw, str):
-        values = raw.replace(";", ",").split(",")
-    else:
-        values = list(raw)
-    return tuple(item.strip() for item in values if str(item).strip())
-
-
 def _normalize_email(raw: str) -> str:
     return raw.strip().lower()
 
 
 def _normalize_role(raw: str) -> str:
-    return raw.strip().lower()
+    normalized = raw.strip().lower()
+    aliases = {
+        "administrador de plataforma": "administrador",
+        "administrador funcional": "manager",
+        "responsable": "manager",
+        "lector": "invitado",
+        "lector/invitado": "invitado",
+    }
+    return aliases.get(normalized, normalized)
 
 
 def _normalize_state(raw: str) -> str:
@@ -315,7 +261,7 @@ def _normalize_state(raw: str) -> str:
 
 
 def _is_admin_role(role: str) -> bool:
-    return _normalize_role(role).startswith("administrador")
+    return _normalize_role(role) == "administrador"
 
 
 def _connect():
@@ -350,7 +296,6 @@ def _user_from_record(record: dict[str, object]) -> ManagedUser:
         email=str(record.get("email") or ""),
         rol_principal=str(record.get("rol_principal") or ""),
         estado=str(record.get("estado") or "pendiente"),
-        superficies=(),
         observaciones_internas=str(record.get("observaciones_internas") or ""),
         fecha_alta=_format_timestamp(record.get("fecha_alta")) or _format_timestamp(_current_timestamp()) or "",
         ultimo_acceso=_format_timestamp(record.get("ultimo_acceso")),
@@ -359,36 +304,26 @@ def _user_from_record(record: dict[str, object]) -> ManagedUser:
     )
 
 
-def _load_aggregated_rows() -> tuple[str, list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
+def _load_aggregated_rows() -> tuple[str, list[dict[str, object]], list[dict[str, object]]]:
     try:
         with _connect() as connection:
             _ensure_schema(connection)
             with connection.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(USERS_SELECT_SQL)
                 users = list(cursor.fetchall())
-                cursor.execute(USER_SURFACES_SELECT_SQL)
-                surfaces = list(cursor.fetchall())
                 cursor.execute(USER_HISTORY_SELECT_SQL)
                 history = list(cursor.fetchall())
     except psycopg2.Error as exc:
         raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
-    return DEFAULT_REFERENCE, users, surfaces, history
+    return DEFAULT_REFERENCE, users, history
 
 
 def _assemble_users(
     user_rows: list[dict[str, object]],
-    surface_rows: list[dict[str, object]],
     history_rows: list[dict[str, object]],
 ) -> list[ManagedUser]:
     users = [_user_from_record(row) for row in user_rows]
     users_by_id = {user.id: user for user in users}
-
-    surfaces_by_user: dict[str, list[tuple[int, str]]] = {user_id: [] for user_id in users_by_id}
-    for row in surface_rows:
-        user_id = str(row.get("usuario_id") or "")
-        if not user_id:
-            continue
-        surfaces_by_user.setdefault(user_id, []).append((int(row.get("orden") or 0), str(row.get("superficie") or "")))
 
     history_by_user: dict[str, list[tuple[datetime, UserEvent]]] = {user_id: [] for user_id in users_by_id}
     for row in history_rows:
@@ -408,7 +343,6 @@ def _assemble_users(
 
     assembled: list[ManagedUser] = []
     for user in users:
-        surfaces = tuple(surface for _, surface in sorted(surfaces_by_user.get(user.id, []), key=lambda item: (item[0], item[1])))
         history = tuple(event for _, event in sorted(history_by_user.get(user.id, []), key=lambda item: item[0]))
         assembled.append(
             ManagedUser(
@@ -418,7 +352,6 @@ def _assemble_users(
                 email=user.email,
                 rol_principal=user.rol_principal,
                 estado=user.estado,
-                superficies=surfaces,
                 observaciones_internas=user.observaciones_internas,
                 fecha_alta=user.fecha_alta,
                 ultimo_acceso=user.ultimo_acceso,
@@ -430,8 +363,8 @@ def _assemble_users(
 
 
 def load_users() -> tuple[str, list[ManagedUser]]:
-    reference, user_rows, surface_rows, history_rows = _load_aggregated_rows()
-    return reference, _assemble_users(user_rows, surface_rows, history_rows)
+    reference, user_rows, history_rows = _load_aggregated_rows()
+    return reference, _assemble_users(user_rows, history_rows)
 
 
 def _ensure_admin_guard(users: list[ManagedUser], candidate_user: ManagedUser, new_role: str, new_state: str) -> None:
@@ -455,16 +388,14 @@ def _validate_user_fields(
     apellidos: str,
     email: str,
     rol_principal: str,
-    superficies: Iterable[str],
     estado: str,
     user_id: str | None = None,
-) -> tuple[str, str, str, str, tuple[str, ...], str]:
+) -> tuple[str, str, str, str, str]:
     nombre = _clean_text(nombre) or ""
     apellidos = _clean_text(apellidos) or ""
     email = _clean_text(email) or ""
     rol_principal = _clean_text(rol_principal) or ""
     estado = _clean_text(estado) or "pendiente"
-    surfaces = tuple(item for item in _split_surfaces(superficies) if item)
 
     if not nombre:
         raise ValueError("El nombre es obligatorio.")
@@ -478,8 +409,6 @@ def _validate_user_fields(
         raise ValueError("El rol principal es obligatorio.")
     if _normalize_state(estado) not in USER_STATUSES:
         raise ValueError("El estado indicado no es valido.")
-    if not surfaces:
-        raise ValueError("Debe indicarse al menos una superficie, area o modulo.")
 
     normalized_email = _normalize_email(email)
     for existing in users:
@@ -488,7 +417,7 @@ def _validate_user_fields(
         if _normalize_email(existing.email) == normalized_email:
             raise ValueError("El email no puede duplicarse entre usuarios.")
 
-    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), surfaces, _normalize_state(estado)
+    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado)
 
 
 def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
@@ -518,17 +447,14 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
         result = [user for user in result if user.estado == normalized.estado]
     if normalized.rol:
         result = [user for user in result if user.rol_principal == normalized.rol]
-    if normalized.superficie:
-        query = normalized.superficie.lower()
-        result = [user for user in result if any(query in surface.lower() for surface in user.superficies)]
     return sorted(result, key=lambda user: (user.apellidos.lower(), user.nombre.lower(), user.email.lower()))
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
+    present_roles = {user.rol_principal for user in users}
     return {
         "estados": list(USER_STATUSES),
-        "roles": sorted({user.rol_principal for user in users}) or list(USER_ROLES),
-        "superficies": sorted({surface for user in users for surface in user.superficies}) or list(DEFAULT_SURFACES),
+        "roles": [role for role in USER_ROLES if role in present_roles] or list(USER_ROLES),
     }
 
 
@@ -597,19 +523,17 @@ def create_user(
     apellidos: str,
     email: str,
     rol_principal: str,
-    superficies: Iterable[str],
     estado: str = "pendiente",
     observaciones_internas: str = "",
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
-    nombre, apellidos, normalized_email, normalized_role, normalized_surfaces, normalized_state = _validate_user_fields(
+    nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
         users,
         nombre,
         apellidos,
         email,
         rol_principal,
-        superficies,
         estado,
     )
     timestamp = _parse_timestamp(now)
@@ -620,7 +544,6 @@ def create_user(
         email=normalized_email,
         rol_principal=normalized_role,
         estado=normalized_state,
-        superficies=normalized_surfaces,
         observaciones_internas=_clean_text(observaciones_internas) or "",
         fecha_alta=_format_timestamp(timestamp) or "",
         ultimo_acceso=None,
@@ -638,7 +561,6 @@ def update_user(
     apellidos: str,
     email: str,
     rol_principal: str,
-    superficies: Iterable[str],
     estado: str,
     observaciones_internas: str = "",
     now: str | datetime | None = None,
@@ -647,13 +569,12 @@ def update_user(
     for current in users:
         if current.id != user_id:
             continue
-        nombre, apellidos, normalized_email, normalized_role, normalized_surfaces, normalized_state = _validate_user_fields(
+        nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
             users,
             nombre,
             apellidos,
             email,
             rol_principal,
-            superficies,
             estado,
             user_id=user_id,
         )
@@ -666,14 +587,13 @@ def update_user(
             email=normalized_email,
             rol_principal=normalized_role,
             estado=normalized_state,
-            superficies=normalized_surfaces,
             observaciones_internas=_clean_text(observaciones_internas) or "",
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
             historial=(
                 *current.historial,
-                _event("edicion", "Datos basicos, rol o superficies actualizados.", timestamp),
+                _event("edicion", "Datos basicos, rol o estado actualizados.", timestamp),
             ),
         )
         _replace_user_record(updated)
@@ -703,7 +623,6 @@ def change_user_state(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=normalized_state,
-            superficies=current.superficies,
             observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
@@ -737,7 +656,6 @@ def resend_invitation(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=current.estado,
-            superficies=current.superficies,
             observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
@@ -771,7 +689,6 @@ def reset_access(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=current.estado,
-            superficies=current.superficies,
             observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
@@ -805,9 +722,6 @@ def _replace_user_record(updated_user: ManagedUser) -> None:
                         updated_user.id,
                     ),
                 )
-                cursor.execute(USER_DELETE_SURFACES_SQL, (updated_user.id,))
-                for order, surface in enumerate(updated_user.superficies):
-                    cursor.execute(USER_INSERT_SURFACE_SQL, (updated_user.id, surface, order))
                 cursor.execute(
                     USER_INSERT_HISTORY_SQL,
                     (
@@ -841,8 +755,6 @@ def _persist_user(new_user: ManagedUser) -> None:
                         new_user.invitacion_pendiente,
                     ),
                 )
-                for order, surface in enumerate(new_user.superficies):
-                    cursor.execute(USER_INSERT_SURFACE_SQL, (new_user.id, surface, order))
                 for event in new_user.historial:
                     cursor.execute(
                         USER_INSERT_HISTORY_SQL,

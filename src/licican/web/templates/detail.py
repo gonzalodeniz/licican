@@ -26,7 +26,7 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "", ac
         """
     content = f"""
       {update_panel}
-      <section class="panel"><div class="panel-body">
+      <section class="panel" id="detail-main-panel"><div class="panel-body">
         <p><a href="{escape(build_url(base_path, '/'))}">Volver al catalogo</a></p>
         {pipeline_form}
         <div class="summary">
@@ -34,7 +34,7 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "", ac
           {render_metric(detail["fecha_limite"], "Fecha limite visible")}
           {render_metric(_format_budget(detail["presupuesto"]), "Presupuesto visible")}
         </div>
-        <div class="table-wrap"><table><tbody>
+        <div class="table-wrap detail-table-wrap"><table class="detail-table"><tbody>
           <tr><th>Organismo convocante</th><td>{escape(str(detail["organismo"]))}</td></tr>
           <tr><th>Ubicacion</th><td>{escape(str(detail["ubicacion"]))}</td></tr>
           <tr><th>Procedimiento</th><td>{escape(str(detail["procedimiento"] or "No informado"))}</td></tr>
@@ -46,9 +46,9 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "", ac
           <tr><th>Fichero .atom origen</th><td>{escape(str(detail["fichero_origen_atom"] or "No informado"))}</td></tr>
         </tbody></table></div>
       </div></section>
-      <section class="panel"><div class="panel-body"><h2>Contexto resumido</h2><p>{escape(str(detail["descripcion"]))}</p></div></section>
-      <section class="panel"><div class="panel-body"><h2>Solvencia tecnica</h2><p>{escape(str(detail["solvencia_tecnica"] or "No informado"))}</p></div></section>
-      <section class="panel"><div class="panel-body"><h2>Criterios de adjudicacion</h2>{criteria_html}</div></section>
+      <section class="panel" id="detail-context-panel"><div class="panel-body"><h2>Contexto resumido</h2><p>{escape(str(detail["descripcion"]))}</p></div></section>
+      <section class="panel" id="detail-solvency-panel"><div class="panel-body"><h2>Solvencia tecnica</h2><p>{escape(str(detail["solvencia_tecnica"] or "No informado"))}</p></div></section>
+      <section class="panel" id="detail-criteria-panel"><div class="panel-body"><h2>Criterios de adjudicacion</h2>{criteria_html}</div></section>
     """
     return page_template("Licican | Ficha de detalle de licitacion", str(detail["titulo"]), "Release 1 · PB-002 · Ficha resumida verificable", "La ficha resume los datos criticos del expediente y mantiene visible la fuente oficial, la fecha de publicación y el estado oficial. Cuando existe una rectificacion o modificacion publicada por el origen, se muestra el ultimo dato oficial visible.", content, current_path=f"/oportunidades/{escape(str(detail['id']))}", base_path=base_path, access_context=access_context)
 
@@ -76,7 +76,7 @@ def render_licitacion_detail(detail: dict[str, object], base_path: str = "", acc
         for label, value in rows
     )
     extra_link = f'<p><a class="offer-action" href="{escape(str(detail["enlace_placsp"]))}" target="_blank" rel="noopener noreferrer">Abrir expediente en PLACSP</a></p>' if detail["enlace_placsp"] else ""
-    content = f'<section class="panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=licitaciones"))}">Volver a Licitaciones TI Canarias</a></p><div class="table-wrap"><table><tbody>{table_rows}</tbody></table></div>{extra_link}</div></section>'
+    content = f'<section class="panel" id="detail-licitacion-panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=licitaciones"))}">Volver a Licitaciones TI Canarias</a></p><div class="table-wrap detail-table-wrap"><table class="detail-table"><tbody>{table_rows}</tbody></table></div>{extra_link}</div></section>'
     return page_template("Licican | Detalle de licitación consolidada", str(detail["titulo"]), "PB-012 · Detalle trazable del expediente", "La ficha mantiene visible la correspondencia funcional con el Excel de referencia y deja explícito el fichero `.atom` que alimenta la versión consolidada mostrada al usuario.", content, current_path="/datos-consolidados", base_path=base_path, access_context=access_context)
 
 
@@ -104,7 +104,7 @@ def render_adjudicacion_detail(detail: dict[str, object], base_path: str = "", a
     licitacion_link = ""
     if detail["licitacion_slug"] is not None:
         licitacion_link = f'<p><a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/licitaciones/{detail["licitacion_slug"]}"))}">Ver licitación asociada</a></p>'
-    content = f'<section class="panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=adjudicaciones"))}">Volver a Adjudicaciones</a></p><p>{escape(_display_value(detail["descripcion"]))}</p><div class="table-wrap"><table><tbody>{table_rows}</tbody></table></div>{licitacion_link}</div></section>'
+    content = f'<section class="panel" id="detail-adjudicacion-panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=adjudicaciones"))}">Volver a Adjudicaciones</a></p><p>{escape(_display_value(detail["descripcion"]))}</p><div class="table-wrap detail-table-wrap"><table class="detail-table"><tbody>{table_rows}</tbody></table></div>{licitacion_link}</div></section>'
     return page_template("Licican | Detalle de adjudicación consolidada", str(detail["titulo"]), "PB-012 · Contrato adjudicado con trazabilidad", "Esta ficha deja visible el resultado contractual de la muestra actual y, cuando existe correspondencia con la licitación, hereda la trazabilidad del fichero `.atom` origen.", content, current_path="/datos-consolidados", base_path=base_path, access_context=access_context)
 
 

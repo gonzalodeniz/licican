@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help run test coverage docker-build docker-up docker-down docker-logs docker-restart docker-psql
+.PHONY: help run test coverage docker-build docker-up docker-down docker-logs docker-restart docker-psql docker-db-up
 
 SHELL := /bin/bash
 PYTHON ?= python3
@@ -57,6 +57,7 @@ help:
 		"  make coverage - Ejecuta la suite y muestra el informe de cobertura" \
 		"  make docker-build  - Construye la imagen Docker minima" \
 		"  make docker-up     - Levanta el despliegue con docker compose" \
+		"  make docker-db-up  - Levanta solo el contenedor de base de datos" \
 		"  make docker-down   - Detiene el despliegue con docker compose" \
 		"  make docker-logs   - Muestra los logs del contenedor" \
 		"  make docker-restart - Recrea el despliegue Docker" \
@@ -68,6 +69,9 @@ docker-build:
 
 docker-up:
 	@$(COMPOSE) up -d --build
+
+docker-db-up:
+	@$(COMPOSE) up -d postgres-licitaciones
 
 docker-down:
 	@$(COMPOSE) down

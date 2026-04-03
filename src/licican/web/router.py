@@ -102,7 +102,6 @@ def _parse_user_filters(request: Request) -> UserFilters:
         busqueda=(query.get("busqueda") or [None])[0],
         estado=(query.get("estado") or [None])[0],
         rol=(query.get("rol") or [None])[0],
-        superficie=(query.get("superficie") or [None])[0],
     )
 
 
@@ -173,7 +172,7 @@ def _access_denied_html(request: Request, capability: str) -> str:
       </section>
       <section class="panel">
         <div class="panel-body">
-          <p>La aplicacion mantiene visibles solo las superficies compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
+          <p>La aplicacion mantiene visibles solo las acciones compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
         </div>
       </section>
     """
@@ -329,7 +328,6 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
         "email": (form_data.get("email") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
         "estado": (form_data.get("estado") or ["pendiente"])[0],
-        "superficies": (form_data.get("superficies") or [""])[0],
         "observaciones_internas": (form_data.get("observaciones_internas") or [""])[0],
     }
 
@@ -349,7 +347,6 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
-            superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
         )
@@ -372,7 +369,6 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
-            superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
         )
@@ -682,9 +678,18 @@ def handle_kpis_page(request: Request, start_response) -> list[bytes]:
     visible_alerts = _visible_alerts(request, alerts)
     alerts_summary = summarize_alerts(visible_alerts)
     pipeline_payload = _visible_pipeline_payload(request)
+    if request.access_context.is_admin:
+        alcance_general = "Indicadores globales"
+        alcance_operativo = "Global para administracion."
+    elif request.access_context.is_manager:
+        alcance_general = "Indicadores del contexto operativo"
+        alcance_operativo = "Operativo para manager."
+    else:
+        alcance_general = "Indicadores del contexto propio"
+        alcance_operativo = "Propio para colaboracion o invitado."
     payload = {
         "rol_activo": request.access_context.role_label,
-        "alcance": "Indicadores globales" if request.access_context.is_admin else "Indicadores del contexto propio del colaborador",
+        "alcance": alcance_general,
         "indicadores": [
             {
                 "nombre": "Cobertura visible",
@@ -696,13 +701,13 @@ def handle_kpis_page(request: Request, start_response) -> list[bytes]:
                 "nombre": "Adopcion de alertas",
                 "valor": alerts_summary["alertas_activas"],
                 "lectura": "Alertas activas dentro del alcance permitido por el rol.",
-                "alcance": "Global para administracion o propio para colaboracion.",
+                "alcance": alcance_operativo,
             },
             {
                 "nombre": "Uso de pipeline",
                 "valor": pipeline_payload["summary"]["total_oportunidades"],
                 "lectura": "Oportunidades actualmente seguidas en pipeline dentro del alcance visible.",
-                "alcance": "Global para administracion o propio para colaboracion.",
+                "alcance": alcance_operativo,
             },
         ],
     }
@@ -724,13 +729,19 @@ def handle_permissions_page(request: Request, start_response) -> list[bytes]:
                 "gobierno": "Puede revisar la matriz de permisos y las restricciones visibles.",
             },
             {
-                "rol": "Colaborador",
-                "consulta": "Catalogo, detalle, datos consolidados, KPIs y su propio espacio operativo.",
-                "gestion": "Solo puede gestionar sus alertas y su pipeline propio.",
-                "gobierno": "No accede a administracion global de permisos.",
+                "rol": "Manager",
+                "consulta": "Catalogo, detalle, datos consolidados, alertas, pipeline y KPIs operativos.",
+                "gestion": "Puede gestionar alertas y pipeline operativos.",
+                "gobierno": "No accede a administracion global de usuarios ni permisos.",
             },
             {
-                "rol": "Lector/Invitado",
+                "rol": "Colaborador",
+                "consulta": "Catalogo, detalle, datos consolidados, alertas y pipeline en modo consulta.",
+                "gestion": "No puede crear ni modificar alertas, pipeline ni configuracion.",
+                "gobierno": "No accede a administracion global de permisos ni usuarios.",
+            },
+            {
+                "rol": "Invitado",
                 "consulta": "Catalogo, detalle y datos consolidados.",
                 "gestion": "No puede crear ni modificar alertas, pipeline ni configuracion.",
                 "gobierno": "No accede a vistas operativas de permisos ni KPIs.",

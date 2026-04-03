@@ -6,22 +6,22 @@ Definir el funcionamiento funcional y visual del modulo de `Gestion de usuarios`
 ## 2. Necesidad de negocio
 - Licican necesita una forma trazable de dar de alta, mantener y retirar cuentas sin gestionar usuarios de forma manual fuera del sistema.
 - La administracion de accesos debe quedar alineada con un entorno de backoffice institucional, claro y consistente con el resto de la aplicacion.
-- El producto requiere control operativo sobre quien accede, con que rol y sobre que superficies o modulos actua cada cuenta.
+- El producto requiere control operativo sobre quien accede y con que rol actua cada cuenta.
 - Los cambios de acceso y permisos deben quedar auditados para soporte, seguridad y trazabilidad administrativa.
 
 ## 3. Objetivo funcional
-Permitir a administradores de plataforma, administradores funcionales y responsables con permisos suficientes gestionar cuentas de usuario de extremo a extremo: alta, edicion, activacion, desactivacion, baja logica, reasignacion de roles, asignacion de permisos o superficies, reenvio de invitacion, reinicio de acceso y consulta de trazabilidad.
+Permitir a usuarios con rol `administrador` o `manager` y permisos suficientes gestionar cuentas de usuario de extremo a extremo: alta, edicion, activacion, desactivacion, baja logica, reasignacion de roles, reenvio de invitacion, reinicio de acceso y consulta de trazabilidad.
 
 ## 4. Alcance
 
 ### 4.1 MVP
 - Listado paginado de usuarios.
-- Filtros por nombre, apellidos, email, identificador, estado, rol y superficie.
+- Filtros por nombre, apellidos, email, identificador, estado y rol.
 - Tarjetas KPI con usuarios totales, activos, inactivos y pendientes o roles definidos.
 - Alta de usuario.
 - Edicion de datos basicos.
 - Cambio de rol principal.
-- Asignacion y retirada de permisos, areas, modulos o superficies.
+- Revision de roles y estado de acceso.
 - Activacion y desactivacion.
 - Baja logica.
 - Reactivacion.
@@ -56,7 +56,7 @@ Permitir a administradores de plataforma, administradores funcionales y responsa
 - Alta de usuario.
 - Edicion de datos basicos.
 - Modificacion de rol principal.
-- Asignacion y retirada de permisos, areas, modulos o superficies.
+- Revision de roles y estado de acceso.
 - Activacion de usuario.
 - Desactivacion o baja logica.
 - Reactivacion.
@@ -81,7 +81,6 @@ Permitir a administradores de plataforma, administradores funcionales y responsa
   - busqueda por nombre, apellidos, email o identificador
   - filtro por estado
   - filtro por rol
-  - filtro por area, modulo o superficie
   - boton `Aplicar filtros`
   - boton `Limpiar filtros`
 - Tabla principal de usuarios.
@@ -103,21 +102,18 @@ Campos obligatorios o visibles segun contexto:
 - email
 - rol
 - estado
-- modulos o superficies accesibles
-- observaciones internas, si procede
-- fecha de alta, si aplica como dato visible o automatico
+  - observaciones internas, si procede
+  - fecha de alta, si aplica como dato visible o automatico
 
 Reglas de formulario:
 - El estado debe ser visible y controlado por el sistema cuando la politica lo requiera.
-- El rol debe quedar claramente identificado como rol principal.
-- Las superficies o areas se usan para acotar el alcance de acceso cuando el modelo lo requiera.
+- El rol debe quedar claramente identificado como rol principal y usar una de estas etiquetas: `administrador`, `manager`, `colaborador` o `invitado`.
 - La fecha de alta puede ser de solo lectura si el sistema la asigna automaticamente.
 
 ## 9. Validaciones
 - El email debe tener formato valido.
 - El email no puede duplicarse.
 - El nombre y el rol son obligatorios.
-- Si el modelo de permisos requiere ambito, debe existir al menos una superficie, area o modulo asignado.
 - Los cambios sensibles requieren confirmacion previa.
 - No se puede dejar al sistema sin ningun usuario administrador activo.
 - Un usuario inactivo no debe poder acceder.
@@ -160,7 +156,7 @@ Reglas de formulario:
 1. El usuario con permisos suficientes ve el modulo `Gestion de usuarios` con listado paginado, filtros, KPIs y acciones por fila.
 2. El usuario puede crear una cuenta con datos validos y verla reflejada en el listado y en el detalle.
 3. El sistema rechaza emails duplicados con un mensaje claro.
-4. El usuario puede editar datos basicos, cambiar rol y ajustar superficies o permisos cuando tenga autorizacion para hacerlo.
+4. El usuario puede editar datos basicos, cambiar rol y ajustar estado cuando tenga autorizacion para hacerlo.
 5. El usuario puede activar, desactivar, reactivar y dar baja logica a una cuenta con confirmacion previa en acciones sensibles.
 6. El usuario puede reenviar invitacion a cuentas pendientes y reiniciar acceso o contrasena cuando corresponda.
 7. El detalle del usuario muestra estado actual, ultimo acceso e historial o trazabilidad de cambios.

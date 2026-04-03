@@ -320,24 +320,26 @@
   - El producto ya dispone de acciones visibles de consulta, alertas o administracion.
 - Flujo principal:
   1. El usuario accede a una vista o accion del producto.
-  2. El sistema identifica su rol: `Administrador`, `Colaborador` o `Lector/Invitado`.
+  2. El sistema identifica su rol: `Administrador`, `Manager`, `Colaborador` o `Invitado`.
   3. El sistema muestra las acciones permitidas para ese rol.
   4. El usuario ejecuta una accion autorizada.
   5. El sistema procesa la accion manteniendo la trazabilidad de permisos aplicada.
 - Flujos alternativos:
   - A1. Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
-  - A2. Si el rol es `Lector/Invitado`, el sistema permite consulta de catalogo, detalle, filtros y vistas consolidadas, pero no muestra acciones de alta o edicion.
+  - A2. Si el rol es `Invitado`, el sistema permite consulta de catalogo, detalle, filtros y vistas consolidadas, pero no muestra acciones de alta o edicion.
   - A3. Si el rol es `Colaborador`, el sistema limita la gestion a sus elementos propios en las superficies ya disponibles y excluye administracion global.
-  - A4. Si una superficie futura como pipeline aun no esta expuesta, la aplicacion conserva la regla funcional definida sin bloquear la iteracion de permisos sobre las superficies vigentes.
+  - A4. Si el rol es `Manager`, el sistema permite gestion operativa sobre alertas y pipeline propios, ademas de la consulta de las superficies ya disponibles.
+  - A5. Si una superficie futura como pipeline aun no esta expuesta, la aplicacion conserva la regla funcional definida sin bloquear la iteracion de permisos sobre las superficies vigentes.
 - Postcondiciones:
   - El usuario ha operado dentro del alcance permitido para su rol.
 - Reglas de negocio relacionadas:
-  - RB-45 El sistema debe distinguir al menos los roles `Administrador`, `Colaborador` y `Lector/Invitado`.
+  - RB-45 El sistema debe distinguir al menos los roles `Administrador`, `Manager`, `Colaborador` e `Invitado`.
   - RB-46 `Administrador` puede administrar acciones transversales de consulta y gestion.
-  - RB-47 `Colaborador` solo puede gestionar sus propios elementos salvo permiso adicional explicitado.
-  - RB-48 `Lector/Invitado` no puede crear ni modificar entidades.
-  - RB-49 La interfaz no debe mostrar como disponibles acciones bloqueadas por permisos.
-  - RB-50 La primera iteracion de permisos debe ser ejecutable sobre las superficies ya disponibles y extenderse a pipeline cuando `PB-005` exista sin redefinir la matriz base.
+  - RB-47 `Manager` puede gestionar sus propias alertas y su pipeline propio salvo permiso adicional explicitado.
+  - RB-48 `Colaborador` solo puede consultar o apoyar en sus elementos propios salvo permiso adicional explicitado.
+  - RB-49 `Invitado` no puede crear ni modificar entidades.
+  - RB-50 La interfaz no debe mostrar como disponibles acciones bloqueadas por permisos.
+  - RB-51 La primera iteracion de permisos debe ser ejecutable sobre las superficies ya disponibles y extenderse a pipeline cuando `PB-005` exista sin redefinir la matriz base.
 
 ## CU-14 Navegar resultados del catalogo en paginas
 - Backlog relacionado: PB-014
@@ -365,7 +367,7 @@
 ## CU-15 Configurar conservacion y archivado de licitaciones
 - Backlog relacionado: PB-015
 - Historias relacionadas: HU-15
-- Actor principal: Administradora u operador de datos.
+- Actor principal: Administrador o operador de datos.
 - Objetivo: Definir cuanto tiempo se conservan las licitaciones activas y cuando deben archivarse las cerradas.
 - Disparador: El responsable de operacion abre el panel de control de retencion.
 - Precondiciones:
@@ -390,24 +392,24 @@
 ## CU-16 Administrar cuentas de usuario
 - Backlog relacionado: PB-016
 - Historias relacionadas: HU-16
-- Actor principal: Administrador de plataforma, administrador funcional o responsable con permisos de gestion de usuarios.
+- Actor principal: Usuario con rol `Administrador` o `Manager` con permisos de gestion de usuarios.
 - Objetivo: Gestionar cuentas, roles, permisos y estados de acceso de los usuarios de Licican desde un modulo centralizado y trazable.
-- Disparador: El responsable abre el modulo `Gestion de usuarios`.
+- Disparador: El usuario abre el modulo `Gestion de usuarios`.
 - Precondiciones:
   - Existe un contexto de sesion con permisos suficientes para la gestion de usuarios.
   - El sistema dispone de persistencia para cuentas, estados y trazabilidad.
 - Flujo principal:
-  1. El responsable abre el modulo de gestion de usuarios.
+  1. El usuario abre el modulo de gestion de usuarios.
   2. El sistema muestra un listado paginado con filtros, KPIs y acciones por fila.
-  3. El responsable crea o edita una cuenta segun necesidad.
+  3. El usuario crea o edita una cuenta segun necesidad.
   4. El sistema valida datos, roles, superficies y restricciones de acceso.
-  5. El responsable activa, desactiva, reactiva, reenvia invitaciones o reinicia acceso segun el estado de la cuenta.
+  5. El usuario activa, desactiva, reactiva, reenvia invitaciones o reinicia acceso segun el estado de la cuenta.
   6. El sistema deja trazabilidad del cambio y actualiza el detalle del usuario.
 - Flujos alternativos:
   - A1. Si el email ya existe, el sistema bloquea la alta o la edicion y muestra un error claro.
   - A2. Si se intenta desactivar al ultimo administrador activo, el sistema bloquea la accion.
   - A3. Si la cuenta esta pendiente de activacion, el sistema permite reenviar la invitacion pero no permite acceso operativo.
-  - A4. Si el responsable no tiene permisos suficientes para asignar un rol o superficie restringida, la accion se impide.
+  - A4. Si el usuario no tiene permisos suficientes para asignar un rol o superficie restringida, la accion se impide.
   - A5. Si se solicita una baja logica, el sistema conserva el historico y retira la cuenta del uso activo.
 - Postcondiciones:
   - La cuenta queda actualizada y la accion relevante permanece auditada.

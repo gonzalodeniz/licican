@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
-from licican.access import AccessContext, ROLE_ADMIN, ROLE_COLLABORATOR, ROLE_READER
+from licican.access import AccessContext, ROLE_ADMINISTRATOR, ROLE_COLLABORATOR, ROLE_INVITED, ROLE_MANAGER
 from licican.web.responses import build_url
 
 
@@ -58,7 +58,7 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
         ]
 
     by_role = {
-        ROLE_ADMIN: [
+        ROLE_ADMINISTRATOR: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
@@ -68,7 +68,7 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
             {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
             {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
         ],
-        ROLE_COLLABORATOR: [
+        ROLE_MANAGER: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Alertas", "description": "Criterios propios y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
@@ -76,7 +76,14 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
             {"label": "Pipeline", "description": "Seguimiento operativo propio", "icon": "PL", "path": "/pipeline", "upcoming": False},
             {"label": "KPIs", "description": "Indicadores de cobertura y uso", "icon": "KP", "path": "/kpis", "upcoming": False},
         ],
-        ROLE_READER: [
+        ROLE_COLLABORATOR: [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+            {"label": "Alertas", "description": "Consulta de criterios y coincidencias", "icon": "AL", "path": "/alertas", "upcoming": False},
+            {"label": "Pipeline", "description": "Consulta del seguimiento operativo", "icon": "PL", "path": "/pipeline", "upcoming": False},
+        ],
+        ROLE_INVITED: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},

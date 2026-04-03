@@ -396,6 +396,34 @@ main {
   padding: 18px 20px;
 }
 
+.users-view {
+  display: grid;
+  gap: 16px;
+}
+
+.users-view .panel-body {
+  padding: 20px 22px;
+}
+
+.catalog-view,
+.coverage-view,
+.dataset-view,
+.classification-view,
+.pipeline-view,
+.permissions-view {
+  display: grid;
+  gap: 16px;
+}
+
+.catalog-view .panel-body,
+.coverage-view .panel-body,
+.dataset-view .panel-body,
+.classification-view .panel-body,
+.pipeline-view .panel-body,
+.permissions-view .panel-body {
+  padding: 20px 22px;
+}
+
 .note {
   padding: 14px 16px;
   border-radius: var(--radius-card);
@@ -712,6 +740,128 @@ button:hover {
   border-bottom: 1px solid var(--border);
 }
 
+.users-table-wrap {
+  overflow-x: hidden;
+}
+
+.catalog-table-wrap,
+.coverage-table-wrap,
+.dataset-table-wrap,
+.classification-table-wrap,
+.pipeline-table-wrap,
+.permissions-table-wrap,
+.detail-table-wrap {
+  overflow-x: hidden;
+}
+
+.users-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.catalog-table,
+.coverage-table,
+.dataset-table,
+.classification-table,
+.pipeline-table,
+.permissions-table,
+.detail-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.users-table th,
+.users-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  padding: 12px 13px;
+}
+
+.catalog-table th,
+.catalog-table td,
+.coverage-table th,
+.coverage-table td,
+.dataset-table th,
+.dataset-table td,
+.classification-table th,
+.classification-table td,
+.pipeline-table th,
+.pipeline-table td,
+.permissions-table th,
+.permissions-table td,
+.detail-table th,
+.detail-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  padding: 12px 13px;
+}
+
+.users-table thead th {
+  white-space: normal;
+  position: sticky;
+}
+
+.catalog-table thead th,
+.coverage-table thead th,
+.dataset-table thead th,
+.classification-table thead th,
+.pipeline-table thead th,
+.permissions-table thead th,
+.detail-table thead th {
+  white-space: normal;
+  position: sticky;
+}
+
+.users-col-name {
+  width: 16%;
+}
+
+.users-col-email {
+  width: 18%;
+}
+
+.users-col-role {
+  width: 12%;
+}
+
+.users-col-scopes {
+  width: 20%;
+}
+
+.users-col-state {
+  width: 10%;
+}
+
+.users-col-last-access {
+  width: 12%;
+}
+
+.users-col-actions {
+  width: 12%;
+}
+
+.users-table .inline-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.catalog-view .table-wrap,
+.coverage-view .table-wrap,
+.dataset-view .table-wrap,
+.classification-view .table-wrap,
+.pipeline-view .table-wrap,
+.permissions-view .table-wrap {
+  margin-top: 4px;
+}
+
 table {
   width: 100%;
   border-collapse: separate;
@@ -848,10 +998,36 @@ ul {
   .pagination-jump {
     justify-content: flex-start;
   }
+
+  .users-view .panel-body {
+    padding: 18px 18px;
+  }
+
+  .catalog-view .panel-body,
+  .coverage-view .panel-body,
+  .dataset-view .panel-body,
+  .classification-view .panel-body,
+  .pipeline-view .panel-body,
+  .permissions-view .panel-body {
+    padding: 18px 18px;
+  }
 }
 
 @media (max-width: 720px) {
   .panel-body {
+    padding: 16px;
+  }
+
+  .users-view .panel-body {
+    padding: 16px;
+  }
+
+  .catalog-view .panel-body,
+  .coverage-view .panel-body,
+  .dataset-view .panel-body,
+  .classification-view .panel-body,
+  .pipeline-view .panel-body,
+  .permissions-view .panel-body {
     padding: 16px;
   }
 
@@ -866,6 +1042,45 @@ ul {
 
   table {
     min-width: 1100px;
+  }
+
+  .users-table-wrap {
+    overflow-x: hidden;
+  }
+
+  .users-table {
+    min-width: 0;
+  }
+
+  .users-table thead th {
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+  }
+
+  .users-table td,
+  .users-table th {
+    padding: 10px 11px;
+  }
+
+  .catalog-table td,
+  .catalog-table th,
+  .coverage-table td,
+  .coverage-table th,
+  .dataset-table td,
+  .dataset-table th,
+  .classification-table td,
+  .classification-table th,
+  .pipeline-table td,
+  .pipeline-table th,
+  .permissions-table td,
+  .permissions-table th,
+  .detail-table td,
+  .detail-table th {
+    padding: 10px 11px;
+  }
+
+  .users-table .inline-actions {
+    gap: 4px;
   }
 
   td,

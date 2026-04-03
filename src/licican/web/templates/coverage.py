@@ -23,7 +23,8 @@ def render_coverage(sources, summary: dict[str, int], base_path: str = "", acces
         for source in sources
     ]
     content = f"""
-      <section class="panel">
+      <section class="coverage-view">
+      <section class="panel" id="coverage-summary-panel">
         <div class="panel-body">
           <div class="summary">
             {render_metric(summary["MVP"], "Fuentes objetivo en MVP")}
@@ -32,12 +33,13 @@ def render_coverage(sources, summary: dict[str, int], base_path: str = "", acces
           </div>
           <p class="muted">Los datos se cargan desde una configuración versionada en <code>data/source_coverage.json</code>.</p>
         </div>
-        {render_table(["Fuente oficial", "Categoría", "Estado", "Alcance", "Justificación funcional", "Trazabilidad"], rows)}
+        {render_table(["Fuente oficial", "Categoría", "Estado", "Alcance", "Justificación funcional", "Trazabilidad"], rows, wrapper_class="table-wrap coverage-table-wrap", table_class="coverage-table")}
       </section>
-      <p class="note">
+      <p class="note" id="coverage-reference-note">
         Referencia funcional alineada con <code>product-manager/refinamiento-funcional.md</code> y <code>product-manager/roadmap.md</code>.
         Esta cobertura sirve de base para el catálogo inicial del MVP sin inducir una expectativa de exhaustividad.
       </p>
+      </section>
     """
     return page_template(
         "Licican | Cobertura inicial del MVP",

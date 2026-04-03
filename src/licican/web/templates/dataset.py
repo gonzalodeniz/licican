@@ -37,7 +37,8 @@ def render_datos_consolidados(
     )
     summary = dataset["resumen"]
     content = f"""
-      <section class="panel">
+      <section class="dataset-view">
+      <section class="panel" id="dataset-summary-panel">
         <div class="panel-body">
           <div class="summary">
             {render_metric(summary["licitaciones"], "Licitaciones en la muestra")}
@@ -48,7 +49,8 @@ def render_datos_consolidados(
           {tabs}
           <p>{description}</p>
         </div>
-        {render_table(headers, body_rows, "No hay filas disponibles en la hoja seleccionada para la muestra actual del Excel.")}
+        {render_table(headers, body_rows, "No hay filas disponibles en la hoja seleccionada para la muestra actual del Excel.", wrapper_class="table-wrap dataset-table-wrap", table_class="dataset-table")}
+      </section>
       </section>
     """
     return page_template(

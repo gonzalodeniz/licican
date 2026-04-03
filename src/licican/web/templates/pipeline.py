@@ -33,7 +33,8 @@ def render_pipeline(
     content = f"""
       {render_status_note(status_message)}
       {render_status_note(error_message, "warn")}
-      <section class="panel">
+      <section class="pipeline-view">
+      <section class="panel" id="pipeline-summary-panel">
         <div class="panel-body">
           <div class="summary">
             {render_metric(summary["total_oportunidades"], "Oportunidades guardadas")}
@@ -46,6 +47,7 @@ def render_pipeline(
       </section>
       {entries_html}
       <p class="note">Referencia funcional activa: <code>{escape(str(payload["referencia_funcional"]))}</code>. Estados de seguimiento disponibles: <code>{escape(", ".join(states))}</code>.</p>
+      </section>
     """
     return page_template(
         "Licican | Pipeline de seguimiento",
@@ -74,7 +76,7 @@ def _render_pipeline_entry(base_path: str, entry: dict[str, object], states: lis
         warning_html = f'<section class="note note-warning"><strong>Advertencia oficial</strong><br />{escape(str(warning))}</section>'
 
     return f"""
-      <section class="panel">
+      <section class="panel pipeline-entry-panel" id="pipeline-entry-{escape(opportunity_id)}">
         <div class="panel-body">
           <p><strong>{escape(str(opportunity["titulo"]))}</strong></p>
           <div class="summary">
@@ -83,8 +85,8 @@ def _render_pipeline_entry(base_path: str, entry: dict[str, object], states: lis
             {render_metric(opportunity["fecha_limite"], "Fecha limite visible")}
           </div>
           {warning_html}
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap pipeline-table-wrap">
+            <table class="pipeline-table">
               <tbody>
                 <tr><th>Organismo</th><td>{escape(str(opportunity["organismo"]))}</td></tr>
                 <tr><th>Ubicacion</th><td>{escape(str(opportunity["ubicacion"]))}</td></tr>
