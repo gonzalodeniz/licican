@@ -769,6 +769,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
+        self.assertIn("Cerrar sesión", html)
 
         create_panel_index = html.index('id="users-create-panel"')
         filters_panel_index = html.index('id="users-filters-panel"')
@@ -802,7 +803,6 @@ class ApplicationTests(unittest.TestCase):
                 "email": "eva.santos@licican.local",
                 "rol_principal": "manager",
                 "estado": "pendiente",
-                "observaciones_internas": "Alta desde pruebas",
             }
         )
         with self._patch_users_db(state):

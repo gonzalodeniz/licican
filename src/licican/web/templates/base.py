@@ -103,6 +103,21 @@ def _context_html(access_context: AccessContext | None) -> str:
     """
 
 
+def _user_menu_html(base_path: str, access_context: AccessContext) -> str:
+    csrf_token = getattr(access_context, "csrf_token", "")
+    badge = " · superadmin" if access_context.is_superadmin else ""
+    hidden_token = f'<input type="hidden" name="csrf_token" value="{escape(csrf_token)}" />' if csrf_token else ""
+    return f"""
+      <div class="user-menu">
+        <p class="nav-copy"><strong>Sesión:</strong> {escape(access_context.display_name or access_context.user_id)}{escape(badge)}</p>
+        <form method="post" action="{escape(build_url(base_path, '/logout'))}">
+          {hidden_token}
+          <button class="button button-secondary button-small" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+    """
+
+
 def _path_matches_navigation(current_path: str, item_path: str) -> bool:
     if item_path == "/":
         return current_path == "/" or current_path.startswith("/oportunidades/")
@@ -148,6 +163,7 @@ def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str
 def _navigation_html(base_path: str, current_path: str, access_context: AccessContext | None = None) -> str:
     items = "".join(_navigation_item_html(base_path, current_path, item) for item in _navigation_items(access_context))
     list_html = f'<ul class="nav-list">{items}</ul>'
+    footer_html = _navigation_footer_html(base_path, access_context)
     return f"""
       <aside class="side-nav" aria-label="Navegacion principal">
         <p class="nav-kicker">PB-010</p>
@@ -158,14 +174,25 @@ def _navigation_html(base_path: str, current_path: str, access_context: AccessCo
           <p class="nav-section-title">Modulos</p>
           {list_html}
         </div>
-        <p class="nav-note">
-          La navegacion solo expone superficies operativas compatibles con el rol activo y mantiene la experiencia de consulta cuando una accion queda restringida.
-        </p>
+        {footer_html}
       </aside>
       <details class="mobile-nav">
         <summary>Menu principal</summary>
         <div class="mobile-nav-body">
           {list_html}
+          {footer_html}
         </div>
       </details>
+    """
+
+
+def _navigation_footer_html(base_path: str, access_context: AccessContext | None) -> str:
+    logout_button = _user_menu_html(base_path, access_context) if access_context is not None else ""
+    return f"""
+      <div class="nav-footer">
+        <p class="nav-note">
+          La navegacion solo expone superficies operativas compatibles con el rol activo y mantiene la experiencia de consulta cuando una accion queda restringida.
+        </p>
+        {logout_button}
+      </div>
     """

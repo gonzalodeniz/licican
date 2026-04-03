@@ -137,6 +137,8 @@ main {
   background: var(--sidebar);
   color: var(--text-inverse);
   box-shadow: var(--shadow-sidebar);
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-kicker {
@@ -164,6 +166,12 @@ main {
 
 .nav-note {
   margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgb(217 226 236 / 0.12);
+}
+
+.nav-footer {
+  margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid rgb(217 226 236 / 0.12);
 }
@@ -349,6 +357,33 @@ main {
 .mobile-nav .nav-copy,
 .mobile-nav .nav-note {
   color: var(--text-soft);
+}
+
+.user-menu {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.button-secondary {
+  border-color: rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.08);
+  color: #eef4fa;
+}
+
+.button-secondary:hover {
+  border-color: rgb(255 255 255 / 0.26);
+  background: rgb(255 255 255 / 0.14);
+}
+
+.button-small {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.88rem;
+}
+
+.auth-mode-note {
+  margin-bottom: 18px;
 }
 
 .hero {

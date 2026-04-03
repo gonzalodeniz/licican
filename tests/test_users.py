@@ -81,7 +81,6 @@ class UsersModuleTests(unittest.TestCase):
             "email": "sonia.admin@licican.local",
             "rol_principal": "administrador",
             "estado": "activo",
-            "observaciones_internas": "Cuenta administrativa secundaria.",
             "fecha_alta": state.users["usr-001"]["fecha_alta"],
             "ultimo_acceso": None,
             "invitacion_pendiente": False,

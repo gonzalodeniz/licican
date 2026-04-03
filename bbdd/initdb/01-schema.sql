@@ -176,7 +176,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     email                   TEXT        NOT NULL,
     rol_principal           TEXT        NOT NULL,
     estado                  TEXT        NOT NULL,
-    observaciones_internas   TEXT        NOT NULL DEFAULT '',
     fecha_alta              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso           TIMESTAMPTZ,
     invitacion_pendiente     BOOLEAN     NOT NULL DEFAULT FALSE,
@@ -189,6 +188,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     CONSTRAINT usuario_email_ck CHECK (btrim(email) <> ''),
     CONSTRAINT usuario_rol_ck CHECK (btrim(rol_principal) <> '')
 );
+ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS observaciones_internas;
 
 CREATE INDEX idx_usuario_estado ON usuario (estado);
 CREATE INDEX idx_usuario_rol_principal ON usuario (rol_principal);
@@ -211,12 +211,12 @@ CREATE TABLE IF NOT EXISTS usuario_historial (
 
 CREATE INDEX idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
 
-INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, invitacion_pendiente)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
@@ -236,7 +236,6 @@ COMMENT ON COLUMN usuario.apellidos IS 'Apellidos del usuario';
 COMMENT ON COLUMN usuario.email IS 'Correo electrónico único de la cuenta';
 COMMENT ON COLUMN usuario.rol_principal IS 'Rol funcional principal asignado';
 COMMENT ON COLUMN usuario.estado IS 'Estado operativo de la cuenta: activo, inactivo, pendiente, bloqueado o baja logica';
-COMMENT ON COLUMN usuario.observaciones_internas IS 'Notas internas no visibles para el acceso de usuario final';
 COMMENT ON COLUMN usuario.fecha_alta IS 'Fecha de alta administrativa de la cuenta';
 COMMENT ON COLUMN usuario.ultimo_acceso IS 'Último acceso registrado por la plataforma';
 COMMENT ON COLUMN usuario.invitacion_pendiente IS 'Indica si la cuenta aún debe activar la invitación';
