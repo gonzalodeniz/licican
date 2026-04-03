@@ -5,14 +5,23 @@ from html import escape
 from licican.web.responses import build_url
 
 
-def render_table(headers: list[str], rows: list[str], empty_message: str | None = None) -> str:
+def render_table(
+    headers: list[str],
+    rows: list[str],
+    empty_message: str | None = None,
+    *,
+    wrapper_class: str = "table-wrap",
+    table_class: str = "",
+) -> str:
     """Renderiza una tabla HTML simple."""
     if not rows and empty_message is not None:
         return f'<section class="note">{escape(empty_message)}</section>'
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
+    wrapper_class_attr = f' class="{escape(wrapper_class)}"' if wrapper_class else ""
+    table_class_attr = f' class="{escape(table_class)}"' if table_class else ""
     return f"""
-      <div class="table-wrap">
-        <table>
+      <div{wrapper_class_attr}>
+        <table{table_class_attr}>
           <thead><tr>{header_html}</tr></thead>
           <tbody>{''.join(rows)}</tbody>
         </table>

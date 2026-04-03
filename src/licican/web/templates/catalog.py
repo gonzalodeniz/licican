@@ -12,7 +12,7 @@ from licican.web.templates.components import render_badges, render_metric, rende
 def render_filter_form(base_path: str, active_filters: dict[str, object], available_filters: dict[str, list[str]], validation_error: str | None, pagination: dict[str, object]) -> str:
     """Renderiza el formulario de filtros del catálogo."""
     return f"""
-      <section class="panel">
+      <section class="panel" id="catalog-filters-panel">
         <div class="panel-body">
           <h2>Filtros funcionales</h2>
           <form method="get" action="{escape(build_url(base_path, '/'))}">
@@ -80,15 +80,31 @@ def render_catalog(catalog: dict[str, object], base_path: str = "", access_conte
             "</tr>"
             for item in opportunities
         )
-        catalog_panel = f'<section class="panel"><div class="panel-body"><div class="summary">{render_metric(catalog["total_oportunidades_catalogo"], "Oportunidades TI visibles")}{render_metric(len(catalog["cobertura_aplicada"]), coverage_label)}{render_metric(catalog["total_oportunidades_visibles"], "Oportunidades TI antes de filtrar")}</div><p class="muted">{coverage_note}</p></div><div class="table-wrap"><table><thead><tr><th>Oferta</th><th>Organismo</th><th>Ubicación</th><th>Procedimiento</th><th>Presupuesto</th><th>Publicación oficial</th><th>Fecha límite</th><th>Estado</th><th>Fuente oficial</th></tr></thead><tbody>{rows}</tbody></table></div><div class="panel-body">{render_pagination(base_path, active_filters, pagination)}</div></section>'
+        catalog_panel = f'''
+          <section class="panel" id="catalog-results-panel">
+            <div class="panel-body">
+              <div class="summary">{render_metric(catalog["total_oportunidades_catalogo"], "Oportunidades TI visibles")}{render_metric(len(catalog["cobertura_aplicada"]), coverage_label)}{render_metric(catalog["total_oportunidades_visibles"], "Oportunidades TI antes de filtrar")}</div>
+              <p class="muted">{coverage_note}</p>
+            </div>
+            <div class="table-wrap catalog-table-wrap">
+              <table class="catalog-table">
+                <thead><tr><th>Oferta</th><th>Organismo</th><th>Ubicación</th><th>Procedimiento</th><th>Presupuesto</th><th>Publicación oficial</th><th>Fecha límite</th><th>Estado</th><th>Fuente oficial</th></tr></thead>
+                <tbody>{rows}</tbody>
+              </table>
+            </div>
+            <div class="panel-body">{render_pagination(base_path, active_filters, pagination)}</div>
+          </section>
+        '''
     else:
         message = "No hay resultados con los filtros activos." if active_filters and validation_error is None else ("No hay oportunidades TI disponibles en los snapshots `.atom` consolidados en este momento." if uses_atom_consolidation else "No hay oportunidades TI disponibles dentro de la cobertura MVP en este momento.")
-        catalog_panel = f'<section class="note">{escape(message)}</section>'
+        catalog_panel = f'<section class="note" id="catalog-empty-state">{escape(message)}</section>'
     content = f"""
+      <section class="catalog-view">
       <p class="muted">Incluye las vistas de <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong> en datos consolidados.</p>
       {filter_form}
       {catalog_panel}
       <p class="note">Referencia funcional activa: <code>{escape(catalog["referencia_funcional"])}</code>. Cada registro mantiene visible su fuente oficial, enlace oficial, fecha de publicación y estado oficial para facilitar verificación por <code>qa-teams</code>.</p>
+      </section>
     """
     return page_template("Licican | Catálogo inicial de oportunidades TI", "Catálogo inicial de oportunidades TI de Canarias", "Release 6 · PB-011 · Consolidacion funcional trazable", "Licican muestra aquí un catálogo consultable obtenido a partir de todos los snapshots `.atom` versionados presentes en `data/`. Solo se publican registros que cumplen simultáneamente criterio geográfico Canarias y criterio TI por CPV, con fuente oficial visible.", content, current_path="/", base_path=base_path, access_context=access_context)
 

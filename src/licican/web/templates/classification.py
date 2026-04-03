@@ -25,7 +25,8 @@ def render_classification(reference: str, rules, audited_examples: list[dict[str
     exclusion_badges = "".join(f'<span class="badge risk">{escape(term)}</span>' for term in rules.exclusion_palabras_clave)
     frontier_badges = "".join(f'<span class="badge warn">{escape(term)}</span>' for term in rules.frontera_palabras_clave)
     content = f"""
-      <section class="panel">
+      <section class="classification-view">
+      <section class="panel" id="classification-rules-panel">
         <div class="panel-body">
           <h2>Reglas auditables aplicadas</h2>
           <div class="rule-grid">
@@ -37,17 +38,18 @@ def render_classification(reference: str, rules, audited_examples: list[dict[str
           <p class="muted">Referencia funcional: <code>{escape(reference)}</code></p>
         </div>
       </section>
-      <section class="panel">
+      <section class="panel" id="classification-examples-panel">
         <div class="panel-body">
           <h2>Ejemplos auditados para QA</h2>
           <p>Esta superficie permite revisar inclusiones, exclusiones y <strong>casos frontera</strong> sin depender todavía del catálogo de <code>PB-001</code>. Los expedientes mixtos o de <strong>telecomunicaciones</strong> ambiguas quedan identificados como revisables.</p>
         </div>
-        <div class="table-wrap">
-          <table>
+        <div class="table-wrap classification-table-wrap">
+          <table class="classification-table">
             <thead><tr><th>Ejemplo</th><th>Esperada</th><th>Obtenida</th><th>Coincidencias</th><th>Trazabilidad funcional</th></tr></thead>
             <tbody>{example_rows}</tbody>
           </table>
         </div>
+      </section>
       </section>
     """
     return page_template(

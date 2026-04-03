@@ -17,22 +17,24 @@ def render_permissions_matrix(payload: dict[str, object], base_path: str = "", a
         for item in payload["matriz"]
     )
     content = f"""
-      <section class="panel">
+      <section class="permissions-view">
+      <section class="panel" id="permissions-summary-panel">
         <div class="panel-body">
           <p><strong>Rol activo:</strong> {escape(str(payload["rol_activo"]))}</p>
           <p><strong>Contexto de usuario:</strong> {escape(str(payload["usuario_activo"]))}</p>
           <p class="muted">La primera iteracion gobierna catalogo, detalle, datos consolidados, alertas, KPIs y la propia matriz de permisos. El pipeline mantiene la misma base de control y queda preparado para ampliaciones posteriores sin redefinir reglas.</p>
         </div>
       </section>
-      <section class="panel">
-        <div class="table-wrap">
-          <table>
+      <section class="panel" id="permissions-matrix-panel">
+        <div class="table-wrap permissions-table-wrap">
+          <table class="permissions-table">
             <thead>
               <tr><th>Rol</th><th>Consulta</th><th>Gestion</th><th>Gobierno</th></tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
         </div>
+      </section>
       </section>
     """
     return page_template(

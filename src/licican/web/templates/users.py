@@ -16,68 +16,77 @@ def render_users(
     status_message: str | None = None,
     access_context: AccessContext | None = None,
 ) -> str:
-    summary = payload["summary"]
     filters = payload["filtros_activos"]
     available_filters = payload["filtros_disponibles"]
     pagination = payload["paginacion"]
     selected_user = payload.get("usuario_seleccionado")
     user_rows = [_render_user_row(base_path, user) for user in payload["usuarios"]]
-    users_table = render_table(
-        ["Nombre completo", "Email", "Rol principal", "Areas / modulos / superficies", "Estado", "Ultimo acceso", "Acciones"],
-        user_rows,
-        "Todavia no hay usuarios que mostrar con los filtros activos.",
-    )
+    users_table = _render_users_table(user_rows)
+    selected_user_panel = _render_selected_user_section(base_path, selected_user)
+    selected_user_block = ""
+    if selected_user_panel:
+        selected_user_block = f"""
+        <section class="panel" id="users-selected-panel">
+          <div class="panel-body">
+            {_status_note_div("La fecha de alta puede generarse automaticamente durante la creacion.", "ok")}
+            {selected_user_panel}
+          </div>
+        </section>
+        """
 
     content = f"""
-      <div class="note">
-        <strong>Gestion administrativa de cuentas</strong><br />
-        Modulo de backoffice para administrar cuentas, roles, permisos y accesos con trazabilidad funcional visible.
-      </div>
-      <div class="panel">
-        <h2>Filtros</h2>
-        <form method="get" action="{escape(build_url(base_path, '/usuarios'))}">
-          <div class="filters">
-            <div><label for="busqueda">Busqueda</label><input id="busqueda" name="busqueda" type="text" value="{escape(str(filters.get('busqueda', '')))}" placeholder="Nombre, apellidos, email o identificador" /></div>
-            <div><label for="estado">Estado</label><select id="estado" name="estado"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("estado") == item else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
-            <div><label for="rol">Rol</label><select id="rol" name="rol"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("rol") == item else '') + f'>{escape(item)}</option>' for item in available_filters["roles"])}</select></div>
-            <div><label for="superficie">Area / modulo / superficie</label><select id="superficie" name="superficie"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("superficie") == item else '') + f'>{escape(item)}</option>' for item in available_filters["superficies"])}</select></div>
+      <section class="users-view" aria-label="Gestion de usuarios">
+        <section class="panel" id="users-filters-panel">
+          <div class="panel-body">
+            <h2>Filtros</h2>
+            <form method="get" action="{escape(build_url(base_path, '/usuarios'))}">
+              <div class="filters">
+                <div><label for="busqueda">Busqueda</label><input id="busqueda" name="busqueda" type="text" value="{escape(str(filters.get('busqueda', '')))}" placeholder="Nombre, apellidos, email o identificador" /></div>
+                <div><label for="estado">Estado</label><select id="estado" name="estado"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("estado") == item else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
+                <div><label for="rol">Rol</label><select id="rol" name="rol"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("rol") == item else '') + f'>{escape(item)}</option>' for item in available_filters["roles"])}</select></div>
+                <div><label for="superficie">Area / modulo / superficie</label><select id="superficie" name="superficie"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("superficie") == item else '') + f'>{escape(item)}</option>' for item in available_filters["superficies"])}</select></div>
+              </div>
+              <div class="filter-actions">
+                <button type="submit">Aplicar filtros</button>
+                <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Limpiar filtros</a>
+              </div>
+            </form>
+            {_filter_badges(filters)}
+            {_status_note_div(validation_error, "warn")}
+            {_status_note_div(status_message, "ok")}
           </div>
-          <div class="filter-actions">
-            <button type="submit">Aplicar filtros</button>
-            <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Limpiar filtros</a>
+        </section>
+        <section class="panel" id="users-create-panel">
+          <div class="panel-body">
+            <h2>Nuevo usuario</h2>
+            <form method="post" action="{escape(build_url(base_path, '/usuarios'))}">
+              <div class="filters">
+                <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
+                <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
+                <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
+                <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in available_filters["roles"])}</select></div>
+                <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
+                <div><label for="nuevas_superficies">Areas / modulos / superficies</label><input id="nuevas_superficies" name="superficies" type="text" placeholder="Catalogo, Alertas, Usuarios" /></div>
+              </div>
+              <label for="nuevas_observaciones">Observaciones internas</label>
+              <textarea id="nuevas_observaciones" name="observaciones_internas" rows="3" placeholder="Notas internas opcionales"></textarea>
+              <div class="filter-actions"><button type="submit">Crear usuario</button></div>
+            </form>
           </div>
-        </form>
-        {_filter_badges(filters)}
-        {_status_note_div(validation_error, "warn")}
-        {_status_note_div(status_message, "ok")}
-      </div>
-      <div class="panel">
-        <h2>Nuevo usuario</h2>
-        <form method="post" action="{escape(build_url(base_path, '/usuarios'))}">
-          <div class="filters">
-            <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
-            <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
-            <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
-            <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in available_filters["roles"])}</select></div>
-            <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
-            <div><label for="nuevas_superficies">Areas / modulos / superficies</label><input id="nuevas_superficies" name="superficies" type="text" placeholder="Catalogo, Alertas, Usuarios" /></div>
+        </section>
+        {selected_user_block}
+        <section class="panel" id="users-table-panel">
+          <div class="panel-body users-table-panel-body">
+            <div class="pagination-status">
+              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+            </div>
+            {_render_pagination(base_path, filters, pagination)}
+            {users_table}
+            {_render_pagination(base_path, filters, pagination)}
           </div>
-          <label for="nuevas_observaciones">Observaciones internas</label>
-          <textarea id="nuevas_observaciones" name="observaciones_internas" rows="3" placeholder="Notas internas opcionales"></textarea>
-          <div class="filter-actions"><button type="submit">Crear usuario</button></div>
-        </form>
-      </div>
-      {_status_note_div("La fecha de alta puede generarse automaticamente durante la creacion.", "ok")}
-      {_render_selected_user_section(base_path, selected_user)}
-      <div class="panel">
-        <div class="pagination-status">
-          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-        </div>
-        {_render_pagination(base_path, filters, pagination)}
-        {users_table}
-        {_render_pagination(base_path, filters, pagination)}
-      </div>
+        </section>
+      </section>
     """
     return page_template(
         "Licican | Gestion de usuarios",
@@ -110,6 +119,31 @@ def _status_note_div(message: str | None, tone: str = "ok") -> str:
     return f'<div class="{class_name}">{escape(message)}</div>'
 
 
+def _render_users_table(user_rows: list[str]) -> str:
+    if not user_rows:
+        return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
+
+    headers = ["Nombre completo", "Email", "Rol principal", "Areas / modulos / superficies", "Estado", "Ultimo acceso", "Acciones"]
+    header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
+    return f"""
+      <div class="table-wrap users-table-wrap">
+        <table class="users-table">
+          <colgroup>
+            <col class="users-col users-col-name" />
+            <col class="users-col users-col-email" />
+            <col class="users-col users-col-role" />
+            <col class="users-col users-col-scopes" />
+            <col class="users-col users-col-state" />
+            <col class="users-col users-col-last-access" />
+            <col class="users-col users-col-actions" />
+          </colgroup>
+          <thead><tr>{header_html}</tr></thead>
+          <tbody>{''.join(user_rows)}</tbody>
+        </table>
+      </div>
+    """
+
+
 def _render_selected_user_section(base_path: str, selected_user: dict[str, object] | None) -> str:
     if selected_user is None:
         return ""
@@ -128,8 +162,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         f'<option value="{escape(state)}"' + (" selected" if selected_user["estado"] == state else "") + f'>{escape(state)}</option>'
         for state in _state_options()
     )
-    content = f"""
-      <div class="panel">
+    return f"""
         <h2>Detalle y edicion</h2>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(str(selected_user["ultimo_acceso"] or "Nunca"))}</p>
@@ -150,9 +183,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         </form>
         <h3>Historial de cambios</h3>
         {history_table}
-      </div>
     """
-    return content
 
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:

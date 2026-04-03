@@ -80,6 +80,8 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Catálogo inicial de oportunidades TI de Canarias", html)
+        self.assertIn('id="catalog-filters-panel"', html)
+        self.assertIn('id="catalog-results-panel"', html)
         self.assertIn("Servicio cloud para copias de seguridad y continuidad de sistemas corporativos", html)
         self.assertIn("Ver oferta concreta", html)
         self.assertIn("Publicación oficial", html)
@@ -308,6 +310,8 @@ class ApplicationTests(unittest.TestCase):
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn('id="dataset-summary-panel"', html)
+        self.assertIn('class="table-wrap dataset-table-wrap"', html)
         self.assertIn("Licitaciones TI Canarias", html)
         self.assertIn("Detalle Lotes", html)
         self.assertIn("Adjudicaciones", html)
@@ -343,11 +347,18 @@ class ApplicationTests(unittest.TestCase):
             "/datos-consolidados/adjudicaciones/2565-2024-pt1-pccntr-4934579"
         )
 
+        licitacion_html = licitacion_body.decode("utf-8")
+        adjudicacion_html = adjudicacion_body.decode("utf-8")
+
         self.assertEqual("200 OK", licitacion_status)
-        self.assertIn("Fichero .atom origen", licitacion_body.decode("utf-8"))
-        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", licitacion_body.decode("utf-8"))
+        self.assertIn('id="detail-licitacion-panel"', licitacion_html)
+        self.assertIn('class="table-wrap detail-table-wrap"', licitacion_html)
+        self.assertIn("Fichero .atom origen", licitacion_html)
+        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", licitacion_html)
         self.assertEqual("200 OK", adjudicacion_status)
-        self.assertIn("Fichero .atom origen", adjudicacion_body.decode("utf-8"))
+        self.assertIn('id="detail-adjudicacion-panel"', adjudicacion_html)
+        self.assertIn('class="table-wrap detail-table-wrap"', adjudicacion_html)
+        self.assertIn("Fichero .atom origen", adjudicacion_html)
 
     def test_coverage_page_remains_available_on_dedicated_route(self) -> None:
         status, headers, body = invoke_app("/cobertura-fuentes")
@@ -355,6 +366,8 @@ class ApplicationTests(unittest.TestCase):
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn('id="coverage-summary-panel"', html)
+        self.assertIn('class="table-wrap coverage-table-wrap"', html)
         self.assertIn("Cobertura inicial de fuentes oficiales del MVP", html)
         self.assertIn("Gobierno de Canarias", html)
 
@@ -396,6 +409,9 @@ class ApplicationTests(unittest.TestCase):
 
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn('id="classification-rules-panel"', html)
+        self.assertIn('id="classification-examples-panel"', html)
+        self.assertIn('class="table-wrap classification-table-wrap"', html)
         self.assertIn("Clasificación TI auditable", html)
         self.assertIn("Casos frontera", html)
         self.assertIn("telecomunicaciones", html)
@@ -432,6 +448,7 @@ class ApplicationTests(unittest.TestCase):
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn('id="pipeline-summary-panel"', html)
         self.assertIn("Pipeline de seguimiento de oportunidades", html)
         self.assertIn("Todavía no hay oportunidades guardadas en el pipeline.", html)
         self.assertIn('class="nav-link active" href="/licican/pipeline"', html)
@@ -598,6 +615,7 @@ class ApplicationTests(unittest.TestCase):
 
         self.assertEqual("200 OK", page_status)
         self.assertEqual("text/html; charset=utf-8", page_headers["Content-Type"])
+        self.assertIn('id="pipeline-summary-panel"', html)
         self.assertIn("pcsp-cabildo-licencias-2026", html)
         self.assertIn("Evaluando", html)
         self.assertIn("Fuente oficial", html)
@@ -615,7 +633,11 @@ class ApplicationTests(unittest.TestCase):
             kpi_status, _, kpi_body = invoke_app("/kpis")
 
         self.assertEqual("200 OK", admin_status)
-        self.assertIn("Matriz funcional de roles y permisos", admin_body.decode("utf-8"))
+        admin_html = admin_body.decode("utf-8")
+        self.assertIn('id="permissions-summary-panel"', admin_html)
+        self.assertIn('id="permissions-matrix-panel"', admin_html)
+        self.assertIn('class="table-wrap permissions-table-wrap"', admin_html)
+        self.assertIn("Matriz funcional de roles y permisos", admin_html)
         self.assertEqual("200 OK", kpi_status)
         self.assertIn("KPIs operativos visibles por rol", kpi_body.decode("utf-8"))
 
@@ -735,8 +757,14 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Gestion de usuarios", html)
         self.assertNotIn("Usuarios totales", html)
+        self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("Ana Lopez", html)
         self.assertIn("Nuevo usuario", html)
+        self.assertIn('id="users-filters-panel"', html)
+        self.assertIn('id="users-create-panel"', html)
+        self.assertIn('id="users-table-panel"', html)
+        self.assertIn('class="table-wrap users-table-wrap"', html)
+        self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
 
