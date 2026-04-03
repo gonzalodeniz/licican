@@ -44,7 +44,7 @@ class UsersModuleTests(unittest.TestCase):
                 nombre="Eva",
                 apellidos="Santos",
                 email="eva.santos@licican.local",
-                rol_principal="responsable",
+                rol_principal="manager",
             )
             reference, users = load_users()
 
@@ -62,24 +62,35 @@ class UsersModuleTests(unittest.TestCase):
                 nombre="Eva",
                 apellidos="Santos",
                 email="eva.santos@licican.local",
-                rol_principal="responsable",
+                rol_principal="manager",
             )
-
             with self.assertRaisesRegex(ValueError, "El email no puede duplicarse"):
                 create_user(
                     nombre="Eva",
                     apellidos="Santos",
                     email="eva.santos@licican.local",
-                    rol_principal="responsable",
+                    rol_principal="manager",
                 )
 
     def test_change_state_blocks_removing_last_active_admin(self) -> None:
         state = SeededUsersState.seed()
+        state.users["usr-005"] = {
+            "id": "usr-005",
+            "nombre": "Sonia",
+            "apellidos": "Admin",
+            "email": "sonia.admin@licican.local",
+            "rol_principal": "administrador",
+            "estado": "activo",
+            "observaciones_internas": "Cuenta administrativa secundaria.",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "invitacion_pendiente": False,
+        }
         with self._patch_users_db(state):
             change_user_state("usr-001", "inactivo")
 
             with self.assertRaisesRegex(ValueError, "sin ningun usuario administrador activo"):
-                change_user_state("usr-002", "inactivo")
+                change_user_state("usr-005", "inactivo")
 
     def test_resend_invitation_requires_pending_user(self) -> None:
         with self._patch_users_db():
@@ -115,7 +126,7 @@ class UsersModuleTests(unittest.TestCase):
                 nombre="Eva",
                 apellidos="Santos",
                 email="eva.santos@licican.local",
-                rol_principal="responsable",
+                rol_principal="manager",
             )
             change_user_state("usr-004", "activo")
             updated = resend_invitation("usr-003")

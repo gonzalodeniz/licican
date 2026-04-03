@@ -473,7 +473,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("La alerta necesita al menos un criterio funcional", html)
 
     def test_reader_role_hides_operational_navigation_and_blocks_alert_access(self) -> None:
-        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+        with patch.dict(os.environ, {"LICICAN_ROLE": "invitado"}, clear=False):
             status, _, body = invoke_app("/")
             alerts_status, alerts_headers, alerts_body = invoke_app("/alertas")
 
@@ -629,7 +629,7 @@ class ApplicationTests(unittest.TestCase):
     def test_admin_can_access_permissions_page_and_collaborator_kpis(self) -> None:
         with patch.dict(os.environ, {"LICICAN_ROLE": "administrador"}, clear=False):
             admin_status, _, admin_body = invoke_app("/permisos")
-        with patch.dict(os.environ, {"LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"}, clear=False):
+        with patch.dict(os.environ, {"LICICAN_ROLE": "manager", "LICICAN_USER_ID": "manager-1"}, clear=False):
             kpi_status, _, kpi_body = invoke_app("/kpis")
 
         self.assertEqual("200 OK", admin_status)
@@ -786,7 +786,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("panel.hidden = true", html)
 
     def test_users_page_denied_to_reader_role(self) -> None:
-        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+        with patch.dict(os.environ, {"LICICAN_ROLE": "invitado"}, clear=False):
             status, headers, body = invoke_app("/usuarios")
 
         self.assertEqual("403 Forbidden", status)
@@ -800,7 +800,7 @@ class ApplicationTests(unittest.TestCase):
                 "nombre": "Eva",
                 "apellidos": "Santos",
                 "email": "eva.santos@licican.local",
-                "rol_principal": "responsable",
+                "rol_principal": "manager",
                 "estado": "pendiente",
                 "observaciones_internas": "Alta desde pruebas",
             }

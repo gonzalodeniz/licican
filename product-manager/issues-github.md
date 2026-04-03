@@ -142,18 +142,19 @@ Backlog: PB-013 Modelo funcional de roles y permisos
 Historia de usuario: HU-13 Gestionar acceso por rol a las acciones del sistema
 Caso de uso: CU-13 Aplicar permisos segun rol en consulta y gestion
 Criterios de aceptacion:
-1. El sistema distingue al menos los roles `Administrador`, `Colaborador` y `Lector/Invitado`.
+1. El sistema distingue al menos los roles `Administrador`, `Manager`, `Colaborador` e `Invitado`.
 2. `Administrador` puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles, ademas de cualquier accion visible para los demas roles.
-3. `Colaborador` puede consultar licitaciones, crear y editar sus alertas propias y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
-4. `Lector/Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
-5. Si una superficie futura como pipeline aun no esta disponible, la primera iteracion de permisos no queda bloqueada por ello y deja preparada la extension de la misma matriz de permisos.
-6. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
-7. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
+3. `Manager` puede consultar licitaciones, crear y editar sus alertas propias, operar su pipeline propio y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
+4. `Colaborador` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
+5. `Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
+6. Si una superficie futura como pipeline aun no esta disponible, la primera iteracion de permisos no queda bloqueada por ello y deja preparada la extension de la misma matriz de permisos.
+7. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
+8. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.
 Dependencias: PB-010 y PB-004
 Estado operativo: cerrado
 
 Contexto funcional:
-- La especificacion funcional consolidada ya define una matriz de permisos para `Administrador`, `Colaborador` y `Lector/Invitado`, pero ese alcance no estaba todavia trazado como issue ejecutable.
+- La especificacion funcional consolidada ya define una matriz de permisos para `Administrador`, `Manager`, `Colaborador` e `Invitado`, pero ese alcance no estaba todavia trazado como issue ejecutable.
 - Producto necesita convertir esa definicion en trabajo observable antes de ampliar gestion multiusuario o administracion operativa.
 - Esta primera iteracion debe gobernar superficies ya visibles del producto; `PB-005` no bloquea este corte y heredara despues la misma matriz funcional.
 

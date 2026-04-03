@@ -10,7 +10,7 @@ Definir el funcionamiento funcional y visual del modulo de `Gestion de usuarios`
 - Los cambios de acceso y permisos deben quedar auditados para soporte, seguridad y trazabilidad administrativa.
 
 ## 3. Objetivo funcional
-Permitir a administradores de plataforma, administradores funcionales y responsables con permisos suficientes gestionar cuentas de usuario de extremo a extremo: alta, edicion, activacion, desactivacion, baja logica, reasignacion de roles, reenvio de invitacion, reinicio de acceso y consulta de trazabilidad.
+Permitir a usuarios con rol `administrador` o `manager` y permisos suficientes gestionar cuentas de usuario de extremo a extremo: alta, edicion, activacion, desactivacion, baja logica, reasignacion de roles, reenvio de invitacion, reinicio de acceso y consulta de trazabilidad.
 
 ## 4. Alcance
 
@@ -107,7 +107,7 @@ Campos obligatorios o visibles segun contexto:
 
 Reglas de formulario:
 - El estado debe ser visible y controlado por el sistema cuando la politica lo requiera.
-- El rol debe quedar claramente identificado como rol principal.
+- El rol debe quedar claramente identificado como rol principal y usar una de estas etiquetas: `administrador`, `manager`, `colaborador` o `invitado`.
 - La fecha de alta puede ser de solo lectura si el sistema la asigna automaticamente.
 
 ## 9. Validaciones

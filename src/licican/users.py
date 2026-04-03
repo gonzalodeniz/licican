@@ -12,11 +12,10 @@ from licican.config import resolve_database_url
 DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios"
 USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado", "baja logica")
 USER_ROLES = (
-    "administrador de plataforma",
-    "administrador funcional",
-    "responsable",
+    "administrador",
+    "manager",
     "colaborador",
-    "lector",
+    "invitado",
 )
 USERS_SELECT_SQL = """
 SELECT
@@ -111,10 +110,10 @@ CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
 CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
 INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador de plataforma', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'administrador funcional', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'responsable', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'colaborador', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES
@@ -122,7 +121,7 @@ VALUES
     ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
     ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
     ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
-    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de colaborador.'),
+    ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de invitado.'),
     ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
 ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
 """
@@ -246,7 +245,15 @@ def _normalize_email(raw: str) -> str:
 
 
 def _normalize_role(raw: str) -> str:
-    return raw.strip().lower()
+    normalized = raw.strip().lower()
+    aliases = {
+        "administrador de plataforma": "administrador",
+        "administrador funcional": "manager",
+        "responsable": "manager",
+        "lector": "invitado",
+        "lector/invitado": "invitado",
+    }
+    return aliases.get(normalized, normalized)
 
 
 def _normalize_state(raw: str) -> str:
@@ -254,7 +261,7 @@ def _normalize_state(raw: str) -> str:
 
 
 def _is_admin_role(role: str) -> bool:
-    return _normalize_role(role).startswith("administrador")
+    return _normalize_role(role) == "administrador"
 
 
 def _connect():
@@ -444,9 +451,10 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
+    present_roles = {user.rol_principal for user in users}
     return {
         "estados": list(USER_STATUSES),
-        "roles": sorted({user.rol_principal for user in users}) or list(USER_ROLES),
+        "roles": [role for role in USER_ROLES if role in present_roles] or list(USER_ROLES),
     }
 
 

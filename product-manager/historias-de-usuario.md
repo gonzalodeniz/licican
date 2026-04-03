@@ -245,10 +245,11 @@
   para proteger la gestion de alertas, pipeline y administracion sin degradar la experiencia de consulta.
 - Criterios de aceptacion:
   1. Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
-  2. Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas propias y no accede a la administracion global.
-  3. Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
-  4. Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion de permisos, Then la matriz funcional deja preparada su extension sin bloquear la entrega actual.
-  5. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
+  2. Given un usuario con rol `Manager`, When accede a la aplicacion, Then puede gestionar sus alertas propias y su pipeline propio dentro de las superficies ya disponibles.
+  3. Given un usuario con rol `Colaborador`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  4. Given un usuario con rol `Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  5. Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion de permisos, Then la matriz funcional deja preparada su extension sin bloquear la entrega actual.
+  6. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 - Dependencias funcionales: PB-010, PB-004
 - Prioridad: P1
 - Estado: `cerrado`
@@ -279,7 +280,7 @@
 - Caso de uso relacionado: CU-15
 - Issue relacionado: #16
 - Historia:
-  Como administradora u operador de datos,
+  Como administrador u operador de datos,
   quiero configurar la antiguedad de conservacion y archivado de las licitaciones,
   para controlar cuanto tiempo permanecen activas en la base de datos antes de moverlas a archivo.
 - Criterios de aceptacion:
@@ -298,7 +299,7 @@
 - Caso de uso relacionado: CU-16
 - Issue relacionado: #28
 - Historia:
-  Como administrador de plataforma, administrador funcional o responsable con permisos suficientes,
+  Como administrador o manager con permisos suficientes,
   quiero poder gestionar cuentas de usuario, roles, permisos y accesos desde un unico modulo,
   para controlar de forma trazable quien puede operar en Licican y con que alcance.
 - Alcance funcional acotado:

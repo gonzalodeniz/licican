@@ -6,7 +6,7 @@ Definir, en un unico artefacto, la estructura funcional de mayor a menor abstrac
 ## Supuestos de alcance
 - Este documento toma como base la vision y el backlog funcional ya vigentes en `product-manager/`.
 - Las funcionalidades cubiertas son las actualmente trazadas en `PB-001` a `PB-013`.
-- El modelo de permisos se define para tres roles de uso del producto: `Administrador`, `Colaborador` y `Lector/Invitado`.
+- El modelo de permisos se define para cuatro roles de uso del producto: `Administrador`, `Manager`, `Colaborador` e `Invitado`.
 - Cuando una capacidad ya exista en el backlog como decision funcional cerrada, aqui se consolida sin reabrir su definicion.
 
 ## 1. Epicas
@@ -199,8 +199,9 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 - Criterios de aceptacion:
   - Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
-  - Given un usuario con rol `Colaborador`, When accede a sus superficies de trabajo, Then puede gestionar solo sus alertas propias sin acceder a administracion global.
-  - Given un usuario con rol `Lector/Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given un usuario con rol `Manager`, When accede a sus superficies de trabajo, Then puede gestionar sus alertas propias y su pipeline propio sin acceder a administracion global.
+  - Given un usuario con rol `Colaborador`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given un usuario con rol `Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
   - Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion, Then la matriz de permisos deja preparada su extension sin bloquear la entrega actual.
   - Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 
@@ -208,7 +209,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-01 Descubrir licitaciones TI en el catalogo
 - Actor principal:
-  - Usuario registrado o lector con acceso a consulta.
+  - Usuario registrado o invitado con acceso a consulta.
 - Objetivo:
   - Identificar oportunidades TI relevantes desde una unica vista.
 - Precondiciones:
@@ -228,7 +229,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-02 Revisar detalle de una licitacion
 - Actor principal:
-  - Usuario registrado o lector con acceso a consulta.
+  - Usuario registrado o invitado con acceso a consulta.
 - Objetivo:
   - Evaluar si la licitacion merece seguimiento.
 - Precondiciones:
@@ -246,7 +247,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-03 Filtrar licitaciones por criterios de negocio
 - Actor principal:
-  - Usuario registrado o lector con acceso a consulta.
+  - Usuario registrado o invitado con acceso a consulta.
 - Objetivo:
   - Reducir ruido en el listado de oportunidades.
 - Precondiciones:
@@ -265,7 +266,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-04 Configurar y mantener alertas
 - Actor principal:
-  - Administrador o colaborador.
+  - Administrador o manager.
 - Objetivo:
   - Guardar criterios persistentes de interes para detectar nuevas oportunidades.
 - Precondiciones:
@@ -286,7 +287,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-05 Gestionar pipeline de oportunidades
 - Actor principal:
-  - Administrador o colaborador.
+  - Administrador o manager.
 - Objetivo:
   - Hacer seguimiento individual de oportunidades guardadas.
 - Precondiciones:
@@ -305,7 +306,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-06 Priorizar y gobernar fuentes oficiales reales
 - Actor principal:
-  - Product Manager o administrador funcional.
+  - Product Manager o manager.
 - Objetivo:
   - Decidir que fuentes reales deben entrar primero en recopilacion.
 - Precondiciones:
@@ -345,7 +346,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-08 Consultar licitaciones, lotes y adjudicaciones consolidadas
 - Actor principal:
-  - Usuario registrado o lector con acceso a consulta.
+  - Usuario registrado o invitado con acceso a consulta.
 - Objetivo:
   - Revisar la informacion consolidada en vistas funcionales contrastables.
 - Precondiciones:
@@ -383,7 +384,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 
 ### CU-10 Revisar indicadores de producto
 - Actor principal:
-  - Product Manager o administrador.
+  - Product Manager o manager.
 - Objetivo:
   - Tomar decisiones posteriores apoyadas en indicadores.
 - Precondiciones:
@@ -457,30 +458,30 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 - RB-23 La navegacion principal debe mantener una variante usable en escritorio y en anchos reducidos.
 - RB-24 Las opciones no disponibles no pueden mostrarse como operativas sin senalizacion explicita.
 - RB-25 Deben existir KPIs minimos de cobertura, adopcion y uso, aunque su medicion completa se habilite en una iteracion posterior.
-- RB-26 El modelo de permisos debe impedir a `Lector/Invitado` crear o modificar entidades.
+- RB-26 El modelo de permisos debe impedir a `Invitado` crear o modificar entidades.
 
 ## 6. Modelo de roles y permisos
 
-| Accion del sistema | Administrador | Colaborador | Lector/Invitado | Nota |
+| Accion del sistema | Administrador | Manager | Colaborador | Invitado | Nota |
 |---|---|---|---|---|
-| Acceder al catalogo de licitaciones | ✅ | ✅ | ✅ | Consulta basica permitida para todos los roles definidos. |
-| Ver detalle de una licitacion | ✅ | ✅ | ✅ | Incluye consulta de campos visibles y origen oficial expuesto. |
-| Filtrar licitaciones | ✅ | ✅ | ✅ | No altera datos del sistema. |
-| Consultar licitaciones, lotes y adjudicaciones consolidadas | ✅ | ✅ | ✅ | Consulta de vistas funcionales consolidadas. |
-| Ver fichero `.atom` origen en detalle | ✅ | ✅ | ✅ | Visible como metadato de trazabilidad, no como capacidad de administracion tecnica. |
-| Crear alerta | ✅ | ✅ | ❌ | Requiere sesion y capacidad de gestion personal. |
-| Editar alerta propia | ✅ | ✅ | ❌ | Limitado a alertas del propio usuario para colaboradores. |
-| Desactivar alerta propia | ✅ | ✅ | ❌ | Limitado a alertas del propio usuario para colaboradores. |
-| Editar alertas de otros usuarios | ✅ | ❌ | ❌ | Solo administracion global. |
-| Guardar oportunidad en pipeline | ✅ | ✅ | ❌ | Requiere sesion y espacio personal de trabajo. |
-| Cambiar estado de oportunidad en pipeline propio | ✅ | ✅ | ❌ | Limitado a registros propios para colaboradores. |
-| Ver pipeline propio | ✅ | ✅ | ❌ | Requiere sesion. |
-| Ver pipeline de otros usuarios | ✅ | ❌ | ❌ | Solo administracion global si el producto lo habilita. |
-| Configurar fuentes oficiales priorizadas | ✅ | ❌ | ❌ | Capacidad funcional de gobierno del producto. |
-| Ajustar reglas de relevancia TI | ✅ | ❌ | ❌ | Cambio de gobierno funcional con impacto transversal. |
-| Consultar KPIs de producto | ✅ | ⚠️ | ❌ | Permitido a colaborador solo si se habilita vista operativa sin datos sensibles de negocio. |
-| Gestionar roles y permisos | ✅ | ❌ | ❌ | Solo administracion. |
-| Ver modulos marcados como `proximamente` | ✅ | ✅ | ✅ | Visibilidad permitida, uso operativo no disponible. |
+| Acceder al catalogo de licitaciones | ✅ | ✅ | ✅ | ✅ | Consulta basica permitida para todos los roles definidos. |
+| Ver detalle de una licitacion | ✅ | ✅ | ✅ | ✅ | Incluye consulta de campos visibles y origen oficial expuesto. |
+| Filtrar licitaciones | ✅ | ✅ | ✅ | ✅ | No altera datos del sistema. |
+| Consultar licitaciones, lotes y adjudicaciones consolidadas | ✅ | ✅ | ✅ | ✅ | Consulta de vistas funcionales consolidadas. |
+| Ver fichero `.atom` origen en detalle | ✅ | ✅ | ✅ | ✅ | Visible como metadato de trazabilidad, no como capacidad de administracion tecnica. |
+| Crear alerta | ✅ | ✅ | ✅ | ❌ | Requiere sesion y capacidad de gestion personal. |
+| Editar alerta propia | ✅ | ✅ | ✅ | ❌ | Limitado a alertas del propio usuario para colaboradores y managers. |
+| Desactivar alerta propia | ✅ | ✅ | ✅ | ❌ | Limitado a alertas del propio usuario para colaboradores y managers. |
+| Editar alertas de otros usuarios | ✅ | ❌ | ❌ | ❌ | Solo administracion global. |
+| Guardar oportunidad en pipeline | ✅ | ✅ | ✅ | ❌ | Requiere sesion y espacio personal de trabajo. |
+| Cambiar estado de oportunidad en pipeline propio | ✅ | ✅ | ✅ | ❌ | Limitado a registros propios para colaboradores y managers. |
+| Ver pipeline propio | ✅ | ✅ | ✅ | ❌ | Requiere sesion. |
+| Ver pipeline de otros usuarios | ✅ | ❌ | ❌ | ❌ | Solo administracion global si el producto lo habilita. |
+| Configurar fuentes oficiales priorizadas | ✅ | ❌ | ❌ | ❌ | Capacidad funcional de gobierno del producto. |
+| Ajustar reglas de relevancia TI | ✅ | ❌ | ❌ | ❌ | Cambio de gobierno funcional con impacto transversal. |
+| Consultar KPIs de producto | ✅ | ✅ | ⚠️ | ❌ | Permitido a manager y a colaborador solo si se habilita vista operativa sin datos sensibles de negocio. |
+| Gestionar roles y permisos | ✅ | ❌ | ❌ | ❌ | Solo administracion. |
+| Ver modulos marcados como `proximamente` | ✅ | ✅ | ✅ | ✅ | Visibilidad permitida, uso operativo no disponible. |
 
 ## 7. Trazabilidad resumida con backlog vigente
 

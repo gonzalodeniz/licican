@@ -5,23 +5,30 @@ from dataclasses import dataclass
 from typing import Mapping
 
 
-ROLE_ADMIN = "administrador"
+ROLE_ADMINISTRATOR = "administrador"
+ROLE_MANAGER = "manager"
 ROLE_COLLABORATOR = "colaborador"
-ROLE_READER = "lector"
+ROLE_INVITED = "invitado"
 
-DEFAULT_ROLE = ROLE_ADMIN
+# Compatibilidad temporal con nombres antiguos.
+ROLE_ADMIN = ROLE_ADMINISTRATOR
+ROLE_READER = ROLE_INVITED
+
+DEFAULT_ROLE = ROLE_ADMINISTRATOR
 DEFAULT_USER_IDS = {
-    ROLE_ADMIN: "administrador-demo",
+    ROLE_ADMINISTRATOR: "administrador-demo",
+    ROLE_MANAGER: "manager-demo",
     ROLE_COLLABORATOR: "colaborador-demo",
-    ROLE_READER: "lector-demo",
+    ROLE_INVITED: "invitado-demo",
 }
 ROLE_LABELS = {
-    ROLE_ADMIN: "Administrador",
+    ROLE_ADMINISTRATOR: "Administrador",
+    ROLE_MANAGER: "Manager",
     ROLE_COLLABORATOR: "Colaborador",
-    ROLE_READER: "Lector/Invitado",
+    ROLE_INVITED: "Invitado",
 }
 CAPABILITY_MATRIX = {
-    ROLE_ADMIN: frozenset(
+    ROLE_ADMINISTRATOR: frozenset(
         {
             "view_catalog",
             "view_dataset",
@@ -35,7 +42,7 @@ CAPABILITY_MATRIX = {
             "manage_users",
         }
     ),
-    ROLE_COLLABORATOR: frozenset(
+    ROLE_MANAGER: frozenset(
         {
             "view_catalog",
             "view_dataset",
@@ -46,7 +53,15 @@ CAPABILITY_MATRIX = {
             "view_kpis",
         }
     ),
-    ROLE_READER: frozenset(
+    ROLE_COLLABORATOR: frozenset(
+        {
+            "view_catalog",
+            "view_dataset",
+            "view_alerts",
+            "view_pipeline",
+        }
+    ),
+    ROLE_INVITED: frozenset(
         {
             "view_catalog",
             "view_dataset",
@@ -64,22 +79,34 @@ class AccessContext:
 
     @property
     def is_admin(self) -> bool:
-        return self.role == ROLE_ADMIN
+        return self.role == ROLE_ADMINISTRATOR
+
+    @property
+    def is_manager(self) -> bool:
+        return self.role == ROLE_MANAGER
 
     @property
     def scope_label(self) -> str:
-        return "global" if self.is_admin else "propio"
+        if self.is_admin:
+            return "global"
+        if self.is_manager:
+            return "operativo"
+        return "propio"
 
 
 def _normalize_role(raw_role: str | None) -> str:
     normalized = (raw_role or "").strip().lower()
     aliases = {
-        "admin": ROLE_ADMIN,
-        "administrador": ROLE_ADMIN,
+        "admin": ROLE_ADMINISTRATOR,
+        "administrador": ROLE_ADMINISTRATOR,
+        "administrador de plataforma": ROLE_ADMINISTRATOR,
+        "administrador funcional": ROLE_MANAGER,
+        "responsable": ROLE_MANAGER,
+        "manager": ROLE_MANAGER,
         "colaborador": ROLE_COLLABORATOR,
-        "lector": ROLE_READER,
-        "lector/invitado": ROLE_READER,
-        "invitado": ROLE_READER,
+        "lector": ROLE_INVITED,
+        "lector/invitado": ROLE_INVITED,
+        "invitado": ROLE_INVITED,
     }
     return aliases.get(normalized, DEFAULT_ROLE)
 
