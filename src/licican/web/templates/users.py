@@ -7,6 +7,7 @@ from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.components import render_badges, render_state_badge, render_table
+from licican.shared.text import format_iso_datetime
 
 
 def render_users(
@@ -169,7 +170,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         return ""
 
     history_rows = "".join(
-        f"<tr><td>{escape(str(item['fecha']))}</td><td>{escape(str(item['accion']))}</td><td>{escape(str(item['detalle']))}</td></tr>"
+        f"<tr><td>{escape(_format_user_datetime(item['fecha']))}</td><td>{escape(str(item['accion']))}</td><td>{escape(str(item['detalle']))}</td></tr>"
         for item in selected_user["historial"]
     )
     history_table = render_table(["Fecha", "Accion", "Detalle"], [history_rows], "Todavia no hay historial disponible.") if history_rows else '<section class="note">Todavia no hay historial disponible.</section>'
@@ -184,7 +185,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     return f"""
         <h2>Detalle y edicion</h2>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
-        <p><strong>Ultimo acceso:</strong> {escape(str(selected_user["ultimo_acceso"] or "Nunca"))}</p>
+        <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
           <div class="filters">
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
@@ -195,7 +196,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
           </div>
           <label for="editar_observaciones">Observaciones internas</label>
           <textarea id="editar_observaciones" name="observaciones_internas" rows="3">{escape(str(selected_user["observaciones_internas"]))}</textarea>
-          <p class="muted">Fecha de alta: {escape(str(selected_user["fecha_alta"]))}</p>
+          <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
           <div class="filter-actions"><button type="submit">Guardar cambios</button></div>
         </form>
         <h3>Historial de cambios</h3>
@@ -224,7 +225,7 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Email">{escape(str(user["email"]))}</td>'
         f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
-        f'<td data-label="Ultimo acceso">{escape(str(user["ultimo_acceso"] or "Nunca"))}</td>'
+        f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
         f'<td data-label="Acciones"><div class="inline-actions">{"".join(actions)}</div></td>'
         "</tr>"
     )
@@ -256,6 +257,13 @@ def _state_options() -> list[str]:
 
 def _role_options() -> list[str]:
     return ["administrador de plataforma", "administrador funcional", "responsable", "colaborador", "lector"]
+
+
+def _format_user_datetime(value: object | None) -> str:
+    formatted = format_iso_datetime(value)
+    if formatted is None:
+        return "Nunca"
+    return formatted
 
 
 def _render_pagination(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:

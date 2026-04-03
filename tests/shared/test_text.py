@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import unittest
+from datetime import datetime, timezone
 
-from licican.shared.text import clean_text, normalize_optional, normalize_text, slugify
+from licican.shared.text import clean_text, format_iso_datetime, normalize_optional, normalize_text, slugify
 
 
 class TextHelpersTests(unittest.TestCase):
@@ -42,3 +43,9 @@ class TextHelpersTests(unittest.TestCase):
     def test_normalize_optional_returns_none_for_blank_or_none(self) -> None:
         self.assertIsNone(normalize_optional(" \n "))
         self.assertIsNone(normalize_optional(None))
+
+    def test_format_iso_datetime_converts_utc_iso_strings(self) -> None:
+        self.assertEqual("02-04-2026 08:10", format_iso_datetime("2026-04-02T08:10:00Z"))
+
+    def test_format_iso_datetime_converts_datetime_objects(self) -> None:
+        self.assertEqual("02-04-2026 08:10", format_iso_datetime(datetime(2026, 4, 2, 8, 10, tzinfo=timezone.utc)))

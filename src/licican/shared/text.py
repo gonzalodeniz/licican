@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unicodedata
+from datetime import datetime, date, timezone
 
 
 def normalize_text(value: str) -> str:
@@ -40,3 +41,32 @@ def normalize_optional(value: str | None) -> str | None:
     if cleaned is None:
         return None
     return normalize_text(cleaned)
+
+
+def format_iso_datetime(value: str | datetime | date | None) -> str | None:
+    """Convierte un ISO 8601 con hora a `DD-MM-YYYY HH:MM`.
+
+    Si el valor no es un ISO 8601 con componente temporal, se devuelve como texto
+    sin modificar para no alterar otros formatos ya existentes.
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        dt = value.astimezone(timezone.utc) if value.tzinfo is not None else value
+        return dt.strftime("%d-%m-%Y %H:%M")
+    if isinstance(value, date):
+        return value.strftime("%d-%m-%Y")
+
+    cleaned = clean_text(value)
+    if not cleaned:
+        return cleaned
+    if "T" not in cleaned:
+        return cleaned
+
+    try:
+        parsed = datetime.fromisoformat(cleaned.replace("Z", "+00:00"))
+    except ValueError:
+        return cleaned
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(timezone.utc)
+    return parsed.strftime("%d-%m-%Y %H:%M")
