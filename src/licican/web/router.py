@@ -102,7 +102,6 @@ def _parse_user_filters(request: Request) -> UserFilters:
         busqueda=(query.get("busqueda") or [None])[0],
         estado=(query.get("estado") or [None])[0],
         rol=(query.get("rol") or [None])[0],
-        superficie=(query.get("superficie") or [None])[0],
     )
 
 
@@ -173,7 +172,7 @@ def _access_denied_html(request: Request, capability: str) -> str:
       </section>
       <section class="panel">
         <div class="panel-body">
-          <p>La aplicacion mantiene visibles solo las superficies compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
+          <p>La aplicacion mantiene visibles solo las acciones compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
         </div>
       </section>
     """
@@ -329,7 +328,6 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
         "email": (form_data.get("email") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
         "estado": (form_data.get("estado") or ["pendiente"])[0],
-        "superficies": (form_data.get("superficies") or [""])[0],
         "observaciones_internas": (form_data.get("observaciones_internas") or [""])[0],
     }
 
@@ -349,7 +347,6 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
-            superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
         )
@@ -372,7 +369,6 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
-            superficies=str(form_data["superficies"]),
             estado=str(form_data["estado"]),
             observaciones_internas=str(form_data["observaciones_internas"]),
         )

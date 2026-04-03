@@ -801,7 +801,6 @@ class ApplicationTests(unittest.TestCase):
                 "email": "eva.santos@licican.local",
                 "rol_principal": "responsable",
                 "estado": "pendiente",
-                "superficies": "Catalogo, Alertas",
                 "observaciones_internas": "Alta desde pruebas",
             }
         )

@@ -45,7 +45,6 @@ class UsersModuleTests(unittest.TestCase):
                 apellidos="Santos",
                 email="eva.santos@licican.local",
                 rol_principal="responsable",
-                superficies="Catalogo, Alertas",
             )
             reference, users = load_users()
 
@@ -64,7 +63,6 @@ class UsersModuleTests(unittest.TestCase):
                 apellidos="Santos",
                 email="eva.santos@licican.local",
                 rol_principal="responsable",
-                superficies="Catalogo, Alertas",
             )
 
             with self.assertRaisesRegex(ValueError, "El email no puede duplicarse"):
@@ -73,7 +71,6 @@ class UsersModuleTests(unittest.TestCase):
                     apellidos="Santos",
                     email="eva.santos@licican.local",
                     rol_principal="responsable",
-                    superficies="Catalogo",
                 )
 
     def test_change_state_blocks_removing_last_active_admin(self) -> None:
@@ -119,7 +116,6 @@ class UsersModuleTests(unittest.TestCase):
                 apellidos="Santos",
                 email="eva.santos@licican.local",
                 rol_principal="responsable",
-                superficies="Catalogo, Alertas",
             )
             change_user_state("usr-004", "activo")
             updated = resend_invitation("usr-003")

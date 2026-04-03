@@ -16,7 +16,6 @@ def _ts(value: str) -> datetime:
 @dataclass
 class SeededUsersState:
     users: dict[str, dict[str, Any]]
-    surfaces: dict[str, list[tuple[int, str]]]
     history: dict[str, list[dict[str, Any]]]
 
     @classmethod
@@ -72,12 +71,6 @@ class SeededUsersState:
                     "invitacion_pendiente": False,
                 },
             },
-            surfaces={
-                "usr-001": [(0, "Catalogo"), (1, "Usuarios"), (2, "Permisos"), (3, "KPIs")],
-                "usr-002": [(0, "Catalogo"), (1, "Alertas"), (2, "Pipeline")],
-                "usr-003": [(0, "Catalogo"), (1, "Datos consolidados")],
-                "usr-004": [(0, "Catalogo"), (1, "Alertas")],
-            },
             history={
                 "usr-001": [
                     {
@@ -129,21 +122,12 @@ class SeededUsersState:
     def clone(self) -> "SeededUsersState":
         return SeededUsersState(
             users=deepcopy(self.users),
-            surfaces=deepcopy(self.surfaces),
             history=deepcopy(self.history),
         )
 
     def user_rows(self) -> list[dict[str, Any]]:
         rows = [deepcopy(record) for record in self.users.values()]
         rows.sort(key=lambda row: (row["apellidos"].lower(), row["nombre"].lower(), row["email"].lower(), row["id"]))
-        return rows
-
-    def surface_rows(self) -> list[dict[str, Any]]:
-        rows: list[dict[str, Any]] = []
-        for user_id, items in self.surfaces.items():
-            for order, surface in sorted(items, key=lambda item: (item[0], item[1])):
-                rows.append({"usuario_id": user_id, "superficie": surface, "orden": order})
-        rows.sort(key=lambda row: (row["usuario_id"], row["orden"], row["superficie"]))
         return rows
 
     def history_rows(self) -> list[dict[str, Any]]:
@@ -210,13 +194,6 @@ class SeededUsersState:
             }
         )
 
-    def delete_surfaces(self, user_id: str) -> None:
-        self.surfaces[str(user_id)] = []
-
-    def insert_surface(self, params: tuple[Any, ...]) -> None:
-        user_id, superficie, orden = params
-        self.surfaces.setdefault(str(user_id), []).append((int(orden), str(superficie)))
-
     def insert_history(self, params: tuple[Any, ...]) -> None:
         user_id, accion, fecha, detalle = params
         self.history.setdefault(str(user_id), []).append(
@@ -243,9 +220,6 @@ class _FakeCursor:
         if normalized == users_module.USERS_SELECT_SQL.strip():
             self.rows = self.state.user_rows()
             return
-        if normalized == users_module.USER_SURFACES_SELECT_SQL.strip():
-            self.rows = self.state.surface_rows()
-            return
         if normalized == users_module.USER_HISTORY_SELECT_SQL.strip():
             self.rows = self.state.history_rows()
             return
@@ -255,14 +229,6 @@ class _FakeCursor:
             return
         if normalized == users_module.USER_UPDATE_SQL.strip():
             self.state.update_user(params)
-            self.rows = []
-            return
-        if normalized == users_module.USER_DELETE_SURFACES_SQL.strip():
-            self.state.delete_surfaces(str(params[0]))
-            self.rows = []
-            return
-        if normalized == users_module.USER_INSERT_SURFACE_SQL.strip():
-            self.state.insert_surface(params)
             self.rows = []
             return
         if normalized == users_module.USER_INSERT_HISTORY_SQL.strip():

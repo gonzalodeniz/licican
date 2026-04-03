@@ -14,6 +14,9 @@ CREATE DATABASE licitaciones
 -- Extensión para generación de UUIDs si se necesita en el futuro
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Limpieza de la tabla antigua de usuario-superficie, ya no forma parte del modelo
+DROP TABLE IF EXISTS usuario_superficie CASCADE;
+
 -- ============================================================
 -- Tabla principal de licitaciones
 -- ============================================================
@@ -192,19 +195,6 @@ CREATE INDEX idx_usuario_rol_principal ON usuario (rol_principal);
 CREATE INDEX idx_usuario_email ON usuario (email);
 CREATE INDEX idx_usuario_fecha_alta ON usuario (fecha_alta);
 
-CREATE TABLE IF NOT EXISTS usuario_superficie (
-    usuario_id              TEXT        NOT NULL,
-    superficie              TEXT        NOT NULL,
-    orden                   INTEGER     NOT NULL DEFAULT 0,
-
-    CONSTRAINT usuario_superficie_pk PRIMARY KEY (usuario_id, orden),
-    CONSTRAINT usuario_superficie_usuario_fk FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
-    CONSTRAINT usuario_superficie_uk UNIQUE (usuario_id, superficie),
-    CONSTRAINT usuario_superficie_ck CHECK (btrim(superficie) <> '')
-);
-
-CREATE INDEX idx_usuario_superficie_superficie ON usuario_superficie (superficie);
-
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id                      BIGSERIAL   NOT NULL,
     usuario_id              TEXT        NOT NULL,
@@ -229,21 +219,6 @@ VALUES
     ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'colaborador', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO usuario_superficie (usuario_id, superficie, orden)
-VALUES
-    ('usr-001', 'Catalogo', 0),
-    ('usr-001', 'Usuarios', 1),
-    ('usr-001', 'Permisos', 2),
-    ('usr-001', 'KPIs', 3),
-    ('usr-002', 'Catalogo', 0),
-    ('usr-002', 'Alertas', 1),
-    ('usr-002', 'Pipeline', 2),
-    ('usr-003', 'Catalogo', 0),
-    ('usr-003', 'Datos consolidados', 1),
-    ('usr-004', 'Catalogo', 0),
-    ('usr-004', 'Alertas', 1)
-ON CONFLICT (usuario_id, superficie) DO NOTHING;
-
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES
     ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
@@ -265,11 +240,6 @@ COMMENT ON COLUMN usuario.observaciones_internas IS 'Notas internas no visibles 
 COMMENT ON COLUMN usuario.fecha_alta IS 'Fecha de alta administrativa de la cuenta';
 COMMENT ON COLUMN usuario.ultimo_acceso IS 'Último acceso registrado por la plataforma';
 COMMENT ON COLUMN usuario.invitacion_pendiente IS 'Indica si la cuenta aún debe activar la invitación';
-
-COMMENT ON TABLE usuario_superficie IS 'Superficies, modulos o ámbitos accesibles para cada usuario';
-COMMENT ON COLUMN usuario_superficie.usuario_id IS 'Identificador de la cuenta asociada';
-COMMENT ON COLUMN usuario_superficie.superficie IS 'Superficie o módulo funcional autorizado';
-COMMENT ON COLUMN usuario_superficie.orden IS 'Orden de presentación de la superficie en el backoffice';
 
 COMMENT ON TABLE usuario_historial IS 'Trazabilidad histórica de cambios sobre cuentas de usuario';
 COMMENT ON COLUMN usuario_historial.usuario_id IS 'Identificador de la cuenta afectada por el evento';

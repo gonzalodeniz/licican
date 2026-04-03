@@ -306,10 +306,10 @@
   - La baja logica reemplaza a la eliminacion fisica.
   - La gestion masiva queda fuera del MVP.
 - Criterios de aceptacion:
-  1. El modulo muestra un listado paginado de usuarios con nombre completo, email, rol principal, superficies asignadas, estado, ultimo acceso y acciones por fila.
+  1. El modulo muestra un listado paginado de usuarios con nombre completo, email, rol principal, estado, ultimo acceso y acciones por fila.
   2. El usuario con permisos suficientes puede crear una cuenta con datos validos y verla reflejada en el listado y en el detalle.
   3. El sistema bloquea emails duplicados con un mensaje de error claro.
-  4. El usuario con permisos suficientes puede editar datos basicos, cambiar el rol principal y ajustar permisos o superficies.
+  4. El usuario con permisos suficientes puede editar datos basicos, cambiar el rol principal y actualizar el estado.
   5. El usuario con permisos suficientes puede activar, desactivar, reactivar o dar baja logica a una cuenta con confirmacion previa en acciones sensibles.
   6. El usuario con permisos suficientes puede reenviar invitacion a cuentas pendientes y reiniciar acceso o contraseña cuando corresponda.
   7. El detalle de usuario muestra estado actual, ultimo acceso e historial o trazabilidad de cambios.

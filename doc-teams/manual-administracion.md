@@ -98,7 +98,7 @@ La entrada del changelog de `2026-03-31` menciona `pipeline` como validado, pero
 ## Riesgos operativos
 - Las superficies actuales son utiles para validacion temprana, pero no para explotacion operativa continua.
 - Comunicar que el producto ya ofrece pipeline induciria a error; las alertas visibles son internas y no envian notificaciones salientes, y la entrada del changelog de `2026-03-31` no cambia ese estado tecnico observable.
-- La gestion de usuarios se apoya en PostgreSQL, con las tablas `usuario`, `usuario_superficie` y `usuario_historial`; si la base no responde, la aplicacion devuelve un error controlado.
+- La gestion de usuarios se apoya en PostgreSQL, con las tablas `usuario` y `usuario_historial`; si la base no responde, la aplicacion devuelve un error controlado.
 - `pyproject.toml` sigue describiendo una superficie mas estrecha que la observable hoy; para soporte operativo debe prevalecer el codigo, las rutas verificadas y esta documentacion.
 - La priorizacion funcional de nuevas fuentes reales oficiales ya esta visible en `main`, pero no debe confundirse con pipeline ni otras capacidades de seguimiento.
 - Aunque algunos documentos de `product-manager/` sigan arrastrando estado anterior, la operacion revisada en `main` ya expone superficies funcionales para esa priorizacion.

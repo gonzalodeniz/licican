@@ -49,7 +49,6 @@ def render_users(
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
                 <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in available_filters["roles"])}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
-                <div><label for="nuevas_superficies">Areas / modulos / superficies</label><input id="nuevas_superficies" name="superficies" type="text" placeholder="Catalogo, Alertas, Usuarios" /></div>
               </div>
               <label for="nuevas_observaciones">Observaciones internas</label>
               <textarea id="nuevas_observaciones" name="observaciones_internas" rows="3" placeholder="Notas internas opcionales"></textarea>
@@ -145,7 +144,7 @@ def _render_users_table(user_rows: list[str]) -> str:
     if not user_rows:
         return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
 
-    headers = ["Nombre completo", "Email", "Rol principal", "Areas / modulos / superficies", "Estado", "Ultimo acceso", "Acciones"]
+    headers = ["Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso", "Acciones"]
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
     return f"""
       <div class="table-wrap users-table-wrap">
@@ -154,7 +153,6 @@ def _render_users_table(user_rows: list[str]) -> str:
             <col class="users-col users-col-name" />
             <col class="users-col users-col-email" />
             <col class="users-col users-col-role" />
-            <col class="users-col users-col-scopes" />
             <col class="users-col users-col-state" />
             <col class="users-col users-col-last-access" />
             <col class="users-col users-col-actions" />
@@ -170,7 +168,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     if selected_user is None:
         return ""
 
-    surfaces = render_badges([("Superficie", surface) for surface in selected_user["superficies"]]) if selected_user["superficies"] else "No informadas"
     history_rows = "".join(
         f"<tr><td>{escape(str(item['fecha']))}</td><td>{escape(str(item['accion']))}</td><td>{escape(str(item['detalle']))}</td></tr>"
         for item in selected_user["historial"]
@@ -188,7 +185,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         <h2>Detalle y edicion</h2>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(str(selected_user["ultimo_acceso"] or "Nunca"))}</p>
-        <p><strong>Superficies asignadas:</strong> {surfaces}</p>
         <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
           <div class="filters">
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
@@ -196,7 +192,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
             <div><label for="editar_rol">Rol principal</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
-            <div><label for="editar_superficies">Areas / modulos / superficies</label><input id="editar_superficies" name="superficies" type="text" value="{escape(', '.join(str(item) for item in selected_user["superficies"]))}" /></div>
           </div>
           <label for="editar_observaciones">Observaciones internas</label>
           <textarea id="editar_observaciones" name="observaciones_internas" rows="3">{escape(str(selected_user["observaciones_internas"]))}</textarea>
@@ -228,7 +223,6 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
         f'<td data-label="Email">{escape(str(user["email"]))}</td>'
         f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
-        f'<td data-label="Areas / modulos / superficies">{render_badges([("Superficie", surface) for surface in user["superficies"]]) if user["superficies"] else "No informadas"}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(str(user["ultimo_acceso"] or "Nunca"))}</td>'
         f'<td data-label="Acciones"><div class="inline-actions">{"".join(actions)}</div></td>'
