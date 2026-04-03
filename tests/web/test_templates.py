@@ -21,6 +21,24 @@ class TemplateSmokeTests(unittest.TestCase):
         self.assertIn("/licican/static/style.css", html)
         self.assertIn("Menu principal", html)
 
+    def test_page_template_places_logout_button_in_sidebar_footer(self) -> None:
+        access_context = SimpleNamespace(
+            role="administrador",
+            role_label="Administrador",
+            scope_label="global",
+            user_id="admin",
+            capabilities=frozenset({"view_catalog"}),
+            display_name="Superadministrador",
+            is_superadmin=True,
+            csrf_token="csrf-token",
+            auto_login_active=False,
+        )
+        html = page_template("Titulo", "Encabezado", "Hero", "Cuerpo", "<p>contenido</p>", base_path="/licican", access_context=access_context)
+
+        self.assertIn('class="nav-footer"', html)
+        self.assertIn("Cerrar sesión", html)
+        self.assertLess(html.index("Cerrar sesión"), html.index("Menu principal"))
+
     def test_component_helpers_render_html(self) -> None:
         self.assertIn("metric", render_metric(2, "Alertas"))
         self.assertIn("note-warning", render_status_note("Error", "warn"))

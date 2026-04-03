@@ -110,7 +110,7 @@ docker compose up -d --build
 ```
 
 Resultado verificado en esta revision:
-- 131 pruebas automatizadas ejecutadas en verde con `pytest`.
+- 149 pruebas automatizadas ejecutadas en verde con `pytest`.
 - Servidor local disponible en `http://127.0.0.1:<PORT>`, usando `PORT` desde `.env` y, por defecto, `8000` si no se define.
 - `make run` puede avanzar al siguiente puerto libre si `PORT` ya esta ocupado.
 - Contenedor accesible en `http://127.0.0.1:<PORT>` cuando `docker-compose.yml` publica la aplicacion con `HOST=0.0.0.0`.

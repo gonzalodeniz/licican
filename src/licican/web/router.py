@@ -491,7 +491,6 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
         "email": (form_data.get("email") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
         "estado": (form_data.get("estado") or ["pendiente"])[0],
-        "observaciones_internas": (form_data.get("observaciones_internas") or [""])[0],
     }
 
 
@@ -511,7 +510,6 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
-            observaciones_internas=str(form_data["observaciones_internas"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, str(exc))
@@ -533,7 +531,6 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
-            observaciones_internas=str(form_data["observaciones_internas"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)

@@ -25,7 +25,6 @@ SELECT
     email,
     rol_principal,
     estado,
-    observaciones_internas,
     fecha_alta,
     ultimo_acceso,
     invitacion_pendiente
@@ -51,12 +50,11 @@ INSERT INTO usuario (
     email,
     rol_principal,
     estado,
-    observaciones_internas,
     fecha_alta,
     ultimo_acceso,
     invitacion_pendiente
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 USER_UPDATE_SQL = """
@@ -66,7 +64,6 @@ SET nombre = %s,
     email = %s,
     rol_principal = %s,
     estado = %s,
-    observaciones_internas = %s,
     ultimo_acceso = %s,
     invitacion_pendiente = %s
 WHERE id = %s
@@ -85,7 +82,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     email                 TEXT        NOT NULL,
     rol_principal         TEXT        NOT NULL,
     estado                TEXT        NOT NULL,
-    observaciones_internas TEXT        NOT NULL DEFAULT '',
     fecha_alta            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso         TIMESTAMPTZ,
     invitacion_pendiente  BOOLEAN     NOT NULL DEFAULT FALSE,
@@ -93,6 +89,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     CONSTRAINT usuario_email_uk UNIQUE (email),
     CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica'))
 );
+ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS observaciones_internas;
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id         BIGSERIAL NOT NULL,
     usuario_id TEXT NOT NULL,
@@ -108,12 +105,12 @@ CREATE INDEX IF NOT EXISTS idx_usuario_rol_principal ON usuario (rol_principal);
 CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario (email);
 CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
 CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
-INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, observaciones_internas, fecha_alta, ultimo_acceso, invitacion_pendiente)
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, invitacion_pendiente)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', 'Cuenta administrativa principal.', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', 'Apoyo funcional de operaciones.', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', 'Invitacion pendiente de activacion.', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', 'Usuario en pausa operativa.', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', '2026-04-02T08:30:00Z', NULL, TRUE),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES
@@ -147,7 +144,6 @@ class ManagedUser:
     email: str
     rol_principal: str
     estado: str
-    observaciones_internas: str
     fecha_alta: str
     ultimo_acceso: str | None
     invitacion_pendiente: bool
@@ -166,7 +162,6 @@ class ManagedUser:
             "email": self.email,
             "rol_principal": self.rol_principal,
             "estado": self.estado,
-            "observaciones_internas": self.observaciones_internas,
             "fecha_alta": self.fecha_alta,
             "ultimo_acceso": self.ultimo_acceso,
             "invitacion_pendiente": self.invitacion_pendiente,
@@ -296,7 +291,6 @@ def _user_from_record(record: dict[str, object]) -> ManagedUser:
         email=str(record.get("email") or ""),
         rol_principal=str(record.get("rol_principal") or ""),
         estado=str(record.get("estado") or "pendiente"),
-        observaciones_internas=str(record.get("observaciones_internas") or ""),
         fecha_alta=_format_timestamp(record.get("fecha_alta")) or _format_timestamp(_current_timestamp()) or "",
         ultimo_acceso=_format_timestamp(record.get("ultimo_acceso")),
         invitacion_pendiente=bool(record.get("invitacion_pendiente", False)),
@@ -352,7 +346,6 @@ def _assemble_users(
                 email=user.email,
                 rol_principal=user.rol_principal,
                 estado=user.estado,
-                observaciones_internas=user.observaciones_internas,
                 fecha_alta=user.fecha_alta,
                 ultimo_acceso=user.ultimo_acceso,
                 invitacion_pendiente=user.invitacion_pendiente,
@@ -524,7 +517,6 @@ def create_user(
     email: str,
     rol_principal: str,
     estado: str = "pendiente",
-    observaciones_internas: str = "",
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
@@ -544,7 +536,6 @@ def create_user(
         email=normalized_email,
         rol_principal=normalized_role,
         estado=normalized_state,
-        observaciones_internas=_clean_text(observaciones_internas) or "",
         fecha_alta=_format_timestamp(timestamp) or "",
         ultimo_acceso=None,
         invitacion_pendiente=normalized_state == "pendiente",
@@ -562,7 +553,6 @@ def update_user(
     email: str,
     rol_principal: str,
     estado: str,
-    observaciones_internas: str = "",
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
@@ -587,7 +577,6 @@ def update_user(
             email=normalized_email,
             rol_principal=normalized_role,
             estado=normalized_state,
-            observaciones_internas=_clean_text(observaciones_internas) or "",
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
@@ -623,7 +612,6 @@ def change_user_state(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=normalized_state,
-            observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
@@ -656,7 +644,6 @@ def resend_invitation(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=current.estado,
-            observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=True,
@@ -689,7 +676,6 @@ def reset_access(
             email=current.email,
             rol_principal=current.rol_principal,
             estado=current.estado,
-            observaciones_internas=current.observaciones_internas,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=current.invitacion_pendiente,
@@ -716,7 +702,6 @@ def _replace_user_record(updated_user: ManagedUser) -> None:
                         updated_user.email,
                         updated_user.rol_principal,
                         updated_user.estado,
-                        updated_user.observaciones_internas,
                         _parse_timestamp(updated_user.ultimo_acceso) if updated_user.ultimo_acceso else None,
                         updated_user.invitacion_pendiente,
                         updated_user.id,
@@ -749,7 +734,6 @@ def _persist_user(new_user: ManagedUser) -> None:
                         new_user.email,
                         new_user.rol_principal,
                         new_user.estado,
-                        new_user.observaciones_internas,
                         _parse_timestamp(new_user.fecha_alta),
                         None,
                         new_user.invitacion_pendiente,

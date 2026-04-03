@@ -51,8 +51,6 @@ def render_users(
                 <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in available_filters["roles"])}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
               </div>
-              <label for="nuevas_observaciones">Observaciones internas</label>
-              <textarea id="nuevas_observaciones" name="observaciones_internas" rows="3" placeholder="Notas internas opcionales"></textarea>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
             </form>
           </div>
@@ -194,8 +192,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_rol">Rol principal</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
           </div>
-          <label for="editar_observaciones">Observaciones internas</label>
-          <textarea id="editar_observaciones" name="observaciones_internas" rows="3">{escape(str(selected_user["observaciones_internas"]))}</textarea>
           <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
           <div class="filter-actions"><button type="submit">Guardar cambios</button></div>
         </form>

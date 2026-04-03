@@ -74,8 +74,7 @@ La rama `main` expone una entrega minima navegable orientada a descubrimiento in
 Los documentos de `product-manager/` siguen siendo la fuente funcional para vision, backlog, historias y casos de uso. Deben leerse como alcance esperado del producto, no como evidencia de que esas funcionalidades ya esten disponibles en esta entrega. Cuando contradigan a `main`, prevalece la evidencia reproducible de la rama actual.
 
 ## Limitaciones relevantes para usuario
-- Las superficies actuales permiten descubrimiento inicial, filtrado funcional, revision de detalle y gestion interna de alertas, pero no cubren todavia seguimiento operativo ni pipeline.
-- Las superficies actuales permiten descubrimiento inicial, filtrado funcional, revision de detalle, seguimiento operativo, datos consolidados y gestion interna de alertas.
+- Las superficies actuales permiten descubrimiento inicial, filtrado funcional, revision de detalle, seguimiento operativo, datos consolidados y gestion interna de alertas, pero las alertas siguen siendo internas y no envian notificaciones salientes.
 - La gestion administrativa de usuarios esta disponible para roles con permisos y persiste en PostgreSQL, pero no existe todavia autenticacion real contra proveedor externo, SSO ni MFA.
 - La priorizacion de fuentes reales oficiales ya es accesible en una superficie propia y el pipeline ya esta disponible; las alertas siguen siendo internas y no envian notificaciones salientes.
 - Los filtros actuales actuan solo sobre el catalogo visible y su API; no existe todavia una persistencia de preferencias separada del registro de alertas internas.

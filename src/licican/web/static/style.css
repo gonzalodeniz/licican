@@ -137,6 +137,8 @@ main {
   background: var(--sidebar);
   color: var(--text-inverse);
   box-shadow: var(--shadow-sidebar);
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-kicker {
@@ -164,6 +166,12 @@ main {
 
 .nav-note {
   margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgb(217 226 236 / 0.12);
+}
+
+.nav-footer {
+  margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid rgb(217 226 236 / 0.12);
 }

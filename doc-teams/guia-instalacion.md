@@ -11,6 +11,7 @@ Instalar la entrega minima actual de `Licican`, dejar operativo el entorno local
 - Version compatible: `3.12` o superior.
 - Acceso local al repositorio en `/opt/apps/licican`.
 - Para la ruta en contenedor, disponer de `docker` y `docker compose`.
+- Para usar el backend PostgreSQL por defecto, el `.env` debe incluir `DB_PASSWORD` o `LICICAN_DATABASE_URL`.
 
 ## Preparacion local
 1. Situate en la raiz del proyecto:
@@ -39,7 +40,7 @@ cp .env.example .env
 ```
 
 Edita `.env` y ajusta al menos `PORT` si quieres usar un puerto distinto del valor por defecto.
-Si vas a ejecutar el contenedor o el backend PostgreSQL por defecto, revisa tambien `DB_*`, `LICICAN_CATALOG_BACKEND`, `LICICAN_DATABASE_URL`, `LICICAN_ALERTS_PATH` y `LICICAN_PIPELINE_PATH`; `PORT` sigue siendo el puerto publicado y la aplicacion usa `HOST=0.0.0.0` dentro de Compose.
+Si vas a ejecutar el contenedor o el backend PostgreSQL por defecto, revisa tambien `DB_*`, `LICICAN_CATALOG_BACKEND`, `LICICAN_DATABASE_URL`, `LICICAN_ALERTS_PATH` y `LICICAN_PIPELINE_PATH`; para PostgreSQL por defecto no puede faltar `DB_PASSWORD` o `LICICAN_DATABASE_URL`. `PORT` sigue siendo el puerto publicado y la aplicacion usa `HOST=0.0.0.0` dentro de Compose.
 
 ## Verificaciones posteriores
 1. Ejecuta la suite tecnica:
@@ -49,7 +50,7 @@ PYTHONPATH=src python3 -m pytest -v
 ```
 
 Resultado esperado en esta revision:
-- 131 pruebas ejecutadas en verde con `pytest`.
+- 149 pruebas ejecutadas en verde con `pytest`.
 
 2. Comprueba el objetivo de pruebas del `Makefile`:
 

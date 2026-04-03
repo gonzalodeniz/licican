@@ -76,9 +76,9 @@ class AccessContext:
     role_label: str
     user_id: str
     capabilities: frozenset[str]
+    csrf_token: str = ""
     display_name: str = ""
     is_superadmin: bool = False
-    csrf_token: str = ""
     auto_login_active: bool = False
 
     @property
@@ -130,9 +130,9 @@ def resolve_access_context(
             role_label=ROLE_LABELS[role],
             user_id=username,
             capabilities=CAPABILITY_MATRIX[role],
+            csrf_token=str(session_user.get("csrf_token") or ""),
             display_name=str(session_user.get("nombre_completo") or username),
             is_superadmin=bool(session_user.get("is_superadmin")),
-            csrf_token=str(session_user.get("csrf_token") or ""),
             auto_login_active=bool(session_user.get("auto_login_active")),
         )
 
