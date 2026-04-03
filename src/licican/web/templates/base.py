@@ -66,6 +66,7 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
             {"label": "Usuarios", "description": "Cuentas, roles y accesos", "icon": "US", "path": "/usuarios", "upcoming": False},
             {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
+            {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
             {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
         ],
         ROLE_COLLABORATOR: [

@@ -428,6 +428,13 @@ main {
   margin: 18px 0 0;
 }
 
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
 .metric {
   min-width: 0;
   padding: 16px 16px 14px;

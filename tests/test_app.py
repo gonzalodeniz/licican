@@ -100,6 +100,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
         self.assertIn('href="/licican/kpis"', html)
+        self.assertIn('href="/licican/conservacion"', html)
         self.assertIn('href="/licican/pipeline"', html)
         self.assertIn('href="/licican/permisos"', html)
 
@@ -619,6 +620,31 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("200 OK", kpi_status)
         self.assertIn("KPIs operativos visibles por rol", kpi_body.decode("utf-8"))
 
+    def test_admin_can_access_retention_page(self) -> None:
+        payload = {
+            "politica": {"antiguedad_dias": 180, "modo": "desde_creacion", "modo_label": "Dias desde la creacion", "actualizada_en": "2026-04-03T09:00:00Z"},
+            "resumen": {"conservar": 2, "archivar": 1, "mantener_activas": 1, "archivadas_existentes": 0},
+            "modos_disponibles": [{"valor": "desde_creacion", "etiqueta": "Dias desde la creacion"}],
+            "grupos": {"conservar": [], "archivar": [], "mantener_activas": []},
+        }
+
+        with patch("licican.web.router.build_retention_payload", return_value=payload):
+            status, headers, body = invoke_app("/conservacion")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Panel de control de conservacion y archivado", html)
+        self.assertIn('class="nav-link active" href="/licican/conservacion"', html)
+
+    def test_retention_page_denied_to_reader_role(self) -> None:
+        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
+            status, headers, body = invoke_app("/conservacion")
+
+        self.assertEqual("403 Forbidden", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
+
     def test_unknown_path_returns_404(self) -> None:
         status, headers, body = invoke_app("/desconocido")
 
@@ -636,7 +662,7 @@ class ApplicationTests(unittest.TestCase):
     def test_main_handles_keyboard_interrupt_with_controlled_shutdown(self) -> None:
         stdout = io.StringIO()
 
-        with patch.dict(os.environ, {"BASE_PATH": "/licican", "PORT": "8123"}, clear=False):
+        with patch.dict(os.environ, {"BASE_PATH": "/licican", "HOST": "127.0.0.1", "PORT": "8123"}, clear=False):
             with patch("licican.app.make_server") as make_server_mock:
                 server = make_server_mock.return_value.__enter__.return_value
                 server.serve_forever.side_effect = KeyboardInterrupt
