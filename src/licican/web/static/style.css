@@ -897,6 +897,90 @@ button:hover {
   gap: 6px;
 }
 
+.delete-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.delete-toggle-trigger,
+.delete-toggle-confirm {
+  border-color: var(--danger-text);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.delete-toggle-trigger:hover,
+.delete-toggle-confirm:hover {
+  border-color: #a44a4a;
+  background: #f9dede;
+  color: var(--danger-text);
+}
+
+.delete-toggle-trigger[hidden] {
+  display: none;
+}
+
+.delete-toggle-confirmation {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 1px solid #efc1c1;
+  border-radius: 8px;
+  background: #fff6f6;
+}
+
+.delete-toggle-confirmation[hidden] {
+  display: none;
+}
+
+.delete-toggle-message {
+  color: var(--danger-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.delete-toggle-user-name {
+  font-weight: 700;
+}
+
+.users-toast-region {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 40;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 44px));
+  pointer-events: none;
+}
+
+.users-toast {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #102a43;
+  color: #f8fbff;
+  box-shadow: var(--surface-shadow);
+  border-left: 4px solid var(--primary);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.users-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.users-toast-success {
+  border-left-color: var(--success-text);
+}
+
+.users-toast-error {
+  border-left-color: var(--danger-text);
+}
+
 .catalog-view .table-wrap,
 .coverage-view .table-wrap,
 .dataset-view .table-wrap,
