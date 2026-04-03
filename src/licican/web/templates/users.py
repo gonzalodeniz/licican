@@ -380,30 +380,31 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
-        f'<td data-label="Acciones"><div class="inline-actions">{"".join(actions)}</div></td>'
+        f'<td data-label="Acciones"><div class="actions-cell">{"".join(actions)}</div></td>'
         "</tr>"
     )
 
 
 def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
     actions: list[str] = []
-    actions.append(f'<a class="offer-action" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Editar</a>')
+    actions.append(f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Modificar</a>')
     if user["estado"] == "activo":
-        actions.append(_action_form(base_path, user["id"], "Desactivar", "inactivo"))
+        actions.append(_action_form(base_path, user["id"], "Dar de baja", "inactivo"))
     else:
-        actions.append(_action_form(base_path, user["id"], "Activar", "activo"))
+        actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
     actions.append(_delete_toggle_fragment(base_path, user))
     return actions
 
 
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
     if query_href is not None:
-        return f'<a class="button-link" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
+        return f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
     assert state is not None
+    button_class = "btn-action btn-danger-outline" if state == "inactivo" else "btn-action btn-success-outline"
     return (
         f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/estado"))}">'
         f'<input type="hidden" name="estado" value="{escape(state)}" />'
-        f'<button type="submit">{escape(label)}</button>'
+        f'<button type="submit" class="{button_class}">{escape(label)}</button>'
         "</form>"
     )
 
@@ -417,7 +418,7 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
       <div class="delete-toggle" id="delete-toggle-{user_id}" data-user-id="{user_id}" data-user-name="{user_name}" data-delete-url="{delete_url}">
         <button
           type="button"
-          class="delete-toggle-trigger"
+          class="btn-action btn-contextual delete-toggle-trigger"
           data-delete-toggle
           data-user-id="{user_id}"
           data-user-name="{user_name}"
@@ -425,11 +426,12 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
           aria-controls="delete-confirm-{user_id}"
           aria-expanded="false"
           onclick="showConfirm(this.dataset.userId, this.dataset.userName)"
-        >Borrar</button>
+          aria-label="Más opciones"
+        >···</button>
         <div class="delete-toggle-confirmation" id="delete-confirm-{user_id}" hidden>
           <span class="delete-toggle-message">¿Confirmar eliminación de <strong class="delete-toggle-user-name">{user_name}</strong>?</span>
-          <button type="button" class="delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)">Confirmar</button>
-          <button type="button" class="button-link delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)">Cancelar</button>
+          <button type="button" class="btn-action btn-danger-outline delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)">Confirmar</button>
+          <button type="button" class="btn-action btn-neutral delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)">Cancelar</button>
         </div>
       </div>
     """

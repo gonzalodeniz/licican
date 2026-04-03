@@ -616,6 +616,81 @@ button,
   transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: 1px solid #cfd6de;
+  background: #ffffff;
+  color: #3f4a57;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.btn-action:hover {
+  background: #f7f9fb;
+  border-color: #b8c2cc;
+}
+
+.btn-action:focus-visible {
+  outline: 2px solid rgb(31 94 137 / 0.22);
+  outline-offset: 2px;
+}
+
+.btn-neutral {
+  background: #ffffff;
+  border-color: #cfd6de;
+  color: #3f4a57;
+}
+
+.btn-danger-outline {
+  background: #ffffff;
+  border-color: #f0c6c6;
+  color: #e05555;
+}
+
+.btn-danger-outline:hover {
+  background: #fff7f7;
+  border-color: #e7a8a8;
+  color: #cc4a4a;
+}
+
+.btn-success-outline {
+  background: #ffffff;
+  border-color: #c9ead8;
+  color: #4caf7d;
+}
+
+.btn-success-outline:hover {
+  background: #f6fbf8;
+  border-color: #a9dbc0;
+  color: #409468;
+}
+
+.btn-contextual {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  color: #7a8591;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.btn-contextual:hover {
+  background: #eef2f6;
+  border-color: #e2e8ef;
+  color: #4b5563;
+}
+
 button {
   border: 1px solid var(--primary);
   background: var(--primary);
@@ -890,6 +965,12 @@ button:hover {
   width: 12%;
 }
 
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .users-table .inline-actions {
   display: flex;
   flex-direction: column;
@@ -902,22 +983,16 @@ button:hover {
   align-items: center;
 }
 
-.delete-toggle-trigger,
 .delete-toggle-confirm {
   border-color: var(--danger-text);
   background: var(--danger-bg);
   color: var(--danger-text);
 }
 
-.delete-toggle-trigger:hover,
 .delete-toggle-confirm:hover {
   border-color: #a44a4a;
   background: #f9dede;
   color: var(--danger-text);
-}
-
-.delete-toggle-trigger[hidden] {
-  display: none;
 }
 
 .delete-toggle-confirmation {
