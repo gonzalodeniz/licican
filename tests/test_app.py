@@ -759,8 +759,9 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn("Usuarios totales", html)
         self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("Ana Lopez", html)
+        self.assertIn('id="toggle-users-create"', html)
         self.assertIn("Nuevo usuario", html)
-        self.assertIn('id="users-create-panel"', html)
+        self.assertIn('id="users-create-panel" hidden', html)
         self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-table-panel"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
@@ -771,6 +772,8 @@ class ApplicationTests(unittest.TestCase):
         create_panel_index = html.index('id="users-create-panel"')
         filters_panel_index = html.index('id="users-filters-panel"')
         table_panel_index = html.index('id="users-table-panel"')
+        toggle_button_index = html.index('id="toggle-users-create"')
+        self.assertLess(toggle_button_index, create_panel_index)
         self.assertLess(create_panel_index, filters_panel_index)
 
         filters_panel_html = html[filters_panel_index:table_panel_index]
@@ -779,6 +782,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn('name="estado"', filters_panel_html)
         self.assertNotIn('name="superficie"', filters_panel_html)
         self.assertNotIn('Area / modulo / superficie', filters_panel_html)
+        self.assertIn("panel.hidden = true", html)
 
     def test_users_page_denied_to_reader_role(self) -> None:
         with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):

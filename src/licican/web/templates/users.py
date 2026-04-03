@@ -35,8 +35,11 @@ def render_users(
         """
 
     content = f"""
-      <section class="users-view" aria-label="Gestion de usuarios">
-        <section class="panel" id="users-create-panel">
+        <section class="users-view" aria-label="Gestion de usuarios">
+        <div class="users-create-toggle">
+          <button type="button" id="toggle-users-create" aria-controls="users-create-panel" aria-expanded="false">Nuevo usuario</button>
+        </div>
+        <section class="panel" id="users-create-panel" hidden>
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
             <form method="post" action="{escape(build_url(base_path, '/usuarios'))}">
@@ -85,6 +88,29 @@ def render_users(
           </div>
         </section>
       </section>
+      <script>
+        (function () {{
+          const button = document.getElementById('toggle-users-create');
+          const panel = document.getElementById('users-create-panel');
+          if (!button || !panel) {{
+            return;
+          }}
+
+          panel.hidden = true;
+          button.setAttribute('aria-expanded', 'false');
+
+          button.addEventListener('click', function () {{
+            const isHidden = panel.hasAttribute('hidden');
+            if (isHidden) {{
+              panel.removeAttribute('hidden');
+              button.setAttribute('aria-expanded', 'true');
+            }} else {{
+              panel.setAttribute('hidden', '');
+              button.setAttribute('aria-expanded', 'false');
+            }}
+          }});
+        }})();
+      </script>
     """
     return page_template(
         "Licican | Gestion de usuarios",
