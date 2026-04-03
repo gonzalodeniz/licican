@@ -1,7 +1,7 @@
 # Borradores de issues de GitHub
 
 ## Estado actual
-- Las unicas issues funcionales abiertas a fecha 2026-04-02 son `#8` y `#16`.
+- Las unicas issues funcionales que deben permanecer abiertas tras la reconciliacion del 2026-04-03 son `#8` y `#16`.
 - La issue de `PB-005` ya no esta abierta: fue validada por `qa-teams` el 2026-03-31 en la issue #7 y cerrada en GitHub el 2026-04-01.
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26 y ya quedo cerrada administrativamente el 2026-03-30 tras validacion, integracion en `main` y borrado de rama.
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
@@ -10,6 +10,7 @@
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
 - La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones y pasa a ser la siguiente issue funcional elegible.
+- La issue de `PB-016` ya fue creada en GitHub como issue #28, validada por `qa-teams` el 2026-04-02, integrada en `main` y cerrada administrativamente por `product-manager` el 2026-04-03 dejando `Estado operativo: cerrado`.
 - La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue tecnica `T-003` ya fue creada en GitHub como issue #18 para unificar utilidades de texto compartidas.
 - La issue tecnica `T-004` ya fue creada en GitHub como issue #19 para centralizar constantes de dominio compartidas.
@@ -215,6 +216,35 @@ Contexto funcional:
 
 Dependencia operativa vigente:
 - Esta issue pasa a ser la siguiente prioridad funcional abierta porque `PB-005` y `PB-013` ya quedaron cerradas administrativamente.
+
+## Issue creada: Gestion de usuarios de plataforma
+
+Titulo sugerido: `[product-manager] PB-016 Gestion de usuarios de plataforma`
+
+Backlog: PB-016 Gestion de usuarios y accesos de plataforma
+Historia de usuario: HU-16 Gestionar usuarios de plataforma
+Caso de uso: CU-16 Administrar cuentas de usuario
+Criterios de aceptacion:
+1. Dado un administrador con permisos suficientes, cuando accede al modulo, entonces ve un listado paginado de usuarios con nombre completo, email, rol principal, superficies asignadas, estado, ultimo acceso y acciones por fila.
+2. Dado un administrador con permisos suficientes, cuando crea un usuario con datos validos, entonces el sistema guarda la cuenta, la muestra en el listado y deja trazabilidad de la alta.
+3. Dado un email ya existente, cuando se intenta crear o editar una cuenta con ese email, entonces el sistema bloquea la operacion con un mensaje de error claro.
+4. Dado un usuario activo, cuando se desactiva o se da de baja logica, entonces deja de poder acceder y la accion queda confirmada antes de ejecutarse.
+5. Dado un usuario pendiente de activacion, cuando se reenvia la invitacion, entonces el sistema confirma el reenvio y mantiene el estado pendiente hasta que acceda.
+6. Dado un usuario con acceso ya iniciado, cuando se reinicia el acceso o la contraseña, entonces el sistema ejecuta la accion y la deja auditada.
+7. Dado un administrador sin permisos suficientes, cuando intenta asignar un rol o superficie restringida, entonces el sistema lo impide.
+8. Dado que el sistema tiene un unico administrador activo, cuando se intenta desactivar ese ultimo administrador, entonces la operacion se bloquea.
+Dependencias: PB-013, contexto de sesion y trazabilidad de cambios disponibles en `main`
+Estado operativo: cerrado
+
+Contexto funcional:
+- El modulo de usuarios ya se encuentra visible y validado sobre la superficie actual del producto.
+- La entrega base resuelve listado, alta, detalle, cambio de estado, reenvio de invitacion, reinicio de acceso y guardia del ultimo administrador activo.
+- Las futuras necesidades de autenticacion real, proveedor de identidad y auditoria centralizada deben tratarse como evoluciones posteriores y no reabrir esta issue ya validada.
+
+Estado administrativo actual:
+- `qa-teams` valido la issue #28 el 2026-04-02.
+- La capacidad ya esta integrada en `main`.
+- `product-manager` reconcilia su cierre administrativo el 2026-04-03 actualizando backlog, historias, casos de uso, roadmap y cuerpo de la issue.
 
 ## Issue creada: Corregir el filtrado de licitaciones tras PostgreSQL
 

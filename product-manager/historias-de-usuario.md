@@ -314,6 +314,7 @@
   6. El usuario con permisos suficientes puede reenviar invitacion a cuentas pendientes y reiniciar acceso o contraseña cuando corresponda.
   7. El detalle de usuario muestra estado actual, ultimo acceso e historial o trazabilidad de cambios.
   8. El sistema impide dejar la plataforma sin ningun administrador activo.
-- Dependencias funcionales: PB-013, persistencia de usuarios, auditoria de cambios, autenticacion o contexto de sesion
+- Dependencias funcionales: PB-013, contexto de sesion y trazabilidad de cambios disponibles en `main`
 - Prioridad: P2
-- Estado: `nuevo`
+- Estado: `cerrado`
+- Nota de estado: `qa-teams` valido la issue #28 el 2026-04-02 y la capacidad ya esta integrada en `main`; `product-manager` la cierra administrativamente el 2026-04-03 tras reconciliar backlog, roadmap e issue de GitHub.

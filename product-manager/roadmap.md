@@ -6,16 +6,16 @@
 - Cada release debe dejar un resultado verificable por `qa-teams` y trazable a backlog e issues.
 
 ## Estado de referencia de la iteracion
-- Fecha de corte documental: 2026-04-02.
+- Fecha de corte documental: 2026-04-03.
 - Estado confirmado: `PB-007` y `PB-006` ya fueron validados por `qa-teams` y sus entregas estan integradas en `main`.
 - Estado actual de trabajo tecnico: `PB-009` ya esta validado, integrado en `main` y cerrado administrativamente en la issue #9.
 - `PB-004` ya no esta en preparacion ni pendiente de integracion: `qa-teams` la valido en la issue #6 el 2026-03-25 y `developer-teams` la integro en `main` con borrado de rama el 2026-03-26.
 - `PB-010` ya no forma parte del trabajo pendiente: quedo validada, integrada en `main` y cerrada administrativamente.
 - `PB-005` ya no esta pendiente de integracion ni de cierre administrativo: la issue #7 fue cerrada en GitHub el 2026-04-01.
 - `PB-013` ya no forma parte del trabajo pendiente: la issue #13 fue cerrada en GitHub el 2026-04-01 y su capacidad queda absorbida en el estado vigente del producto.
+- `PB-016` ya no forma parte del trabajo pendiente: `qa-teams` lo valido en la issue #28 el 2026-04-02, la entrega ya esta integrada en `main` y `product-manager` reconcilia su cierre administrativo el 2026-04-03.
 - Siguiente recomendacion para `developer-teams`: tomar `PB-015` como siguiente issue funcional elegible, porque sus dependencias ya estan resueltas y ordena el gobierno de retencion del dato operativo.
 - `PB-008` queda despues de `PB-015` como siguiente trabajo documental de medicion.
-- `PB-016` queda como siguiente evolucion funcional de gobierno de usuarios y accesos una vez queden ordenados `PB-015` y `PB-008`.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -185,7 +185,8 @@
 - Riesgo principal:
   - Que el producto crezca en volumen de cuentas sin una herramienta administrativa interna que evite gestion manual y errores de acceso.
 - Estado operativo actual:
-  - `PB-016` esta documentado y preparado como siguiente paso funcional de gobierno, pero sigue por detras de `PB-015` y `PB-008` en la prioridad operativa.
+  - `qa-teams` valido `PB-016` en la issue #28 el 2026-04-02.
+  - La capacidad ya esta integrada en `main` y queda cerrada administrativamente por `product-manager` el 2026-04-03.
 
 ## Dependencias abiertas de roadmap
 - Confirmar con negocio cuando la cobertura de ayuntamientos pasa de `Posterior` a promesa comercial del producto.
@@ -193,13 +194,13 @@
 - Decidir en una iteracion posterior si los KPIs de alertas deben exigirse ya con dato real o pueden arrancar con definicion documental y recogida manual temporal.
 - Confirmar que modulos deben formar parte de la navegacion principal visible desde la primera entrega de `PB-010` y cuales deben quedar ocultos o marcados como `proximamente`.
 - Confirmar si la referencia funcional al Excel debe cubrir en una iteracion posterior tambien la hoja `Modificaciones` cuando existan datos disponibles.
-- Concretar el modelo persistente de cuentas y auditoria necesario para arrancar `PB-016` sin ambiguedad de acceso.
+- Convertir en trabajo trazable las evoluciones posteriores del modulo de usuarios: autenticacion real, proveedor de identidad y auditoria centralizada.
 
 ## Decision operativa para la siguiente iteracion
 - El siguiente paso operativo de producto es mantener sincronizados backlog, historias, roadmap e issues abiertos con la nueva prioridad funcional.
 - La issue tecnica `T-002` ya quedo cerrada administrativamente el 2026-03-30 tras validacion, merge en `main` y borrado de rama.
-- A partir de esta reconciliacion, el orden funcional recomendado pasa a `PB-015` y `PB-008`.
+- A partir de esta reconciliacion, el orden funcional recomendado abierto pasa a `PB-015` y `PB-008`.
 - `PB-009` ya reutiliza la cobertura validada de `PB-007`, la regla auditable validada de `PB-006` y la superficie ya validada de catalogo, detalle y filtros.
 - `PB-005` ya no debe tratarse como trabajo abierto: queda cerrado administrativamente y absorbido en la base funcional vigente.
 - Antes de abrir una nueva expansion funcional, producto debe recibir de `developer-teams` la traduccion a issues tecnicas de los hallazgos accionables de auditoria del 2026-03-28 para poder priorizarlos frente al roadmap vigente.
-- A fecha 2026-04-02 la integracion de `PB-012`, el cierre administrativo de la issue tecnica `#14`, el cierre de la issue #7 y el cierre de la issue #13 ya estan resueltos en `main` y en GitHub; el siguiente cuello de botella operativo pasa a ser ejecutar `PB-015` sin perder de vista `PB-008`.
+- A fecha 2026-04-03 la integracion de `PB-012`, `PB-016`, el cierre administrativo de la issue tecnica `#14`, el cierre de la issue #7 y el cierre de la issue #13 ya estan resueltos en `main` y en GitHub; el siguiente cuello de botella operativo pasa a ser ejecutar `PB-015` sin perder de vista `PB-008`.
