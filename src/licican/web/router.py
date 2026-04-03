@@ -19,6 +19,12 @@ from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion
 from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
 from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
+from licican.retention import (
+    RetentionDatabaseError,
+    apply_retention_policy,
+    build_retention_payload,
+    update_retention_policy,
+)
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
@@ -36,6 +42,7 @@ from licican.web.templates.kpis import render_kpis
 from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
+from licican.web.templates.retention import render_retention_control
 from licican.web.templates.users import render_users
 from licican.web.templates.login import render_login
 
@@ -412,6 +419,29 @@ def handle_logout(request: Request, start_response) -> list[bytes]:
     return _redirect(start_response, build_url(request.base_path, "/login?reason=logout"))
 
 
+def _retention_data_error_html(base_path: str, message: str) -> str:
+    content = f"""
+      <section class="note note-warning">
+        <strong>Control de conservacion no disponible</strong><br />
+        {escape(message)}
+      </section>
+      <section class="panel">
+        <div class="panel-body">
+          <p>La politica de retencion y el archivado requieren acceso operativo a PostgreSQL.</p>
+        </div>
+      </section>
+    """
+    return page_template(
+        "Licican | Conservacion temporalmente no disponible",
+        "Conservacion temporalmente no disponible",
+        "Servicio de datos no disponible",
+        "La gestion de conservacion y archivado depende de la base de datos operativa.",
+        content,
+        current_path="/conservacion",
+        base_path=base_path,
+    )
+
+
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
     relative_path = filename
     static_path = (STATIC_DIR / relative_path).resolve()
@@ -482,6 +512,54 @@ def handle_users_page(request: Request, start_response, id: str | None = None) -
         content = render_users(_visible_users_payload(request), request.base_path, str(exc), status_message, request.access_context)
         return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_retention_page(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "view_retention"):
+        return _deny_html(request, start_response, "view_retention")
+    status_message = (request.query.get("mensaje") or [None])[0]
+    try:
+        payload = build_retention_payload(pipeline_path=resolve_pipeline_path())
+        content = render_retention_control(payload, request.base_path, None, status_message, request.access_context)
+    except RetentionDatabaseError as exc:
+        content = _retention_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
+
+
+def handle_update_retention_policy(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_retention"):
+        return _deny_html(request, start_response, "manage_retention")
+    form_data = read_form_data(request.environ)
+    raw_days = (form_data.get("antiguedad_dias") or [""])[0]
+    mode = (form_data.get("modo") or [""])[0]
+    try:
+        antiguedad_dias = int(raw_days)
+        update_retention_policy(antiguedad_dias=antiguedad_dias, modo=mode)
+    except ValueError as exc:
+        try:
+            payload = build_retention_payload(pipeline_path=resolve_pipeline_path())
+            content = render_retention_control(payload, request.base_path, str(exc), None, request.access_context)
+            return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
+        except RetentionDatabaseError as retention_exc:
+            content = _retention_data_error_html(request.base_path, str(retention_exc))
+            return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    except RetentionDatabaseError as exc:
+        content = _retention_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    return send_redirect(start_response, build_url(request.base_path, "/conservacion") + "?mensaje=Politica+de+conservacion+actualizada")
+
+
+def handle_apply_retention_policy(request: Request, start_response) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_retention"):
+        return _deny_html(request, start_response, "manage_retention")
+    try:
+        result = apply_retention_policy(pipeline_path=resolve_pipeline_path())
+    except RetentionDatabaseError as exc:
+        content = _retention_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    message = f"Archivado aplicado: {result['archivadas']} licitaciones trasladadas"
+    return send_redirect(start_response, build_url(request.base_path, "/conservacion") + f"?mensaje={message.replace(' ', '+')}")
 
 
 def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
@@ -950,6 +1028,8 @@ routes = [
     Route("POST", "/alertas/{id}/desactivar", handle_deactivate_alert),
     Route("POST", "/pipeline", handle_create_pipeline_entry),
     Route("POST", "/pipeline/{id}/estado", handle_update_pipeline_entry),
+    Route("POST", "/conservacion/politica", handle_update_retention_policy),
+    Route("POST", "/conservacion/aplicar", handle_apply_retention_policy),
     Route("POST", "/usuarios", handle_create_user),
     Route("POST", "/usuarios/{id}", handle_update_user),
     Route("POST", "/usuarios/{id}/estado", handle_change_user_state),
@@ -964,6 +1044,7 @@ routes = [
     Route("GET", "/cobertura-fuentes", handle_coverage_page),
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
     Route("GET", "/kpis", handle_kpis_page),
+    Route("GET", "/conservacion", handle_retention_page),
     Route("GET", "/permisos", handle_permissions_page),
     Route("GET", "/usuarios/{id}", handle_users_page),
     Route("GET", "/usuarios", handle_users_page),

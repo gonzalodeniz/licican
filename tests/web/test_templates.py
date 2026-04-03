@@ -13,6 +13,7 @@ from licican.web.templates.dataset import render_datos_consolidados
 from licican.web.templates.detail import render_adjudicacion_detail, render_licitacion_detail, render_opportunity_detail
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
+from licican.web.templates.retention import render_retention_control
 
 
 class TemplateSmokeTests(unittest.TestCase):
@@ -114,3 +115,19 @@ class TemplateSmokeTests(unittest.TestCase):
         )
         self.assertIn("Pipeline de seguimiento de oportunidades", html)
         self.assertIn("Actualizar estado", html)
+
+    def test_retention_template_renders_smoke(self) -> None:
+        html = render_retention_control(
+            {
+                "politica": {"antiguedad_dias": 180, "modo": "desde_creacion", "modo_label": "Dias desde la creacion", "actualizada_en": "2026-04-03T09:00:00Z"},
+                "resumen": {"conservar": 2, "archivar": 1, "mantener_activas": 1, "archivadas_existentes": 4},
+                "modos_disponibles": [{"valor": "desde_creacion", "etiqueta": "Dias desde la creacion"}],
+                "grupos": {
+                    "conservar": [],
+                    "archivar": [{"expediente": "EXP-1", "titulo": "Archivada", "organismo": "Cabildo", "estado": "RES", "seguimiento_activo": False, "dias_antiguedad": 50, "motivo": "Supera politica"}],
+                    "mantener_activas": [],
+                },
+            }
+        )
+        self.assertIn("Panel de control de conservacion y archivado", html)
+        self.assertIn("Aplicar archivado ahora", html)

@@ -148,6 +148,32 @@ CREATE INDEX idx_licitacion_titulo_tsvector  ON licitacion USING GIN (to_tsvecto
 CREATE INDEX idx_licitacion_resumen_tsvector ON licitacion USING GIN (to_tsvector('spanish', COALESCE(resumen, '')));
 
 -- ============================================================
+-- Politica de conservacion y tabla archivada de licitaciones
+-- ============================================================
+CREATE TABLE IF NOT EXISTS licitacion_retencion_config (
+    id                          SMALLINT    NOT NULL PRIMARY KEY,
+    antiguedad_dias             INTEGER     NOT NULL CHECK (antiguedad_dias > 0),
+    modo                        TEXT        NOT NULL CHECK (modo IN ('desde_creacion', 'cerradas')),
+    actualizada_en              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT licitacion_retencion_config_singleton_ck CHECK (id = 1)
+);
+
+INSERT INTO licitacion_retencion_config (id, antiguedad_dias, modo, actualizada_en)
+VALUES (1, 180, 'desde_creacion', NOW())
+ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS licitacion_archivada (
+    LIKE licitacion INCLUDING ALL
+);
+
+ALTER TABLE licitacion_archivada ADD COLUMN IF NOT EXISTS archivada_en TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE licitacion_archivada ADD COLUMN IF NOT EXISTS motivo_archivado TEXT NOT NULL DEFAULT 'politica_conservacion';
+ALTER TABLE licitacion_archivada ADD COLUMN IF NOT EXISTS politica_modo TEXT;
+ALTER TABLE licitacion_archivada ADD COLUMN IF NOT EXISTS politica_antiguedad_dias INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_licitacion_archivada_archivada_en ON licitacion_archivada (archivada_en DESC);
+
+-- ============================================================
 -- Tabla de control de ficheros ya procesados
 -- Evita reprocesar ficheros ATOM que ya han sido leídos
 -- ============================================================

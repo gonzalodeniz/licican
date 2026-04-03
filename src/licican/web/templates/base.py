@@ -68,6 +68,7 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
             {"label": "Usuarios", "description": "Cuentas, roles y accesos", "icon": "US", "path": "/usuarios", "upcoming": False},
             {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
+            {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
             {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
         ],
         ROLE_MANAGER: [
@@ -130,6 +131,8 @@ def _auto_login_notice_html(access_context: AccessContext | None) -> str:
         <strong>Sesión automática activa (entorno desarrollo)</strong>
       </section>
     """
+
+
 def _path_matches_navigation(current_path: str, item_path: str) -> bool:
     if item_path == "/":
         return current_path == "/" or current_path.startswith("/oportunidades/")

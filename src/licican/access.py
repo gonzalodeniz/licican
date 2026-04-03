@@ -38,6 +38,8 @@ CAPABILITY_MATRIX = {
             "manage_pipeline",
             "view_kpis",
             "view_permissions",
+            "view_retention",
+            "manage_retention",
             "view_users",
             "manage_users",
         }
