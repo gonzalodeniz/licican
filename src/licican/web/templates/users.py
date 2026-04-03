@@ -36,26 +36,6 @@ def render_users(
 
     content = f"""
       <section class="users-view" aria-label="Gestion de usuarios">
-        <section class="panel" id="users-filters-panel">
-          <div class="panel-body">
-            <h2>Filtros</h2>
-            <form method="get" action="{escape(build_url(base_path, '/usuarios'))}">
-              <div class="filters">
-                <div><label for="busqueda">Busqueda</label><input id="busqueda" name="busqueda" type="text" value="{escape(str(filters.get('busqueda', '')))}" placeholder="Nombre, apellidos, email o identificador" /></div>
-                <div><label for="estado">Estado</label><select id="estado" name="estado"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("estado") == item else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
-                <div><label for="rol">Rol</label><select id="rol" name="rol"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("rol") == item else '') + f'>{escape(item)}</option>' for item in available_filters["roles"])}</select></div>
-                <div><label for="superficie">Area / modulo / superficie</label><select id="superficie" name="superficie"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("superficie") == item else '') + f'>{escape(item)}</option>' for item in available_filters["superficies"])}</select></div>
-              </div>
-              <div class="filter-actions">
-                <button type="submit">Aplicar filtros</button>
-                <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Limpiar filtros</a>
-              </div>
-            </form>
-            {_filter_badges(filters)}
-            {_status_note_div(validation_error, "warn")}
-            {_status_note_div(status_message, "ok")}
-          </div>
-        </section>
         <section class="panel" id="users-create-panel">
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
@@ -72,6 +52,24 @@ def render_users(
               <textarea id="nuevas_observaciones" name="observaciones_internas" rows="3" placeholder="Notas internas opcionales"></textarea>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
             </form>
+          </div>
+        </section>
+        <section class="panel" id="users-filters-panel">
+          <div class="panel-body">
+            <h2>Filtros</h2>
+            <form method="get" action="{escape(build_url(base_path, '/usuarios'))}">
+              <div class="filters">
+                <div><label for="busqueda">Busqueda</label><input id="busqueda" name="busqueda" type="text" value="{escape(str(filters.get('busqueda', '')))}" placeholder="Nombre, apellidos, email o identificador" /></div>
+                <div><label for="rol">Rol</label><select id="rol" name="rol"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("rol") == item else '') + f'>{escape(item)}</option>' for item in available_filters["roles"])}</select></div>
+              </div>
+              <div class="filter-actions">
+                <button type="submit">Aplicar filtros</button>
+                <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Limpiar filtros</a>
+              </div>
+            </form>
+            {_filter_badges(filters)}
+            {_status_note_div(validation_error, "warn")}
+            {_status_note_div(status_message, "ok")}
           </div>
         </section>
         {selected_user_block}
@@ -105,9 +103,7 @@ def _filter_badges(filters: dict[str, object]) -> str:
         return ""
     labels = {
         "busqueda": "Busqueda",
-        "estado": "Estado",
         "rol": "Rol",
-        "superficie": "Superficie",
     }
     return f'<div class="active-filters"><p><strong>Filtros activos</strong></p><div>{render_badges([(labels[key], str(value)) for key, value in filters.items() if key in labels])}</div></div>'
 

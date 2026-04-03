@@ -760,13 +760,25 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("Ana Lopez", html)
         self.assertIn("Nuevo usuario", html)
-        self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-create-panel"', html)
+        self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-table-panel"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
+
+        create_panel_index = html.index('id="users-create-panel"')
+        filters_panel_index = html.index('id="users-filters-panel"')
+        table_panel_index = html.index('id="users-table-panel"')
+        self.assertLess(create_panel_index, filters_panel_index)
+
+        filters_panel_html = html[filters_panel_index:table_panel_index]
+        self.assertIn('name="busqueda"', filters_panel_html)
+        self.assertIn('name="rol"', filters_panel_html)
+        self.assertNotIn('name="estado"', filters_panel_html)
+        self.assertNotIn('name="superficie"', filters_panel_html)
+        self.assertNotIn('Area / modulo / superficie', filters_panel_html)
 
     def test_users_page_denied_to_reader_role(self) -> None:
         with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
