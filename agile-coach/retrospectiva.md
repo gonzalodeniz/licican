@@ -28,3 +28,11 @@
 ## Seguimiento
 - Usar esta retrospectiva como referencia ligera cuando se vuelva a tocar una regla compartida.
 - Revisar las metricas 15 y 16 en cualquier iteracion donde cambien estados operativos, handoffs o plantillas literales.
+
+## Revision 2026-04-03
+
+Hora: 11:02:14 UTC
+
+- La revision actual confirma que la friccion principal no esta en una regla nueva, sino en el coste de mantener copias largas de reglas compartidas en los `AGENTS.md` de rol.
+- Se prioriza como accion operativa la limpieza real de esas copias, dejando en cada documento solo lo especifico del rol y remitiendo el resto a `agile-coach/acuerdos-operativos.md`.
+- La simplificacion debe comprobarse con las metricas 15 y 16 para verificar que baja el coste de propagacion y la duplicacion de bloques compartidos.
