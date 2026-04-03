@@ -25,6 +25,48 @@
 - En la revision del 2026-03-29 se detecta una inconsistencia de alcance en `PB-013`: no debe quedar bloqueada por `PB-005`, porque su primer corte funcional gobierna superficies ya disponibles y deja pipeline como extension posterior.
 - Los hallazgos de `quality-auditor` y `security-auditor` del 2026-03-28 quedan pendientes de que `developer-teams` los traduzca en issues tecnicas separadas para su priorizacion posterior por producto.
 
+## Issue creada: Medicion basica de cobertura, adopcion y uso inicial del producto
+
+Titulo sugerido: `[product-manager] PB-008 Definir medicion basica de cobertura, adopcion y uso`
+
+Backlog: PB-008 Medicion basica de valor del producto
+Historia de usuario: HU-08 Medir cobertura y uso inicial del producto
+Caso de uso: CU-07 Revisar indicadores iniciales de producto
+Criterios de aceptacion:
+1. Existe al menos un KPI de cobertura, uno de adopcion y uno de uso.
+2. Cada KPI incluye definicion, formula, umbral inicial y decision asociada.
+3. La bateria minima puede arrancar con medicion manual temporal si la instrumentacion completa aun no existe, siempre que la limitacion quede explicitada.
+4. La documentacion resultante permite revisar los KPIs sin bloquear el MVP funcional.
+5. La propuesta deja claro que la primera medicion puede ser operativa y documental, no necesariamente automatizada desde el primer dia.
+Dependencias: PB-001, PB-004
+Estado operativo: nuevo
+
+Contexto funcional:
+- Producto necesita una base objetiva para decidir si ampliar cobertura, profundizar en relevancia o invertir antes en retencion.
+- La definicion de KPIs debe ser util para la priorizacion posterior, no solo para reporting descriptivo.
+- La primera iteracion no debe quedar bloqueada por la ausencia de instrumentacion avanzada si la definicion funcional ya es clara.
+
+KPIs sugeridos para la primera iteracion:
+- Cobertura: porcentaje de fuentes MVP priorizadas que producen datos visibles y trazables en la ventana de evaluacion.
+- Adopcion: porcentaje de usuarios activos semanales que disponen de al menos una alerta activa.
+- Uso: frecuencia semanal de consultas de catalogo o detalle por usuario activo.
+
+Umbrales iniciales y decisiones asociadas:
+- Cobertura: umbral inicial provisional del 90 por ciento; si baja de ese nivel, la decision es frenar expansion y estabilizar trazabilidad e ingestion.
+- Adopcion: umbral inicial provisional del 30 por ciento de usuarios activos semanales con al menos una alerta; si baja de ese nivel, la decision es simplificar onboarding y configuracion de alertas.
+- Uso: umbral inicial provisional de una interaccion semanal de catalogo o detalle por usuario activo; si baja de ese nivel, la decision es revisar relevancia, navegacion y encaje funcional antes de ampliar cobertura.
+
+Tareas sugeridas:
+- Definir la formula exacta de cada KPI y su unidad de medida.
+- Fijar un umbral inicial provisional para cada indicador y la decision de producto asociada.
+- Indicar claramente si la primera captura sera manual, automatizada o mixta.
+- Alinear la definicion con las capacidades ya disponibles en catalogo, alertas y detalle.
+- Preparar criterios verificables para que `qa-teams` contraste la documentacion.
+
+Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
+- Si el primer corte funcional de medicion se apoyara en datos manuales de seguimiento mientras se habilita la instrumentacion automatica.
+- Si el KPI de uso debe centrarse en catalogo, detalle, alertas o una combinacion simple de las tres superficies.
+
 ## Issue creada: Consolidar fuentes `.atom` versionadas de `/data` para licitaciones TI Canarias
 
 Titulo sugerido: `[product-manager] PB-011 Consolidar fuentes .atom versionadas de /data para licitaciones TI Canarias`

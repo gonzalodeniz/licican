@@ -16,7 +16,7 @@
 - `PB-016` ya no forma parte del trabajo pendiente: `qa-teams` lo valido en la issue #28 el 2026-04-02, la entrega ya esta integrada en `main` y `product-manager` reconcilia su cierre administrativo el 2026-04-03.
 - `PB-015` ya no forma parte del trabajo pendiente: la issue #16 fue validada por `qa-teams`, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el 2026-04-03.
 - Siguiente recomendacion para `developer-teams`: priorizar las issues tecnicas derivadas de auditoria y dejar `PB-008` como siguiente trabajo documental de medicion.
-- `PB-008` queda despues de las issues tecnicas como siguiente trabajo documental de medicion.
+- `PB-008` queda despues de las issues tecnicas como siguiente trabajo documental de medicion y debe concretarse con al menos una familia de KPI de cobertura, una de adopcion y una de uso, pudiendo arrancar con medicion manual temporal si hace falta.
 - Las decisiones funcionales sobre expedientes mixtos y sobre oportunidades anuladas, desiertas, desistidas o modificadas quedan ya definidas para evitar bloqueo de backlog posterior.
 - En esta revision tambien quedan cerradas cuatro aclaraciones de release para reducir ambiguedad de implementacion:
   - una alerta del MVP requiere al menos un criterio funcional informado
@@ -156,6 +156,8 @@
   - Ajustes de priorizacion segun feedback y resultados de QA.
 - Criterios de salida:
   - Existen definiciones de KPI utilizables para decidir siguientes inversiones funcionales.
+  - La bateria minima cubre cobertura de fuentes priorizadas, adopcion temprana y uso recurrente.
+  - La primera medicion puede ser manual si la instrumentacion completa aun no existe, siempre que la limitacion quede explicitada.
   - El roadmap posterior puede justificarse con evidencia y no solo con intuicion.
 
 ## Release 8: Escalado de consulta y gobierno de retencion

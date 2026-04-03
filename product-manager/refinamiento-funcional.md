@@ -37,6 +37,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Queda definido que una alerta del MVP necesita al menos un criterio funcional informado y no puede guardarse vacia.
 - Queda definido que el alta inicial en pipeline crea siempre el estado `Nueva`.
 - Queda definido que `PB-008` puede avanzar como definicion funcional de KPIs aunque la instrumentacion completa llegue en una iteracion posterior.
+- Queda concretado que `PB-008` debe incluir como minimo una KPI de cobertura de fuentes priorizadas, una de adopcion temprana de alertas y una de uso recurrente del catalogo o del detalle, pudiendo arrancar con medicion manual temporal si la instrumentacion completa todavia no existe.
 - Queda definido que la entrega base de `PB-016` puede considerarse cerrada con la capacidad ya validada; la persistencia avanzada, la autenticacion real y la auditoria centralizada pasan a evoluciones posteriores y no reabren esta issue.
 - Queda incorporada como prioridad explicita la recopilacion desde fuentes reales oficiales nominadas, ya que `PB-007` solo cerraba cobertura funcional y no orden de implementacion de fuentes reales.
 - Queda definido que el rediseño de interfaz solicitado debe materializarse como un item funcional trazable y no como una observacion informal para desarrollo.
@@ -80,6 +81,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
 - La primera vez que una oportunidad entra en pipeline debe hacerlo en estado `Nueva`.
 - La definicion de KPIs de `PB-008` no exige disponer desde el primer dia de toda la instrumentacion automatizada, pero si exige dejar explicita cualquier limitacion de medicion.
+- La bateria minima de `PB-008` debe poder revisarse aunque la medicion inicial se haga de forma manual, siempre que la documentacion incluya definicion, formula, umbral inicial y decision asociada.
 - La primera entrega de `PB-009` debe conservar, como minimo por oportunidad recopilada, referencia a la fuente oficial, enlace oficial, fecha de publicacion o equivalente y estado oficial cuando la fuente lo publique.
 - `PB-009` no cambia por si solo la promesa comercial de cobertura ni adelanta funcionalidades de alertas o pipeline.
 - La siguiente iteracion operativa debe tomar todos los `.atom` presentes en `data/` aunque cambien fecha y hora en su nombre.
