@@ -206,6 +206,9 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Cancelar</a>
           </div>
         </form>
+        <div class="inline-actions">
+          <a class="button-link" href="#editar_nueva_contrasena">Cambiar contrasena</a>
+        </div>
         {_render_selected_user_actions(base_path, selected_user)}
         <h3>Historial de cambios</h3>
         {history_table}
@@ -240,7 +243,6 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
         actions.append(_action_form(base_path, user["id"], "Desactivar", "inactivo"))
     else:
         actions.append(_action_form(base_path, user["id"], "Activar", "activo"))
-    actions.append(f'<a class="button-link" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}#editar_nueva_contrasena">Cambiar contrasena</a>')
     actions.append(_action_button_form(base_path, user["id"], "Borrar", "borrar"))
     return actions
 
