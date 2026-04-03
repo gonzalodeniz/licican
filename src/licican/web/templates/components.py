@@ -56,9 +56,6 @@ def render_state_badge(value: object) -> str:
         tone = "danger"
     elif normalized in {"nueva", "evaluando", "preparando oferta", "presentada", "posterior", "por definir", "propio", "pendiente", "invitado / pendiente de activacion"}:
         tone = "warning"
-    elif normalized in {"baja logica"}:
-        tone = "neutral"
-
     return f'<span class="status-badge {tone}">{text}</span>'
 
 

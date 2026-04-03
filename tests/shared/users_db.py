@@ -234,6 +234,10 @@ class SeededUsersState:
         record = self.users.get(str(user_id))
         return deepcopy(record) if record is not None else None
 
+    def delete_user(self, user_id: str) -> None:
+        self.users.pop(str(user_id), None)
+        self.history.pop(str(user_id), None)
+
 
 class _FakeCursor:
     def __init__(self, state: SeededUsersState):
@@ -263,6 +267,11 @@ class _FakeCursor:
             return
         if normalized == users_module.USER_INSERT_HISTORY_SQL.strip():
             self.state.insert_history(params)
+            self.rows = []
+            self.row = None
+            return
+        if normalized == users_module.USER_DELETE_SQL.strip():
+            self.state.delete_user(str(params[0]))
             self.rows = []
             self.row = None
             return

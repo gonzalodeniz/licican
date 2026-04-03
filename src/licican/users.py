@@ -11,7 +11,7 @@ from licican.config import resolve_database_url
 
 
 DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios"
-USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado", "baja logica")
+USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado")
 USER_ROLES = (
     "administrador",
     "manager",
@@ -89,6 +89,11 @@ INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES (%s, %s, %s, %s)
 """
 
+USER_DELETE_SQL = """
+DELETE FROM usuario
+WHERE id = %s
+"""
+
 USER_SCHEMA_BOOTSTRAP_SQL = """
 CREATE TABLE IF NOT EXISTS usuario (
     id                    TEXT        NOT NULL,
@@ -102,7 +107,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     invitacion_pendiente  BOOLEAN     NOT NULL DEFAULT FALSE,
     CONSTRAINT usuario_pk PRIMARY KEY (id),
     CONSTRAINT usuario_email_uk UNIQUE (email),
-    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica'))
+    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado'))
 );
 ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS observaciones_internas;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS username VARCHAR(100);
@@ -668,71 +673,23 @@ def change_user_state(
     raise KeyError(user_id)
 
 
-def resend_invitation(
+def delete_user(
     user_id: str,
-    *,
-    now: str | datetime | None = None,
-) -> ManagedUser:
+) -> None:
     _, users = load_users()
-    timestamp = _parse_timestamp(now)
     for current in users:
         if current.id != user_id:
             continue
-        if current.estado != "pendiente":
-            raise ValueError("Solo se puede reenviar invitacion a usuarios pendientes de activacion.")
-        updated = ManagedUser(
-            id=current.id,
-            nombre=current.nombre,
-            apellidos=current.apellidos,
-            email=current.email,
-            rol_principal=current.rol_principal,
-            estado=current.estado,
-            fecha_alta=current.fecha_alta,
-            ultimo_acceso=current.ultimo_acceso,
-            invitacion_pendiente=True,
-            username=current.username,
-            password_hash=current.password_hash,
-            historial=(
-                *current.historial,
-                _event("reenvio_invitacion", "Se reenvio la invitacion de activacion.", timestamp),
-            ),
-        )
-        _replace_user_record(updated)
-        return updated
-    raise KeyError(user_id)
-
-
-def reset_access(
-    user_id: str,
-    *,
-    now: str | datetime | None = None,
-) -> ManagedUser:
-    _, users = load_users()
-    timestamp = _parse_timestamp(now)
-    for current in users:
-        if current.id != user_id:
-            continue
-        if current.estado == "pendiente":
-            raise ValueError("No se puede reiniciar el acceso de un usuario pendiente de activacion.")
-        updated = ManagedUser(
-            id=current.id,
-            nombre=current.nombre,
-            apellidos=current.apellidos,
-            email=current.email,
-            rol_principal=current.rol_principal,
-            estado=current.estado,
-            fecha_alta=current.fecha_alta,
-            ultimo_acceso=current.ultimo_acceso,
-            invitacion_pendiente=current.invitacion_pendiente,
-            username=current.username,
-            password_hash=current.password_hash,
-            historial=(
-                *current.historial,
-                _event("reinicio_acceso", "Se reinicio el acceso o la contrasena.", timestamp),
-            ),
-        )
-        _replace_user_record(updated)
-        return updated
+        if _is_admin_role(current.rol_principal) and current.estado == "activo" and _active_admin_count(users, user_id) == 0:
+            raise ValueError("No se puede eliminar el ultimo usuario administrador activo.")
+        try:
+            with _connect() as connection:
+                _ensure_schema(connection)
+                with connection.cursor() as cursor:
+                    cursor.execute(USER_DELETE_SQL, (user_id,))
+        except psycopg2.Error as exc:
+            raise UsersDatabaseError("No se pudo consultar PostgreSQL para gestionar usuarios.") from exc
+        return
     raise KeyError(user_id)
 
 

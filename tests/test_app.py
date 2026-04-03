@@ -826,6 +826,13 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-table-panel"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
+        self.assertIn("Editar", html)
+        self.assertIn("Activar", html)
+        self.assertIn("Cambiar contrasena", html)
+        self.assertIn("Borrar", html)
+        self.assertNotIn("Reenviar invitacion", html)
+        self.assertNotIn("Reiniciar acceso", html)
+        self.assertNotIn("Baja logica", html)
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
@@ -892,9 +899,12 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Nueva contrasena", html)
         self.assertIn("Confirmar nueva contrasena", html)
         self.assertIn(">Cancelar</a>", html)
+        self.assertIn("Editar", html)
+        self.assertIn("Activar", html)
+        self.assertIn("Cambiar contrasena", html)
+        self.assertIn("Borrar", html)
         self.assertIn("Fecha de alta: 02-04-2026 08:30", html)
         self.assertIn("02-04-2026 08:30", html)
-        self.assertIn("Reenviar invitacion", html)
         self.assertIn("Historial de cambios", html)
 
     def test_user_update_route_redirects_back_to_list_after_save(self) -> None:
@@ -922,3 +932,32 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('id="users-table-panel"', html)
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn("Laura Gonzalez", html)
+
+    def test_user_delete_route_redirects_back_to_list_after_delete(self) -> None:
+        state = SeededUsersState.seed()
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-004/borrar", method="POST")
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Usuario+eliminado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertNotIn("Mario Perez", html)
+        self.assertNotIn("usr-004", html)
+
+    def test_user_state_route_redirects_back_to_list_after_activation(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode({"estado": "activo"})
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-003/estado", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Estado+de+usuario+actualizado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-selected-panel"', html)

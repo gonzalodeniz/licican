@@ -29,7 +29,7 @@ from licican.real_source_prioritization import load_real_source_prioritization, 
 from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
-from licican.users import UsersDatabaseError, UserFilters, build_users_payload, change_user_state, create_user, resend_invitation, reset_access, update_user
+from licican.users import UsersDatabaseError, UserFilters, build_users_payload, change_user_state, create_user, delete_user, update_user
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 from licican.web.templates.alerts import render_alerts
 from licican.web.templates.base import page_template
@@ -636,37 +636,22 @@ def handle_change_user_state(request: Request, start_response, id: str) -> list[
     except UsersDatabaseError as exc:
         content = _users_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Estado+de+usuario+actualizado")
+    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Estado+de+usuario+actualizado")
 
 
-def handle_resend_user_invitation(request: Request, start_response, id: str) -> list[bytes]:
+def handle_delete_user(request: Request, start_response, id: str) -> list[bytes]:
     if not has_capability(request.access_context, "manage_users"):
         return _deny_html(request, start_response, "manage_users")
     try:
-        resend_invitation(id)
+        delete_user(id)
     except ValueError as exc:
-        return _users_error_response(request, start_response, f"No se ha reenviado la invitacion de {id}. {exc}", selected_user_id=id)
+        return _users_error_response(request, start_response, f"No se ha eliminado {id}. {exc}", selected_user_id=id)
     except KeyError:
         return _not_found(start_response)
     except UsersDatabaseError as exc:
         content = _users_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Invitacion+reenviada")
-
-
-def handle_reset_user_access(request: Request, start_response, id: str) -> list[bytes]:
-    if not has_capability(request.access_context, "manage_users"):
-        return _deny_html(request, start_response, "manage_users")
-    try:
-        reset_access(id)
-    except ValueError as exc:
-        return _users_error_response(request, start_response, f"No se ha reiniciado el acceso de {id}. {exc}", selected_user_id=id)
-    except KeyError:
-        return _not_found(start_response)
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Acceso+reiniciado")
+    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+eliminado")
 
 
 
@@ -1035,8 +1020,7 @@ routes = [
     Route("POST", "/usuarios", handle_create_user),
     Route("POST", "/usuarios/{id}", handle_update_user),
     Route("POST", "/usuarios/{id}/estado", handle_change_user_state),
-    Route("POST", "/usuarios/{id}/invitacion", handle_resend_user_invitation),
-    Route("POST", "/usuarios/{id}/reiniciar", handle_reset_user_access),
+    Route("POST", "/usuarios/{id}/borrar", handle_delete_user),
     Route("GET", "/api/oportunidades/{id}", handle_api_opportunity_detail),
     Route("GET", "/api/oportunidades", handle_api_opportunities),
     Route("GET", "/api/fuentes", handle_api_sources),

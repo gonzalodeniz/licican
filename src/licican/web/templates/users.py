@@ -185,7 +185,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         f'<option value="{escape(state)}"' + (" selected" if selected_user["estado"] == state else "") + f'>{escape(state)}</option>'
         for state in _state_options()
     )
-    selected_actions = _render_selected_user_actions(base_path, selected_user)
     return f"""
         <h2>Detalle y edicion</h2>
         <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
@@ -207,38 +206,21 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Cancelar</a>
           </div>
         </form>
-        {selected_actions}
+        {_render_selected_user_actions(base_path, selected_user)}
         <h3>Historial de cambios</h3>
         {history_table}
     """
 
 
 def _render_selected_user_actions(base_path: str, selected_user: dict[str, object]) -> str:
-    actions: list[str] = []
-    if selected_user["estado"] == "pendiente":
-        actions.append(_action_button_form(base_path, str(selected_user["id"]), "Reenviar invitacion", "invitacion"))
-    if selected_user["estado"] in {"activo", "bloqueado"}:
-        actions.append(_action_button_form(base_path, str(selected_user["id"]), "Reiniciar acceso", "reiniciar"))
+    actions = _build_action_controls(base_path, selected_user)
     if not actions:
         return ""
     return f'<div class="inline-actions">{ "".join(actions) }</div>'
 
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
-    actions: list[str] = []
-    actions.append(f'<a class="offer-action" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Ver detalle</a>')
-    actions.append(_action_form(base_path, user["id"], "Editar", None, query_href=f"/usuarios/{user['id']}"))
-    if user["estado"] != "activo":
-        actions.append(_action_form(base_path, user["id"], "Activar", "activo"))
-        if user["estado"] in {"inactivo", "baja logica"}:
-            actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
-    else:
-        actions.append(_action_form(base_path, user["id"], "Desactivar", "inactivo"))
-        actions.append(_action_form(base_path, user["id"], "Baja logica", "baja logica"))
-    if user["estado"] == "pendiente":
-        actions.append(_action_button_form(base_path, user["id"], "Reenviar invitacion", "invitacion"))
-    if user["estado"] in {"activo", "bloqueado"}:
-        actions.append(_action_button_form(base_path, user["id"], "Reiniciar acceso", "reiniciar"))
+    actions = _build_action_controls(base_path, user)
     return (
         "<tr>"
         f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
@@ -249,6 +231,18 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Acciones"><div class="inline-actions">{"".join(actions)}</div></td>'
         "</tr>"
     )
+
+
+def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
+    actions: list[str] = []
+    actions.append(f'<a class="offer-action" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Editar</a>')
+    if user["estado"] == "activo":
+        actions.append(_action_form(base_path, user["id"], "Desactivar", "inactivo"))
+    else:
+        actions.append(_action_form(base_path, user["id"], "Activar", "activo"))
+    actions.append(f'<a class="button-link" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}#editar_nueva_contrasena">Cambiar contrasena</a>')
+    actions.append(_action_button_form(base_path, user["id"], "Borrar", "borrar"))
+    return actions
 
 
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
@@ -264,6 +258,12 @@ def _action_form(base_path: str, user_id: str, label: str, state: str | None, qu
 
 
 def _action_button_form(base_path: str, user_id: str, label: str, action: str) -> str:
+    if action == "borrar":
+        return (
+            f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/borrar"))}" onsubmit="return confirm(\'Borrar este usuario?\');">'
+            f'<button type="submit">{escape(label)}</button>'
+            "</form>"
+        )
     return (
         f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/{action}"))}">'
         f'<button type="submit">{escape(label)}</button>'
@@ -272,7 +272,7 @@ def _action_button_form(base_path: str, user_id: str, label: str, action: str) -
 
 
 def _state_options() -> list[str]:
-    return ["pendiente", "activo", "inactivo", "bloqueado", "baja logica"]
+    return ["pendiente", "activo", "inactivo", "bloqueado"]
 
 
 def _role_options() -> list[str]:
