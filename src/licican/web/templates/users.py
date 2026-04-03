@@ -34,6 +34,21 @@ def render_users(
           </div>
         </section>
         """
+    users_table_block = ""
+    if not selected_user_panel:
+        users_table_block = f"""
+        <section class="panel" id="users-table-panel">
+          <div class="panel-body users-table-panel-body">
+            <div class="pagination-status">
+              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+            </div>
+            {_render_pagination(base_path, filters, pagination)}
+            {users_table}
+            {_render_pagination(base_path, filters, pagination)}
+          </div>
+        </section>
+        """
 
     content = f"""
         <section class="users-view" aria-label="Gestion de usuarios">
@@ -74,17 +89,7 @@ def render_users(
           </div>
         </section>
         {selected_user_block}
-        <section class="panel" id="users-table-panel">
-          <div class="panel-body users-table-panel-body">
-            <div class="pagination-status">
-              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-            </div>
-            {_render_pagination(base_path, filters, pagination)}
-            {users_table}
-            {_render_pagination(base_path, filters, pagination)}
-          </div>
-        </section>
+        {users_table_block}
       </section>
       <script>
         (function () {{
@@ -180,8 +185,10 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         f'<option value="{escape(state)}"' + (" selected" if selected_user["estado"] == state else "") + f'>{escape(state)}</option>'
         for state in _state_options()
     )
+    selected_actions = _render_selected_user_actions(base_path, selected_user)
     return f"""
         <h2>Detalle y edicion</h2>
+        <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
@@ -191,13 +198,30 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
             <div><label for="editar_rol">Rol principal</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
+            <div><label for="editar_nueva_contrasena">Nueva contrasena</label><input id="editar_nueva_contrasena" name="nueva_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
+            <div><label for="editar_confirmar_contrasena">Confirmar nueva contrasena</label><input id="editar_confirmar_contrasena" name="confirmar_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
           </div>
           <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
-          <div class="filter-actions"><button type="submit">Guardar cambios</button></div>
+          <div class="filter-actions">
+            <button type="submit">Guardar cambios</button>
+            <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Cancelar</a>
+          </div>
         </form>
+        {selected_actions}
         <h3>Historial de cambios</h3>
         {history_table}
     """
+
+
+def _render_selected_user_actions(base_path: str, selected_user: dict[str, object]) -> str:
+    actions: list[str] = []
+    if selected_user["estado"] == "pendiente":
+        actions.append(_action_button_form(base_path, str(selected_user["id"]), "Reenviar invitacion", "invitacion"))
+    if selected_user["estado"] in {"activo", "bloqueado"}:
+        actions.append(_action_button_form(base_path, str(selected_user["id"]), "Reiniciar acceso", "reiniciar"))
+    if not actions:
+        return ""
+    return f'<div class="inline-actions">{ "".join(actions) }</div>'
 
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:

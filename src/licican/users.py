@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 
+import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
@@ -27,7 +28,9 @@ SELECT
     estado,
     fecha_alta,
     ultimo_acceso,
-    invitacion_pendiente
+    invitacion_pendiente,
+    username,
+    password_hash
 FROM usuario
 ORDER BY apellidos, nombre, email, id
 """
@@ -52,9 +55,15 @@ INSERT INTO usuario (
     estado,
     fecha_alta,
     ultimo_acceso,
-    invitacion_pendiente
+    invitacion_pendiente,
+    username,
+    password_hash,
+    nombre_completo,
+    rol,
+    activo,
+    updated_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 USER_UPDATE_SQL = """
@@ -65,7 +74,13 @@ SET nombre = %s,
     rol_principal = %s,
     estado = %s,
     ultimo_acceso = %s,
-    invitacion_pendiente = %s
+    invitacion_pendiente = %s,
+    username = %s,
+    password_hash = %s,
+    nombre_completo = %s,
+    rol = %s,
+    activo = %s,
+    updated_at = %s
 WHERE id = %s
 """
 
@@ -90,6 +105,14 @@ CREATE TABLE IF NOT EXISTS usuario (
     CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica'))
 );
 ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS observaciones_internas;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS username VARCHAR(100);
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nombre_completo VARCHAR(255);
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS rol VARCHAR(50);
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id         BIGSERIAL NOT NULL,
     usuario_id TEXT NOT NULL,
@@ -105,6 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_usuario_rol_principal ON usuario (rol_principal);
 CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario (email);
 CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
 CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_usuario_auth_username ON usuario (username) WHERE username IS NOT NULL;
 INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, invitacion_pendiente)
 VALUES
     ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
@@ -148,6 +172,8 @@ class ManagedUser:
     ultimo_acceso: str | None
     invitacion_pendiente: bool
     historial: tuple[UserEvent, ...]
+    username: str | None = None
+    password_hash: str | None = None
 
     @property
     def nombre_completo(self) -> str:
@@ -294,6 +320,8 @@ def _user_from_record(record: dict[str, object]) -> ManagedUser:
         fecha_alta=_format_timestamp(record.get("fecha_alta")) or _format_timestamp(_current_timestamp()) or "",
         ultimo_acceso=_format_timestamp(record.get("ultimo_acceso")),
         invitacion_pendiente=bool(record.get("invitacion_pendiente", False)),
+        username=_clean_text(str(record.get("username") or "")),
+        password_hash=_clean_text(str(record.get("password_hash") or "")),
         historial=(),
     )
 
@@ -349,6 +377,8 @@ def _assemble_users(
                 fecha_alta=user.fecha_alta,
                 ultimo_acceso=user.ultimo_acceso,
                 invitacion_pendiente=user.invitacion_pendiente,
+                username=user.username,
+                password_hash=user.password_hash,
                 historial=history,
             )
         )
@@ -539,6 +569,8 @@ def create_user(
         fecha_alta=_format_timestamp(timestamp) or "",
         ultimo_acceso=None,
         invitacion_pendiente=normalized_state == "pendiente",
+        username=normalized_email,
+        password_hash=None,
         historial=_default_history("alta", "Alta inicial de la cuenta.", timestamp),
     )
     _persist_user(new_user)
@@ -553,6 +585,8 @@ def update_user(
     email: str,
     rol_principal: str,
     estado: str,
+    nueva_contrasena: str | None = None,
+    confirmar_contrasena: str | None = None,
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
@@ -570,6 +604,11 @@ def update_user(
         )
         _ensure_admin_guard(users, current, normalized_role, normalized_state)
         timestamp = _parse_timestamp(now)
+        password_hash = current.password_hash
+        history_detail = "Datos basicos, rol o estado actualizados."
+        if nueva_contrasena or confirmar_contrasena:
+            password_hash = _hash_password(nueva_contrasena, confirmar_contrasena)
+            history_detail = "Datos basicos, rol, estado y contrasena actualizados."
         updated = ManagedUser(
             id=current.id,
             nombre=nombre,
@@ -580,9 +619,11 @@ def update_user(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
+            username=current.username or normalized_email,
+            password_hash=password_hash,
             historial=(
                 *current.historial,
-                _event("edicion", "Datos basicos, rol o estado actualizados.", timestamp),
+                _event("edicion", history_detail, timestamp),
             ),
         )
         _replace_user_record(updated)
@@ -615,6 +656,8 @@ def change_user_state(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
+            username=current.username,
+            password_hash=current.password_hash,
             historial=(
                 *current.historial,
                 _event("cambio_estado", f"Estado cambiado a {normalized_state}.", timestamp),
@@ -647,6 +690,8 @@ def resend_invitation(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=True,
+            username=current.username,
+            password_hash=current.password_hash,
             historial=(
                 *current.historial,
                 _event("reenvio_invitacion", "Se reenvio la invitacion de activacion.", timestamp),
@@ -679,6 +724,8 @@ def reset_access(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=current.invitacion_pendiente,
+            username=current.username,
+            password_hash=current.password_hash,
             historial=(
                 *current.historial,
                 _event("reinicio_acceso", "Se reinicio el acceso o la contrasena.", timestamp),
@@ -704,6 +751,12 @@ def _replace_user_record(updated_user: ManagedUser) -> None:
                         updated_user.estado,
                         _parse_timestamp(updated_user.ultimo_acceso) if updated_user.ultimo_acceso else None,
                         updated_user.invitacion_pendiente,
+                        updated_user.username,
+                        updated_user.password_hash,
+                        updated_user.nombre_completo,
+                        updated_user.rol_principal,
+                        updated_user.estado == "activo",
+                        _current_timestamp().replace(tzinfo=None),
                         updated_user.id,
                     ),
                 )
@@ -737,6 +790,12 @@ def _persist_user(new_user: ManagedUser) -> None:
                         _parse_timestamp(new_user.fecha_alta),
                         None,
                         new_user.invitacion_pendiente,
+                        new_user.username,
+                        new_user.password_hash,
+                        new_user.nombre_completo,
+                        new_user.rol_principal,
+                        new_user.estado == "activo",
+                        _current_timestamp().replace(tzinfo=None),
                     ),
                 )
                 for event in new_user.historial:
@@ -768,3 +827,18 @@ def _next_user_id(users: list[ManagedUser]) -> str:
         if candidate not in existing_ids:
             return candidate
         next_number += 1
+
+
+def _hash_password(
+    nueva_contrasena: str | None,
+    confirmar_contrasena: str | None,
+) -> str:
+    password = (nueva_contrasena or "").strip()
+    confirm = (confirmar_contrasena or "").strip()
+    if not password:
+        raise ValueError("La nueva contrasena no puede estar vacia.")
+    if len(password) < 8:
+        raise ValueError("La nueva contrasena debe tener al menos 8 caracteres.")
+    if password != confirm:
+        raise ValueError("La confirmacion de contrasena no coincide.")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")

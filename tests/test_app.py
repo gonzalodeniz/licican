@@ -887,7 +887,38 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Detalle y edicion", html)
         self.assertIn("Laura Gonzalez", html)
+        self.assertIn('id="users-selected-panel"', html)
+        self.assertNotIn('id="users-table-panel"', html)
+        self.assertIn("Nueva contrasena", html)
+        self.assertIn("Confirmar nueva contrasena", html)
+        self.assertIn(">Cancelar</a>", html)
         self.assertIn("Fecha de alta: 02-04-2026 08:30", html)
         self.assertIn("02-04-2026 08:30", html)
         self.assertIn("Reenviar invitacion", html)
         self.assertIn("Historial de cambios", html)
+
+    def test_user_update_route_redirects_back_to_list_after_save(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode(
+            {
+                "nombre": "Laura",
+                "apellidos": "Gonzalez",
+                "email": "laura.gonzalez@licican.local",
+                "rol_principal": "colaborador",
+                "estado": "activo",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
+            }
+        )
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-003", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Usuario+actualizado", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-selected-panel"', html)
+        self.assertIn("Laura Gonzalez", html)

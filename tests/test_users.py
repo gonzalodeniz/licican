@@ -4,6 +4,8 @@ import os
 import unittest
 from unittest.mock import patch
 
+import bcrypt
+
 from licican.users import (
     UserFilters,
     build_users_payload,
@@ -12,6 +14,7 @@ from licican.users import (
     load_users,
     resend_invitation,
     reset_access,
+    update_user,
 )
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
@@ -117,6 +120,40 @@ class UsersModuleTests(unittest.TestCase):
         with self._patch_users_db():
             with self.assertRaisesRegex(ValueError, "pendiente de activacion"):
                 reset_access("usr-003")
+
+    def test_update_user_allows_changing_password(self) -> None:
+        state = SeededUsersState.seed()
+        previous_hash = str(state.users["usr-002"]["password_hash"])
+
+        with self._patch_users_db(state):
+            updated = update_user(
+                "usr-002",
+                nombre="Carlos",
+                apellidos="Mendez",
+                email="carlos.mendez@licican.local",
+                rol_principal="manager",
+                estado="activo",
+                nueva_contrasena="nueva-clave-123",
+                confirmar_contrasena="nueva-clave-123",
+            )
+
+        self.assertNotEqual(previous_hash, updated.password_hash)
+        self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(updated.password_hash).encode("utf-8")))
+        self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(state.users["usr-002"]["password_hash"]).encode("utf-8")))
+
+    def test_update_user_rejects_password_confirmation_mismatch(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "confirmacion de contrasena no coincide"):
+                update_user(
+                    "usr-002",
+                    nombre="Carlos",
+                    apellidos="Mendez",
+                    email="carlos.mendez@licican.local",
+                    rol_principal="manager",
+                    estado="activo",
+                    nueva_contrasena="nueva-clave-123",
+                    confirmar_contrasena="otra-clave-123",
+                )
 
     def test_user_storage_remains_consistent_after_operations(self) -> None:
         state = SeededUsersState.seed()

@@ -30,9 +30,11 @@ class SeededUsersState:
                     "email": "ana.lopez@licican.local",
                     "rol_principal": "administrador",
                     "estado": "activo",
-                    "fecha_alta": _ts("2026-04-01T09:00:00Z"),
-                    "ultimo_acceso": _ts("2026-04-02T08:10:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-04-01T09:00:00Z"),
+                "ultimo_acceso": _ts("2026-04-02T08:10:00Z"),
+                "invitacion_pendiente": False,
+                "username": "ana.lopez@licican.local",
+                "password_hash": "hash-ana",
                 },
                 "usr-002": {
                     "id": "usr-002",
@@ -41,9 +43,11 @@ class SeededUsersState:
                     "email": "carlos.mendez@licican.local",
                     "rol_principal": "manager",
                     "estado": "activo",
-                    "fecha_alta": _ts("2026-04-01T10:15:00Z"),
-                    "ultimo_acceso": _ts("2026-04-02T07:50:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-04-01T10:15:00Z"),
+                "ultimo_acceso": _ts("2026-04-02T07:50:00Z"),
+                "invitacion_pendiente": False,
+                "username": "carlos.mendez@licican.local",
+                "password_hash": "hash-carlos",
                 },
                 "usr-003": {
                     "id": "usr-003",
@@ -52,9 +56,11 @@ class SeededUsersState:
                     "email": "laura.gonzalez@licican.local",
                     "rol_principal": "colaborador",
                     "estado": "pendiente",
-                    "fecha_alta": _ts("2026-04-02T08:30:00Z"),
-                    "ultimo_acceso": None,
-                    "invitacion_pendiente": True,
+                "fecha_alta": _ts("2026-04-02T08:30:00Z"),
+                "ultimo_acceso": None,
+                "invitacion_pendiente": True,
+                "username": "laura.gonzalez@licican.local",
+                "password_hash": None,
                 },
                 "usr-004": {
                     "id": "usr-004",
@@ -63,9 +69,11 @@ class SeededUsersState:
                     "email": "mario.perez@licican.local",
                     "rol_principal": "invitado",
                     "estado": "inactivo",
-                    "fecha_alta": _ts("2026-03-30T11:00:00Z"),
-                    "ultimo_acceso": _ts("2026-03-31T15:15:00Z"),
-                    "invitacion_pendiente": False,
+                "fecha_alta": _ts("2026-03-30T11:00:00Z"),
+                "ultimo_acceso": _ts("2026-03-31T15:15:00Z"),
+                "invitacion_pendiente": False,
+                "username": "mario.perez@licican.local",
+                "password_hash": "hash-mario",
                 },
             },
             history={
@@ -146,6 +154,12 @@ class SeededUsersState:
             fecha_alta,
             ultimo_acceso,
             invitacion_pendiente,
+            username,
+            password_hash,
+            nombre_completo,
+            rol,
+            activo,
+            updated_at,
         ) = params
         if user_id in self.users:
             raise AssertionError("user id already exists in test state")
@@ -161,6 +175,12 @@ class SeededUsersState:
             "fecha_alta": fecha_alta,
             "ultimo_acceso": ultimo_acceso,
             "invitacion_pendiente": bool(invitacion_pendiente),
+            "username": None if username is None else str(username),
+            "password_hash": None if password_hash is None else str(password_hash),
+            "nombre_completo": str(nombre_completo),
+            "rol": str(rol),
+            "activo": bool(activo),
+            "updated_at": updated_at,
         }
 
     def update_user(self, params: tuple[Any, ...]) -> None:
@@ -172,6 +192,12 @@ class SeededUsersState:
             estado,
             ultimo_acceso,
             invitacion_pendiente,
+            username,
+            password_hash,
+            nombre_completo,
+            rol,
+            activo,
+            updated_at,
             user_id,
         ) = params
         record = self.users[str(user_id)]
@@ -184,6 +210,12 @@ class SeededUsersState:
                 "estado": str(estado),
                 "ultimo_acceso": ultimo_acceso,
                 "invitacion_pendiente": bool(invitacion_pendiente),
+                "username": None if username is None else str(username),
+                "password_hash": None if password_hash is None else str(password_hash),
+                "nombre_completo": str(nombre_completo),
+                "rol": str(rol),
+                "activo": bool(activo),
+                "updated_at": updated_at,
             }
         )
 

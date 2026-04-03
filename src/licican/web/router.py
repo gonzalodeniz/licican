@@ -609,6 +609,8 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             email=str(form_data["email"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
+            nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
+            confirmar_contrasena=(form_data.get("confirmar_contrasena") or [""])[0],
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)
@@ -617,7 +619,7 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
     except UsersDatabaseError as exc:
         content = _users_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, f"/usuarios/{id}") + "?mensaje=Usuario+actualizado")
+    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+actualizado")
 
 
 def handle_change_user_state(request: Request, start_response, id: str) -> list[bytes]:
