@@ -1,7 +1,7 @@
 # Borradores de issues de GitHub
 
 ## Estado actual
-- Las unicas issues funcionales que deben permanecer abiertas tras la reconciliacion del 2026-04-03 son `#8` y `#16`.
+- La unica issue funcional que debe permanecer abierta tras la reconciliacion del 2026-04-03 es `#8`.
 - La issue de `PB-005` ya no esta abierta: fue validada por `qa-teams` el 2026-03-31 en la issue #7 y cerrada en GitHub el 2026-04-01.
 - La issue de `PB-010` ya fue creada en GitHub como issue #10 el 2026-03-26 y ya quedo cerrada administrativamente el 2026-03-30 tras validacion, integracion en `main` y borrado de rama.
 - La issue de `PB-011` ya fue creada en GitHub como issue #11 el 2026-03-26, validada por `qa-teams` el 2026-03-27, integrada en `main` por `developer-teams` el 2026-03-28 y cerrada administrativamente por `product-manager` el mismo dia.
@@ -9,7 +9,7 @@
 - La issue de `PB-013` ya fue creada en GitHub como issue #13 el 2026-03-28 y fue cerrada en GitHub el 2026-04-01.
 - La issue tecnica #14 ya fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue de `PB-014` ya fue creada en GitHub como issue #15 para introducir paginacion en el catalogo y la API.
-- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones y pasa a ser la siguiente issue funcional elegible.
+- La issue de `PB-015` ya fue creada en GitHub como issue #16 para introducir un panel de control de conservacion y archivado de licitaciones; fue validada por `qa-teams`, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el 2026-04-03.
 - La issue de `PB-016` ya fue creada en GitHub como issue #28, validada por `qa-teams` el 2026-04-02, integrada en `main` y cerrada administrativamente por `product-manager` el 2026-04-03 dejando `Estado operativo: cerrado`.
 - La issue tecnica `T-002` ya fue creada en GitHub como issue #17 para corregir el filtrado de licitaciones tras la migracion a PostgreSQL, fue validada por `qa-teams` el 2026-03-30, integrada en `main` por `developer-teams` y cerrada administrativamente por `product-manager` el mismo dia.
 - La issue tecnica `T-003` ya fue creada en GitHub como issue #18 para unificar utilidades de texto compartidas.
@@ -109,7 +109,7 @@ Criterios de aceptacion:
 5. Las opciones aun no disponibles no deben presentarse como rutas plenamente operativas; si se muestran, deben quedar marcadas de forma explicita como `proximamente`.
 6. La entrega no debe degradar las superficies ya validadas de catalogo, detalle, filtros y alertas.
 Dependencias: PB-001, PB-002, PB-003 y coordinacion de visibilidad con PB-004 y PB-005 segun estado real de implementacion
-Estado operativo: nuevo
+Estado operativo: cerrado
 
 Contexto funcional:
 - El producto necesita una base de navegacion comun para sostener el crecimiento de catalogo, alertas, pipeline y futuras vistas sin obligar al usuario a reaprender la estructura en cada pantalla.
@@ -216,7 +216,7 @@ Contexto funcional:
 - La tabla archivada debe mantener la misma estructura de datos para no romper trazabilidad ni consultas futuras.
 
 Dependencia operativa vigente:
-- Esta issue pasa a ser la siguiente prioridad funcional abierta porque `PB-005` y `PB-013` ya quedaron cerradas administrativamente.
+- Esta issue ya no permanece abierta; su cierre administrativo queda reconciliado con la validacion de `qa-teams` y la integracion en `main`.
 
 ## Issue creada: Gestion de usuarios de plataforma
 
