@@ -7,10 +7,10 @@ Equipo documental, stakeholders funcionales, equipo tecnico y administracion que
 Dejar una referencia unica y accionable sobre que capacidades estan disponibles hoy en `main`, que evidencia las respalda y que puntos siguen siendo backlog o contradiccion documental abierta.
 
 ## Estado de referencia
-- Fecha de revision: `2026-04-02`
+- Fecha de revision: `2026-04-03`
 - Rama revisada: `main`
 - Verificacion ejecutada:
-  - `PYTHONPATH=src python3 -m pytest -q` -> `131 passed`
+  - `PYTHONPATH=src python3 -m pytest -q` -> `149 passed`
   - comprobacion directa de rutas `/`, `/api/oportunidades`, `/oportunidades/pcsp-cabildo-licencias-2026`, `/api/oportunidades/pcsp-cabildo-licencias-2026`, `/datos-consolidados`, `/api/datos-consolidados`, `/pipeline`, `/api/pipeline`, `/alertas`, `/api/alertas`, `/cobertura-fuentes`, `/api/fuentes`, `/clasificacion-ti`, `/api/clasificacion-ti`, `/kpis` y `/permisos`
   - comprobacion directa de rutas `/usuarios`, `/usuarios/usr-003`, `/api/usuarios` y `/api/usuarios/usr-003`
   - comprobacion de que el arbol versionado actual no contiene snapshots Atom en `data/` y de que la ruta `file` usa `data/opportunities.json` como respaldo cuando no se aportan ficheros Atom

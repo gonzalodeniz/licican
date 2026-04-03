@@ -4,7 +4,7 @@
 Centralizar la documentacion oficial de `Licican` separando con claridad el contenido para usuario final, equipo tecnico y administracion.
 
 ## Estado documental de referencia
-Fecha de revision: `2026-04-02`.
+Fecha de revision: `2026-04-03`.
 
 Esta carpeta documenta el estado real verificable de la rama `main`. En esta revision la entrega minima ejecutable ya incorpora PostgreSQL como backend operativo por defecto para catalogo y detalle, la gestion administrativa de usuarios con persistencia en PostgreSQL, la superficie consolidada de datos de `PB-012`, el pipeline operativo de `PB-005`, la matriz de permisos y los KPIs visibles para administracion.
 La consolidacion de `PB-011` sigue soportada por el codigo y por las pruebas, pero esta checkout no versiona snapshots `.atom` en `data/`; por eso, la carga reproducible desde el arbol actual cae en el respaldo `data/opportunities.json` salvo que se aporten ficheros Atom temporales o externos.
@@ -51,7 +51,7 @@ Las alertas tempranas, el pipeline, la gestion administrativa de usuarios, los d
 
 ## Hallazgos principales de esta revision
 - `main` contiene implementacion Python versionada en `src/licican/`, datos en `data/` y pruebas automatizadas en `tests/`.
-- `PYTHONPATH=src python3 -m pytest -v` ejecuta la suite automatizada del proyecto en esta checkout.
+- `PYTHONPATH=src python3 -m pytest -v` ejecuta la suite automatizada del proyecto en esta checkout, que en esta revision termina en 149 pruebas en verde.
 - `make test` tambien funciona en un entorno con `.venv` disponible.
 - `make run` arranca un servidor WSGI local usando `PORT` desde `.env` y, si ese puerto ya esta ocupado, avanza al siguiente libre.
 - `docker compose up -d --build` levanta la misma aplicacion en contenedor, publica el puerto configurado en `PORT` y monta `data/` como volumen persistente.

@@ -12,6 +12,7 @@ En `main` existe un servicio HTTP local arrancable con `wsgiref.simple_server`. 
 - Entorno virtual activo o directorio `.venv/` disponible si se va a usar `make`.
 - `make` para usar los objetivos definidos en `Makefile`.
 - Un fichero `.env` con `PORT` definido. Si no existe, puede copiarse desde [`.env.example`](/opt/apps/licican/.env.example).
+- Para usar el backend PostgreSQL por defecto, el `.env` debe incluir `DB_PASSWORD` o `LICICAN_DATABASE_URL`; sin una de esas opciones la conexion no se puede resolver.
 - Un fichero `.env` con `DB_PORT` definido si se quiere exponer la BBDD integrada en un puerto distinto; por defecto se usa `15432`.
 - Un fichero `.env` con `LICICAN_CATALOG_BACKEND` definido si se quiere forzar `file`; por defecto se usa PostgreSQL.
 - Un fichero `.env` con `LICICAN_DATABASE_URL` o con las variables `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD` definido si se quiere personalizar la conexion a PostgreSQL.
@@ -52,7 +53,7 @@ Resultado esperado:
 - los KPIs y la matriz de permisos responden en `http://127.0.0.1:<PORT>/kpis` y `http://127.0.0.1:<PORT>/permisos`
 
 ## Resultado esperado en esta revision
-- `make test` ejecuta 131 pruebas en verde con `pytest`.
+- `make test` ejecuta 149 pruebas en verde con `pytest`.
 - `make run` publica el mensaje `Servidor disponible en http://127.0.0.1:<PORT>` segun el valor configurado en `.env`, o el siguiente puerto libre si el solicitado esta ocupado.
 - `docker compose up -d --build` publica la misma aplicacion con el puerto definido por `PORT` y levanta la BBDD integrada.
 - `make docker-psql` abre una terminal `psql` contra `postgres-licitaciones`.

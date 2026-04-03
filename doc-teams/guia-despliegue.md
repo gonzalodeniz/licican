@@ -18,11 +18,11 @@ timeout 2s make run
 docker compose up -d --build
 ```
 
-Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. En contenedor, la app usa `HOST=0.0.0.0` para aceptar conexiones externas al puerto publicado. Si vas a operar pipeline o alertas en una ruta distinta, revisa tambien `LICICAN_PIPELINE_PATH` y `LICICAN_ALERTS_PATH`.
+Si no existe `.env`, copia antes `.env.example` a `.env` y define `PORT`. Para el backend PostgreSQL por defecto, asegúrate tambien de que exista `DB_PASSWORD` o `LICICAN_DATABASE_URL`. En contenedor, la app usa `HOST=0.0.0.0` para aceptar conexiones externas al puerto publicado. Si vas a operar pipeline o alertas en una ruta distinta, revisa tambien `LICICAN_PIPELINE_PATH` y `LICICAN_ALERTS_PATH`.
 
 ## Resultado esperado en esta revision
 - `python3 -m pip install -e .` termina correctamente.
-- `make test` ejecuta 131 pruebas en verde con `pytest`.
+- `make test` ejecuta 149 pruebas en verde con `pytest`.
 - `make run` arranca el servidor local usando `PORT` desde `.env` y, si el puerto esta ocupado, avanza al siguiente libre.
 - `docker compose up -d --build` publica la misma aplicacion en un contenedor, levanta la BBDD integrada y monta `data/` como volumen persistente.
 - En la superficie desplegada responden tambien `/alertas` y `/api/alertas`, que almacenan alertas internas sin notificaciones salientes.
