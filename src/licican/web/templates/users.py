@@ -6,7 +6,14 @@ from urllib.parse import urlencode
 from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_badges, render_role_badge, render_state_badge, render_table
+from licican.web.templates.components import (
+    render_badges,
+    render_icon_button,
+    render_inline_svg_icon,
+    render_role_badge,
+    render_state_badge,
+    render_table,
+)
 from licican.shared.text import format_iso_datetime
 
 
@@ -297,7 +304,7 @@ def _render_users_table(user_rows: list[str]) -> str:
     if not user_rows:
         return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
 
-    headers = ["Usuario", "Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso", "Acciones"]
+    headers = ["Usuario", "Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso"]
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
     return f"""
       <div class="table-wrap users-table-wrap">
@@ -311,7 +318,7 @@ def _render_users_table(user_rows: list[str]) -> str:
             <col class="users-col users-col-last-access" />
             <col class="users-col users-col-actions" />
           </colgroup>
-          <thead><tr>{header_html}</tr></thead>
+          <thead><tr>{header_html}<th style="width: 120px; text-align: right;">ACCIONES</th></tr></thead>
           <tbody>{''.join(user_rows)}</tbody>
         </table>
       </div>
@@ -384,14 +391,23 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Rol principal">{render_role_badge(user["rol_principal"])}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
-        f'<td data-label="Acciones"><div class="actions-cell">{"".join(actions)}</div></td>'
+        f'<td data-label="ACCIONES"><div class="actions-cell">{"".join(actions)}</div></td>'
         "</tr>"
     )
 
 
 def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
     actions: list[str] = []
-    actions.append(f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Modificar</a>')
+    actions.append(
+        render_icon_button(
+            label="Modificar",
+            icon_svg=render_inline_svg_icon("edit"),
+            href=build_url(base_path, f"/usuarios/{user["id"]}"),
+            css_class="btn-icon--edit",
+            tooltip="Modificar",
+            aria_label=f"Modificar usuario {user['nombre_completo']}",
+        )
+    )
     if user["estado"] == "activo":
         actions.append(_action_form(base_path, user["id"], "Dar de baja", "inactivo"))
     else:
@@ -402,15 +418,25 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
 
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
     if query_href is not None:
-        return f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
+        return render_icon_button(
+            label=label,
+            icon_svg=render_inline_svg_icon("more"),
+            href=build_url(base_path, query_href),
+            css_class="btn-icon--edit",
+            tooltip=label,
+            aria_label=label,
+        )
     assert state is not None
-    button_class = "btn-action btn-danger-outline" if state == "inactivo" else "btn-action btn-success-outline"
-    return (
-        f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/estado"))}">'
-        f'<input type="hidden" name="estado" value="{escape(state)}" />'
-        f'<button type="submit" class="{button_class}">{escape(label)}</button>'
-        "</form>"
-    )
+    button_class = "btn-icon--ban" if state == "inactivo" else "btn-icon--restore"
+    icon_name = "ban" if state == "inactivo" else "restore"
+    return f"""
+      <form class="btn-icon-form" method="post" action="{escape(build_url(base_path, f'/usuarios/{user_id}/estado'))}">
+        <input type="hidden" name="estado" value="{escape(state)}" />
+        <button type="submit" class="btn-icon {button_class}" data-tooltip="{escape(label)}" aria-label="{escape(label)}">
+          {render_inline_svg_icon(icon_name)}
+        </button>
+      </form>
+    """
 
 
 def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
@@ -422,7 +448,7 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
       <div class="delete-toggle" id="delete-toggle-{user_id}" data-user-id="{user_id}" data-user-name="{user_name}" data-delete-url="{delete_url}">
         <button
           type="button"
-          class="btn-action btn-contextual delete-toggle-trigger"
+          class="btn-icon btn-icon--more delete-toggle-trigger"
           data-delete-toggle
           data-user-id="{user_id}"
           data-user-name="{user_name}"
@@ -431,11 +457,12 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
           aria-expanded="false"
           onclick="showConfirm(this.dataset.userId, this.dataset.userName)"
           aria-label="Más opciones"
-        >···</button>
+          data-tooltip="Más opciones"
+        >{render_inline_svg_icon("more")}</button>
         <div class="delete-toggle-confirmation" id="delete-confirm-{user_id}" hidden>
           <span class="delete-toggle-message">¿Confirmar eliminación de <strong class="delete-toggle-user-name">{user_name}</strong>?</span>
-          <button type="button" class="btn-action btn-danger-outline delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)">Confirmar</button>
-          <button type="button" class="btn-action btn-neutral delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)">Cancelar</button>
+          <button type="button" class="btn-icon btn-icon--delete delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)" aria-label="Eliminar usuario" data-tooltip="Eliminar">{render_inline_svg_icon("trash")}</button>
+          <button type="button" class="btn-icon btn-icon--edit delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)" aria-label="Cancelar" data-tooltip="Cancelar">{render_inline_svg_icon("cancel")}</button>
         </div>
       </div>
     """
