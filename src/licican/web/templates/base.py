@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from html import escape
 
-from licican.access import AccessContext, ROLE_ADMINISTRATOR, ROLE_COLLABORATOR, ROLE_INVITED, ROLE_MANAGER
+from licican.access import AccessContext, ROLE_ADMINISTRATOR, ROLE_COLLABORATOR, ROLE_INVITED, ROLE_MANAGER, ROLE_SUPERADMIN
 from licican.web.responses import build_url
 
 
@@ -60,6 +60,16 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
 
     by_role = {
         ROLE_ADMINISTRATOR: [
+            {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
+            {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
+            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
+            {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
+            {"label": "Usuarios", "description": "Cuentas, roles y accesos", "icon": "US", "path": "/usuarios", "upcoming": False},
+            {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
+            {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
+            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
+        ],
+        ROLE_SUPERADMIN: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},

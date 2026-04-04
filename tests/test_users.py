@@ -105,6 +105,15 @@ class UsersModuleTests(unittest.TestCase):
         self.assertEqual("usr-003", payload["usuario_seleccionado"]["id"])
         self.assertEqual({"busqueda": "laura", "estado": "pendiente"}, payload["filtros_activos"])
 
+    def test_build_users_payload_matches_username_in_search(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["usr-003"]["username"] = "laura-login"
+        with self._patch_users_db(state):
+            payload = build_users_payload(filters=UserFilters(busqueda="laura-login"))
+
+        self.assertEqual(["usr-003"], [item["id"] for item in payload["usuarios"]])
+        self.assertEqual("laura-login", payload["usuarios"][0]["username"])
+
     def test_update_user_allows_changing_password(self) -> None:
         state = SeededUsersState.seed()
         previous_hash = str(state.users["usr-002"]["password_hash"])
@@ -115,6 +124,7 @@ class UsersModuleTests(unittest.TestCase):
                 nombre="Carlos",
                 apellidos="Mendez",
                 email="carlos.mendez@licican.local",
+                username="carlos-login",
                 rol_principal="manager",
                 estado="activo",
                 nueva_contrasena="nueva-clave-123",
@@ -124,6 +134,8 @@ class UsersModuleTests(unittest.TestCase):
         self.assertNotEqual(previous_hash, updated.password_hash)
         self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(updated.password_hash).encode("utf-8")))
         self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(state.users["usr-002"]["password_hash"]).encode("utf-8")))
+        self.assertEqual("carlos-login", updated.username)
+        self.assertEqual("carlos-login", state.users["usr-002"]["username"])
 
     def test_update_user_rejects_password_confirmation_mismatch(self) -> None:
         with self._patch_users_db():
@@ -146,3 +158,36 @@ class UsersModuleTests(unittest.TestCase):
 
         self.assertNotIn("usr-004", state.users)
         self.assertNotIn("usr-004", state.history)
+
+    def test_superadmin_cannot_be_updated_deleted_or_disabled(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "invitacion_pendiente": False,
+            "username": "admin",
+            "password_hash": bcrypt.hashpw(b"admin12345", bcrypt.gensalt()).decode("utf-8"),
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state):
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                update_user(
+                    "admin",
+                    nombre="Super",
+                    apellidos="Admin",
+                    email="super@licican.local",
+                    username="admin",
+                    rol_principal="superadmin",
+                    estado="activo",
+                )
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                change_user_state("admin", "inactivo")
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                delete_user("admin")

@@ -6,7 +6,14 @@ from urllib.parse import urlencode
 from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_badges, render_state_badge, render_table
+from licican.web.templates.components import (
+    render_badges,
+    render_icon_button,
+    render_inline_svg_icon,
+    render_role_badge,
+    render_state_badge,
+    render_table,
+)
 from licican.shared.text import format_iso_datetime
 
 
@@ -297,12 +304,13 @@ def _render_users_table(user_rows: list[str]) -> str:
     if not user_rows:
         return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
 
-    headers = ["Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso", "Acciones"]
+    headers = ["Usuario", "Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso"]
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
     return f"""
       <div class="table-wrap users-table-wrap">
         <table class="users-table">
           <colgroup>
+            <col class="users-col users-col-username" />
             <col class="users-col users-col-name" />
             <col class="users-col users-col-email" />
             <col class="users-col users-col-role" />
@@ -310,7 +318,7 @@ def _render_users_table(user_rows: list[str]) -> str:
             <col class="users-col users-col-last-access" />
             <col class="users-col users-col-actions" />
           </colgroup>
-          <thead><tr>{header_html}</tr></thead>
+          <thead><tr>{header_html}<th style="width: 120px; text-align: right;">ACCIONES</th></tr></thead>
           <tbody>{''.join(user_rows)}</tbody>
         </table>
       </div>
@@ -326,6 +334,22 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         for item in selected_user["historial"]
     )
     history_table = render_table(["Fecha", "Accion", "Detalle"], [history_rows], "Todavia no hay historial disponible.") if history_rows else '<section class="note">Todavia no hay historial disponible.</section>'
+    login_name = _user_login_name(selected_user)
+    is_superadmin = _is_superadmin_user(selected_user)
+    if is_superadmin:
+        return f"""
+        <h2>Detalle y edicion</h2>
+        <p><strong>Usuario seleccionado:</strong> {escape(login_name)}</p>
+        <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
+        <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
+        <section class="note note-warning">
+          La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.
+          Solo se gestiona mediante el fichero <code>.env</code>.
+        </section>
+        <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
+        <h3>Historial de cambios</h3>
+        {history_table}
+    """
     role_options = "".join(
         f'<option value="{escape(role)}"' + (" selected" if selected_user["rol_principal"] == role else "") + f'>{escape(role.title())}</option>'
         for role in _role_options()
@@ -339,8 +363,9 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
-        <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
+        <form method="post" action="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}"))}">
           <div class="filters">
+            <div><label for="editar_username">Usuario</label><input id="editar_username" name="username" type="text" value="{escape(str(selected_user.get("username") or selected_user["email"]))}" /></div>
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
             <div><label for="editar_apellidos">Apellidos</label><input id="editar_apellidos" name="apellidos" type="text" value="{escape(str(selected_user["apellidos"]))}" required /></div>
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
@@ -373,40 +398,82 @@ def _render_selected_user_actions(base_path: str, selected_user: dict[str, objec
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
     actions = _build_action_controls(base_path, user)
+    login_name = _user_login_name(user)
     return (
         f'<tr id="user-row-{escape(str(user["id"]))}">'
-        f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
-        f'<td data-label="Email">{escape(str(user["email"]))}</td>'
-        f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
+        f'<td data-label="Usuario">{escape(login_name)}</td>'
+        f'<td data-label="Nombre completo">{escape(_display_optional_text(user["nombre_completo"]))}</td>'
+        f'<td data-label="Email">{escape(_display_optional_text(user["email"]))}</td>'
+        f'<td data-label="Rol principal">{render_role_badge(user["rol_principal"])}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
-        f'<td data-label="Acciones"><div class="actions-cell">{"".join(actions)}</div></td>'
+        f'<td data-label="ACCIONES"><div class="actions-cell">{"".join(actions)}</div></td>'
         "</tr>"
     )
 
 
 def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
+    if _is_superadmin_user(user):
+        return []
     actions: list[str] = []
-    actions.append(f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, f"/usuarios/{user["id"]}"))}">Modificar</a>')
+    actions.append(
+        render_icon_button(
+            label="Modificar",
+            icon_svg=render_inline_svg_icon("edit"),
+            href=build_url(base_path, f"/usuarios/{user['id']}"),
+            css_class="btn-icon--edit",
+            tooltip="Modificar",
+            aria_label=f"Modificar usuario {_user_login_name(user)}",
+        )
+    )
     if user["estado"] == "activo":
-        actions.append(_action_form(base_path, user["id"], "Dar de baja", "inactivo"))
+        actions.append(_action_form(base_path, user["id"], "Deshabilitar", "inactivo"))
     else:
         actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
     actions.append(_delete_toggle_fragment(base_path, user))
     return actions
 
 
+def _is_superadmin_user(user: dict[str, object]) -> bool:
+    return str(user.get("rol_principal") or "").strip().lower() == "superadmin"
+
+
+def _display_optional_text(value: object | None) -> str:
+    text = str(value or "").strip()
+    return text if text else "-"
+
+
+def _user_login_name(user: dict[str, object]) -> str:
+    username = str(user.get("username") or "").strip()
+    if username:
+        return username
+    email = str(user.get("email") or "").strip()
+    if email:
+        return email
+    return str(user.get("id") or "")
+
+
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
     if query_href is not None:
-        return f'<a class="btn-action btn-neutral" href="{escape(build_url(base_path, query_href))}">{escape(label)}</a>'
+        return render_icon_button(
+            label=label,
+            icon_svg=render_inline_svg_icon("more"),
+            href=build_url(base_path, query_href),
+            css_class="btn-icon--edit",
+            tooltip=label,
+            aria_label=label,
+        )
     assert state is not None
-    button_class = "btn-action btn-danger-outline" if state == "inactivo" else "btn-action btn-success-outline"
-    return (
-        f'<form method="post" action="{escape(build_url(base_path, f"/usuarios/{user_id}/estado"))}">'
-        f'<input type="hidden" name="estado" value="{escape(state)}" />'
-        f'<button type="submit" class="{button_class}">{escape(label)}</button>'
-        "</form>"
-    )
+    button_class = "btn-icon--ban" if state == "inactivo" else "btn-icon--restore"
+    icon_name = "ban" if state == "inactivo" else "restore"
+    return f"""
+      <form class="btn-icon-form" method="post" action="{escape(build_url(base_path, f'/usuarios/{user_id}/estado'))}">
+        <input type="hidden" name="estado" value="{escape(state)}" />
+        <button type="submit" class="btn-icon {button_class}" data-tooltip="{escape(label)}" aria-label="{escape(label)}">
+          {render_inline_svg_icon(icon_name)}
+        </button>
+      </form>
+    """
 
 
 def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
@@ -418,7 +485,7 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
       <div class="delete-toggle" id="delete-toggle-{user_id}" data-user-id="{user_id}" data-user-name="{user_name}" data-delete-url="{delete_url}">
         <button
           type="button"
-          class="btn-action btn-contextual delete-toggle-trigger"
+          class="btn-icon btn-icon--delete delete-toggle-trigger"
           data-delete-toggle
           data-user-id="{user_id}"
           data-user-name="{user_name}"
@@ -426,12 +493,13 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
           aria-controls="delete-confirm-{user_id}"
           aria-expanded="false"
           onclick="showConfirm(this.dataset.userId, this.dataset.userName)"
-          aria-label="Más opciones"
-        >···</button>
+          aria-label="Eliminar usuario"
+          data-tooltip="Eliminar"
+        >{render_inline_svg_icon("trash")}</button>
         <div class="delete-toggle-confirmation" id="delete-confirm-{user_id}" hidden>
           <span class="delete-toggle-message">¿Confirmar eliminación de <strong class="delete-toggle-user-name">{user_name}</strong>?</span>
-          <button type="button" class="btn-action btn-danger-outline delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)">Confirmar</button>
-          <button type="button" class="btn-action btn-neutral delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)">Cancelar</button>
+          <button type="button" class="btn-icon btn-icon--delete delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)" aria-label="Eliminar usuario" data-tooltip="Eliminar">{render_inline_svg_icon("trash")}</button>
+          <button type="button" class="btn-icon btn-icon--edit delete-toggle-cancel" data-delete-cancel onclick="hideConfirm(this.closest('.delete-toggle').dataset.userId)" aria-label="Cancelar" data-tooltip="Cancelar">{render_inline_svg_icon("cancel")}</button>
         </div>
       </div>
     """
@@ -442,7 +510,7 @@ def _state_options() -> list[str]:
 
 
 def _role_options() -> list[str]:
-    return ["administrador", "manager", "colaborador", "invitado"]
+    return ["administrador", "superadmin", "manager", "colaborador", "invitado"]
 
 
 def _format_user_datetime(value: object | None) -> str:

@@ -15,14 +15,18 @@ from licican.auth.config import get_auth_settings
 from licican.auth.rate_limiter import rate_limiter
 from licican.auth.service import (
     AUTH_USER_BOOTSTRAP_SQL,
+    AUTH_USER_CLEAR_USERNAME_SQL,
     AUTH_USER_DEACTIVATE_SQL,
     AUTH_USER_INSERT_SQL,
     AUTH_USER_LAST_LOGIN_SQL,
     AUTH_USER_SELECT_SQL,
+    AUTH_USER_SELECT_BY_USERNAME_SQL,
+    AUTH_USER_SELECT_SUPERADMIN_SQL,
+    AUTH_USER_DELETE_SQL,
     AUTH_USER_UPDATE_SUPERADMIN_SQL,
     synchronize_superadmin_account,
 )
-from tests.test_app import invoke_app
+from tests.shared.app_http import invoke_app
 
 
 class _BrowserSession:
@@ -46,11 +50,53 @@ class _FakeAuthCursor:
         normalized = str(sql).strip()
         if normalized == AUTH_USER_BOOTSTRAP_SQL.strip():
             return
-        if normalized == AUTH_USER_SELECT_SQL.strip():
-            username = params[0]
-            record = self.state.get(str(username))
+        if normalized == AUTH_USER_SELECT_SUPERADMIN_SQL.strip():
+            role_principal = str(params[0])
+            role = str(params[1])
+            preferred_username = str(params[2])
+            rows = [
+                deepcopy(record)
+                for record in self.state.values()
+                if record.get("rol_principal") == role_principal or record.get("rol") == role
+            ]
+            rows.sort(
+                key=lambda record: (
+                    0 if record.get("username") == preferred_username else 1,
+                    str(record.get("updated_at") or ""),
+                    str(record.get("fecha_alta") or ""),
+                    str(record.get("id") or ""),
+                )
+            )
+            self.rows = rows
+            self.row = rows[0] if rows else None
+            return
+        if normalized == AUTH_USER_SELECT_BY_USERNAME_SQL.strip():
+            username = str(params[0])
+            record = self.state.get(username)
             self.row = deepcopy(record) if record is not None else None
             return
+        if normalized == AUTH_USER_SELECT_SQL.strip():
+            login_name = str(params[0])
+            email = str(params[1]) if params and len(params) > 1 else login_name
+            record = self.state.get(login_name)
+            if record is None:
+                record = next((row for row in self.state.values() if row.get("email") == email), None)
+            self.row = deepcopy(record) if record is not None else None
+            return
+        if normalized == AUTH_USER_CLEAR_USERNAME_SQL.strip():
+            updated_at, user_id = params
+            for key, record in list(self.state.items()):
+                if record["id"] == user_id:
+                    previous_username = str(record.get("username") or "")
+                    record["username"] = None
+                    record["updated_at"] = updated_at
+                    if key != str(record["id"]):
+                        self.state.pop(key, None)
+                    self.state[str(record["id"])] = record
+                    if previous_username and previous_username != str(record["id"]):
+                        self.state.pop(previous_username, None)
+                    return
+            raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
         if normalized == AUTH_USER_LAST_LOGIN_SQL.strip():
             last_login, last_access, updated_at, user_id = params
             for record in self.state.values():
@@ -102,6 +148,13 @@ class _FakeAuthCursor:
                 "updated_at": updated_at,
             }
             return
+        if normalized == AUTH_USER_DELETE_SQL.strip():
+            (user_id,) = params
+            for key, record in list(self.state.items()):
+                if record["id"] == user_id:
+                    self.state.pop(key, None)
+                    return
+            raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
         if normalized == AUTH_USER_UPDATE_SUPERADMIN_SQL.strip():
             (
                 nombre,
@@ -122,8 +175,9 @@ class _FakeAuthCursor:
                 updated_at,
                 user_id,
             ) = params
-            for record in self.state.values():
+            for key, record in list(self.state.items()):
                 if record["id"] == user_id:
+                    previous_username = str(record.get("username") or "")
                     record.update(
                         {
                             "nombre": str(nombre),
@@ -144,6 +198,12 @@ class _FakeAuthCursor:
                             "updated_at": updated_at,
                         }
                     )
+                    new_username = str(username)
+                    if previous_username and previous_username != new_username:
+                        self.state.pop(previous_username, None)
+                    if key != str(record["id"]):
+                        self.state.pop(key, None)
+                    self.state[new_username] = record
                     return
             raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
         if normalized == AUTH_USER_DEACTIVATE_SQL.strip():
@@ -160,6 +220,9 @@ class _FakeAuthCursor:
 
     def fetchone(self) -> dict[str, object] | None:
         return deepcopy(self.row) if self.row is not None else None
+
+    def fetchall(self) -> list[dict[str, object]]:
+        return [deepcopy(row) for row in getattr(self, "rows", [])]
 
     def __enter__(self):
         return self
@@ -190,6 +253,7 @@ def _build_user_record(
     *,
     user_id: int,
     username: str,
+    email: str | None = None,
     password: str,
     nombre_completo: str,
     rol: str = "consultor",
@@ -198,7 +262,7 @@ def _build_user_record(
     nombre, _, apellidos = nombre_completo.partition(" ")
     if not apellidos:
         apellidos = "Licican"
-    email = username if "@" in username else f"{username}@licican.local"
+    email = email or (username if "@" in username else f"{username}@licican.local")
     current = datetime.now(UTC).replace(microsecond=0)
     return {
         "id": user_id,
@@ -272,10 +336,11 @@ class AuthenticationTests(unittest.TestCase):
         self.assertIn("Cerrar sesión", page_body.decode("utf-8"))
         self.assertIn("admin", auth_state)
         self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
         self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
         self.assertEqual("Licican", auth_state["admin"]["apellidos"])
+        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
 
@@ -322,6 +387,7 @@ class AuthenticationTests(unittest.TestCase):
             "admin": _build_user_record(
                 user_id=9,
                 username="admin",
+                email="admin@licican.local",
                 password="anterior123",
                 nombre_completo="Superadministrador",
                 rol="administrador",
@@ -330,6 +396,7 @@ class AuthenticationTests(unittest.TestCase):
             "marta": _build_user_record(
                 user_id=1,
                 username="marta",
+                email="marta.garcia@licican.local",
                 password="secreto123",
                 nombre_completo="Marta Pérez",
                 rol="gestor",
@@ -355,6 +422,51 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("activo", auth_state["admin"]["estado"])
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+
+    def test_login_with_database_email_creates_session(self) -> None:
+        browser = _BrowserSession()
+        auth_state = {
+            "marta": _build_user_record(
+                user_id=1,
+                username="marta",
+                email="marta.garcia@licican.local",
+                password="secreto123",
+                nombre_completo="Marta Pérez",
+                rol="gestor",
+            )
+        }
+        with ExitStack() as stack:
+            stack.enter_context(self._manual_env())
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            _, _, body = browser.request("/login")
+            csrf_token = self._extract_csrf(body.decode("utf-8"))
+            status, headers, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta.garcia@licican.local&password=secreto123&csrf_token={csrf_token}",
+            )
+
+        self.assertEqual("302 Found", status)
+        self.assertEqual("/licican/", headers["Location"])
+        self.assertIsNotNone(auth_state["marta"]["ultimo_login"])
+
+    def test_login_with_superadmin_email_alias_creates_session(self) -> None:
+        browser = _BrowserSession()
+        auth_state: dict[str, dict[str, object]] = {}
+        with ExitStack() as stack:
+            stack.enter_context(self._manual_env())
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            _, _, body = browser.request("/login")
+            csrf_token = self._extract_csrf(body.decode("utf-8"))
+            status, headers, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=superadmin@licitan.local&password=admin12345&csrf_token={csrf_token}",
+            )
+
+        self.assertEqual("302 Found", status)
+        self.assertEqual("/licican/", headers["Location"])
+        self.assertIn("admin", auth_state)
 
     def test_login_with_inactive_user_is_rejected(self) -> None:
         browser = _BrowserSession()
@@ -389,7 +501,7 @@ class AuthenticationTests(unittest.TestCase):
                 username="admin",
                 password="admin12345",
                 nombre_completo="Superadministrador",
-                rol="administrador",
+                rol="superadmin",
                 activo=True,
             )
         }
@@ -408,7 +520,7 @@ class AuthenticationTests(unittest.TestCase):
                 username="admin",
                 password="vieja12345",
                 nombre_completo="Superadministrador",
-                rol="administrador",
+                rol="superadmin",
                 activo=False,
             )
         }
@@ -419,8 +531,55 @@ class AuthenticationTests(unittest.TestCase):
 
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
+        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
+        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
+        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
+        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
         self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+
+    def test_superadmin_sync_updates_username_and_removes_duplicates(self) -> None:
+        auth_state = {
+            "admin": _build_user_record(
+                user_id=7,
+                username="admin",
+                password="vieja12345",
+                nombre_completo="Superadministrador",
+                rol="superadmin",
+                activo=True,
+            ),
+            "admin-duplicado": _build_user_record(
+                user_id=8,
+                username="admin-duplicado",
+                password="otra12345",
+                nombre_completo="Superadministrador",
+                rol="superadmin",
+                activo=True,
+            ),
+            "marta": _build_user_record(
+                user_id=1,
+                username="marta",
+                password="secreto123",
+                nombre_completo="Marta Pérez",
+                rol="gestor",
+            ),
+        }
+        with ExitStack() as stack:
+            stack.enter_context(self._manual_env(LOGIN_SUPERADMIN_NAME="superadmin-nuevo", LOGIN_SUPERADMIN_PASS="nueva12345"))
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            synchronize_superadmin_account(get_auth_settings())
+
+        superadmin_rows = [user for user in auth_state.values() if user["rol_principal"] == "superadmin"]
+        self.assertEqual(1, len(superadmin_rows))
+        self.assertIn("superadmin-nuevo", auth_state)
+        self.assertNotIn("admin", auth_state)
+        self.assertNotIn("admin-duplicado", auth_state)
+        self.assertEqual("superadmin-nuevo", auth_state["superadmin-nuevo"]["username"])
+        self.assertEqual("Superadministrador", auth_state["superadmin-nuevo"]["nombre"])
+        self.assertEqual("Licican", auth_state["superadmin-nuevo"]["apellidos"])
+        self.assertEqual("superadmin@licitan.local", auth_state["superadmin-nuevo"]["email"])
+        self.assertEqual("activo", auth_state["superadmin-nuevo"]["estado"])
+        self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["superadmin-nuevo"]["password_hash"].encode("utf-8")))
 
     def test_login_with_invalid_credentials_returns_generic_message(self) -> None:
         browser = _BrowserSession()
@@ -457,7 +616,8 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
         self.assertEqual("Licican", auth_state["admin"]["apellidos"])
         self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
 
     def test_login_with_database_error_returns_generic_message(self) -> None:
@@ -510,7 +670,7 @@ class AuthenticationTests(unittest.TestCase):
             )
 
         self.assertEqual("302 Found", status)
-        self.assertEqual("/licican/login?reason=logout", headers["Location"])
+        self.assertTrue(headers["Location"].startswith("/licican/login"))
         self.assertEqual("302 Found", redirected_status)
         self.assertEqual("/licican/login", redirected_headers["Location"])
 

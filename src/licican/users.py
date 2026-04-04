@@ -14,6 +14,7 @@ DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios
 USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado")
 USER_ROLES = (
     "administrador",
+    "superadmin",
     "manager",
     "colaborador",
     "invitado",
@@ -191,6 +192,7 @@ class ManagedUser:
             "apellidos": self.apellidos,
             "nombre_completo": self.nombre_completo,
             "email": self.email,
+            "username": self.username,
             "rol_principal": self.rol_principal,
             "estado": self.estado,
             "fecha_alta": self.fecha_alta,
@@ -274,6 +276,8 @@ def _normalize_role(raw: str) -> str:
     normalized = raw.strip().lower()
     aliases = {
         "administrador de plataforma": "administrador",
+        "superadmin": "superadmin",
+        "super administrador": "superadmin",
         "administrador funcional": "manager",
         "responsable": "manager",
         "lector": "invitado",
@@ -287,7 +291,15 @@ def _normalize_state(raw: str) -> str:
 
 
 def _is_admin_role(role: str) -> bool:
-    return _normalize_role(role) == "administrador"
+    return _normalize_role(role) in {"administrador", "superadmin"}
+
+
+def _is_superadmin_user(user: ManagedUser) -> bool:
+    return _normalize_role(user.rol_principal) == "superadmin"
+
+
+def _superadmin_mutation_error() -> ValueError:
+    return ValueError("La cuenta superadmin no puede editarse, deshabilitarse ni borrarse desde la interfaz. Solo se gestiona mediante el fichero .env.")
 
 
 def _connect():
@@ -415,13 +427,15 @@ def _validate_user_fields(
     nombre: str,
     apellidos: str,
     email: str,
+    username: str | None,
     rol_principal: str,
     estado: str,
     user_id: str | None = None,
-) -> tuple[str, str, str, str, str]:
+) -> tuple[str, str, str, str, str, str | None]:
     nombre = _clean_text(nombre) or ""
     apellidos = _clean_text(apellidos) or ""
     email = _clean_text(email) or ""
+    username = _clean_text(username)
     rol_principal = _clean_text(rol_principal) or ""
     estado = _clean_text(estado) or "pendiente"
 
@@ -444,8 +458,30 @@ def _validate_user_fields(
             continue
         if _normalize_email(existing.email) == normalized_email:
             raise ValueError("El email no puede duplicarse entre usuarios.")
+        existing_username = _clean_text(existing.username)
+        if username and existing_username and existing_username == username:
+            raise ValueError("El nombre de usuario no puede duplicarse entre usuarios.")
+        if username and _normalize_email(existing.email) == _normalize_email(username):
+            raise ValueError("El nombre de usuario no puede duplicarse con un email existente.")
+        if existing_username and _normalize_email(existing_username) == normalized_email:
+            raise ValueError("El email no puede duplicarse con un nombre de usuario existente.")
 
-    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado)
+    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado), username
+
+
+def _display_optional_text(value: object | None) -> str:
+    cleaned = _clean_text(str(value or "")) if value is not None else None
+    return cleaned if cleaned else "-"
+
+
+def _login_name_for_user(user: dict[str, object]) -> str:
+    username = _clean_text(str(user.get("username") or ""))
+    if username:
+        return username
+    email = _clean_text(str(user.get("email") or ""))
+    if email:
+        return email
+    return str(user.get("id") or "—")
 
 
 def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
@@ -470,6 +506,7 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
             or query in user.nombre.lower()
             or query in user.apellidos.lower()
             or query in user.email.lower()
+            or (user.username is not None and query in user.username.lower())
         ]
     if normalized.estado:
         result = [user for user in result if user.estado == normalized.estado]
@@ -479,10 +516,9 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
-    present_roles = {user.rol_principal for user in users}
     return {
         "estados": list(USER_STATUSES),
-        "roles": [role for role in USER_ROLES if role in present_roles] or list(USER_ROLES),
+        "roles": list(USER_ROLES),
     }
 
 
@@ -555,11 +591,12 @@ def create_user(
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
-    nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
+    nombre, apellidos, normalized_email, normalized_role, normalized_state, _ = _validate_user_fields(
         users,
         nombre,
         apellidos,
         email,
+        None,
         rol_principal,
         estado,
     )
@@ -588,6 +625,7 @@ def update_user(
     nombre: str,
     apellidos: str,
     email: str,
+    username: str | None = None,
     rol_principal: str,
     estado: str,
     nueva_contrasena: str | None = None,
@@ -598,11 +636,14 @@ def update_user(
     for current in users:
         if current.id != user_id:
             continue
-        nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
+        nombre, apellidos, normalized_email, normalized_role, normalized_state, normalized_username = _validate_user_fields(
             users,
             nombre,
             apellidos,
             email,
+            username,
             rol_principal,
             estado,
             user_id=user_id,
@@ -624,7 +665,7 @@ def update_user(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
-            username=current.username or normalized_email,
+            username=normalized_username or current.username or normalized_email,
             password_hash=password_hash,
             historial=(
                 *current.historial,
@@ -649,6 +690,8 @@ def change_user_state(
     for current in users:
         if current.id != user_id:
             continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
         _ensure_admin_guard(users, current, current.rol_principal, normalized_state)
         timestamp = _parse_timestamp(now)
         updated = ManagedUser(
@@ -680,6 +723,8 @@ def delete_user(
     for current in users:
         if current.id != user_id:
             continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
         if _is_admin_role(current.rol_principal) and current.estado == "activo" and _active_admin_count(users, user_id) == 0:
             raise ValueError("No se puede eliminar el ultimo usuario administrador activo.")
         try:

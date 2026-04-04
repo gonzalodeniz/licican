@@ -644,6 +644,96 @@ button,
   outline-offset: 2px;
 }
 
+.btn-icon-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  position: relative;
+  transition: background 150ms, color 150ms;
+}
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.btn-icon:hover {
+  background: #f3f4f6;
+}
+
+.btn-icon--edit:hover {
+  color: #2563eb;
+}
+
+.btn-icon--ban:hover {
+  color: #dc2626;
+}
+
+.btn-icon--restore:hover {
+  color: #16a34a;
+}
+
+.btn-icon--delete:hover {
+  color: #dc2626;
+}
+
+.btn-icon--more:hover {
+  color: #6b7280;
+}
+
+.btn-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+  z-index: 2;
+}
+
+.btn-icon:hover::after {
+  opacity: 1;
+}
+
+.btn-icon::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1f2937;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+.btn-icon:hover::before {
+  opacity: 1;
+}
+
 .btn-neutral {
   background: #ffffff;
   border-color: #cfd6de;
@@ -811,6 +901,47 @@ button:hover {
   color: #415366;
 }
 
+.badge-rol {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-rol--administrador {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-rol--administrador-funcional {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.badge-rol--colaborador {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.badge-rol--gestor {
+  background: #cffafe;
+  color: #0e7490;
+}
+
+.badge-rol--usuario {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.badge-rol--superadmin {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .pagination-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -938,7 +1069,11 @@ button:hover {
 }
 
 .users-col-name {
-  width: 16%;
+  width: 18%;
+}
+
+.users-col-username {
+  width: 14%;
 }
 
 .users-col-email {
@@ -962,13 +1097,14 @@ button:hover {
 }
 
 .users-col-actions {
-  width: 12%;
+  width: 120px;
 }
 
 .actions-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .users-table .inline-actions {
@@ -984,23 +1120,19 @@ button:hover {
 }
 
 .delete-toggle-confirm {
-  border-color: var(--danger-text);
-  background: var(--danger-bg);
   color: var(--danger-text);
 }
 
 .delete-toggle-confirm:hover {
-  border-color: #a44a4a;
-  background: #f9dede;
   color: var(--danger-text);
 }
 
 .delete-toggle-confirmation {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
-  padding: 8px 10px;
+  padding: 4px 6px;
   border: 1px solid #efc1c1;
   border-radius: 8px;
   background: #fff6f6;

@@ -238,6 +238,28 @@ class SeededUsersState:
         self.users.pop(str(user_id), None)
         self.history.pop(str(user_id), None)
 
+    def superadmin_rows(self, preferred_username: str) -> list[dict[str, Any]]:
+        rows = [
+            deepcopy(record)
+            for record in self.users.values()
+            if record.get("rol_principal") == "superadmin" or record.get("rol") == "superadmin"
+        ]
+        rows.sort(
+            key=lambda row: (
+                0 if row.get("username") == preferred_username else 1,
+                str(row.get("updated_at") or ""),
+                str(row.get("fecha_alta") or ""),
+                str(row.get("id") or ""),
+            )
+        )
+        return rows
+
+    def user_by_username(self, username: str) -> dict[str, Any] | None:
+        for record in self.users.values():
+            if record.get("username") == username:
+                return deepcopy(record)
+        return None
+
 
 class _FakeCursor:
     def __init__(self, state: SeededUsersState):
@@ -287,9 +309,21 @@ class _FakeCursor:
             self.rows = []
             self.row = None
             return
+        if normalized == auth_service.AUTH_USER_SELECT_BY_USERNAME_SQL.strip():
+            username = str(params[0])
+            self.row = self.state.user_by_username(username)
+            self.rows = []
+            return
+        if normalized == auth_service.AUTH_USER_SELECT_SUPERADMIN_SQL.strip():
+            preferred_username = str(params[2])
+            self.rows = self.state.superadmin_rows(preferred_username)
+            self.row = self.rows[0] if self.rows else None
+            return
         if normalized in {
             auth_service.AUTH_USER_INSERT_SQL.strip(),
             auth_service.AUTH_USER_UPDATE_SUPERADMIN_SQL.strip(),
+            auth_service.AUTH_USER_CLEAR_USERNAME_SQL.strip(),
+            auth_service.AUTH_USER_DELETE_SQL.strip(),
             auth_service.AUTH_USER_DEACTIVATE_SQL.strip(),
             auth_service.AUTH_USER_LAST_LOGIN_SQL.strip(),
         }:

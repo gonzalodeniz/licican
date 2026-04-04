@@ -6,6 +6,7 @@ from typing import Mapping
 
 
 ROLE_ADMINISTRATOR = "administrador"
+ROLE_SUPERADMIN = "superadmin"
 ROLE_MANAGER = "manager"
 ROLE_COLLABORATOR = "colaborador"
 ROLE_INVITED = "invitado"
@@ -17,18 +18,36 @@ ROLE_READER = ROLE_INVITED
 DEFAULT_ROLE = ROLE_ADMINISTRATOR
 DEFAULT_USER_IDS = {
     ROLE_ADMINISTRATOR: "administrador-demo",
+    ROLE_SUPERADMIN: "superadmin-demo",
     ROLE_MANAGER: "manager-demo",
     ROLE_COLLABORATOR: "colaborador-demo",
     ROLE_INVITED: "invitado-demo",
 }
 ROLE_LABELS = {
     ROLE_ADMINISTRATOR: "Administrador",
+    ROLE_SUPERADMIN: "Superadmin",
     ROLE_MANAGER: "Manager",
     ROLE_COLLABORATOR: "Colaborador",
     ROLE_INVITED: "Invitado",
 }
 CAPABILITY_MATRIX = {
     ROLE_ADMINISTRATOR: frozenset(
+        {
+            "view_catalog",
+            "view_dataset",
+            "view_alerts",
+            "manage_alerts",
+            "view_pipeline",
+            "manage_pipeline",
+            "view_kpis",
+            "view_permissions",
+            "view_retention",
+            "manage_retention",
+            "view_users",
+            "manage_users",
+        }
+    ),
+    ROLE_SUPERADMIN: frozenset(
         {
             "view_catalog",
             "view_dataset",
@@ -85,7 +104,7 @@ class AccessContext:
 
     @property
     def is_admin(self) -> bool:
-        return self.role == ROLE_ADMINISTRATOR
+        return self.role in {ROLE_ADMINISTRATOR, ROLE_SUPERADMIN}
 
     @property
     def is_manager(self) -> bool:
@@ -108,6 +127,8 @@ def _normalize_role(raw_role: str | None) -> str:
         "administrador de plataforma": ROLE_ADMINISTRATOR,
         "administrador funcional": ROLE_MANAGER,
         "responsable": ROLE_MANAGER,
+        "superadmin": ROLE_SUPERADMIN,
+        "super administrador": ROLE_SUPERADMIN,
         "manager": ROLE_MANAGER,
         "gestor": ROLE_MANAGER,
         "colaborador": ROLE_COLLABORATOR,
