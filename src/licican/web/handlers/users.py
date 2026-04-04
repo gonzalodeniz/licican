@@ -7,6 +7,8 @@ from licican.web.http import (
     deny_html,
     deny_json,
     not_found,
+    parse_catalog_page as _parse_users_page,
+    parse_catalog_page_size as _parse_users_page_size,
     users_data_error_html,
 )
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
@@ -29,27 +31,6 @@ def _parse_user_filters(request: Request):
         estado=(query.get("estado") or [None])[0],
         rol=(query.get("rol") or [None])[0],
     )
-
-
-def _parse_users_page(request: Request) -> int:
-    candidates = request.query.get("page")
-    if not candidates:
-        return 1
-    try:
-        return int(candidates[0])
-    except ValueError:
-        return 1
-
-
-def _parse_users_page_size(request: Request) -> int:
-    candidates = request.query.get("page_size")
-    if not candidates:
-        return 10
-    try:
-        page_size = int(candidates[0])
-    except ValueError:
-        return 10
-    return page_size if page_size in {5, 10, 25, 50} else 10
 
 
 def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
