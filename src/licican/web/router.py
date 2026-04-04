@@ -103,7 +103,10 @@ def _forbidden(start_response, message: str = "CSRF invalido") -> list[bytes]:
 
 def _activate_superadmin_session(request: Request) -> Request:
     settings = get_auth_settings()
-    synchronize_superadmin_account(settings)
+    try:
+        synchronize_superadmin_account(settings)
+    except AuthenticationError:
+        LOGGER.warning("No se pudo sincronizar el superadmin al activar la sesion automatica.")
     request.session.clear()
     request.session.update(
         {
