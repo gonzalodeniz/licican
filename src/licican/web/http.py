@@ -15,7 +15,6 @@ from licican.auth.session import SessionState, now_iso
 from licican.config import normalize_base_path, resolve_pipeline_path
 from licican.pipeline import build_pipeline_payload
 from licican.shared.filters import CatalogFilters
-from licican.users import UserFilters, build_users_payload
 from licican.web.responses import html_body, json_body, send_response
 from licican.web.templates.base import page_template
 
@@ -157,36 +156,6 @@ def parse_catalog_page_size(request: Request) -> int:
     return page_size if page_size in {5, 10, 25, 50} else 10
 
 
-def parse_user_filters(request: Request) -> UserFilters:
-    query = request.query
-    return UserFilters(
-        busqueda=(query.get("busqueda") or [None])[0],
-        estado=(query.get("estado") or [None])[0],
-        rol=(query.get("rol") or [None])[0],
-    )
-
-
-def parse_users_page(request: Request) -> int:
-    candidates = request.query.get("page")
-    if not candidates:
-        return 1
-    try:
-        return int(candidates[0])
-    except ValueError:
-        return 1
-
-
-def parse_users_page_size(request: Request) -> int:
-    candidates = request.query.get("page_size")
-    if not candidates:
-        return 10
-    try:
-        page_size = int(candidates[0])
-    except ValueError:
-        return 10
-    return page_size if page_size in {5, 10, 25, 50} else 10
-
-
 def resolve_request_path(environ: dict[str, object], base_path: str) -> str:
     raw_path = str(environ.get("PATH_INFO", "/") or "/")
     script_name = normalize_base_path(str(environ.get("SCRIPT_NAME") or "")) or base_path
@@ -251,15 +220,6 @@ def visible_pipeline_payload(request: Request) -> dict[str, object]:
     return build_pipeline_payload(
         path=resolve_pipeline_path(),
         usuario_id=None if request.access_context.is_admin else request.access_context.user_id,
-    )
-
-
-def visible_users_payload(request: Request, selected_user_id: str | None = None) -> dict[str, object]:
-    return build_users_payload(
-        filters=parse_user_filters(request),
-        page=parse_users_page(request),
-        page_size=parse_users_page_size(request),
-        selected_user_id=selected_user_id,
     )
 
 

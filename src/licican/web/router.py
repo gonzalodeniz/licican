@@ -8,9 +8,8 @@ from urllib.parse import parse_qs
 from licican.access import has_capability, resolve_access_context
 from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.auth.config import get_auth_settings
-from licican.auth.csrf import ensure_csrf_token, validate_csrf_token
-from licican.auth.rate_limiter import rate_limiter
-from licican.auth.service import AuthenticationError, authenticate_user, synchronize_superadmin_account
+from licican.auth.csrf import ensure_csrf_token
+from licican.auth.service import AuthenticationError, synchronize_superadmin_account
 from licican.auth.session import clear_session, load_session, now_iso, persist_session_headers, timeout_exceeded
 from licican.config import resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
@@ -24,7 +23,16 @@ from licican.retention import (
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
-from licican.users import UsersDatabaseError, change_user_state, create_user, delete_user, update_user
+from licican.web.handlers.auth import handle_login_page, handle_login_submit, handle_logout
+from licican.web.handlers.users import (
+    handle_api_user_detail,
+    handle_api_users,
+    handle_change_user_state,
+    handle_create_user,
+    handle_delete_user,
+    handle_update_user,
+    handle_users_page,
+)
 from licican.web.http import (
     Request,
     Route,
@@ -32,7 +40,6 @@ from licican.web.http import (
     client_ip as _client_ip,
     deny_html as _deny_html,
     deny_json as _deny_json,
-    forbidden as _forbidden,
     is_authenticated as _is_authenticated,
     is_public_path as _is_public_path,
     not_found as _not_found,
@@ -40,16 +47,11 @@ from licican.web.http import (
     parse_catalog_page as _parse_catalog_page,
     parse_catalog_page_size as _parse_catalog_page_size,
     parse_filters_from_multidict as _parse_filters_from_multidict,
-    parse_user_filters as _parse_user_filters,
-    parse_users_page as _parse_users_page,
-    parse_users_page_size as _parse_users_page_size,
     redirect as _redirect,
     resolve_request_path as _resolve_request_path,
     secure_request as _secure_request,
     visible_alerts as _visible_alerts,
     visible_pipeline_payload as _visible_pipeline_payload,
-    visible_users_payload as _visible_users_payload,
-    users_data_error_html as _users_data_error_html,
     retention_data_error_html as _retention_data_error_html,
 )
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
@@ -64,8 +66,6 @@ from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 from licican.web.templates.retention import render_retention_control
-from licican.web.templates.users import render_users
-from licican.web.templates.login import render_login
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 LOGGER = logging.getLogger(__name__)
@@ -94,90 +94,6 @@ def _catalog_data_error_html(base_path: str, message: str) -> str:
         base_path=base_path,
     )
 
-
-def handle_login_page(request: Request, start_response) -> list[bytes]:
-    if _is_authenticated(request.session):
-        return _redirect(start_response, build_url(request.base_path, "/"))
-    ensure_csrf_token(request.session)
-    request.session_state.should_persist = True
-    reason = (request.query.get("reason") or [None])[0]
-    content = render_login(
-        base_path=request.base_path,
-        csrf_token=str(request.session.get("csrf_token") or ""),
-        reason=reason,
-    )
-    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
-def handle_login_submit(request: Request, start_response) -> list[bytes]:
-    form_data = read_form_data(request.environ)
-    if not validate_csrf_token(request.session, (form_data.get("csrf_token") or [None])[0]):
-        return _forbidden(start_response)
-
-    client_ip = _client_ip(request.environ)
-    if rate_limiter.is_limited(client_ip):
-        return send_response(
-            start_response,
-            "429 Too Many Requests",
-            "text/html; charset=utf-8",
-            b"".join(
-                html_body(
-                    render_login(
-                        base_path=request.base_path,
-                        csrf_token=ensure_csrf_token(request.session),
-                        error_message="Demasiados intentos. Espere unos minutos.",
-                    )
-                )
-            ),
-        )
-
-    settings = get_auth_settings()
-    username = (form_data.get("username") or [""])[0]
-    password = (form_data.get("password") or [""])[0]
-    try:
-        user = authenticate_user(username, password, settings)
-    except AuthenticationError as exc:
-        if exc.code != "database_error":
-            rate_limiter.register_failure(client_ip)
-        request.session_state.should_persist = True
-        return send_response(
-            start_response,
-            "401 Unauthorized",
-            "text/html; charset=utf-8",
-            b"".join(
-                html_body(
-                    render_login(
-                        base_path=request.base_path,
-                        csrf_token=ensure_csrf_token(request.session),
-                        error_message=str(exc),
-                    )
-                )
-            ),
-        )
-
-    rate_limiter.reset(client_ip)
-    request.session.clear()
-    ensure_csrf_token(request.session)
-    request.session.update(
-        {
-            "username": user.username,
-            "rol": user.rol,
-            "nombre_completo": user.nombre_completo,
-            "is_superadmin": user.is_superadmin,
-            "last_activity": now_iso(),
-            "auto_login_active": False,
-        }
-    )
-    request.session_state.should_persist = True
-    return _redirect(start_response, build_url(request.base_path, "/"))
-
-
-def handle_logout(request: Request, start_response) -> list[bytes]:
-    form_data = read_form_data(request.environ)
-    if not validate_csrf_token(request.session, (form_data.get("csrf_token") or [None])[0]):
-        return _forbidden(start_response)
-    clear_session(request.session_state)
-    return _redirect(start_response, build_url(request.base_path, "/login?reason=logout"))
 
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
     relative_path = filename
@@ -228,25 +144,6 @@ def handle_pipeline_page(request: Request, start_response) -> list[bytes]:
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
-def handle_users_page(request: Request, start_response, id: str | None = None) -> list[bytes]:
-    if not has_capability(request.access_context, "view_users"):
-        return _deny_html(request, start_response, "view_users")
-    status_message = (request.query.get("mensaje") or [None])[0]
-    selected_user_id = id
-    try:
-        if selected_user_id is None and request.path != "/usuarios":
-            selected_user_id = request.path.rsplit("/", 1)[-1]
-        payload = _visible_users_payload(request, selected_user_id=selected_user_id)
-        content = render_users(payload, request.base_path, None, status_message, request.access_context)
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    except Exception as exc:
-        content = render_users(_visible_users_payload(request), request.base_path, str(exc), status_message, request.access_context)
-        return send_response(start_response, "400 Bad Request", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
 def handle_retention_page(request: Request, start_response) -> list[bytes]:
     if not has_capability(request.access_context, "view_retention"):
         return _deny_html(request, start_response, "view_retention")
@@ -293,103 +190,6 @@ def handle_apply_retention_policy(request: Request, start_response) -> list[byte
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     message = f"Archivado aplicado: {result['archivadas']} licitaciones trasladadas"
     return send_redirect(start_response, build_url(request.base_path, "/conservacion") + f"?mensaje={message.replace(' ', '+')}")
-
-
-def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
-    return {
-        "nombre": (form_data.get("nombre") or [""])[0],
-        "apellidos": (form_data.get("apellidos") or [""])[0],
-        "email": (form_data.get("email") or [""])[0],
-        "username": (form_data.get("username") or [""])[0],
-        "rol_principal": (form_data.get("rol_principal") or [""])[0],
-        "estado": (form_data.get("estado") or ["pendiente"])[0],
-    }
-
-
-def _users_error_response(request: Request, start_response, message: str, status: str = "400 Bad Request", selected_user_id: str | None = None) -> list[bytes]:
-    content = render_users(_visible_users_payload(request, selected_user_id=selected_user_id), request.base_path, message, None, request.access_context)
-    return send_response(start_response, status, "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
-def handle_create_user(request: Request, start_response) -> list[bytes]:
-    if not has_capability(request.access_context, "manage_users"):
-        return _deny_html(request, start_response, "manage_users")
-    form_data = _user_form_values(read_form_data(request.environ))
-    try:
-        create_user(
-            nombre=str(form_data["nombre"]),
-            apellidos=str(form_data["apellidos"]),
-            email=str(form_data["email"]),
-            rol_principal=str(form_data["rol_principal"]),
-            estado=str(form_data["estado"]),
-        )
-    except ValueError as exc:
-        return _users_error_response(request, start_response, str(exc))
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+creado+y+registrado")
-
-
-def handle_update_user(request: Request, start_response, id: str) -> list[bytes]:
-    if not has_capability(request.access_context, "manage_users"):
-        return _deny_html(request, start_response, "manage_users")
-    form_data = _user_form_values(read_form_data(request.environ))
-    try:
-        update_user(
-            id,
-            nombre=str(form_data["nombre"]),
-            apellidos=str(form_data["apellidos"]),
-            email=str(form_data["email"]),
-            username=str(form_data["username"]),
-            rol_principal=str(form_data["rol_principal"]),
-            estado=str(form_data["estado"]),
-            nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
-            confirmar_contrasena=(form_data.get("confirmar_contrasena") or [""])[0],
-        )
-    except ValueError as exc:
-        return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)
-    except KeyError:
-        return _not_found(start_response)
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+actualizado")
-
-
-def handle_change_user_state(request: Request, start_response, id: str) -> list[bytes]:
-    if not has_capability(request.access_context, "manage_users"):
-        return _deny_html(request, start_response, "manage_users")
-    form_data = read_form_data(request.environ)
-    state = (form_data.get("estado") or [""])[0]
-    try:
-        change_user_state(id, state)
-    except ValueError as exc:
-        return _users_error_response(request, start_response, f"No se ha actualizado el estado de {id}. {exc}", selected_user_id=id)
-    except KeyError:
-        return _not_found(start_response)
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Estado+de+usuario+actualizado")
-
-
-def handle_delete_user(request: Request, start_response, id: str) -> list[bytes]:
-    if not has_capability(request.access_context, "manage_users"):
-        return _deny_html(request, start_response, "manage_users")
-    try:
-        delete_user(id)
-    except ValueError as exc:
-        return _users_error_response(request, start_response, f"No se ha eliminado {id}. {exc}", selected_user_id=id)
-    except KeyError:
-        return _not_found(start_response)
-    except UsersDatabaseError as exc:
-        content = _users_data_error_html(request.base_path, str(exc))
-        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
-    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Usuario+eliminado")
-
-
-
 def handle_create_alert(request: Request, start_response) -> list[bytes]:
     if not has_capability(request.access_context, "manage_alerts"):
         return _deny_html(request, start_response, "manage_alerts")
@@ -692,29 +492,6 @@ def handle_permissions_page(request: Request, start_response) -> list[bytes]:
     }
     content = render_permissions_matrix(payload, request.base_path, request.access_context)
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
-def handle_api_users(request: Request, start_response) -> list[bytes]:
-    if not has_capability(request.access_context, "view_users"):
-        return _deny_json(start_response, "view_users")
-    try:
-        payload = _visible_users_payload(request)
-    except UsersDatabaseError as exc:
-        return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", b"".join(json_body({"error": str(exc)})))
-    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(payload)))
-
-
-def handle_api_user_detail(request: Request, start_response, id: str) -> list[bytes]:
-    if not has_capability(request.access_context, "view_users"):
-        return _deny_json(start_response, "view_users")
-    try:
-        payload = _visible_users_payload(request, selected_user_id=id)
-    except UsersDatabaseError as exc:
-        return send_response(start_response, "503 Service Unavailable", "application/json; charset=utf-8", b"".join(json_body({"error": str(exc)})))
-    user = payload.get("usuario_seleccionado")
-    if user is None:
-        return _not_found(start_response)
-    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(user)))
 
 
 routes = [

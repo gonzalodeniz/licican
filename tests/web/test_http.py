@@ -12,9 +12,6 @@ from licican.web.http import (
     parse_catalog_filters,
     parse_catalog_page,
     parse_catalog_page_size,
-    parse_user_filters,
-    parse_users_page,
-    parse_users_page_size,
     resolve_request_path,
     secure_request,
 )
@@ -66,8 +63,6 @@ class HttpHelpersTests(unittest.TestCase):
         )
 
         catalog_filters = parse_catalog_filters(request)
-        user_filters = parse_user_filters(request)
-
         self.assertEqual("backup", catalog_filters.palabra_clave)
         self.assertEqual(1000, catalog_filters.presupuesto_min)
         self.assertIsNone(catalog_filters.presupuesto_max)
@@ -75,8 +70,3 @@ class HttpHelpersTests(unittest.TestCase):
         self.assertEqual("Canarias", catalog_filters.ubicacion)
         self.assertEqual(3, parse_catalog_page(request))
         self.assertEqual(25, parse_catalog_page_size(request))
-        self.assertEqual("Ana", user_filters.busqueda)
-        self.assertEqual("activo", user_filters.estado)
-        self.assertEqual("manager", user_filters.rol)
-        self.assertEqual(3, parse_users_page(request))
-        self.assertEqual(25, parse_users_page_size(request))
