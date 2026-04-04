@@ -20,3 +20,5 @@ run-codex.sh
 *_rol-*.sh
 .env
 .env.*
+reports/
+data-licitaciones/
