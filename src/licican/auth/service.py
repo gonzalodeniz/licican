@@ -213,7 +213,7 @@ def _authenticate_superadmin(username: str, password: str, settings: AuthSetting
     return AuthenticatedUser(
         username=settings.login_superadmin_name,
         rol="superadmin",
-        nombre_completo="Superadministrador",
+        nombre_completo="",
         is_superadmin=True,
     )
 
@@ -242,9 +242,9 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                             AUTH_USER_INSERT_SQL,
                             (
                                 superadmin_id,
-                                _superadmin_display_name(),
-                                _superadmin_surname(),
-                                superadmin_email,
+                                "",
+                                "",
+                                "",
                                 "superadmin",
                                 "activo",
                                 _superadmin_observations(),
@@ -253,7 +253,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 False,
                                 superadmin_name,
                                 password_hash,
-                                "Superadministrador",
+                                "",
                                 "superadmin",
                                 True,
                                 None,
@@ -265,9 +265,9 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                         cursor.execute(
                             AUTH_USER_UPDATE_SUPERADMIN_SQL,
                             (
-                                _superadmin_display_name(),
-                                _superadmin_surname(),
-                                superadmin_email,
+                                "",
+                                "",
+                                "",
                                 "superadmin",
                                 "activo",
                                 _superadmin_observations(),
@@ -276,7 +276,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 False,
                                 superadmin_name,
                                 password_hash,
-                                "Superadministrador",
+                                "",
                                 "superadmin",
                                 True,
                                 existing.get("ultimo_login"),
@@ -294,11 +294,11 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
 
 
 def _superadmin_display_name() -> str:
-    return "Superadministrador"
+    return ""
 
 
 def _superadmin_surname() -> str:
-    return "Licican"
+    return ""
 
 
 def _superadmin_observations() -> str:

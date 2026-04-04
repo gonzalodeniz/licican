@@ -158,3 +158,36 @@ class UsersModuleTests(unittest.TestCase):
 
         self.assertNotIn("usr-004", state.users)
         self.assertNotIn("usr-004", state.history)
+
+    def test_superadmin_cannot_be_updated_deleted_or_disabled(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "invitacion_pendiente": False,
+            "username": "admin",
+            "password_hash": bcrypt.hashpw(b"admin12345", bcrypt.gensalt()).decode("utf-8"),
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state):
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                update_user(
+                    "admin",
+                    nombre="Super",
+                    apellidos="Admin",
+                    email="super@licican.local",
+                    username="admin",
+                    rol_principal="superadmin",
+                    estado="activo",
+                )
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                change_user_state("admin", "inactivo")
+            with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
+                delete_user("admin")

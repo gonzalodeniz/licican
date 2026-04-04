@@ -277,9 +277,10 @@ class AuthenticationTests(unittest.TestCase):
         self.assertIn("admin", auth_state)
         self.assertEqual("activo", auth_state["admin"]["estado"])
         self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
-        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
-        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
+        self.assertEqual("", auth_state["admin"]["email"])
+        self.assertEqual("", auth_state["admin"]["nombre"])
+        self.assertEqual("", auth_state["admin"]["apellidos"])
+        self.assertEqual("", auth_state["admin"]["nombre_completo"])
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
 
@@ -471,6 +472,10 @@ class AuthenticationTests(unittest.TestCase):
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
         self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
+        self.assertEqual("", auth_state["admin"]["nombre"])
+        self.assertEqual("", auth_state["admin"]["apellidos"])
+        self.assertEqual("", auth_state["admin"]["email"])
+        self.assertEqual("", auth_state["admin"]["nombre_completo"])
         self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
 
     def test_login_with_invalid_credentials_returns_generic_message(self) -> None:
@@ -505,9 +510,10 @@ class AuthenticationTests(unittest.TestCase):
             synchronize_superadmin_account(get_auth_settings())
 
         self.assertIn("admin", auth_state)
-        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
-        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
-        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
+        self.assertEqual("", auth_state["admin"]["nombre"])
+        self.assertEqual("", auth_state["admin"]["apellidos"])
+        self.assertEqual("", auth_state["admin"]["email"])
+        self.assertEqual("", auth_state["admin"]["nombre_completo"])
         self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
 

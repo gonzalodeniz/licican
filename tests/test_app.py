@@ -833,6 +833,74 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn('Area / modulo / superficie', filters_panel_html)
         self.assertIn("panel.hidden = true", html)
 
+    def test_users_page_hides_actions_and_personal_data_for_superadmin(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "invitacion_pendiente": False,
+            "username": "admin",
+            "password_hash": "hash-admin",
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state):
+            status, headers, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn('id="user-row-admin"', html)
+        admin_row_start = html.index('id="user-row-admin"')
+        admin_row_html = html[admin_row_start:html.index("</tr>", admin_row_start)]
+        self.assertIn("badge-rol--superadmin", admin_row_html)
+        self.assertIn('data-label="Usuario">admin</td>', admin_row_html)
+        self.assertIn('data-label="Nombre completo">-</td>', admin_row_html)
+        self.assertIn('data-label="Email">-</td>', admin_row_html)
+        self.assertNotIn('data-tooltip="Modificar"', admin_row_html)
+        self.assertNotIn('data-tooltip="Deshabilitar"', admin_row_html)
+        self.assertNotIn('data-tooltip="Reactivar"', admin_row_html)
+        self.assertNotIn('data-tooltip="Eliminar"', admin_row_html)
+
+    def test_superadmin_detail_page_hides_edit_form_and_actions(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "invitacion_pendiente": False,
+            "username": "admin",
+            "password_hash": "hash-admin",
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state):
+            status, headers, body = invoke_app("/usuarios/admin")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.", html)
+        self.assertIn('Usuario seleccionado:</strong> admin', html)
+        self.assertNotIn('id="editar_username"', html)
+        self.assertNotIn('id="editar_nombre"', html)
+        self.assertNotIn('id="editar_email"', html)
+        self.assertNotIn('data-tooltip="Modificar"', html)
+        self.assertNotIn('data-tooltip="Deshabilitar"', html)
+        self.assertNotIn('data-tooltip="Reactivar"', html)
+        self.assertNotIn('data-tooltip="Eliminar"', html)
+
     def test_users_page_denied_to_reader_role(self) -> None:
         with patch.dict(os.environ, {"LICICAN_ROLE": "invitado"}, clear=False):
             status, headers, body = invoke_app("/usuarios")

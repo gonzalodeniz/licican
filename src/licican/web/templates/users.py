@@ -334,6 +334,22 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         for item in selected_user["historial"]
     )
     history_table = render_table(["Fecha", "Accion", "Detalle"], [history_rows], "Todavia no hay historial disponible.") if history_rows else '<section class="note">Todavia no hay historial disponible.</section>'
+    login_name = _user_login_name(selected_user)
+    is_superadmin = _is_superadmin_user(selected_user)
+    if is_superadmin:
+        return f"""
+        <h2>Detalle y edicion</h2>
+        <p><strong>Usuario seleccionado:</strong> {escape(login_name)}</p>
+        <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
+        <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
+        <section class="note note-warning">
+          La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.
+          Solo se gestiona mediante el fichero <code>.env</code>.
+        </section>
+        <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
+        <h3>Historial de cambios</h3>
+        {history_table}
+    """
     role_options = "".join(
         f'<option value="{escape(role)}"' + (" selected" if selected_user["rol_principal"] == role else "") + f'>{escape(role.title())}</option>'
         for role in _role_options()
@@ -347,7 +363,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
-        <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
+        <form method="post" action="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}"))}">
           <div class="filters">
             <div><label for="editar_username">Usuario</label><input id="editar_username" name="username" type="text" value="{escape(str(selected_user.get("username") or selected_user["email"]))}" /></div>
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
@@ -382,12 +398,12 @@ def _render_selected_user_actions(base_path: str, selected_user: dict[str, objec
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
     actions = _build_action_controls(base_path, user)
-    login_name = str(user.get("username") or user["email"])
+    login_name = _user_login_name(user)
     return (
         f'<tr id="user-row-{escape(str(user["id"]))}">'
         f'<td data-label="Usuario">{escape(login_name)}</td>'
-        f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
-        f'<td data-label="Email">{escape(str(user["email"]))}</td>'
+        f'<td data-label="Nombre completo">{escape(_display_optional_text(user["nombre_completo"]))}</td>'
+        f'<td data-label="Email">{escape(_display_optional_text(user["email"]))}</td>'
         f'<td data-label="Rol principal">{render_role_badge(user["rol_principal"])}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
@@ -397,15 +413,17 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
 
 
 def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]:
+    if _is_superadmin_user(user):
+        return []
     actions: list[str] = []
     actions.append(
         render_icon_button(
             label="Modificar",
             icon_svg=render_inline_svg_icon("edit"),
-            href=build_url(base_path, f"/usuarios/{user["id"]}"),
+            href=build_url(base_path, f"/usuarios/{user['id']}"),
             css_class="btn-icon--edit",
             tooltip="Modificar",
-            aria_label=f"Modificar usuario {user['nombre_completo']}",
+            aria_label=f"Modificar usuario {_user_login_name(user)}",
         )
     )
     if user["estado"] == "activo":
@@ -414,6 +432,25 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
         actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
     actions.append(_delete_toggle_fragment(base_path, user))
     return actions
+
+
+def _is_superadmin_user(user: dict[str, object]) -> bool:
+    return str(user.get("rol_principal") or "").strip().lower() == "superadmin"
+
+
+def _display_optional_text(value: object | None) -> str:
+    text = str(value or "").strip()
+    return text if text else "-"
+
+
+def _user_login_name(user: dict[str, object]) -> str:
+    username = str(user.get("username") or "").strip()
+    if username:
+        return username
+    email = str(user.get("email") or "").strip()
+    if email:
+        return email
+    return str(user.get("id") or "")
 
 
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:

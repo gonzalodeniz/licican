@@ -294,6 +294,14 @@ def _is_admin_role(role: str) -> bool:
     return _normalize_role(role) in {"administrador", "superadmin"}
 
 
+def _is_superadmin_user(user: ManagedUser) -> bool:
+    return _normalize_role(user.rol_principal) == "superadmin"
+
+
+def _superadmin_mutation_error() -> ValueError:
+    return ValueError("La cuenta superadmin no puede editarse, deshabilitarse ni borrarse desde la interfaz. Solo se gestiona mediante el fichero .env.")
+
+
 def _connect():
     try:
         return psycopg2.connect(resolve_database_url())
@@ -461,6 +469,21 @@ def _validate_user_fields(
     return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado), username
 
 
+def _display_optional_text(value: object | None) -> str:
+    cleaned = _clean_text(str(value or "")) if value is not None else None
+    return cleaned if cleaned else "-"
+
+
+def _login_name_for_user(user: dict[str, object]) -> str:
+    username = _clean_text(str(user.get("username") or ""))
+    if username:
+        return username
+    email = _clean_text(str(user.get("email") or ""))
+    if email:
+        return email
+    return str(user.get("id") or "—")
+
+
 def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
     return {
         "usuarios_totales": len(users),
@@ -613,6 +636,8 @@ def update_user(
     for current in users:
         if current.id != user_id:
             continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
         nombre, apellidos, normalized_email, normalized_role, normalized_state, normalized_username = _validate_user_fields(
             users,
             nombre,
@@ -665,6 +690,8 @@ def change_user_state(
     for current in users:
         if current.id != user_id:
             continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
         _ensure_admin_guard(users, current, current.rol_principal, normalized_state)
         timestamp = _parse_timestamp(now)
         updated = ManagedUser(
@@ -696,6 +723,8 @@ def delete_user(
     for current in users:
         if current.id != user_id:
             continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
         if _is_admin_role(current.rol_principal) and current.estado == "activo" and _active_admin_count(users, user_id) == 0:
             raise ValueError("No se puede eliminar el ultimo usuario administrador activo.")
         try:
