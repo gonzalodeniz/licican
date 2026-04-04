@@ -448,7 +448,7 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
       <div class="delete-toggle" id="delete-toggle-{user_id}" data-user-id="{user_id}" data-user-name="{user_name}" data-delete-url="{delete_url}">
         <button
           type="button"
-          class="btn-icon btn-icon--more delete-toggle-trigger"
+          class="btn-icon btn-icon--delete delete-toggle-trigger"
           data-delete-toggle
           data-user-id="{user_id}"
           data-user-name="{user_name}"
@@ -456,9 +456,9 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
           aria-controls="delete-confirm-{user_id}"
           aria-expanded="false"
           onclick="showConfirm(this.dataset.userId, this.dataset.userName)"
-          aria-label="Más opciones"
-          data-tooltip="Más opciones"
-        >{render_inline_svg_icon("more")}</button>
+          aria-label="Eliminar usuario"
+          data-tooltip="Eliminar"
+        >{render_inline_svg_icon("trash")}</button>
         <div class="delete-toggle-confirmation" id="delete-confirm-{user_id}" hidden>
           <span class="delete-toggle-message">¿Confirmar eliminación de <strong class="delete-toggle-user-name">{user_name}</strong>?</span>
           <button type="button" class="btn-icon btn-icon--delete delete-toggle-confirm" data-delete-confirm onclick="deleteUser(this.closest('.delete-toggle').dataset.userId)" aria-label="Eliminar usuario" data-tooltip="Eliminar">{render_inline_svg_icon("trash")}</button>
