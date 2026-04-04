@@ -8,7 +8,6 @@ from itsdangerous import URLSafeSerializer
 from unittest.mock import patch
 
 from licican.app import application
-from licican.auth.config import DEFAULT_SESSION_SECRET_KEY
 
 
 def session_cookie(*, role: str, username: str, nombre_completo: str | None = None) -> str:
@@ -61,32 +60,30 @@ def invoke_app(
         env_overrides["LOGIN_SUPERADMIN_NAME"] = "admin"
     if "LOGIN_SUPERADMIN_PASS" not in os.environ:
         env_overrides["LOGIN_SUPERADMIN_PASS"] = "admin12345"
-    if "SESSION_SECRET_KEY" not in os.environ:
-        env_overrides["SESSION_SECRET_KEY"] = "test-session-secret"
+    env_overrides["SESSION_SECRET_KEY"] = "test-session-secret"
     if "LICICAN_CATALOG_BACKEND" not in os.environ:
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     if "LICICAN_ROLE" not in os.environ:
         env_overrides["LICICAN_ROLE"] = "administrador"
+    env_overrides["DB_PASSWORD"] = "test-password"
 
-    if "DB_PASSWORD" not in os.environ:
-        env_overrides["DB_PASSWORD"] = "test-password"
-        if authenticated and not cookies:
-            role = os.environ.get("LICICAN_ROLE", "administrador")
-            username = os.environ.get("LICICAN_USER_ID", "admin-1")
-            session_payload = {
-                "username": username,
-                "rol": role,
-                "nombre_completo": username,
-                "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
-                "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-                "csrf_token": "csrf-test-token",
-                "auto_login_active": False,
-            }
-            signer = URLSafeSerializer(
-                os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
-                salt="licican.session",
-            )
-            cookies = f"licican_session={signer.dumps(session_payload)}"
+    if authenticated and not cookies:
+        role = os.environ.get("LICICAN_ROLE", "administrador")
+        username = os.environ.get("LICICAN_USER_ID", "admin-1")
+        session_payload = {
+            "username": username,
+            "rol": role,
+            "nombre_completo": username,
+            "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
+            "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "csrf_token": "csrf-test-token",
+            "auto_login_active": False,
+        }
+        signer = URLSafeSerializer(
+            os.environ.get("SESSION_SECRET_KEY", env_overrides["SESSION_SECRET_KEY"]),
+            salt="licican.session",
+        )
+        cookies = f"licican_session={signer.dumps(session_payload)}"
 
     if cookies:
         environ["HTTP_COOKIE"] = cookies
