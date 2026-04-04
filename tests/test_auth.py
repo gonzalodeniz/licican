@@ -26,7 +26,7 @@ from licican.auth.service import (
     AUTH_USER_UPDATE_SUPERADMIN_SQL,
     synchronize_superadmin_account,
 )
-from tests.test_app import invoke_app
+from tests.shared.app_http import invoke_app
 
 
 class _BrowserSession:
