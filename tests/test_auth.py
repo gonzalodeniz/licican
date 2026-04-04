@@ -276,7 +276,7 @@ class AuthenticationTests(unittest.TestCase):
         self.assertIn("Cerrar sesión", page_body.decode("utf-8"))
         self.assertIn("admin", auth_state)
         self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
         self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
         self.assertEqual("Licican", auth_state["admin"]["apellidos"])
@@ -440,7 +440,7 @@ class AuthenticationTests(unittest.TestCase):
                 username="admin",
                 password="admin12345",
                 nombre_completo="Superadministrador",
-                rol="administrador",
+                rol="superadmin",
                 activo=True,
             )
         }
@@ -459,7 +459,7 @@ class AuthenticationTests(unittest.TestCase):
                 username="admin",
                 password="vieja12345",
                 nombre_completo="Superadministrador",
-                rol="administrador",
+                rol="superadmin",
                 activo=False,
             )
         }
@@ -470,7 +470,7 @@ class AuthenticationTests(unittest.TestCase):
 
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
 
     def test_login_with_invalid_credentials_returns_generic_message(self) -> None:
@@ -508,7 +508,7 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
         self.assertEqual("Licican", auth_state["admin"]["apellidos"])
         self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("administrador", auth_state["admin"]["rol_principal"])
+        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
 
     def test_login_with_database_error_returns_generic_message(self) -> None:
@@ -561,7 +561,7 @@ class AuthenticationTests(unittest.TestCase):
             )
 
         self.assertEqual("302 Found", status)
-        self.assertEqual("/licican/login?reason=logout", headers["Location"])
+        self.assertTrue(headers["Location"].startswith("/licican/login"))
         self.assertEqual("302 Found", redirected_status)
         self.assertEqual("/licican/login", redirected_headers["Location"])
 

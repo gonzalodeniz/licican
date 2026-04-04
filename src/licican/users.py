@@ -14,6 +14,7 @@ DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios
 USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado")
 USER_ROLES = (
     "administrador",
+    "superadmin",
     "manager",
     "colaborador",
     "invitado",
@@ -275,6 +276,8 @@ def _normalize_role(raw: str) -> str:
     normalized = raw.strip().lower()
     aliases = {
         "administrador de plataforma": "administrador",
+        "superadmin": "superadmin",
+        "super administrador": "superadmin",
         "administrador funcional": "manager",
         "responsable": "manager",
         "lector": "invitado",
@@ -288,7 +291,7 @@ def _normalize_state(raw: str) -> str:
 
 
 def _is_admin_role(role: str) -> bool:
-    return _normalize_role(role) == "administrador"
+    return _normalize_role(role) in {"administrador", "superadmin"}
 
 
 def _connect():
@@ -490,10 +493,9 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
-    present_roles = {user.rol_principal for user in users}
     return {
         "estados": list(USER_STATUSES),
-        "roles": [role for role in USER_ROLES if role in present_roles] or list(USER_ROLES),
+        "roles": list(USER_ROLES),
     }
 
 

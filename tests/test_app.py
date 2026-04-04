@@ -65,18 +65,18 @@ def invoke_app(
         env_overrides["LICICAN_ROLE"] = "administrador"
     if "DB_PASSWORD" not in os.environ:
         env_overrides["DB_PASSWORD"] = "test-password"
-    if authenticated and not cookies:
-        role = os.environ.get("LICICAN_ROLE", "administrador")
-        username = os.environ.get("LICICAN_USER_ID", "admin-1")
-        session_payload = {
-            "username": username,
-            "rol": role,
-            "nombre_completo": username,
-            "is_superadmin": role == "administrador" and username == "admin-1",
-            "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-            "csrf_token": "csrf-test-token",
-            "auto_login_active": False,
-        }
+        if authenticated and not cookies:
+            role = os.environ.get("LICICAN_ROLE", "administrador")
+            username = os.environ.get("LICICAN_USER_ID", "admin-1")
+            session_payload = {
+                "username": username,
+                "rol": role,
+                "nombre_completo": username,
+                "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
+                "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                "csrf_token": "csrf-test-token",
+                "auto_login_active": False,
+            }
         signer = URLSafeSerializer(
             os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
             salt="licican.session",
@@ -778,6 +778,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn("Usuarios totales", html)
         self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("<th>Usuario</th>", html)
+        self.assertIn('value="superadmin"', html)
         self.assertIn("badge-rol--administrador", html)
         self.assertIn("badge-rol--gestor", html)
         self.assertIn("badge-rol--colaborador", html)

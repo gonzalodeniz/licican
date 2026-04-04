@@ -108,7 +108,7 @@ def _activate_superadmin_session(request: Request) -> Request:
     request.session.update(
         {
             "username": settings.login_superadmin_name,
-            "rol": "administrador",
+            "rol": "superadmin",
             "nombre_completo": "Superadministrador",
             "is_superadmin": True,
             "last_activity": now_iso(),

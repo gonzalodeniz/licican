@@ -473,7 +473,7 @@ def _state_options() -> list[str]:
 
 
 def _role_options() -> list[str]:
-    return ["administrador", "manager", "colaborador", "invitado"]
+    return ["administrador", "superadmin", "manager", "colaborador", "invitado"]
 
 
 def _format_user_datetime(value: object | None) -> str:
