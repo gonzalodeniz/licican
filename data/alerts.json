@@ -1,4 +1,185 @@
 {
   "referencia_funcional": "PB-004 · HU-04 · CU-04 · Registro interno de alertas tempranas del MVP",
-  "alerts": []
+  "alerts": [
+    {
+      "id": "alerta-001",
+      "usuario_id": "admin",
+      "activa": true,
+      "creada_en": "2026-04-04T07:25:12Z",
+      "actualizada_en": "2026-04-04T07:25:12Z",
+      "filtros": {
+        "palabra_clave": "backup"
+      },
+      "coincidencias": [
+        {
+          "id": "ser-2025-0000126334",
+          "titulo": "Servicio de derecho al uso de las licencias de software de Backup para el Complejo Hospitalario Universitario Insular-Materno Infantil de Gran Canaria.",
+          "organismo": "Dirección Gerencia del Complejo Hospitalario Universitario Insular Materno Infantil",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Abierto",
+          "presupuesto": 224700,
+          "fecha_publicacion_oficial": "2026-02-17",
+          "fecha_limite": "2025-10-30",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=JI3Y9cNLQF0%2B1TMyIiZmzw%3D%3D"
+        },
+        {
+          "id": "2226-2024",
+          "titulo": "Suministro consistente en la extensión de garantía de servidores, abina de almacenamiento, cabina de backup y switches",
+          "organismo": "Concejal de Área de Turismo, Promoción Cultural, Fiestas, Mercado, Desarrollo Tecnológico Y Organismo Autónomo Local del Ayuntamiento de Puerto de la Cruz",
+          "ubicacion": "Tenerife",
+          "procedimiento": "Abierto simplificado",
+          "presupuesto": 48600,
+          "fecha_publicacion_oficial": "2026-02-18",
+          "fecha_limite": "2025-12-02",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=ES1yufsABC%2BcTfjQf3USOg%3D%3D"
+        }
+      ]
+    },
+    {
+      "id": "alerta-002",
+      "usuario_id": "admin",
+      "activa": true,
+      "creada_en": "2026-04-04T07:25:29Z",
+      "actualizada_en": "2026-04-04T07:25:29Z",
+      "filtros": {
+        "presupuesto_min": 5000
+      },
+      "coincidencias": [
+        {
+          "id": "55-t-20-ss-co-a-0004",
+          "titulo": "Servicio de CPD, Infraestructuras y Operaciones de los Servicios TIC para el Hospital Universitario Ntra. Sra. de Candelaria.",
+          "organismo": "Consejería de Sanidad del Gobierno de Canarias",
+          "ubicacion": "Canarias",
+          "procedimiento": "Abierto",
+          "presupuesto": 2143803,
+          "fecha_publicacion_oficial": "2026-02-19",
+          "fecha_limite": "2020-06-25",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=Lmk0s6SNPS6rz3GQd5r6SQ%3D%3D"
+        },
+        {
+          "id": "xp1321-2020",
+          "titulo": "suministro de software de servidores informáticos.",
+          "organismo": "Consejería de Gobierno de Presidencia y Movilidad Sostenible del Cabildo de Gran Canaria",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Abierto",
+          "presupuesto": 559744,
+          "fecha_publicacion_oficial": "2026-02-25",
+          "fecha_limite": "2020-12-09",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=rAZcwYjQf7GiEJrVRqloyA%3D%3D"
+        },
+        {
+          "id": "51-t-21-ss-ge-a-0012",
+          "titulo": "Servicio de mantenimiento y asistencia técnica de las infraestructuras del CPD de la Gerencia del Hospital Universitario de Gran Canaria Doctor Negrín (HUGCDN)",
+          "organismo": "Dirección Gerencia Hospital Universitario de Gran Canaria Doctor Negrín",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Abierto",
+          "presupuesto": 171200,
+          "fecha_publicacion_oficial": "2026-03-10",
+          "fecha_limite": "2021-03-29",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=f4bXGMR1hEqiEJrVRqloyA%3D%3D"
+        },
+        {
+          "id": "xp0692-2021",
+          "titulo": "Suministro de licencias de software Liferay DXP, última versión, con formación.",
+          "organismo": "Consejería de Gobierno de Presidencia y Movilidad Sostenible del Cabildo de Gran Canaria",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Abierto",
+          "presupuesto": 218146,
+          "fecha_publicacion_oficial": "2026-02-23",
+          "fecha_limite": "2021-06-28",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=v33WBoB3ounnSoTX3z%2F7wA%3D%3D"
+        },
+        {
+          "id": "202100014",
+          "titulo": "Servicio de mantenimiento y soporte de la plataforma SAGE 200c, herramienta de trabajo para la administración de personal y RRHH de la Sociedad Municipal.",
+          "organismo": "Sociedad Municipal de Viviendas y de Servicios de San Cristóbal de La Laguna",
+          "ubicacion": "Canarias",
+          "procedimiento": "Procedimiento 3",
+          "presupuesto": 46116,
+          "fecha_publicacion_oficial": "2026-03-04",
+          "fecha_limite": "2021-06-30",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=OK6V%2Bq%2BcuEABPRBxZ4nJ%2Fg%3D%3D"
+        },
+        {
+          "id": "37-2021-cnt",
+          "titulo": "suministro y servicio de implantación de software destinado a la ampliación del sistema de información corporativo y de la plataforma de administración electrónica tao 2.0 del cabildo insular de la pa",
+          "organismo": "Presidencia del Cabildo Insular de la Palma",
+          "ubicacion": "La Palma",
+          "procedimiento": "Procedimiento 3",
+          "presupuesto": 290569,
+          "fecha_publicacion_oficial": "2026-02-12",
+          "fecha_limite": "2021-09-03",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B%2FM9xIDsHN5vYnTkQN0%2FZA%3D%3D"
+        },
+        {
+          "id": "xp0770-2021",
+          "titulo": "Servicio de implantación y soporte de una plataforma de servicios de administración electrónica",
+          "organismo": "Consejería de Gobierno de Presidencia y Movilidad Sostenible del Cabildo de Gran Canaria",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Abierto",
+          "presupuesto": 1011929,
+          "fecha_publicacion_oficial": "2026-02-23",
+          "fecha_limite": "2021-09-23",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=p1%2FnQ54JPQuiEJrVRqloyA%3D%3D"
+        },
+        {
+          "id": "pao-0120-2021",
+          "titulo": "Servicio de Desarrollo, Mantenimiento y Soporte de los Sistemas de Información para la Gestión en los ámbitos de Educación y Universidades de la Consejería de Educación, Universidades, Cultura y Deportes.",
+          "organismo": "Consejería de Educación, Formación Profesional, Actividad Física y Deportes de Canarias",
+          "ubicacion": "Canarias",
+          "procedimiento": "Abierto",
+          "presupuesto": 10854107,
+          "fecha_publicacion_oficial": "2026-03-23",
+          "fecha_limite": "2021-10-20",
+          "estado": "Adjudicada",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=wVQaXWaaZcGiEJrVRqloyA%3D%3D"
+        },
+        {
+          "id": "xp0578-2021",
+          "titulo": "Suministro de licencias de software",
+          "organismo": "Consejería de Gobierno de Presidencia y Movilidad Sostenible del Cabildo de Gran Canaria",
+          "ubicacion": "Gran Canaria",
+          "procedimiento": "Procedimiento 3",
+          "presupuesto": 204504,
+          "fecha_publicacion_oficial": "2026-02-25",
+          "fecha_limite": "2021-11-04",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=febJiIijYKumq21uxhbaVQ%3D%3D"
+        },
+        {
+          "id": "20-016-sr-rr-ab-aa21",
+          "titulo": "Servicio consistente en el mantenimiento integral de diversos sistemas de Información corporativos y departamentales de la Comunidad Autónoma de Canarias, cofinanciado por el FEDER, en el marco del Programa Operativo FEDER de Canarias 2014-2020",
+          "organismo": "Consejería de Administraciones Públicas, Justicia y Seguridad",
+          "ubicacion": "España",
+          "procedimiento": "Abierto",
+          "presupuesto": 1209100,
+          "fecha_publicacion_oficial": "2026-01-29",
+          "fecha_limite": "2022-01-03",
+          "estado": "Resuelta",
+          "fuente_oficial": "Plataforma de Contratación del Sector Público filtrada por órganos de Canarias",
+          "url_fuente_oficial": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=JAPodtqysVUBPRBxZ4nJ%2Fg%3D%3D"
+        }
+      ]
+    }
+  ]
 }
