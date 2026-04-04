@@ -409,7 +409,7 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
         )
     )
     if user["estado"] == "activo":
-        actions.append(_action_form(base_path, user["id"], "Dar de baja", "inactivo"))
+        actions.append(_action_form(base_path, user["id"], "Deshabilitar", "inactivo"))
     else:
         actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
     actions.append(_delete_toggle_fragment(base_path, user))

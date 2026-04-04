@@ -798,7 +798,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('class="btn-icon btn-icon--restore"', html)
         self.assertIn('class="btn-icon btn-icon--delete delete-toggle-trigger"', html)
         self.assertIn('data-tooltip="Modificar"', html)
-        self.assertIn('data-tooltip="Dar de baja"', html)
+        self.assertIn('data-tooltip="Deshabilitar"', html)
         self.assertIn('data-tooltip="Reactivar"', html)
         self.assertIn('data-tooltip="Eliminar"', html)
         self.assertNotIn("Cambiar contrasena", html)
