@@ -40,7 +40,7 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
         "email": (form_data.get("email") or [""])[0],
         "username": (form_data.get("username") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
-        "estado": (form_data.get("estado") or ["pendiente"])[0],
+        "estado": (form_data.get("estado") or ["deshabilitado"])[0],
     }
 
 

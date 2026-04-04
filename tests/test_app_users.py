@@ -5,17 +5,22 @@ import unittest
 from urllib.parse import urlencode
 from unittest.mock import patch
 
+import psycopg2
+
+from licican.auth.config import get_auth_settings
 from tests.shared.app_http import invoke_app, session_cookie as _session_cookie
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
 class ApplicationUsersTests(unittest.TestCase):
     def setUp(self) -> None:
+        get_auth_settings.cache_clear()
         self._env_patch = patch.dict(os.environ, {"DB_PASSWORD": "test-password"}, clear=False)
         self._env_patch.start()
 
     def tearDown(self) -> None:
         self._env_patch.stop()
+        get_auth_settings.cache_clear()
 
     def _patch_users_db(self, state: SeededUsersState | None = None):
         current_state = state or SeededUsersState.seed()
@@ -106,7 +111,8 @@ class ApplicationUsersTests(unittest.TestCase):
             "estado": "activo",
             "fecha_alta": state.users["usr-001"]["fecha_alta"],
             "ultimo_acceso": None,
-            "invitacion_pendiente": False,
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
             "username": "admin",
             "password_hash": "hash-admin",
         }
@@ -141,7 +147,8 @@ class ApplicationUsersTests(unittest.TestCase):
             "estado": "activo",
             "fecha_alta": state.users["usr-001"]["fecha_alta"],
             "ultimo_acceso": None,
-            "invitacion_pendiente": False,
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
             "username": "admin",
             "password_hash": "hash-admin",
         }
@@ -165,12 +172,25 @@ class ApplicationUsersTests(unittest.TestCase):
 
     def test_users_page_denied_to_reader_role(self) -> None:
         invited_cookie = _session_cookie(role="invitado", username="invitado-1", nombre_completo="Invitado Demo")
-        with patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
+        with self._patch_users_db(), patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
             status, headers, body = invoke_app("/usuarios", cookies=invited_cookie)
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
+
+    def test_users_page_shows_database_unavailable_message_when_postgresql_fails(self) -> None:
+        with patch("licican.users.psycopg2.connect", side_effect=psycopg2.OperationalError("db down")):
+            status, headers, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("503 Service Unavailable", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Usuarios temporalmente no disponibles", html)
+        self.assertIn("El modulo de gestion de usuarios requiere acceso a la base de datos configurada.", html)
+        self.assertIn("Base de datos de usuarios no disponible", html)
+        self.assertIn("No se pudo consultar PostgreSQL para gestionar usuarios.", html)
+        self.assertIn("La gestion de usuarios depende de PostgreSQL y no puede renderizarse mientras la conexion no responda.", html)
 
     def test_user_creation_route_redirects_and_persists_account(self) -> None:
         state = SeededUsersState.seed()
@@ -180,7 +200,7 @@ class ApplicationUsersTests(unittest.TestCase):
                 "apellidos": "Santos",
                 "email": "eva.santos@licican.local",
                 "rol_principal": "manager",
-                "estado": "pendiente",
+                "estado": "deshabilitado",
             }
         )
         with self._patch_users_db(state):
@@ -194,7 +214,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Eva Santos", html)
         self.assertIn("eva.santos@licican.local", html)
         self.assertIn("usr-005", html)
-        self.assertIn("pendiente", html)
+        self.assertIn("deshabilitado", html)
 
     def test_user_detail_page_shows_selected_user_history(self) -> None:
         with self._patch_users_db():

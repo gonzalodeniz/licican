@@ -203,7 +203,7 @@ def application(environ, start_response):
     try:
         synchronize_superadmin_account(settings)
     except AuthenticationError:
-        LOGGER.warning("No se pudo sincronizar el superadmin al procesar la petición.")
+        LOGGER.debug("No se pudo sincronizar el superadmin al procesar la petición.")
     base_path = resolve_base_path()
     query = parse_qs(str(environ.get("QUERY_STRING", "")), keep_blank_values=False)
     session_state = load_session(environ, settings)

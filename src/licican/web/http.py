@@ -80,7 +80,7 @@ def activate_superadmin_session(request: Request) -> Request:
     try:
         synchronize_superadmin_account(settings)
     except AuthenticationError:
-        LOGGER.warning("No se pudo sincronizar el superadmin al activar la sesion automatica.")
+        LOGGER.debug("No se pudo sincronizar el superadmin al activar la sesion automatica.")
     request.session.clear()
     request.session.update(
         {

@@ -72,7 +72,7 @@ def render_users(
                 <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
                 <div><label for="nuevo_rol">Rol</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in _form_role_options(available_filters["roles"]))}</select></div>
-                <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
+                <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "deshabilitado" else '') + f'>{escape(item)}</option>' for item in _state_options_for_form())}</select></div>
               </div>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
             </form>
@@ -356,7 +356,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     )
     state_options = "".join(
         f'<option value="{escape(state)}"' + (" selected" if selected_user["estado"] == state else "") + f'>{escape(state)}</option>'
-        for state in _state_options()
+        for state in _state_options_for_form(str(selected_user["estado"]))
     )
     return f"""
         <h2>Detalle y edicion</h2>
@@ -427,7 +427,7 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
         )
     )
     if user["estado"] == "activo":
-        actions.append(_action_form(base_path, user["id"], "Deshabilitar", "inactivo"))
+        actions.append(_action_form(base_path, user["id"], "Deshabilitar", "deshabilitado"))
     else:
         actions.append(_action_form(base_path, user["id"], "Reactivar", "activo"))
     actions.append(_delete_toggle_fragment(base_path, user))
@@ -464,8 +464,8 @@ def _action_form(base_path: str, user_id: str, label: str, state: str | None, qu
             aria_label=label,
         )
     assert state is not None
-    button_class = "btn-icon--ban" if state == "inactivo" else "btn-icon--restore"
-    icon_name = "ban" if state == "inactivo" else "restore"
+    button_class = "btn-icon--ban" if state == "deshabilitado" else "btn-icon--restore"
+    icon_name = "ban" if state == "deshabilitado" else "restore"
     return f"""
       <form class="btn-icon-form" method="post" action="{escape(build_url(base_path, f'/usuarios/{user_id}/estado'))}">
         <input type="hidden" name="estado" value="{escape(state)}" />
@@ -506,7 +506,14 @@ def _delete_toggle_fragment(base_path: str, user: dict[str, object]) -> str:
 
 
 def _state_options() -> list[str]:
-    return ["pendiente", "activo", "inactivo", "bloqueado"]
+    return ["activo", "deshabilitado", "bloqueado"]
+
+
+def _state_options_for_form(current_state: str | None = None) -> list[str]:
+    states = ["activo", "deshabilitado"]
+    if current_state == "bloqueado":
+        states.append("bloqueado")
+    return states
 
 
 def _role_options() -> list[str]:

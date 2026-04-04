@@ -52,7 +52,7 @@ def render_state_badge(value: object) -> str:
     tone = "neutral"
     if normalized in {"resuelta", "adjudicada", "activa", "mvp", "global"}:
         tone = "success"
-    elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva", "bloqueado"}:
+    elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva", "deshabilitado", "bloqueado"}:
         tone = "danger"
     elif normalized in {"nueva", "evaluando", "preparando oferta", "presentada", "posterior", "por definir", "propio", "pendiente", "invitado / pendiente de activacion"}:
         tone = "warning"

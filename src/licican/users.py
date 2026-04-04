@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from licican.auth.config import get_auth_settings
 from licican.config import resolve_database_url
 
 
 DEFAULT_REFERENCE = "PB-016 - HU-16 - CU-16 - Gestion administrativa de usuarios"
-USER_STATUSES = ("activo", "inactivo", "pendiente", "bloqueado")
+USER_STATUSES = ("activo", "deshabilitado", "bloqueado")
 USER_ROLES = (
     "administrador",
     "superadmin",
@@ -29,7 +30,8 @@ SELECT
     estado,
     fecha_alta,
     ultimo_acceso,
-    invitacion_pendiente,
+    failed_login_attempts,
+    bloqueado_hasta,
     username,
     password_hash
 FROM usuario
@@ -56,7 +58,8 @@ INSERT INTO usuario (
     estado,
     fecha_alta,
     ultimo_acceso,
-    invitacion_pendiente,
+    failed_login_attempts,
+    bloqueado_hasta,
     username,
     password_hash,
     nombre_completo,
@@ -64,7 +67,7 @@ INSERT INTO usuario (
     activo,
     updated_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 USER_UPDATE_SQL = """
@@ -75,7 +78,8 @@ SET nombre = %s,
     rol_principal = %s,
     estado = %s,
     ultimo_acceso = %s,
-    invitacion_pendiente = %s,
+    failed_login_attempts = %s,
+    bloqueado_hasta = %s,
     username = %s,
     password_hash = %s,
     nombre_completo = %s,
@@ -105,20 +109,35 @@ CREATE TABLE IF NOT EXISTS usuario (
     estado                TEXT        NOT NULL,
     fecha_alta            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso         TIMESTAMPTZ,
-    invitacion_pendiente  BOOLEAN     NOT NULL DEFAULT FALSE,
     CONSTRAINT usuario_pk PRIMARY KEY (id),
     CONSTRAINT usuario_email_uk UNIQUE (email),
-    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado'))
+    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'deshabilitado', 'bloqueado'))
 );
 ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS observaciones_internas;
+ALTER TABLE IF EXISTS usuario DROP CONSTRAINT IF EXISTS usuario_estado_ck;
+ALTER TABLE IF EXISTS usuario DROP COLUMN IF EXISTS invitacion_pendiente;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS username VARCHAR(100);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nombre_completo VARCHAR(255);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS rol VARCHAR(50);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS bloqueado_hasta TIMESTAMPTZ;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+UPDATE usuario
+SET estado = CASE
+        WHEN estado IN ('activo', 'deshabilitado', 'bloqueado') THEN estado
+        ELSE 'deshabilitado'
+    END,
+    activo = CASE
+        WHEN COALESCE(NULLIF(estado, ''), 'deshabilitado') = 'activo' THEN TRUE
+        ELSE FALSE
+    END,
+    failed_login_attempts = COALESCE(failed_login_attempts, 0),
+    bloqueado_hasta = NULL;
+ALTER TABLE usuario ADD CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'deshabilitado', 'bloqueado'));
 CREATE TABLE IF NOT EXISTS usuario_historial (
     id         BIGSERIAL NOT NULL,
     usuario_id TEXT NOT NULL,
@@ -135,19 +154,19 @@ CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario (email);
 CREATE INDEX IF NOT EXISTS idx_usuario_fecha_alta ON usuario (fecha_alta);
 CREATE INDEX IF NOT EXISTS idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_usuario_auth_username ON usuario (username) WHERE username IS NOT NULL;
-INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, invitacion_pendiente)
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, failed_login_attempts, bloqueado_hasta)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', 0, NULL),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', 0, NULL),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'deshabilitado', '2026-04-02T08:30:00Z', NULL, 0, NULL),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'deshabilitado', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', 0, NULL)
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
 VALUES
     ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
     ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
     ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
-    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
+    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Alta inicial de la cuenta.'),
     ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de invitado.'),
     ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
 ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
@@ -176,8 +195,9 @@ class ManagedUser:
     estado: str
     fecha_alta: str
     ultimo_acceso: str | None
-    invitacion_pendiente: bool
     historial: tuple[UserEvent, ...]
+    failed_login_attempts: int = 0
+    bloqueado_hasta: str | None = None
     username: str | None = None
     password_hash: str | None = None
 
@@ -197,7 +217,8 @@ class ManagedUser:
             "estado": self.estado,
             "fecha_alta": self.fecha_alta,
             "ultimo_acceso": self.ultimo_acceso,
-            "invitacion_pendiente": self.invitacion_pendiente,
+            "failed_login_attempts": self.failed_login_attempts,
+            "bloqueado_hasta": self.bloqueado_hasta,
             "historial": [event.to_payload() for event in self.historial],
         }
 
@@ -287,7 +308,16 @@ def _normalize_role(raw: str) -> str:
 
 
 def _normalize_state(raw: str) -> str:
-    return raw.strip().lower()
+    normalized = raw.strip().lower()
+    return normalized if normalized in {"activo", "deshabilitado", "bloqueado"} else "deshabilitado"
+
+
+def _state_metadata_for_user(state: str, now: datetime | None = None) -> tuple[int, str | None]:
+    if state == "bloqueado":
+        settings = get_auth_settings()
+        moment = now or _current_timestamp()
+        return settings.login_max_failed_attempts, _format_timestamp(moment + timedelta(minutes=settings.login_lock_minutes))
+    return 0, None
 
 
 def _is_admin_role(role: str) -> bool:
@@ -333,10 +363,11 @@ def _user_from_record(record: dict[str, object]) -> ManagedUser:
         apellidos=str(record.get("apellidos") or ""),
         email=str(record.get("email") or ""),
         rol_principal=str(record.get("rol_principal") or ""),
-        estado=str(record.get("estado") or "pendiente"),
+        estado=_normalize_state(str(record.get("estado") or "deshabilitado")),
         fecha_alta=_format_timestamp(record.get("fecha_alta")) or _format_timestamp(_current_timestamp()) or "",
         ultimo_acceso=_format_timestamp(record.get("ultimo_acceso")),
-        invitacion_pendiente=bool(record.get("invitacion_pendiente", False)),
+        failed_login_attempts=int(record.get("failed_login_attempts") or 0),
+        bloqueado_hasta=_format_timestamp(record.get("bloqueado_hasta")),
         username=_clean_text(str(record.get("username") or "")),
         password_hash=_clean_text(str(record.get("password_hash") or "")),
         historial=(),
@@ -393,10 +424,11 @@ def _assemble_users(
                 estado=user.estado,
                 fecha_alta=user.fecha_alta,
                 ultimo_acceso=user.ultimo_acceso,
-                invitacion_pendiente=user.invitacion_pendiente,
                 username=user.username,
                 password_hash=user.password_hash,
                 historial=history,
+                failed_login_attempts=user.failed_login_attempts,
+                bloqueado_hasta=user.bloqueado_hasta,
             )
         )
     return assembled
@@ -437,7 +469,7 @@ def _validate_user_fields(
     email = _clean_text(email) or ""
     username = _clean_text(username)
     rol_principal = _clean_text(rol_principal) or ""
-    estado = _clean_text(estado) or "pendiente"
+    estado = _clean_text(estado) or "deshabilitado"
 
     if not nombre:
         raise ValueError("El nombre es obligatorio.")
@@ -490,8 +522,8 @@ def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
     return {
         "usuarios_totales": len(users),
         "usuarios_activos": sum(1 for user in users if user.estado == "activo"),
-        "usuarios_inactivos": sum(1 for user in users if user.estado == "inactivo"),
-        "invitaciones_pendientes": sum(1 for user in users if user.estado == "pendiente" or user.invitacion_pendiente),
+        "usuarios_deshabilitados": sum(1 for user in users if user.estado == "deshabilitado"),
+        "usuarios_bloqueados": sum(1 for user in users if user.estado == "bloqueado"),
         "roles_definidos": len({user.rol_principal for user in users}) if users else len(USER_ROLES),
     }
 
@@ -589,7 +621,7 @@ def create_user(
     apellidos: str,
     email: str,
     rol_principal: str,
-    estado: str = "pendiente",
+    estado: str = "deshabilitado",
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
@@ -603,6 +635,7 @@ def create_user(
         estado,
     )
     timestamp = _parse_timestamp(now)
+    failed_login_attempts, bloqueado_hasta = _state_metadata_for_user(normalized_state, timestamp)
     new_user = ManagedUser(
         id=_next_user_id(users),
         nombre=nombre,
@@ -612,7 +645,8 @@ def create_user(
         estado=normalized_state,
         fecha_alta=_format_timestamp(timestamp) or "",
         ultimo_acceso=None,
-        invitacion_pendiente=normalized_state == "pendiente",
+        failed_login_attempts=failed_login_attempts,
+        bloqueado_hasta=bloqueado_hasta,
         username=normalized_email,
         password_hash=None,
         historial=_default_history("alta", "Alta inicial de la cuenta.", timestamp),
@@ -652,6 +686,7 @@ def update_user(
         )
         _ensure_admin_guard(users, current, normalized_role, normalized_state)
         timestamp = _parse_timestamp(now)
+        failed_login_attempts, bloqueado_hasta = _state_metadata_for_user(normalized_state, timestamp)
         password_hash = current.password_hash
         history_detail = "Datos basicos, rol o estado actualizados."
         if nueva_contrasena or confirmar_contrasena:
@@ -666,13 +701,14 @@ def update_user(
             estado=normalized_state,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
-            invitacion_pendiente=normalized_state == "pendiente",
             username=normalized_username or current.username or normalized_email,
             password_hash=password_hash,
             historial=(
                 *current.historial,
                 _event("edicion", history_detail, timestamp),
             ),
+            failed_login_attempts=failed_login_attempts,
+            bloqueado_hasta=bloqueado_hasta,
         )
         _replace_user_record(updated)
         return updated
@@ -696,6 +732,7 @@ def change_user_state(
             raise _superadmin_mutation_error()
         _ensure_admin_guard(users, current, current.rol_principal, normalized_state)
         timestamp = _parse_timestamp(now)
+        failed_login_attempts, bloqueado_hasta = _state_metadata_for_user(normalized_state, timestamp)
         updated = ManagedUser(
             id=current.id,
             nombre=current.nombre,
@@ -705,13 +742,14 @@ def change_user_state(
             estado=normalized_state,
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
-            invitacion_pendiente=normalized_state == "pendiente",
             username=current.username,
             password_hash=current.password_hash,
             historial=(
                 *current.historial,
                 _event("cambio_estado", f"Estado cambiado a {normalized_state}.", timestamp),
             ),
+            failed_login_attempts=failed_login_attempts,
+            bloqueado_hasta=bloqueado_hasta,
         )
         _replace_user_record(updated)
         return updated
@@ -754,7 +792,8 @@ def _replace_user_record(updated_user: ManagedUser) -> None:
                         updated_user.rol_principal,
                         updated_user.estado,
                         _parse_timestamp(updated_user.ultimo_acceso) if updated_user.ultimo_acceso else None,
-                        updated_user.invitacion_pendiente,
+                        updated_user.failed_login_attempts,
+                        _parse_timestamp(updated_user.bloqueado_hasta) if updated_user.bloqueado_hasta else None,
                         updated_user.username,
                         updated_user.password_hash,
                         updated_user.nombre_completo,
@@ -793,7 +832,8 @@ def _persist_user(new_user: ManagedUser) -> None:
                         new_user.estado,
                         _parse_timestamp(new_user.fecha_alta),
                         None,
-                        new_user.invitacion_pendiente,
+                        new_user.failed_login_attempts,
+                        _parse_timestamp(new_user.bloqueado_hasta) if new_user.bloqueado_hasta else None,
                         new_user.username,
                         new_user.password_hash,
                         new_user.nombre_completo,

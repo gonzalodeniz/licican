@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hmac
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import logging
 
 import bcrypt
@@ -25,16 +25,18 @@ CREATE TABLE IF NOT EXISTS usuario (
     observaciones_internas TEXT NOT NULL DEFAULT '',
     fecha_alta TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso TIMESTAMPTZ,
-    invitacion_pendiente BOOLEAN NOT NULL DEFAULT FALSE,
     username VARCHAR(100) UNIQUE,
     password_hash VARCHAR(255),
     nombre_completo VARCHAR(255),
     rol VARCHAR(50) NOT NULL DEFAULT 'consultor',
     activo BOOLEAN NOT NULL DEFAULT true,
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+    bloqueado_hasta TIMESTAMPTZ,
     ultimo_login TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+ALTER TABLE usuario DROP CONSTRAINT IF EXISTS usuario_estado_ck;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nombre TEXT;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS apellidos TEXT;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS email TEXT;
@@ -43,25 +45,40 @@ ALTER TABLE usuario ADD COLUMN IF NOT EXISTS estado TEXT;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS observaciones_internas TEXT;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS fecha_alta TIMESTAMPTZ;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS ultimo_acceso TIMESTAMPTZ;
-ALTER TABLE usuario ADD COLUMN IF NOT EXISTS invitacion_pendiente BOOLEAN;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS username VARCHAR(100);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nombre_completo VARCHAR(255);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS rol VARCHAR(50);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS activo BOOLEAN;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS bloqueado_hasta TIMESTAMPTZ;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMP;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+ALTER TABLE usuario DROP COLUMN IF EXISTS invitacion_pendiente;
 ALTER TABLE usuario ALTER COLUMN nombre SET DEFAULT 'Superadministrador';
 ALTER TABLE usuario ALTER COLUMN apellidos SET DEFAULT 'Licican';
 ALTER TABLE usuario ALTER COLUMN email SET DEFAULT '';
 ALTER TABLE usuario ALTER COLUMN rol_principal SET DEFAULT 'administrador';
-ALTER TABLE usuario ALTER COLUMN estado SET DEFAULT 'inactivo';
+ALTER TABLE usuario ALTER COLUMN estado SET DEFAULT 'deshabilitado';
 ALTER TABLE usuario ALTER COLUMN observaciones_internas SET DEFAULT '';
 ALTER TABLE usuario ALTER COLUMN fecha_alta SET DEFAULT NOW();
-ALTER TABLE usuario ALTER COLUMN invitacion_pendiente SET DEFAULT FALSE;
 ALTER TABLE usuario ALTER COLUMN rol SET DEFAULT 'consultor';
 ALTER TABLE usuario ALTER COLUMN activo SET DEFAULT true;
+ALTER TABLE usuario ALTER COLUMN failed_login_attempts SET DEFAULT 0;
+UPDATE usuario
+SET estado = CASE
+        WHEN estado IN ('activo', 'deshabilitado', 'bloqueado') THEN estado
+        ELSE 'deshabilitado'
+    END,
+    activo = CASE
+        WHEN COALESCE(NULLIF(estado, ''), 'deshabilitado') = 'activo' THEN TRUE
+        ELSE FALSE
+    END,
+    failed_login_attempts = COALESCE(failed_login_attempts, 0),
+    bloqueado_hasta = bloqueado_hasta
+WHERE TRUE;
+ALTER TABLE usuario ADD CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'deshabilitado', 'bloqueado'));
 UPDATE usuario
 SET rol = COALESCE(NULLIF(rol, ''), 'consultor'),
     activo = COALESCE(activo, true)
@@ -105,6 +122,38 @@ SET ultimo_login = %s,
 WHERE id = %s
 """
 
+AUTH_USER_RESET_LOGIN_STATE_SQL = """
+UPDATE usuario
+SET estado = 'activo',
+    activo = TRUE,
+    failed_login_attempts = 0,
+    bloqueado_hasta = NULL,
+    updated_at = %s
+WHERE id = %s
+"""
+
+AUTH_USER_RECORD_FAILED_LOGIN_SQL = """
+UPDATE usuario
+SET estado = %s,
+    activo = %s,
+    failed_login_attempts = %s,
+    bloqueado_hasta = %s,
+    updated_at = %s
+WHERE id = %s
+"""
+
+AUTH_USER_RECORD_SUCCESSFUL_LOGIN_SQL = """
+UPDATE usuario
+SET estado = 'activo',
+    activo = TRUE,
+    failed_login_attempts = 0,
+    bloqueado_hasta = NULL,
+    ultimo_login = %s,
+    ultimo_acceso = %s,
+    updated_at = %s
+WHERE id = %s
+"""
+
 AUTH_USER_INSERT_SQL = """
 INSERT INTO usuario (
     id,
@@ -116,17 +165,18 @@ INSERT INTO usuario (
     observaciones_internas,
     fecha_alta,
     ultimo_acceso,
-    invitacion_pendiente,
     username,
     password_hash,
     nombre_completo,
     rol,
     activo,
+    failed_login_attempts,
+    bloqueado_hasta,
     ultimo_login,
     created_at,
     updated_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 AUTH_USER_UPDATE_SUPERADMIN_SQL = """
@@ -139,12 +189,13 @@ SET nombre = %s,
     observaciones_internas = %s,
     fecha_alta = %s,
     ultimo_acceso = %s,
-    invitacion_pendiente = %s,
     username = %s,
     password_hash = %s,
     nombre_completo = %s,
     rol = %s,
     activo = %s,
+    failed_login_attempts = %s,
+    bloqueado_hasta = %s,
     ultimo_login = %s,
     updated_at = %s
 WHERE id = %s
@@ -164,9 +215,10 @@ WHERE id = %s
 
 AUTH_USER_DEACTIVATE_SQL = """
 UPDATE usuario
-SET estado = 'inactivo',
+SET estado = 'deshabilitado',
     activo = FALSE,
-    invitacion_pendiente = FALSE,
+    failed_login_attempts = 0,
+    bloqueado_hasta = NULL,
     updated_at = %s
 WHERE id = %s
 """
@@ -184,6 +236,119 @@ class AuthenticationError(RuntimeError):
     def __init__(self, message: str, *, code: str = "invalid_credentials") -> None:
         super().__init__(message)
         self.code = code
+
+
+def _now_utc() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None, microsecond=0)
+
+
+def _as_naive_utc(value: object | None) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(microsecond=0)
+        return value.astimezone(UTC).replace(tzinfo=None, microsecond=0)
+    cleaned = str(value).strip().replace("Z", "+00:00")
+    if not cleaned:
+        return None
+    parsed = datetime.fromisoformat(cleaned)
+    if parsed.tzinfo is None:
+        return parsed.replace(microsecond=0)
+    return parsed.astimezone(UTC).replace(tzinfo=None, microsecond=0)
+
+
+def _normalize_status(value: object | None) -> str:
+    normalized = str(value or "").strip().lower()
+    return normalized if normalized in {"activo", "deshabilitado", "bloqueado"} else "deshabilitado"
+
+
+def _user_blocked_until(row: dict[str, object]) -> datetime | None:
+    return _as_naive_utc(row.get("bloqueado_hasta"))
+
+
+def _failed_attempts(row: dict[str, object]) -> int:
+    try:
+        return max(0, int(row.get("failed_login_attempts") or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _block_until(now: datetime, settings: AuthSettings) -> datetime:
+    return now + timedelta(minutes=settings.login_lock_minutes)
+
+
+def _is_superadmin_row(row: dict[str, object]) -> bool:
+    role_principal = str(row.get("rol_principal") or "").strip().lower()
+    role = str(row.get("rol") or "").strip().lower()
+    return role_principal == "superadmin" or role == "superadmin"
+
+
+def _mark_successful_login(cursor, row_id: object, now: datetime) -> None:
+    cursor.execute(
+        AUTH_USER_RECORD_SUCCESSFUL_LOGIN_SQL,
+        (
+            now,
+            now,
+            now,
+            row_id,
+        ),
+    )
+
+
+def _unlock_expired_user(cursor, row_id: object, now: datetime) -> None:
+    cursor.execute(
+        AUTH_USER_RESET_LOGIN_STATE_SQL,
+        (
+            now,
+            row_id,
+        ),
+    )
+
+
+def _record_failed_login(cursor, row: dict[str, object], now: datetime, settings: AuthSettings) -> None:
+    if _is_superadmin_row(row):
+        cursor.execute(
+            AUTH_USER_RECORD_FAILED_LOGIN_SQL,
+            (
+                "activo",
+                True,
+                0,
+                None,
+                now,
+                row["id"],
+            ),
+        )
+        return
+    failed_attempts = _failed_attempts(row) + 1
+    if failed_attempts >= settings.login_max_failed_attempts:
+        cursor.execute(
+            AUTH_USER_RECORD_FAILED_LOGIN_SQL,
+            (
+                "bloqueado",
+                False,
+                failed_attempts,
+                _block_until(now, settings),
+                now,
+                row["id"],
+            ),
+        )
+        return
+
+    current_status = _normalize_status(row.get("estado"))
+    if current_status == "bloqueado":
+        current_status = "activo"
+    cursor.execute(
+        AUTH_USER_RECORD_FAILED_LOGIN_SQL,
+        (
+            current_status if current_status in {"activo", "deshabilitado"} else "activo",
+            current_status == "activo",
+            failed_attempts,
+            _user_blocked_until(row),
+            now,
+            row["id"],
+        ),
+    )
 
 
 def authenticate_user(username: str, password: str, settings: AuthSettings) -> AuthenticatedUser:
@@ -209,13 +374,50 @@ def authenticate_user(username: str, password: str, settings: AuthSettings) -> A
                 row = cursor.fetchone()
                 if row is None:
                     raise AuthenticationError("Usuario o contraseña incorrectos.")
-                if not bool(row.get("activo")):
-                    raise AuthenticationError("Usuario desactivado. Contacte al administrador.", code="inactive_user")
+                current = _now_utc()
+                state = _normalize_status(row.get("estado"))
+                blocked_until = _user_blocked_until(row)
+                if _is_superadmin_row(row) and state == "bloqueado":
+                    _unlock_expired_user(cursor, row["id"], current)
+                    state = "activo"
+                    row["estado"] = "activo"
+                    row["failed_login_attempts"] = 0
+                    row["bloqueado_hasta"] = None
+                if state == "bloqueado":
+                    if blocked_until is None:
+                        blocked_until = _block_until(current, settings)
+                        cursor.execute(
+                            AUTH_USER_RECORD_FAILED_LOGIN_SQL,
+                            (
+                                "bloqueado",
+                                False,
+                                max(_failed_attempts(row), settings.login_max_failed_attempts),
+                                blocked_until,
+                                current,
+                                row["id"],
+                            ),
+                        )
+                        raise AuthenticationError(
+                            f"Usuario bloqueado temporalmente. Espere {settings.login_lock_minutes} minuto(s) antes de volver a intentarlo.",
+                            code="locked_user",
+                        )
+                    if blocked_until > current:
+                        raise AuthenticationError(
+                            f"Usuario bloqueado temporalmente. Espere {settings.login_lock_minutes} minuto(s) antes de volver a intentarlo.",
+                            code="locked_user",
+                        )
+                    _unlock_expired_user(cursor, row["id"], current)
+                    state = "activo"
+                    row["estado"] = "activo"
+                    row["failed_login_attempts"] = 0
+                    row["bloqueado_hasta"] = None
+                if state == "deshabilitado":
+                    raise AuthenticationError("Usuario deshabilitado. Contacte al administrador.", code="inactive_user")
                 password_hash = str(row.get("password_hash") or "")
                 if not password_hash or not bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8")):
+                    _record_failed_login(cursor, row, current, settings)
                     raise AuthenticationError("Usuario o contraseña incorrectos.")
-                current = datetime.now(UTC).replace(tzinfo=None, microsecond=0)
-                cursor.execute(AUTH_USER_LAST_LOGIN_SQL, (current, current, current, row["id"]))
+                _mark_successful_login(cursor, row["id"], current)
                 return AuthenticatedUser(
                     username=str(row["username"]),
                     rol=str(row.get("rol") or "consultor"),
@@ -290,12 +492,13 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 _superadmin_observations(),
                                 current,
                                 None,
-                                False,
                                 superadmin_name,
                                 password_hash,
                                 f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
                                 True,
+                                0,
+                                None,
                                 None,
                                 current,
                                 current,
@@ -329,12 +532,13 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 _superadmin_observations(),
                                 canonical.get("fecha_alta") or current,
                                 canonical.get("ultimo_acceso"),
-                                False,
                                 superadmin_name,
                                 password_hash,
                                 f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
                                 True,
+                                0,
+                                None,
                                 canonical.get("ultimo_login"),
                                 current,
                                 canonical_id,
@@ -348,7 +552,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                         cursor.execute(AUTH_USER_DELETE_SQL, (duplicate["id"],))
                     cursor.execute(AUTH_USER_DEACTIVATE_SQL, (current, canonical["id"]))
     except psycopg2.Error as exc:
-        LOGGER.warning("No se pudo sincronizar el usuario superadmin en PostgreSQL.")
+        LOGGER.debug("No se pudo sincronizar el usuario superadmin en PostgreSQL.")
         raise AuthenticationError("No se pudo validar la autenticacion.", code="database_error") from exc
 
 

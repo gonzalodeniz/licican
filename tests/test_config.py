@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import licican.auth.config as auth_config
 import licican.config as config
 
 
@@ -56,3 +57,19 @@ class ConfigTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             config._ENV_LOADED = True
             self.assertEqual("127.0.0.1", config.resolve_host())
+
+    def test_auth_settings_reads_lock_configuration(self) -> None:
+        auth_config.get_auth_settings.cache_clear()
+        with patch.dict(
+            os.environ,
+            {
+                "DB_PASSWORD": "test-password",
+                "LOGIN_MAX_FAILED_ATTEMPTS": "7",
+                "LOGIN_LOCK_MINUTES": "3",
+            },
+            clear=True,
+        ):
+            settings = auth_config.get_auth_settings()
+
+        self.assertEqual(7, settings.login_max_failed_attempts)
+        self.assertEqual(3, settings.login_lock_minutes)
