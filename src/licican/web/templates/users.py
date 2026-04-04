@@ -297,12 +297,13 @@ def _render_users_table(user_rows: list[str]) -> str:
     if not user_rows:
         return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
 
-    headers = ["Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso", "Acciones"]
+    headers = ["Usuario", "Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso", "Acciones"]
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
     return f"""
       <div class="table-wrap users-table-wrap">
         <table class="users-table">
           <colgroup>
+            <col class="users-col users-col-username" />
             <col class="users-col users-col-name" />
             <col class="users-col users-col-email" />
             <col class="users-col users-col-role" />
@@ -341,6 +342,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <form method="post" action="{escape(build_url(base_path, f'/usuarios/{selected_user["id"]}'))}">
           <div class="filters">
+            <div><label for="editar_username">Usuario</label><input id="editar_username" name="username" type="text" value="{escape(str(selected_user.get("username") or selected_user["email"]))}" /></div>
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
             <div><label for="editar_apellidos">Apellidos</label><input id="editar_apellidos" name="apellidos" type="text" value="{escape(str(selected_user["apellidos"]))}" required /></div>
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
@@ -373,8 +375,10 @@ def _render_selected_user_actions(base_path: str, selected_user: dict[str, objec
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
     actions = _build_action_controls(base_path, user)
+    login_name = str(user.get("username") or user["email"])
     return (
         f'<tr id="user-row-{escape(str(user["id"]))}">'
+        f'<td data-label="Usuario">{escape(login_name)}</td>'
         f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
         f'<td data-label="Email">{escape(str(user["email"]))}</td>'
         f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'

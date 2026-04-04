@@ -34,7 +34,7 @@ def render_login(
         <form method="post" action="{escape(build_url(base_path, '/login'))}" class="login-form">
           <input type="hidden" name="csrf_token" value="{escape(csrf_token)}" />
           <label class="form-field" for="username">
-            <span>Usuario</span>
+            <span>Usuario o email</span>
             <input id="username" name="username" type="text" autocomplete="username" required />
           </label>
           <label class="form-field" for="password">

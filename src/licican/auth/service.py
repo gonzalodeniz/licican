@@ -73,6 +73,8 @@ AUTH_USER_SELECT_SQL = """
 SELECT *
 FROM usuario
 WHERE username = %s
+   OR email = %s
+ORDER BY CASE WHEN username = %s THEN 0 ELSE 1 END
 LIMIT 1
 """
 
@@ -172,7 +174,7 @@ def authenticate_user(username: str, password: str, settings: AuthSettings) -> A
         with psycopg2.connect(resolve_database_url()) as connection:
             with connection.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(AUTH_USER_BOOTSTRAP_SQL)
-                cursor.execute(AUTH_USER_SELECT_SQL, (normalized_username,))
+                cursor.execute(AUTH_USER_SELECT_SQL, (normalized_username, normalized_username, normalized_username))
                 row = cursor.fetchone()
                 if row is None:
                     raise AuthenticationError("Usuario o contraseña incorrectos.")
@@ -197,7 +199,14 @@ def authenticate_user(username: str, password: str, settings: AuthSettings) -> A
 def _authenticate_superadmin(username: str, password: str, settings: AuthSettings) -> AuthenticatedUser | None:
     if not settings.login_superadmin_enabled:
         return None
-    if not hmac.compare_digest(username, settings.login_superadmin_name):
+    superadmin_name = settings.login_superadmin_name.strip()
+    if not superadmin_name:
+        return None
+    aliases = [superadmin_name]
+    email_alias = _superadmin_email(superadmin_name)
+    if email_alias not in aliases:
+        aliases.append(email_alias)
+    if not any(alias and hmac.compare_digest(username, alias) for alias in aliases):
         return None
     if not hmac.compare_digest(password, settings.login_superadmin_pass):
         raise AuthenticationError("Usuario o contraseña incorrectos.")
@@ -221,7 +230,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
         with psycopg2.connect(resolve_database_url()) as connection:
             with connection.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(AUTH_USER_BOOTSTRAP_SQL)
-                cursor.execute(AUTH_USER_SELECT_SQL, (superadmin_name,))
+                cursor.execute(AUTH_USER_SELECT_SQL, (superadmin_name, superadmin_email, superadmin_name))
                 existing = cursor.fetchone()
                 if settings.login_superadmin_enabled:
                     password_hash = bcrypt.hashpw(

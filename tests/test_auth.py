@@ -47,8 +47,11 @@ class _FakeAuthCursor:
         if normalized == AUTH_USER_BOOTSTRAP_SQL.strip():
             return
         if normalized == AUTH_USER_SELECT_SQL.strip():
-            username = params[0]
-            record = self.state.get(str(username))
+            login_name = str(params[0])
+            email = str(params[1]) if params and len(params) > 1 else login_name
+            record = self.state.get(login_name)
+            if record is None:
+                record = next((row for row in self.state.values() if row.get("email") == email), None)
             self.row = deepcopy(record) if record is not None else None
             return
         if normalized == AUTH_USER_LAST_LOGIN_SQL.strip():
@@ -190,6 +193,7 @@ def _build_user_record(
     *,
     user_id: int,
     username: str,
+    email: str | None = None,
     password: str,
     nombre_completo: str,
     rol: str = "consultor",
@@ -198,7 +202,7 @@ def _build_user_record(
     nombre, _, apellidos = nombre_completo.partition(" ")
     if not apellidos:
         apellidos = "Licican"
-    email = username if "@" in username else f"{username}@licican.local"
+    email = email or (username if "@" in username else f"{username}@licican.local")
     current = datetime.now(UTC).replace(microsecond=0)
     return {
         "id": user_id,
@@ -322,6 +326,7 @@ class AuthenticationTests(unittest.TestCase):
             "admin": _build_user_record(
                 user_id=9,
                 username="admin",
+                email="admin@licican.local",
                 password="anterior123",
                 nombre_completo="Superadministrador",
                 rol="administrador",
@@ -330,6 +335,7 @@ class AuthenticationTests(unittest.TestCase):
             "marta": _build_user_record(
                 user_id=1,
                 username="marta",
+                email="marta.garcia@licican.local",
                 password="secreto123",
                 nombre_completo="Marta Pérez",
                 rol="gestor",
@@ -355,6 +361,51 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("activo", auth_state["admin"]["estado"])
         self.assertTrue(auth_state["admin"]["activo"])
         self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+
+    def test_login_with_database_email_creates_session(self) -> None:
+        browser = _BrowserSession()
+        auth_state = {
+            "marta": _build_user_record(
+                user_id=1,
+                username="marta",
+                email="marta.garcia@licican.local",
+                password="secreto123",
+                nombre_completo="Marta Pérez",
+                rol="gestor",
+            )
+        }
+        with ExitStack() as stack:
+            stack.enter_context(self._manual_env())
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            _, _, body = browser.request("/login")
+            csrf_token = self._extract_csrf(body.decode("utf-8"))
+            status, headers, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta.garcia@licican.local&password=secreto123&csrf_token={csrf_token}",
+            )
+
+        self.assertEqual("302 Found", status)
+        self.assertEqual("/licican/", headers["Location"])
+        self.assertIsNotNone(auth_state["marta"]["ultimo_login"])
+
+    def test_login_with_superadmin_email_alias_creates_session(self) -> None:
+        browser = _BrowserSession()
+        auth_state: dict[str, dict[str, object]] = {}
+        with ExitStack() as stack:
+            stack.enter_context(self._manual_env())
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            _, _, body = browser.request("/login")
+            csrf_token = self._extract_csrf(body.decode("utf-8"))
+            status, headers, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=superadmin@licitan.local&password=admin12345&csrf_token={csrf_token}",
+            )
+
+        self.assertEqual("302 Found", status)
+        self.assertEqual("/licican/", headers["Location"])
+        self.assertIn("admin", auth_state)
 
     def test_login_with_inactive_user_is_rejected(self) -> None:
         browser = _BrowserSession()

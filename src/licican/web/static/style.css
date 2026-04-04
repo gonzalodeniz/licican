@@ -938,7 +938,11 @@ button:hover {
 }
 
 .users-col-name {
-  width: 16%;
+  width: 18%;
+}
+
+.users-col-username {
+  width: 14%;
 }
 
 .users-col-email {

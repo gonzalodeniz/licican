@@ -191,6 +191,7 @@ class ManagedUser:
             "apellidos": self.apellidos,
             "nombre_completo": self.nombre_completo,
             "email": self.email,
+            "username": self.username,
             "rol_principal": self.rol_principal,
             "estado": self.estado,
             "fecha_alta": self.fecha_alta,
@@ -415,13 +416,15 @@ def _validate_user_fields(
     nombre: str,
     apellidos: str,
     email: str,
+    username: str | None,
     rol_principal: str,
     estado: str,
     user_id: str | None = None,
-) -> tuple[str, str, str, str, str]:
+) -> tuple[str, str, str, str, str, str | None]:
     nombre = _clean_text(nombre) or ""
     apellidos = _clean_text(apellidos) or ""
     email = _clean_text(email) or ""
+    username = _clean_text(username)
     rol_principal = _clean_text(rol_principal) or ""
     estado = _clean_text(estado) or "pendiente"
 
@@ -444,8 +447,15 @@ def _validate_user_fields(
             continue
         if _normalize_email(existing.email) == normalized_email:
             raise ValueError("El email no puede duplicarse entre usuarios.")
+        existing_username = _clean_text(existing.username)
+        if username and existing_username and existing_username == username:
+            raise ValueError("El nombre de usuario no puede duplicarse entre usuarios.")
+        if username and _normalize_email(existing.email) == _normalize_email(username):
+            raise ValueError("El nombre de usuario no puede duplicarse con un email existente.")
+        if existing_username and _normalize_email(existing_username) == normalized_email:
+            raise ValueError("El email no puede duplicarse con un nombre de usuario existente.")
 
-    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado)
+    return nombre, apellidos, normalized_email, _normalize_role(rol_principal), _normalize_state(estado), username
 
 
 def summarize_users(users: list[ManagedUser]) -> dict[str, int]:
@@ -470,6 +480,7 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
             or query in user.nombre.lower()
             or query in user.apellidos.lower()
             or query in user.email.lower()
+            or (user.username is not None and query in user.username.lower())
         ]
     if normalized.estado:
         result = [user for user in result if user.estado == normalized.estado]
@@ -555,11 +566,12 @@ def create_user(
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
-    nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
+    nombre, apellidos, normalized_email, normalized_role, normalized_state, _ = _validate_user_fields(
         users,
         nombre,
         apellidos,
         email,
+        None,
         rol_principal,
         estado,
     )
@@ -588,6 +600,7 @@ def update_user(
     nombre: str,
     apellidos: str,
     email: str,
+    username: str | None = None,
     rol_principal: str,
     estado: str,
     nueva_contrasena: str | None = None,
@@ -598,11 +611,12 @@ def update_user(
     for current in users:
         if current.id != user_id:
             continue
-        nombre, apellidos, normalized_email, normalized_role, normalized_state = _validate_user_fields(
+        nombre, apellidos, normalized_email, normalized_role, normalized_state, normalized_username = _validate_user_fields(
             users,
             nombre,
             apellidos,
             email,
+            username,
             rol_principal,
             estado,
             user_id=user_id,
@@ -624,7 +638,7 @@ def update_user(
             fecha_alta=current.fecha_alta,
             ultimo_acceso=current.ultimo_acceso,
             invitacion_pendiente=normalized_state == "pendiente",
-            username=current.username or normalized_email,
+            username=normalized_username or current.username or normalized_email,
             password_hash=password_hash,
             historial=(
                 *current.historial,

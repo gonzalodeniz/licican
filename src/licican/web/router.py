@@ -561,6 +561,7 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
         "nombre": (form_data.get("nombre") or [""])[0],
         "apellidos": (form_data.get("apellidos") or [""])[0],
         "email": (form_data.get("email") or [""])[0],
+        "username": (form_data.get("username") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
         "estado": (form_data.get("estado") or ["pendiente"])[0],
     }
@@ -601,6 +602,7 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             nombre=str(form_data["nombre"]),
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
+            username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
             nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
