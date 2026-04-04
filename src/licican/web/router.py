@@ -1,23 +1,20 @@
 from __future__ import annotations
 
-from collections import namedtuple
-from dataclasses import dataclass
-from datetime import UTC, datetime
 from html import escape
 import logging
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from licican.access import AccessContext, has_capability, resolve_access_context
-from licican.alerts import create_alert, deactivate_alert, filter_alerts_by_user, load_alerts, summarize_alerts, update_alert
+from licican.access import has_capability, resolve_access_context
+from licican.alerts import create_alert, deactivate_alert, load_alerts, summarize_alerts, update_alert
 from licican.auth.config import get_auth_settings
 from licican.auth.csrf import ensure_csrf_token, validate_csrf_token
 from licican.auth.rate_limiter import rate_limiter
 from licican.auth.service import AuthenticationError, authenticate_user, synchronize_superadmin_account
-from licican.auth.session import SessionState, clear_session, load_session, now_iso, persist_session_headers, timeout_exceeded
-from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
+from licican.auth.session import clear_session, load_session, now_iso, persist_session_headers, timeout_exceeded
+from licican.config import resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
-from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
+from licican.pipeline import add_opportunity_to_pipeline, update_pipeline_entry_status
 from licican.retention import (
     RetentionDatabaseError,
     apply_retention_policy,
@@ -25,10 +22,36 @@ from licican.retention import (
     update_retention_policy,
 )
 from licican.real_source_prioritization import load_real_source_prioritization, summarize_prioritization
-from licican.shared.filters import CatalogFilters
 from licican.source_coverage import load_source_coverage, summary_by_status
 from licican.ti_classification import audit_examples, load_rule_set
-from licican.users import UsersDatabaseError, UserFilters, build_users_payload, change_user_state, create_user, delete_user, update_user
+from licican.users import UsersDatabaseError, change_user_state, create_user, delete_user, update_user
+from licican.web.http import (
+    Request,
+    Route,
+    activate_superadmin_session as _activate_superadmin_session,
+    client_ip as _client_ip,
+    deny_html as _deny_html,
+    deny_json as _deny_json,
+    forbidden as _forbidden,
+    is_authenticated as _is_authenticated,
+    is_public_path as _is_public_path,
+    not_found as _not_found,
+    parse_catalog_filters as _parse_catalog_filters,
+    parse_catalog_page as _parse_catalog_page,
+    parse_catalog_page_size as _parse_catalog_page_size,
+    parse_filters_from_multidict as _parse_filters_from_multidict,
+    parse_user_filters as _parse_user_filters,
+    parse_users_page as _parse_users_page,
+    parse_users_page_size as _parse_users_page_size,
+    redirect as _redirect,
+    resolve_request_path as _resolve_request_path,
+    secure_request as _secure_request,
+    visible_alerts as _visible_alerts,
+    visible_pipeline_payload as _visible_pipeline_payload,
+    visible_users_payload as _visible_users_payload,
+    users_data_error_html as _users_data_error_html,
+    retention_data_error_html as _retention_data_error_html,
+)
 from licican.web.responses import build_url, html_body, json_body, read_form_data, send_redirect, send_response
 from licican.web.templates.alerts import render_alerts
 from licican.web.templates.base import page_template
@@ -45,185 +68,7 @@ from licican.web.templates.users import render_users
 from licican.web.templates.login import render_login
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-Route = namedtuple("Route", ["method", "pattern", "handler"])
 LOGGER = logging.getLogger(__name__)
-PUBLIC_PATH_PREFIXES = ("/static/",)
-PUBLIC_PATHS = frozenset({"/login"})
-
-
-@dataclass(frozen=True)
-class Request:
-    environ: dict[str, object]
-    method: str
-    path: str
-    base_path: str
-    query: dict[str, list[str]]
-    access_context: AccessContext
-    session_state: SessionState
-
-    @property
-    def session(self) -> dict[str, object]:
-        return self.session_state.session
-
-
-def _is_public_path(path: str) -> bool:
-    return path in PUBLIC_PATHS or any(path.startswith(prefix) for prefix in PUBLIC_PATH_PREFIXES)
-
-
-def _is_authenticated(session: dict[str, object]) -> bool:
-    return bool(session.get("username"))
-
-
-def _secure_request(environ: dict[str, object]) -> bool:
-    scheme = str(environ.get("wsgi.url_scheme", "http") or "http").lower()
-    forwarded_proto = str(environ.get("HTTP_X_FORWARDED_PROTO", "") or "").lower()
-    return scheme == "https" or forwarded_proto == "https"
-
-
-def _client_ip(environ: dict[str, object]) -> str:
-    forwarded_for = str(environ.get("HTTP_X_FORWARDED_FOR", "") or "").strip()
-    if forwarded_for:
-        return forwarded_for.split(",", 1)[0].strip()
-    return str(environ.get("REMOTE_ADDR", "") or "unknown")
-
-
-def _redirect(start_response, location: str) -> list[bytes]:
-    return send_response(
-        start_response,
-        "302 Found",
-        "text/plain; charset=utf-8",
-        b"",
-        extra_headers=[("Location", location)],
-    )
-
-
-def _forbidden(start_response, message: str = "CSRF invalido") -> list[bytes]:
-    return send_response(start_response, "403 Forbidden", "text/plain; charset=utf-8", message.encode("utf-8"))
-
-
-def _activate_superadmin_session(request: Request) -> Request:
-    settings = get_auth_settings()
-    try:
-        synchronize_superadmin_account(settings)
-    except AuthenticationError:
-        LOGGER.warning("No se pudo sincronizar el superadmin al activar la sesion automatica.")
-    request.session.clear()
-    request.session.update(
-        {
-            "username": settings.login_superadmin_name,
-            "rol": "superadmin",
-            "nombre_completo": "",
-            "is_superadmin": True,
-            "last_activity": now_iso(),
-            "auto_login_active": True,
-        }
-    )
-    ensure_csrf_token(request.session)
-    request.session_state.should_persist = True
-    return Request(
-        environ=request.environ,
-        method=request.method,
-        path=request.path,
-        base_path=request.base_path,
-        query=request.query,
-        access_context=resolve_access_context(request.environ, request.query, session_user=request.session),
-        session_state=request.session_state,
-    )
-
-
-def _parse_filters_from_multidict(values: dict[str, list[str]]) -> CatalogFilters:
-    def first(name: str) -> str | None:
-        candidates = values.get(name)
-        if not candidates:
-            return None
-        value = candidates[0].strip()
-        return value or None
-
-    def integer(name: str) -> int | None:
-        value = first(name)
-        if value is None:
-            return None
-        try:
-            return int(value)
-        except ValueError:
-            return None
-
-    return CatalogFilters(
-        palabra_clave=first("palabra_clave"),
-        presupuesto_min=integer("presupuesto_min"),
-        presupuesto_max=integer("presupuesto_max"),
-        procedimiento=first("procedimiento"),
-        ubicacion=first("ubicacion"),
-    )
-
-
-def _parse_catalog_filters(request: Request) -> CatalogFilters:
-    return _parse_filters_from_multidict(request.query)
-
-
-def _parse_catalog_page(request: Request) -> int:
-    candidates = request.query.get("page")
-    if not candidates:
-        return 1
-    try:
-        return int(candidates[0])
-    except ValueError:
-        return 1
-
-
-def _parse_catalog_page_size(request: Request) -> int:
-    candidates = request.query.get("page_size")
-    if not candidates:
-        return 10
-    try:
-        page_size = int(candidates[0])
-    except ValueError:
-        return 10
-    return page_size if page_size in {5, 10, 25, 50} else 10
-
-
-def _parse_user_filters(request: Request) -> UserFilters:
-    query = request.query
-    return UserFilters(
-        busqueda=(query.get("busqueda") or [None])[0],
-        estado=(query.get("estado") or [None])[0],
-        rol=(query.get("rol") or [None])[0],
-    )
-
-
-def _parse_users_page(request: Request) -> int:
-    candidates = request.query.get("page")
-    if not candidates:
-        return 1
-    try:
-        return int(candidates[0])
-    except ValueError:
-        return 1
-
-
-def _parse_users_page_size(request: Request) -> int:
-    candidates = request.query.get("page_size")
-    if not candidates:
-        return 10
-    try:
-        page_size = int(candidates[0])
-    except ValueError:
-        return 10
-    return page_size if page_size in {5, 10, 25, 50} else 10
-
-
-def _resolve_request_path(environ: dict[str, object], base_path: str) -> str:
-    raw_path = str(environ.get("PATH_INFO", "/") or "/")
-    script_name = normalize_base_path(str(environ.get("SCRIPT_NAME") or "")) or base_path
-    if script_name and raw_path.startswith(script_name):
-        raw_path = raw_path[len(script_name):] or "/"
-    if not raw_path.startswith("/"):
-        raw_path = f"/{raw_path}"
-    return raw_path or "/"
-
-
-def _not_found(start_response) -> list[bytes]:
-    return send_response(start_response, "404 Not Found", "text/plain; charset=utf-8", b"No encontrado")
 
 
 def _catalog_data_error_html(base_path: str, message: str) -> str:
@@ -246,91 +91,6 @@ def _catalog_data_error_html(base_path: str, message: str) -> str:
         "El catalogo y el detalle requieren acceso a la fuente de datos configurada para la aplicacion.",
         content,
         current_path="/",
-        base_path=base_path,
-    )
-
-
-def _access_denied_html(request: Request, capability: str) -> str:
-    content = f"""
-      <section class="note note-warning">
-        <strong>Acceso bloqueado por permisos</strong><br />
-        El rol activo <strong>{escape(request.access_context.role_label)}</strong> no puede ejecutar la accion requerida para <code>{escape(capability)}</code>.
-      </section>
-      <section class="panel">
-        <div class="panel-body">
-          <p>La aplicacion mantiene visibles solo las acciones compatibles con el rol actual y bloquea de forma consistente los intentos de gestion no autorizados.</p>
-        </div>
-      </section>
-    """
-    return page_template(
-        "Licican | Acceso restringido",
-        "Acceso restringido por rol",
-        "PB-013 · Restriccion consistente de acciones",
-        "La accion solicitada no esta disponible para el rol funcional activo.",
-        content,
-        current_path=request.path,
-        base_path=request.base_path,
-        access_context=request.access_context,
-    )
-
-
-def _deny_html(request: Request, start_response, capability: str) -> list[bytes]:
-    return send_response(
-        start_response,
-        "403 Forbidden",
-        "text/html; charset=utf-8",
-        b"".join(html_body(_access_denied_html(request, capability))),
-    )
-
-
-def _deny_json(start_response, capability: str) -> list[bytes]:
-    return send_response(
-        start_response,
-        "403 Forbidden",
-        "application/json; charset=utf-8",
-        b"".join(json_body({"error": f"Acceso restringido por permisos para {capability}."})),
-    )
-
-
-def _visible_alerts(request: Request, alerts):
-    return alerts if request.access_context.is_admin else filter_alerts_by_user(alerts, request.access_context.user_id)
-
-
-def _visible_pipeline_payload(request: Request) -> dict[str, object]:
-    return build_pipeline_payload(
-        path=resolve_pipeline_path(),
-        usuario_id=None if request.access_context.is_admin else request.access_context.user_id,
-    )
-
-
-def _visible_users_payload(request: Request, selected_user_id: str | None = None) -> dict[str, object]:
-    return build_users_payload(
-        filters=_parse_user_filters(request),
-        page=_parse_users_page(request),
-        page_size=_parse_users_page_size(request),
-        selected_user_id=selected_user_id,
-    )
-
-
-def _users_data_error_html(base_path: str, message: str) -> str:
-    content = f"""
-      <section class="note note-warning">
-        <strong>Base de datos de usuarios no disponible</strong><br />
-        {escape(message)}
-      </section>
-      <section class="panel">
-        <div class="panel-body">
-          <p>La gestion de usuarios depende de PostgreSQL y no puede renderizarse mientras la conexion no responda.</p>
-        </div>
-      </section>
-    """
-    return page_template(
-        "Licican | Usuarios temporalmente no disponibles",
-        "Usuarios temporalmente no disponibles",
-        "Servicio de datos no disponible",
-        "El modulo de gestion de usuarios requiere acceso a la base de datos configurada.",
-        content,
-        current_path="/usuarios",
         base_path=base_path,
     )
 
@@ -418,30 +178,6 @@ def handle_logout(request: Request, start_response) -> list[bytes]:
         return _forbidden(start_response)
     clear_session(request.session_state)
     return _redirect(start_response, build_url(request.base_path, "/login?reason=logout"))
-
-
-def _retention_data_error_html(base_path: str, message: str) -> str:
-    content = f"""
-      <section class="note note-warning">
-        <strong>Control de conservacion no disponible</strong><br />
-        {escape(message)}
-      </section>
-      <section class="panel">
-        <div class="panel-body">
-          <p>La politica de retencion y el archivado requieren acceso operativo a PostgreSQL.</p>
-        </div>
-      </section>
-    """
-    return page_template(
-        "Licican | Conservacion temporalmente no disponible",
-        "Conservacion temporalmente no disponible",
-        "Servicio de datos no disponible",
-        "La gestion de conservacion y archivado depende de la base de datos operativa.",
-        content,
-        current_path="/conservacion",
-        base_path=base_path,
-    )
-
 
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
     relative_path = filename
