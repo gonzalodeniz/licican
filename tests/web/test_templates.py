@@ -7,13 +7,14 @@ from licican.web.templates.alerts import render_alert_form
 from licican.web.templates.base import page_template
 from licican.web.templates.catalog import render_catalog
 from licican.web.templates.classification import render_classification
-from licican.web.templates.components import render_metric, render_status_note, render_table
+from licican.web.templates.components import render_metric, render_role_badge, render_status_note, render_table
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.detail import render_opportunity_detail
 from licican.web.templates.kpis import render_kpis
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 from licican.web.templates.retention import render_retention_control
+from licican.shared.text import slugify
 
 
 class TemplateSmokeTests(unittest.TestCase):
@@ -45,6 +46,9 @@ class TemplateSmokeTests(unittest.TestCase):
         self.assertIn("metric", render_metric(2, "Alertas"))
         self.assertIn("note-warning", render_status_note("Error", "warn"))
         self.assertIn("<table>", render_table(["A"], ["<tr><td>x</td></tr>"]))
+        self.assertIn("badge-rol--gestor", render_role_badge("manager"))
+        self.assertIn("badge-rol--administrador-funcional", render_role_badge("Administrador funcional"))
+        self.assertEqual("administracion-funcional", slugify("Administración Funcional"))
 
     def test_catalog_template_renders_catalog(self) -> None:
         html = render_catalog(

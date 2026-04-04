@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from html import escape
 
+from licican.shared.text import slugify
+
+
 def render_table(
     headers: list[str],
     rows: list[str],
@@ -54,6 +57,46 @@ def render_state_badge(value: object) -> str:
     elif normalized in {"nueva", "evaluando", "preparando oferta", "presentada", "posterior", "por definir", "propio", "pendiente", "invitado / pendiente de activacion"}:
         tone = "warning"
     return f'<span class="status-badge {tone}">{text}</span>'
+
+
+def render_role_badge(value: object) -> str:
+    """Renderiza un badge visual para roles administrativos."""
+    raw_value = " ".join(str(value).split()).strip()
+    normalized_slug = slugify(raw_value)
+    label = _role_badge_label(normalized_slug, raw_value)
+    role_class = _ROLE_BADGE_CLASS_ALIASES.get(normalized_slug, normalized_slug)
+    return f'<span class="badge-rol badge-rol--{escape(role_class)}">{escape(label)}</span>'
+
+
+_ROLE_BADGE_LABEL_ALIASES: dict[str, str] = {
+    "administrador-funcional": "administrador funcional",
+    "administrador-de-plataforma": "administrador",
+    "manager": "gestor",
+    "gestor": "gestor",
+    "colaborador": "colaborador",
+    "invitado": "usuario",
+    "usuario": "usuario",
+    "superadmin": "superadmin",
+    "administrador": "administrador",
+}
+
+_ROLE_BADGE_CLASS_ALIASES: dict[str, str] = {
+    "administrador-funcional": "administrador-funcional",
+    "administrador-de-plataforma": "administrador",
+    "manager": "gestor",
+    "gestor": "gestor",
+    "colaborador": "colaborador",
+    "invitado": "usuario",
+    "usuario": "usuario",
+    "superadmin": "superadmin",
+    "administrador": "administrador",
+}
+
+
+def _role_badge_label(normalized_slug: str, raw_value: str) -> str:
+    if normalized_slug in _ROLE_BADGE_LABEL_ALIASES:
+        return _ROLE_BADGE_LABEL_ALIASES[normalized_slug]
+    return raw_value or normalized_slug.replace("-", " ")
 
 
 def render_status_note(message: str | None, tone: str = "ok") -> str:

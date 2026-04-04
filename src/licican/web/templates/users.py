@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
-from licican.web.templates.components import render_badges, render_state_badge, render_table
+from licican.web.templates.components import render_badges, render_role_badge, render_state_badge, render_table
 from licican.shared.text import format_iso_datetime
 
 
@@ -381,7 +381,7 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Usuario">{escape(login_name)}</td>'
         f'<td data-label="Nombre completo">{escape(str(user["nombre_completo"]))}</td>'
         f'<td data-label="Email">{escape(str(user["email"]))}</td>'
-        f'<td data-label="Rol principal">{escape(str(user["rol_principal"]))}</td>'
+        f'<td data-label="Rol principal">{render_role_badge(user["rol_principal"])}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
         f'<td data-label="Acciones"><div class="actions-cell">{"".join(actions)}</div></td>'
