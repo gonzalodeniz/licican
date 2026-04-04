@@ -1,0 +1,143 @@
+@media (max-width: 1200px) {
+  .filters {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    padding: 14px;
+    min-height: auto;
+  }
+
+  .app-frame {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: auto;
+  }
+
+  .side-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  .content-shell {
+    padding: 0;
+  }
+
+  main {
+    padding-top: 0;
+  }
+
+  .pagination-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-jump {
+    justify-content: flex-start;
+  }
+
+  .users-view .panel-body {
+    padding: 18px 18px;
+  }
+
+  .catalog-view .panel-body,
+  .coverage-view .panel-body,
+  .dataset-view .panel-body,
+  .classification-view .panel-body,
+  .pipeline-view .panel-body,
+  .permissions-view .panel-body {
+    padding: 18px 18px;
+  }
+}
+
+@media (max-width: 720px) {
+  .panel-body {
+    padding: 16px;
+  }
+
+  .login-body {
+    padding: 18px;
+  }
+
+  .login-card {
+    padding: 24px 20px;
+  }
+
+  .users-view .panel-body {
+    padding: 16px;
+  }
+
+  .catalog-view .panel-body,
+  .coverage-view .panel-body,
+  .dataset-view .panel-body,
+  .classification-view .panel-body,
+  .pipeline-view .panel-body,
+  .permissions-view .panel-body {
+    padding: 16px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrap {
+    border-top: 0;
+    border-bottom: 0;
+  }
+
+  table {
+    min-width: 1100px;
+  }
+
+  .users-table-wrap {
+    overflow-x: hidden;
+  }
+
+  .users-table {
+    min-width: 0;
+  }
+
+  .users-table thead th {
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+  }
+
+  .users-table td,
+  .users-table th {
+    padding: 10px 11px;
+  }
+
+  .catalog-table td,
+  .catalog-table th,
+  .coverage-table td,
+  .coverage-table th,
+  .dataset-table td,
+  .dataset-table th,
+  .classification-table td,
+  .classification-table th,
+  .pipeline-table td,
+  .pipeline-table th,
+  .permissions-table td,
+  .permissions-table th,
+  .detail-table td,
+  .detail-table th {
+    padding: 10px 11px;
+  }
+
+  .users-table .inline-actions {
+    gap: 4px;
+  }
+
+  td,
+  th {
+    padding: 11px 14px;
+  }
+
+  .offer-cell {
+    min-width: 0;
+  }
+}

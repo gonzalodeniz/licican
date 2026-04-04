@@ -1,0 +1,73 @@
+.login-body {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgb(31 94 137 / 0.14), transparent 32%),
+    radial-gradient(circle at bottom right, rgb(15 76 92 / 0.12), transparent 28%),
+    linear-gradient(180deg, #eef4fa 0%, #f6f8fb 56%, #edf3f9 100%);
+}
+
+.login-shell {
+  width: min(100%, 460px);
+}
+
+.login-card {
+  padding: 30px 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: 0 24px 48px rgb(15 23 42 / 0.12);
+}
+
+.login-copy {
+  margin: 10px 0 0;
+  color: var(--text-soft);
+}
+
+.login-feedback {
+  margin-top: 16px;
+}
+
+.login-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.form-field span {
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.form-field input:focus {
+  border-color: #89acc8;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(31 94 137 / 0.12);
+}
+
+.button-primary,
+.login-submit {
+  width: 100%;
+}
+
+ul {
+  padding-left: 18px;
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 from urllib.parse import parse_qs
 
@@ -79,6 +80,27 @@ from licican.web.templates.retention import render_retention_control
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 LOGGER = logging.getLogger(__name__)
+CSS_IMPORT_RE = re.compile(r'@import\s+url\(["\']?(?P<path>[^"\')]+)["\']?\)\s*;?')
+
+
+def _read_static_css(static_path: Path, visited: set[Path] | None = None) -> bytes:
+    visited = visited or set()
+    resolved_path = static_path.resolve()
+    if resolved_path in visited:
+        return b""
+    visited.add(resolved_path)
+
+    chunks: list[bytes] = []
+    for line in static_path.read_text(encoding="utf-8").splitlines():
+        match = CSS_IMPORT_RE.fullmatch(line.strip())
+        if match is None:
+            chunks.append((line + "\n").encode("utf-8"))
+            continue
+        imported_path = (static_path.parent / match.group("path")).resolve()
+        if not str(imported_path).startswith(str(STATIC_DIR.resolve())) or not imported_path.is_file():
+            continue
+        chunks.append(_read_static_css(imported_path, visited))
+    return b"".join(chunks)
 
 
 def handle_static(request: Request, start_response, filename: str) -> list[bytes]:
@@ -87,6 +109,8 @@ def handle_static(request: Request, start_response, filename: str) -> list[bytes
     if not str(static_path).startswith(str(STATIC_DIR.resolve())) or not static_path.is_file():
         return _not_found(start_response)
     content_type = "text/css; charset=utf-8" if static_path.suffix == ".css" else "application/octet-stream"
+    if static_path.suffix == ".css":
+        return send_response(start_response, "200 OK", content_type, _read_static_css(static_path))
     return send_response(start_response, "200 OK", content_type, static_path.read_bytes())
 
 
