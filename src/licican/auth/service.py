@@ -78,6 +78,25 @@ ORDER BY CASE WHEN username = %s THEN 0 ELSE 1 END
 LIMIT 1
 """
 
+AUTH_USER_SELECT_BY_USERNAME_SQL = """
+SELECT *
+FROM usuario
+WHERE username = %s
+LIMIT 1
+"""
+
+AUTH_USER_SELECT_SUPERADMIN_SQL = """
+SELECT *
+FROM usuario
+WHERE rol_principal = %s
+   OR rol = %s
+ORDER BY
+    CASE WHEN username = %s THEN 0 ELSE 1 END,
+    updated_at DESC,
+    fecha_alta DESC,
+    id
+"""
+
 AUTH_USER_LAST_LOGIN_SQL = """
 UPDATE usuario
 SET ultimo_login = %s,
@@ -127,6 +146,18 @@ SET nombre = %s,
     rol = %s,
     activo = %s,
     ultimo_login = %s,
+    updated_at = %s
+WHERE id = %s
+"""
+
+AUTH_USER_DELETE_SQL = """
+DELETE FROM usuario
+WHERE id = %s
+"""
+
+AUTH_USER_CLEAR_USERNAME_SQL = """
+UPDATE usuario
+SET username = NULL,
     updated_at = %s
 WHERE id = %s
 """
@@ -224,27 +255,36 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
         return
 
     current = datetime.now(UTC).replace(tzinfo=None, microsecond=0)
-    superadmin_id = superadmin_name
     superadmin_email = _superadmin_email(superadmin_name)
     try:
         with psycopg2.connect(resolve_database_url()) as connection:
             with connection.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(AUTH_USER_BOOTSTRAP_SQL)
-                cursor.execute(AUTH_USER_SELECT_SQL, (superadmin_name, superadmin_email, superadmin_name))
-                existing = cursor.fetchone()
+                cursor.execute(AUTH_USER_SELECT_SUPERADMIN_SQL, ("superadmin", "superadmin", superadmin_name))
+                superadmin_rows = list(cursor.fetchall())
                 if settings.login_superadmin_enabled:
                     password_hash = bcrypt.hashpw(
                         settings.login_superadmin_pass.encode("utf-8"),
                         bcrypt.gensalt(),
                     ).decode("utf-8")
-                    if existing is None:
+                    if not superadmin_rows:
+                        cursor.execute(AUTH_USER_SELECT_BY_USERNAME_SQL, (superadmin_name,))
+                        conflicting_user = cursor.fetchone()
+                        if conflicting_user is not None:
+                            cursor.execute(
+                                AUTH_USER_CLEAR_USERNAME_SQL,
+                                (
+                                    current,
+                                    conflicting_user["id"],
+                                ),
+                            )
                         cursor.execute(
                             AUTH_USER_INSERT_SQL,
                             (
-                                superadmin_id,
-                                "",
-                                "",
-                                "",
+                                superadmin_name,
+                                _superadmin_display_name(),
+                                _superadmin_surname(),
+                                superadmin_email,
                                 "superadmin",
                                 "activo",
                                 _superadmin_observations(),
@@ -253,7 +293,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 False,
                                 superadmin_name,
                                 password_hash,
-                                "",
+                                f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
                                 True,
                                 None,
@@ -262,43 +302,62 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                             ),
                         )
                     else:
+                        canonical = superadmin_rows[0]
+                        canonical_id = canonical["id"]
+                        for duplicate in superadmin_rows[1:]:
+                            cursor.execute(AUTH_USER_DELETE_SQL, (duplicate["id"],))
+                        cursor.execute(AUTH_USER_SELECT_BY_USERNAME_SQL, (superadmin_name,))
+                        conflicting_user = cursor.fetchone()
+                        if conflicting_user is not None and str(conflicting_user["id"]) != str(canonical_id):
+                            conflict_is_superadmin = any(str(row["id"]) == str(conflicting_user["id"]) for row in superadmin_rows)
+                            if not conflict_is_superadmin:
+                                cursor.execute(
+                                    AUTH_USER_CLEAR_USERNAME_SQL,
+                                    (
+                                        current,
+                                        conflicting_user["id"],
+                                    ),
+                                )
                         cursor.execute(
                             AUTH_USER_UPDATE_SUPERADMIN_SQL,
                             (
-                                "",
-                                "",
-                                "",
+                                _superadmin_display_name(),
+                                _superadmin_surname(),
+                                superadmin_email,
                                 "superadmin",
                                 "activo",
                                 _superadmin_observations(),
-                                existing.get("fecha_alta") or current,
-                                existing.get("ultimo_acceso"),
+                                canonical.get("fecha_alta") or current,
+                                canonical.get("ultimo_acceso"),
                                 False,
                                 superadmin_name,
                                 password_hash,
-                                "",
+                                f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
                                 True,
-                                existing.get("ultimo_login"),
+                                canonical.get("ultimo_login"),
                                 current,
-                                existing["id"],
+                                canonical_id,
                             ),
                         )
                     return
 
-                if existing is not None:
-                    cursor.execute(AUTH_USER_DEACTIVATE_SQL, (current, existing["id"]))
+                if superadmin_rows:
+                    canonical = superadmin_rows[0]
+                    for duplicate in superadmin_rows[1:]:
+                        cursor.execute(AUTH_USER_DELETE_SQL, (duplicate["id"],))
+                    cursor.execute(AUTH_USER_DEACTIVATE_SQL, (current, canonical["id"]))
     except psycopg2.Error as exc:
         LOGGER.warning("No se pudo sincronizar el usuario superadmin en PostgreSQL.")
         raise AuthenticationError("No se pudo validar la autenticacion.", code="database_error") from exc
 
 
 def _superadmin_display_name() -> str:
-    return ""
+    return "Superadministrador"
 
 
 def _superadmin_surname() -> str:
-    return ""
+    return "Licican"
 
 
 def _superadmin_observations() -> str:

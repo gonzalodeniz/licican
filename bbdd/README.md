@@ -16,7 +16,9 @@ PYTHONPATH=src python3 bbdd/seed_superadmin.py
 
 El script usa la configuración del `.env`:
 
-- si `LOGIN_SUPERADMIN_ENABLED=true` o `LOGIN_AUTOMATICO=true`, crea o reactiva el superadmin y actualiza su contraseña
+- si `LOGIN_SUPERADMIN_ENABLED=true` o `LOGIN_AUTOMATICO=true`, crea o reactiva el superadmin, actualiza su `username` al valor del `.env` y actualiza su contraseña
 - si `LOGIN_SUPERADMIN_ENABLED=false`, desactiva el superadmin existente
+
+La sincronización conserva una única fila superadmin en la tabla `usuario`.
 
 Este seed no forma parte del `initdb` automático para no mezclar el contrato base con una acción operativa opcional.
