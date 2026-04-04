@@ -449,6 +449,8 @@ def _validate_user_fields(
         raise ValueError("El email no tiene un formato valido.")
     if not rol_principal:
         raise ValueError("El rol principal es obligatorio.")
+    if _normalize_role(rol_principal) == "superadmin":
+        raise ValueError("El rol superadmin no puede asignarse desde la interfaz. Solo se gestiona mediante el fichero .env.")
     if _normalize_state(estado) not in USER_STATUSES:
         raise ValueError("El estado indicado no es valido.")
 

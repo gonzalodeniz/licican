@@ -71,7 +71,7 @@ def render_users(
                 <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
                 <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
-                <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in available_filters["roles"])}</select></div>
+                <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in _form_role_options(available_filters["roles"]))}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
               </div>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
@@ -352,7 +352,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     """
     role_options = "".join(
         f'<option value="{escape(role)}"' + (" selected" if selected_user["rol_principal"] == role else "") + f'>{escape(role.title())}</option>'
-        for role in _role_options()
+        for role in _form_role_options(_role_options())
     )
     state_options = "".join(
         f'<option value="{escape(state)}"' + (" selected" if selected_user["estado"] == state else "") + f'>{escape(state)}</option>'
@@ -511,6 +511,10 @@ def _state_options() -> list[str]:
 
 def _role_options() -> list[str]:
     return ["administrador", "superadmin", "manager", "colaborador", "invitado"]
+
+
+def _form_role_options(roles: list[str]) -> list[str]:
+    return [role for role in roles if role != "superadmin"]
 
 
 def _format_user_datetime(value: object | None) -> str:

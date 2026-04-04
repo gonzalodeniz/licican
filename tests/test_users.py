@@ -74,6 +74,16 @@ class UsersModuleTests(unittest.TestCase):
                     rol_principal="manager",
                 )
 
+    def test_create_user_rejects_superadmin_role(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "superadmin no puede asignarse"):
+                create_user(
+                    nombre="Eva",
+                    apellidos="Santos",
+                    email="eva.santos@licican.local",
+                    rol_principal="superadmin",
+                )
+
     def test_change_state_blocks_removing_last_active_admin(self) -> None:
         state = SeededUsersState.seed()
         state.users["usr-005"] = {
@@ -136,6 +146,19 @@ class UsersModuleTests(unittest.TestCase):
         self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(state.users["usr-002"]["password_hash"]).encode("utf-8")))
         self.assertEqual("carlos-login", updated.username)
         self.assertEqual("carlos-login", state.users["usr-002"]["username"])
+
+    def test_update_user_rejects_superadmin_role_assignment(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "superadmin no puede asignarse"):
+                update_user(
+                    "usr-002",
+                    nombre="Carlos",
+                    apellidos="Mendez",
+                    email="carlos.mendez@licican.local",
+                    username="carlos-login",
+                    rol_principal="superadmin",
+                    estado="activo",
+                )
 
     def test_update_user_rejects_password_confirmation_mismatch(self) -> None:
         with self._patch_users_db():

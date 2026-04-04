@@ -32,7 +32,6 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn("Usuarios totales", html)
         self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("<th>Usuario</th>", html)
-        self.assertIn('value="superadmin"', html)
         self.assertIn("badge-rol--administrador", html)
         self.assertIn("badge-rol--gestor", html)
         self.assertIn("badge-rol--colaborador", html)
@@ -78,6 +77,13 @@ class ApplicationUsersTests(unittest.TestCase):
         toggle_button_index = html.index('id="toggle-users-create"')
         self.assertLess(toggle_button_index, create_panel_index)
         self.assertLess(create_panel_index, filters_panel_index)
+
+        create_panel_html = html[create_panel_index:filters_panel_index]
+        self.assertNotIn('value="superadmin"', create_panel_html)
+        self.assertIn('value="administrador"', create_panel_html)
+        self.assertIn('value="manager"', create_panel_html)
+        self.assertIn('value="colaborador"', create_panel_html)
+        self.assertIn('value="invitado"', create_panel_html)
 
         filters_panel_html = html[filters_panel_index:table_panel_index]
         self.assertIn('name="busqueda"', filters_panel_html)
@@ -224,6 +230,15 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Fecha de alta: 02-04-2026 08:30", html)
         self.assertIn("02-04-2026 08:30", html)
         self.assertIn("Historial de cambios", html)
+
+        edit_role_select_start = html.index('id="editar_rol"')
+        edit_role_select_end = html.index('</select>', edit_role_select_start)
+        edit_role_select_html = html[edit_role_select_start:edit_role_select_end]
+        self.assertNotIn('value="superadmin"', edit_role_select_html)
+        self.assertIn('value="administrador"', edit_role_select_html)
+        self.assertIn('value="manager"', edit_role_select_html)
+        self.assertIn('value="colaborador"', edit_role_select_html)
+        self.assertIn('value="invitado"', edit_role_select_html)
 
     def test_user_update_route_redirects_back_to_list_after_save(self) -> None:
         state = SeededUsersState.seed()
