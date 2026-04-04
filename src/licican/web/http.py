@@ -15,7 +15,7 @@ from licican.auth.session import SessionState, now_iso
 from licican.config import normalize_base_path, resolve_pipeline_path
 from licican.pipeline import build_pipeline_payload
 from licican.shared.filters import CatalogFilters
-from licican.web.responses import html_body, json_body, send_response
+from licican.web.responses import build_url, html_body, json_body, send_response
 from licican.web.templates.base import page_template
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -220,6 +220,30 @@ def visible_pipeline_payload(request: Request) -> dict[str, object]:
     return build_pipeline_payload(
         path=resolve_pipeline_path(),
         usuario_id=None if request.access_context.is_admin else request.access_context.user_id,
+    )
+
+
+def catalog_data_error_html(base_path: str, message: str) -> str:
+    content = f"""
+      <section class="note note-warning">
+        <strong>Fuente temporalmente no disponible</strong><br />
+        {escape(message)}
+      </section>
+      <section class="panel">
+        <div class="panel-body">
+          <p>La aplicacion no ha podido consultar la fuente de datos operativa configurada para el catalogo. Revisa la conexion a PostgreSQL o la configuracion del backend antes de reintentar.</p>
+          <p>Ruta afectada del catalogo: <code>{escape(build_url(base_path, '/api/oportunidades'))}</code></p>
+        </div>
+      </section>
+    """
+    return page_template(
+        "Licican | Catalogo temporalmente no disponible",
+        "Catalogo temporalmente no disponible",
+        "Servicio de datos no disponible",
+        "El catalogo y el detalle requieren acceso a la fuente de datos configurada para la aplicacion.",
+        content,
+        current_path="/",
+        base_path=base_path,
     )
 
 
