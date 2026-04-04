@@ -71,7 +71,7 @@ def render_users(
                 <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
                 <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
-                <div><label for="nuevo_rol">Rol principal</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in _form_role_options(available_filters["roles"]))}</select></div>
+                <div><label for="nuevo_rol">Rol</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in _form_role_options(available_filters["roles"]))}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "pendiente" else '') + f'>{escape(item)}</option>' for item in available_filters["estados"])}</select></div>
               </div>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
@@ -304,7 +304,7 @@ def _render_users_table(user_rows: list[str]) -> str:
     if not user_rows:
         return '<section class="note">Todavia no hay usuarios que mostrar con los filtros activos.</section>'
 
-    headers = ["Usuario", "Nombre completo", "Email", "Rol principal", "Estado", "Ultimo acceso"]
+    headers = ["Usuario", "Nombre completo", "Email", "Rol", "Estado", "Ultimo acceso"]
     header_html = "".join(f"<th>{escape(label)}</th>" for label in headers)
     return f"""
       <div class="table-wrap users-table-wrap">
@@ -369,7 +369,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
             <div><label for="editar_apellidos">Apellidos</label><input id="editar_apellidos" name="apellidos" type="text" value="{escape(str(selected_user["apellidos"]))}" required /></div>
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
-            <div><label for="editar_rol">Rol principal</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
+            <div><label for="editar_rol">Rol</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
             <div><label for="editar_nueva_contrasena">Nueva contrasena</label><input id="editar_nueva_contrasena" name="nueva_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
             <div><label for="editar_confirmar_contrasena">Confirmar nueva contrasena</label><input id="editar_confirmar_contrasena" name="confirmar_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
@@ -404,7 +404,7 @@ def _render_user_row(base_path: str, user: dict[str, object]) -> str:
         f'<td data-label="Usuario">{escape(login_name)}</td>'
         f'<td data-label="Nombre completo">{escape(_display_optional_text(user["nombre_completo"]))}</td>'
         f'<td data-label="Email">{escape(_display_optional_text(user["email"]))}</td>'
-        f'<td data-label="Rol principal">{render_role_badge(user["rol_principal"])}</td>'
+        f'<td data-label="Rol">{render_role_badge(user["rol_principal"])}</td>'
         f'<td data-label="Estado">{render_state_badge(user["estado"])}</td>'
         f'<td data-label="Ultimo acceso">{escape(_format_user_datetime(user["ultimo_acceso"]))}</td>'
         f'<td data-label="ACCIONES"><div class="actions-cell">{"".join(actions)}</div></td>'
