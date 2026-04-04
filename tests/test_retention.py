@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
+import licican.config as config
 from licican import retention as retention_module
 
 
@@ -134,10 +136,16 @@ class _FakeConnection:
 class RetentionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.previous_bootstrap = retention_module._SCHEMA_BOOTSTRAPPED
+        self.previous_env_loaded = config._ENV_LOADED
         retention_module._SCHEMA_BOOTSTRAPPED = False
+        config._ENV_LOADED = False
+        self._env_patch = patch.dict(os.environ, {"DB_PASSWORD": "test-password"}, clear=False)
+        self._env_patch.start()
 
     def tearDown(self) -> None:
+        self._env_patch.stop()
         retention_module._SCHEMA_BOOTSTRAPPED = self.previous_bootstrap
+        config._ENV_LOADED = self.previous_env_loaded
 
     def test_build_retention_payload_classifies_operational_records(self) -> None:
         state = _RetentionState()

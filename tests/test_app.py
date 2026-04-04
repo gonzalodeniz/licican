@@ -20,6 +20,20 @@ from licican.auth.config import DEFAULT_SESSION_SECRET_KEY
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
+def _session_cookie(*, role: str, username: str, nombre_completo: str | None = None) -> str:
+    signer = URLSafeSerializer("test-session-secret", salt="licican.session")
+    session_payload = {
+        "username": username,
+        "rol": role,
+        "nombre_completo": nombre_completo or username,
+        "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
+        "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "csrf_token": "csrf-test-token",
+        "auto_login_active": False,
+    }
+    return f"licican_session={signer.dumps(session_payload)}"
+
+
 def invoke_app(
     path: str,
     query_string: str = "",
@@ -63,6 +77,7 @@ def invoke_app(
         env_overrides["LICICAN_CATALOG_BACKEND"] = "file"
     if "LICICAN_ROLE" not in os.environ:
         env_overrides["LICICAN_ROLE"] = "administrador"
+    session_payload: dict[str, object] | None = None
     if "DB_PASSWORD" not in os.environ:
         env_overrides["DB_PASSWORD"] = "test-password"
         if authenticated and not cookies:
@@ -77,11 +92,11 @@ def invoke_app(
                 "csrf_token": "csrf-test-token",
                 "auto_login_active": False,
             }
-        signer = URLSafeSerializer(
-            os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
-            salt="licican.session",
-        )
-        cookies = f"licican_session={signer.dumps(session_payload)}"
+            signer = URLSafeSerializer(
+                os.environ.get("SESSION_SECRET_KEY", env_overrides.get("SESSION_SECRET_KEY", DEFAULT_SESSION_SECRET_KEY)),
+                salt="licican.session",
+            )
+            cookies = f"licican_session={signer.dumps(session_payload)}"
     if cookies:
         environ["HTTP_COOKIE"] = cookies
     with patch.dict(os.environ, env_overrides, clear=False):
@@ -463,9 +478,10 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("La alerta necesita al menos un criterio funcional", html)
 
     def test_reader_role_hides_operational_navigation_and_blocks_alert_access(self) -> None:
-        with patch.dict(os.environ, {"LICICAN_ROLE": "invitado"}, clear=False):
-            status, _, body = invoke_app("/")
-            alerts_status, alerts_headers, alerts_body = invoke_app("/alertas")
+        reader_cookie = _session_cookie(role="invitado", username="lector-1", nombre_completo="Lector Demo")
+        with patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
+            status, _, body = invoke_app("/", cookies=reader_cookie)
+            alerts_status, alerts_headers, alerts_body = invoke_app("/alertas", cookies=reader_cookie)
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
@@ -522,20 +538,22 @@ class ApplicationTests(unittest.TestCase):
     def test_collaborator_only_sees_own_alerts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
+            admin_cookie = _session_cookie(role="administrador", username="admin-1", nombre_completo="Admin Demo")
+            manager_cookie = _session_cookie(role="manager", username="manager-1", nombre_completo="Manager Demo")
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "administrador", "LICICAN_USER_ID": "admin-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LOGIN_AUTOMATICO": "false"},
                 clear=False,
             ):
-                invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
+                invoke_app("/alertas", method="POST", body="palabra_clave=licencias", cookies=admin_cookie)
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "manager", "LICICAN_USER_ID": "manager-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LOGIN_AUTOMATICO": "false"},
                 clear=False,
             ):
-                invoke_app("/alertas", method="POST", body="procedimiento=Abierto")
-                page_status, _, page_body = invoke_app("/alertas")
-                api_status, _, api_body = invoke_app("/api/alertas")
+                invoke_app("/alertas", method="POST", body="procedimiento=Abierto", cookies=manager_cookie)
+                page_status, _, page_body = invoke_app("/alertas", cookies=manager_cookie)
+                api_status, _, api_body = invoke_app("/api/alertas", cookies=manager_cookie)
 
         self.assertEqual("200 OK", page_status)
         html = page_body.decode("utf-8")
@@ -549,18 +567,25 @@ class ApplicationTests(unittest.TestCase):
     def test_collaborator_cannot_edit_alerts_from_other_owner(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             alerts_path = Path(tmp_dir) / "alerts.json"
+            admin_cookie = _session_cookie(role="administrador", username="admin-1", nombre_completo="Admin Demo")
+            collaborator_cookie = _session_cookie(role="colaborador", username="colab-1", nombre_completo="Colaborador Demo")
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "administrador", "LICICAN_USER_ID": "admin-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LOGIN_AUTOMATICO": "false"},
                 clear=False,
             ):
-                invoke_app("/alertas", method="POST", body="palabra_clave=licencias")
+                invoke_app("/alertas", method="POST", body="palabra_clave=licencias", cookies=admin_cookie)
             with patch.dict(
                 os.environ,
-                {"LICICAN_ALERTS_PATH": str(alerts_path), "LICICAN_ROLE": "colaborador", "LICICAN_USER_ID": "colab-1"},
+                {"LICICAN_ALERTS_PATH": str(alerts_path), "LOGIN_AUTOMATICO": "false"},
                 clear=False,
             ):
-                status, headers, body = invoke_app("/alertas/alerta-001/editar", method="POST", body="procedimiento=Abierto")
+                status, headers, body = invoke_app(
+                    "/alertas/alerta-001/editar",
+                    method="POST",
+                    body="procedimiento=Abierto",
+                    cookies=collaborator_cookie,
+                )
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
@@ -653,8 +678,9 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn('class="nav-link active" href="/licican/conservacion"', html)
 
     def test_retention_page_denied_to_reader_role(self) -> None:
-        with patch.dict(os.environ, {"LICICAN_ROLE": "lector"}, clear=False):
-            status, headers, body = invoke_app("/conservacion")
+        reader_cookie = _session_cookie(role="lector", username="lector-1", nombre_completo="Lector Demo")
+        with patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
+            status, headers, body = invoke_app("/conservacion", cookies=reader_cookie)
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
@@ -902,8 +928,9 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn('data-tooltip="Eliminar"', html)
 
     def test_users_page_denied_to_reader_role(self) -> None:
-        with patch.dict(os.environ, {"LICICAN_ROLE": "invitado"}, clear=False):
-            status, headers, body = invoke_app("/usuarios")
+        invited_cookie = _session_cookie(role="invitado", username="invitado-1", nombre_completo="Invitado Demo")
+        with patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
+            status, headers, body = invoke_app("/usuarios", cookies=invited_cookie)
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
