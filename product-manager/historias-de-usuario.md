@@ -216,24 +216,8 @@
 - Nota de estado: `qa-teams` valido la entrega en la issue #11 el 2026-03-27. `developer-teams` integro la rama en `main` y la elimino el 2026-03-28; `product-manager` cerro administrativamente la issue el mismo dia.
 
 ## HU-12 Consultar licitaciones, lotes y adjudicaciones con trazabilidad al fichero origen
-- Backlog relacionado: PB-012
-- Caso de uso relacionado: CU-12
-- Issue relacionado: #12
-- Historia:
-  Como empresa o profesional TI,
-  quiero consultar en la aplicacion las licitaciones, sus lotes y sus adjudicaciones con el mismo marco funcional del Excel de referencia y con visibilidad del fichero origen,
-  para revisar la oportunidad sin perder trazabilidad del dato.
-- Criterios de aceptacion:
-  1. La aplicacion muestra una pestaña `Licitaciones TI Canarias`.
-  2. La aplicacion muestra una pestaña `Detalle Lotes`.
-  3. La aplicacion muestra una pestaña `Adjudicaciones`.
-  4. El detalle de una licitacion o contrato muestra el nombre del fichero `.atom` de origen.
-  5. La informacion visible para la muestra actual se corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
-  6. Si un dato no viene informado en origen, la interfaz lo muestra como no informado o equivalente claro.
-- Dependencias funcionales: PB-011, PB-002
-- Prioridad: P0
-- Estado: `cerrado`
-- Nota de estado: `qa-teams` valido la reentrega de la issue #12 el 2026-03-29. `developer-teams` integro la rama en `main` y la elimino el 2026-03-30; `product-manager` reconcilia la historia como cerrada.
+- Estado: retirado del alcance visible en `main`.
+- Nota de producto: la experiencia consolidada de licitaciones, lotes y adjudicaciones fue retirada de la aplicacion y ya no debe tratarse como capacidad activa del producto.
 
 ## HU-13 Gestionar acceso por rol a las acciones del sistema
 - Backlog relacionado: PB-013
@@ -246,8 +230,8 @@
 - Criterios de aceptacion:
   1. Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
   2. Given un usuario con rol `Manager`, When accede a la aplicacion, Then puede gestionar sus alertas propias y su pipeline propio dentro de las superficies ya disponibles.
-  3. Given un usuario con rol `Colaborador`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
-  4. Given un usuario con rol `Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  3. Given un usuario con rol `Colaborador`, When navega por catalogo, detalle o filtros, Then puede consultar la informacion pero no crear ni editar entidades.
+  4. Given un usuario con rol `Invitado`, When navega por catalogo, detalle o filtros, Then puede consultar la informacion pero no crear ni editar entidades.
   5. Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion de permisos, Then la matriz funcional deja preparada su extension sin bloquear la entrega actual.
   6. Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 - Dependencias funcionales: PB-010, PB-004

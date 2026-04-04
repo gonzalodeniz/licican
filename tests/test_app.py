@@ -122,10 +122,6 @@ class ApplicationTests(unittest.TestCase):
         self.assertIn("Fuente oficial", html)
         self.assertIn('/licican/oportunidades/pcsp-cabildo-licencias-2026', html)
         self.assertIn('action="/licican/"', html)
-        self.assertIn("Licitaciones TI Canarias", html)
-        self.assertIn("Detalle Lotes", html)
-        self.assertIn("Adjudicaciones", html)
-        self.assertIn('/licican/datos-consolidados', html)
         self.assertIn('<link rel="stylesheet" href="/licican/static/style.css"', html)
         self.assertNotIn("Pagina 1 de 1", html)
         self.assertNotIn("Mostrando 1-3 de 3", html)
@@ -133,7 +129,7 @@ class ApplicationTests(unittest.TestCase):
         self.assertNotIn("Ir a la pagina", html)
         self.assertIn("Menu principal", html)
         self.assertIn('class="nav-link active" href="/licican/"', html)
-        self.assertIn("Datos consolidados", html)
+        self.assertNotIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
         self.assertIn('href="/licican/kpis"', html)
         self.assertIn('href="/licican/conservacion"', html)
@@ -339,61 +335,20 @@ class ApplicationTests(unittest.TestCase):
             payload["criterios_adjudicacion"],
         )
 
-    def test_consolidated_dataset_page_renders_excel_tabs_and_rows(self) -> None:
-        status, headers, body = invoke_app("/datos-consolidados")
-        html = body.decode("utf-8")
+    def test_removed_dataset_routes_return_not_found(self) -> None:
+        for path in (
+            "/datos-consolidados",
+            "/datos-consolidados/licitaciones/114-2025",
+            "/datos-consolidados/adjudicaciones/2565-2024-pt1-pccntr-4934579",
+            "/api/datos-consolidados",
+        ):
+            status, _, body = invoke_app(path)
+            self.assertEqual("404 Not Found", status)
+            self.assertIn(b"No encontrado", body)
 
-        self.assertEqual("200 OK", status)
-        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
-        self.assertIn('id="dataset-summary-panel"', html)
-        self.assertIn('class="table-wrap dataset-table-wrap"', html)
-        self.assertIn("Licitaciones TI Canarias", html)
-        self.assertIn("Detalle Lotes", html)
-        self.assertIn("Adjudicaciones", html)
-        self.assertIn("Servicios y suministros de un conjunto de soluciones digitales innovadoras", html)
-        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", html)
-
-    def test_consolidated_dataset_supports_lot_and_award_tabs(self) -> None:
-        lot_status, _, lot_body = invoke_app("/datos-consolidados", "vista=lotes")
-        award_status, _, award_body = invoke_app("/datos-consolidados", "vista=adjudicaciones")
-
-        self.assertEqual("200 OK", lot_status)
-        self.assertIn("LOTE 1: Portal web de análisis de turismo inteligente", lot_body.decode("utf-8"))
-        self.assertEqual("200 OK", award_status)
-        self.assertIn("SOLUCIONES AVANZADAS EN INFORMATICA APLICADA", award_body.decode("utf-8"))
-        self.assertIn("Fichero Origen", award_body.decode("utf-8"))
-
-    def test_consolidated_dataset_api_returns_excel_counts(self) -> None:
-        status, headers, body = invoke_app("/api/datos-consolidados")
-        payload = json.loads(body)
-
-        self.assertEqual("200 OK", status)
-        self.assertEqual("application/json; charset=utf-8", headers["Content-Type"])
-        self.assertEqual("PB-012", payload["referencia_funcional"])
-        self.assertEqual({"licitaciones": 23, "lotes": 29, "adjudicaciones": 18}, payload["resumen"])
-        self.assertEqual(
-            "licitacionesPerfilesContratanteCompleto3_20260322_190106.atom",
-            payload["licitaciones"][0]["fichero_origen_atom"],
-        )
-
-    def test_excel_detail_pages_show_atom_traceability(self) -> None:
-        licitacion_status, _, licitacion_body = invoke_app("/datos-consolidados/licitaciones/114-2025")
-        adjudicacion_status, _, adjudicacion_body = invoke_app(
-            "/datos-consolidados/adjudicaciones/2565-2024-pt1-pccntr-4934579"
-        )
-
-        licitacion_html = licitacion_body.decode("utf-8")
-        adjudicacion_html = adjudicacion_body.decode("utf-8")
-
-        self.assertEqual("200 OK", licitacion_status)
-        self.assertIn('id="detail-licitacion-panel"', licitacion_html)
-        self.assertIn('class="table-wrap detail-table-wrap"', licitacion_html)
-        self.assertIn("Fichero .atom origen", licitacion_html)
-        self.assertIn("licitacionesPerfilesContratanteCompleto3_20260322_190106.atom", licitacion_html)
-        self.assertEqual("200 OK", adjudicacion_status)
-        self.assertIn('id="detail-adjudicacion-panel"', adjudicacion_html)
-        self.assertIn('class="table-wrap detail-table-wrap"', adjudicacion_html)
-        self.assertIn("Fichero .atom origen", adjudicacion_html)
+        status, _, body = invoke_app("/datos-consolidados", "vista=lotes")
+        self.assertEqual("404 Not Found", status)
+        self.assertIn(b"No encontrado", body)
 
     def test_coverage_page_remains_available_on_dedicated_route(self) -> None:
         status, headers, body = invoke_app("/cobertura-fuentes")

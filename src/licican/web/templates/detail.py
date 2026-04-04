@@ -53,61 +53,6 @@ def render_opportunity_detail(detail: dict[str, object], base_path: str = "", ac
     return page_template("Licican | Ficha de detalle de licitacion", str(detail["titulo"]), "Release 1 · PB-002 · Ficha resumida verificable", "La ficha resume los datos criticos del expediente y mantiene visible la fuente oficial, la fecha de publicación y el estado oficial. Cuando existe una rectificacion o modificacion publicada por el origen, se muestra el ultimo dato oficial visible.", content, current_path=f"/oportunidades/{escape(str(detail['id']))}", base_path=base_path, access_context=access_context)
 
 
-def render_licitacion_detail(detail: dict[str, object], base_path: str = "", access_context: AccessContext | None = None) -> str:
-    """Renderiza el detalle de una licitación del Excel."""
-    rows = [
-        ("ID Expediente", detail["id_expediente"]),
-        ("Estado", detail["estado"]),
-        ("Órgano Contratación", detail["organo_contratacion"]),
-        ("Importe estimado", detail["importe_estimado"]),
-        ("Importe con IVA", detail["importe_con_iva"]),
-        ("Importe sin IVA", detail["importe_sin_iva"]),
-        ("CPVs Informáticos", detail["cpvs_informaticos"]),
-        ("Ubicación", detail["ubicacion"]),
-        ("Procedimiento", detail["procedimiento"]),
-        ("Plazo Presentación", detail["plazo_presentacion"]),
-        ("Nº Lotes", detail["numero_lotes"]),
-        ("Nº Adjudicaciones", detail["numero_adjudicaciones"]),
-        ("Fecha Actualización", detail["fecha_actualizacion"]),
-        ("Fichero .atom origen", detail["fichero_origen_atom"]),
-    ]
-    table_rows = "".join(
-        f"<tr><th>{escape(label)}</th><td>{render_state_badge(value) if label == 'Estado' else escape(_display_value(value))}</td></tr>"
-        for label, value in rows
-    )
-    extra_link = f'<p><a class="offer-action" href="{escape(str(detail["enlace_placsp"]))}" target="_blank" rel="noopener noreferrer">Abrir expediente en PLACSP</a></p>' if detail["enlace_placsp"] else ""
-    content = f'<section class="panel" id="detail-licitacion-panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=licitaciones"))}">Volver a Licitaciones TI Canarias</a></p><div class="table-wrap detail-table-wrap"><table class="detail-table"><tbody>{table_rows}</tbody></table></div>{extra_link}</div></section>'
-    return page_template("Licican | Detalle de licitación consolidada", str(detail["titulo"]), "PB-012 · Detalle trazable del expediente", "La ficha mantiene visible la correspondencia funcional con el Excel de referencia y deja explícito el fichero `.atom` que alimenta la versión consolidada mostrada al usuario.", content, current_path="/datos-consolidados", base_path=base_path, access_context=access_context)
-
-
-def render_adjudicacion_detail(detail: dict[str, object], base_path: str = "", access_context: AccessContext | None = None) -> str:
-    """Renderiza el detalle de una adjudicación del Excel."""
-    rows = [
-        ("ID Expediente", detail["id_expediente"]),
-        ("Resultado", detail["resultado"]),
-        ("Fecha Adjudicación", detail["fecha_adjudicacion"]),
-        ("Lote", detail["lote"]),
-        ("Ganador", detail["ganador"]),
-        ("NIF Ganador", detail["nif_ganador"]),
-        ("Ciudad Ganador", detail["ciudad_ganador"]),
-        ("País", detail["pais"]),
-        ("Importe Adj. sin IVA", detail["importe_adjudicacion_sin_iva"]),
-        ("Importe Adj. Total", detail["importe_adjudicacion_total"]),
-        ("Ofertas Recibidas", detail["ofertas_recibidas"]),
-        ("Ofertas PYME", detail["ofertas_pyme"]),
-        ("PYME Adjudicatario", detail["pyme_adjudicatario"]),
-        ("ID Contrato", detail["id_contrato"]),
-        ("Fecha Contrato", detail["fecha_contrato"]),
-        ("Fichero .atom origen", detail["fichero_origen_atom"]),
-    ]
-    table_rows = "".join(f"<tr><th>{escape(label)}</th><td>{escape(_display_value(value))}</td></tr>" for label, value in rows)
-    licitacion_link = ""
-    if detail["licitacion_slug"] is not None:
-        licitacion_link = f'<p><a class="offer-action" href="{escape(build_url(base_path, f"/datos-consolidados/licitaciones/{detail["licitacion_slug"]}"))}">Ver licitación asociada</a></p>'
-    content = f'<section class="panel" id="detail-adjudicacion-panel"><div class="panel-body"><p><a href="{escape(build_url(base_path, "/datos-consolidados?vista=adjudicaciones"))}">Volver a Adjudicaciones</a></p><p>{escape(_display_value(detail["descripcion"]))}</p><div class="table-wrap detail-table-wrap"><table class="detail-table"><tbody>{table_rows}</tbody></table></div>{licitacion_link}</div></section>'
-    return page_template("Licican | Detalle de adjudicación consolidada", str(detail["titulo"]), "PB-012 · Contrato adjudicado con trazabilidad", "Esta ficha deja visible el resultado contractual de la muestra actual y, cuando existe correspondencia con la licitación, hereda la trazabilidad del fichero `.atom` origen.", content, current_path="/datos-consolidados", base_path=base_path, access_context=access_context)
-
-
 def _display_value(value: object | None) -> str:
     if value in (None, ""):
         return "No informado"

@@ -93,16 +93,15 @@
   - `product-manager` cerro administrativamente la issue #11 el 2026-03-28.
 
 ## Release 4: Vistas verificables de licitaciones, lotes y adjudicaciones
-- Objetivo: Hacer visible en la aplicacion la informacion consolidada derivada de los `.atom` en una superficie contrastable con el Excel funcional de referencia.
+- Esta release se conserva solo como referencia historica; la superficie fue retirada de `main`.
+- Objetivo: Conservar la trazabilidad historica de la entrega consolidada retirada, sin presentar la superficie como funcional en `main`.
 - Alcance:
   - PB-012 Exposicion funcional en la aplicacion del dataset de licitaciones TI Canarias.
 - Criterios de salida:
-  - Existen las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
-  - La informacion visible se corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` para la muestra actual.
-  - El detalle de la licitacion o contrato muestra el fichero `.atom` origen.
-  - Los datos no informados y los estados vacios se muestran de forma clara.
+  - La referencia historica queda documentada sin exponer rutas activas en `main`.
+  - Las menciones a la entrega consolidada se conservan solo como trazabilidad.
 - Riesgo principal:
-  - Que el dato consolidado exista tecnicamente pero siga sin una superficie funcional verificable por usuario y QA.
+  - Que la documentacion siga sugiriendo una superficie retirada como si continuara operativa.
 - Estado operativo actual:
   - `qa-teams` valido `PB-012` en la issue #12 el 2026-03-29.
   - `developer-teams` integro la rama validada en `main` y elimino la rama tecnica el 2026-03-30.

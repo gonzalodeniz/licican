@@ -52,7 +52,6 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
     if access_context is None:
         return [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
@@ -62,7 +61,6 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
     by_role = {
         ROLE_ADMINISTRATOR: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
@@ -73,7 +71,6 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
         ],
         ROLE_MANAGER: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Alertas", "description": "Criterios propios y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo propio", "icon": "PL", "path": "/pipeline", "upcoming": False},
@@ -81,14 +78,12 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
         ],
         ROLE_COLLABORATOR: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Alertas", "description": "Consulta de criterios y coincidencias", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Pipeline", "description": "Consulta del seguimiento operativo", "icon": "PL", "path": "/pipeline", "upcoming": False},
         ],
         ROLE_INVITED: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Datos consolidados", "description": "Excel funcional, lotes y adjudicaciones", "icon": "DC", "path": "/datos-consolidados", "upcoming": False},
             {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
         ],
     }
@@ -136,8 +131,6 @@ def _auto_login_notice_html(access_context: AccessContext | None) -> str:
 def _path_matches_navigation(current_path: str, item_path: str) -> bool:
     if item_path == "/":
         return current_path == "/" or current_path.startswith("/oportunidades/")
-    if item_path == "/datos-consolidados":
-        return current_path == item_path or current_path.startswith(f"{item_path}/")
     return current_path == item_path or current_path.startswith(f"{item_path}/")
 
 

@@ -15,7 +15,6 @@ from licican.auth.csrf import ensure_csrf_token, validate_csrf_token
 from licican.auth.rate_limiter import rate_limiter
 from licican.auth.service import AuthenticationError, authenticate_user, synchronize_superadmin_account
 from licican.auth.session import SessionState, clear_session, load_session, now_iso, persist_session_headers, timeout_exceeded
-from licican.canarias_dataset import build_adjudicacion_detail, build_licitacion_detail, load_canarias_dataset
 from licican.config import normalize_base_path, resolve_alerts_path, resolve_base_path, resolve_pipeline_path
 from licican.opportunity_catalog import CatalogDataSourceError, build_catalog, build_opportunity_detail
 from licican.pipeline import add_opportunity_to_pipeline, build_pipeline_payload, update_pipeline_entry_status
@@ -36,8 +35,7 @@ from licican.web.templates.base import page_template
 from licican.web.templates.catalog import render_catalog
 from licican.web.templates.classification import render_classification
 from licican.web.templates.coverage import render_coverage
-from licican.web.templates.dataset import render_datos_consolidados
-from licican.web.templates.detail import render_adjudicacion_detail, render_licitacion_detail, render_opportunity_detail
+from licican.web.templates.detail import render_opportunity_detail
 from licican.web.templates.kpis import render_kpis
 from licican.web.templates.permissions import render_permissions_matrix
 from licican.web.templates.pipeline import render_pipeline
@@ -451,10 +449,6 @@ def handle_static(request: Request, start_response, filename: str) -> list[bytes
     return send_response(start_response, "200 OK", content_type, static_path.read_bytes())
 
 
-def handle_api_dataset(request: Request, start_response) -> list[bytes]:
-    return send_response(start_response, "200 OK", "application/json; charset=utf-8", b"".join(json_body(load_canarias_dataset())))
-
-
 def handle_api_alerts(request: Request, start_response) -> list[bytes]:
     if not has_capability(request.access_context, "view_alerts"):
         return _deny_json(start_response, "view_alerts")
@@ -822,48 +816,6 @@ def handle_prioritization_page(request: Request, start_response) -> list[bytes]:
     return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
 
 
-def handle_dataset_page(request: Request, start_response) -> list[bytes]:
-    dataset = load_canarias_dataset()
-    selected_view = (request.query.get("vista") or ["licitaciones"])[0]
-    selected_view = selected_view if selected_view in {"licitaciones", "lotes", "adjudicaciones"} else "licitaciones"
-    if selected_view == "licitaciones":
-        rows = dataset["licitaciones"]
-        columns = [("id_expediente", "ID Expediente"), ("titulo", "Título"), ("estado", "Estado"), ("organo_contratacion", "Órgano Contratación"), ("importe_sin_iva", "Importe sin IVA"), ("procedimiento", "Procedimiento"), ("plazo_presentacion", "Plazo Presentación"), ("numero_lotes", "Nº Lotes"), ("numero_adjudicaciones", "Nº Adjudicaciones"), ("fichero_origen_atom", "Fichero Origen")]
-        actions = [f'<a class="offer-action" href="{escape(build_url(request.base_path, f"/datos-consolidados/licitaciones/{item["slug"]}"))}">Ver detalle</a>' for item in rows]
-        heading = "Licitaciones TI Canarias"
-        description = "La vista replica la hoja principal del Excel versionado y expone el expediente, su estado, el órgano contratante, los importes clave y el fichero `.atom` consolidado visible para trazabilidad."
-    elif selected_view == "lotes":
-        rows = dataset["lotes"]
-        columns = [("id_expediente", "ID Expediente"), ("titulo_licitacion", "Título Licitación"), ("numero_lote", "Nº Lote"), ("nombre_lote", "Nombre Lote"), ("importe_sin_iva", "Importe sin IVA (€)"), ("importe_con_iva", "Importe con IVA (€)"), ("cpvs", "CPVs"), ("ubicacion", "Ubicación"), ("criterios_adjudicacion", "Criterios Adjudicación")]
-        actions = [f'<a class="offer-action" href="{escape(build_url(request.base_path, f"/datos-consolidados/licitaciones/{item["licitacion_slug"]}"))}">Ver licitación</a>' for item in rows]
-        heading = "Detalle Lotes"
-        description = "La hoja de lotes permite revisar el desglose funcional de cada expediente por lote, manteniendo importes, ubicación, CPVs y criterios de adjudicación."
-    else:
-        rows = dataset["adjudicaciones"]
-        columns = [("id_expediente", "ID Expediente"), ("titulo", "Título"), ("fecha_adjudicacion", "Fecha Adjudicación"), ("lote", "Lote"), ("ganador", "Ganador"), ("importe_adjudicacion_sin_iva", "Importe Adj. sin IVA"), ("importe_adjudicacion_total", "Importe Adj. Total"), ("id_contrato", "ID Contrato"), ("fichero_origen_atom", "Fichero Origen")]
-        actions = [f'<a class="offer-action" href="{escape(build_url(request.base_path, f"/datos-consolidados/adjudicaciones/{item["slug"]}"))}">Ver contrato</a>' for item in rows]
-        heading = "Adjudicaciones"
-        description = "La hoja de adjudicaciones expone el resultado contractual visible para la muestra actual, incluyendo adjudicatario, importes, lote y trazabilidad al origen cuando la licitación asociada la aporta."
-    content = render_datos_consolidados(dataset, selected_view, heading, description, columns, actions, rows, request.base_path, request.access_context)
-    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
-def handle_licitacion_detail(request: Request, start_response, id: str) -> list[bytes]:
-    detail = build_licitacion_detail(id)
-    if detail is None:
-        return _not_found(start_response)
-    content = render_licitacion_detail(detail, request.base_path, request.access_context)
-    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
-def handle_adjudicacion_detail(request: Request, start_response, id: str) -> list[bytes]:
-    detail = build_adjudicacion_detail(id)
-    if detail is None:
-        return _not_found(start_response)
-    content = render_adjudicacion_detail(detail, request.base_path, request.access_context)
-    return send_response(start_response, "200 OK", "text/html; charset=utf-8", b"".join(html_body(content)))
-
-
 def handle_catalog_page(request: Request, start_response) -> list[bytes]:
     try:
         payload = build_catalog(
@@ -973,25 +925,25 @@ def handle_permissions_page(request: Request, start_response) -> list[bytes]:
         "matriz": [
             {
                 "rol": "Administrador",
-                "consulta": "Catalogo, detalle, datos consolidados, KPIs, alertas y pipeline.",
+                "consulta": "Catalogo, detalle, KPIs, alertas y pipeline.",
                 "gestion": "Puede crear y editar alertas propias o de otros contextos, y operar el pipeline.",
                 "gobierno": "Puede revisar la matriz de permisos y las restricciones visibles.",
             },
             {
                 "rol": "Manager",
-                "consulta": "Catalogo, detalle, datos consolidados, alertas, pipeline y KPIs operativos.",
+                "consulta": "Catalogo, detalle, alertas, pipeline y KPIs operativos.",
                 "gestion": "Puede gestionar alertas y pipeline operativos.",
                 "gobierno": "No accede a administracion global de usuarios ni permisos.",
             },
             {
                 "rol": "Colaborador",
-                "consulta": "Catalogo, detalle, datos consolidados, alertas y pipeline en modo consulta.",
+                "consulta": "Catalogo, detalle, alertas y pipeline en modo consulta.",
                 "gestion": "No puede crear ni modificar alertas, pipeline ni configuracion.",
                 "gobierno": "No accede a administracion global de permisos ni usuarios.",
             },
             {
                 "rol": "Invitado",
-                "consulta": "Catalogo, detalle y datos consolidados.",
+                "consulta": "Catalogo y detalle.",
                 "gestion": "No puede crear ni modificar alertas, pipeline ni configuracion.",
                 "gobierno": "No accede a vistas operativas de permisos ni KPIs.",
             },
@@ -1029,7 +981,6 @@ routes = [
     Route("GET", "/login", handle_login_page),
     Route("POST", "/login", handle_login_submit),
     Route("POST", "/logout", handle_logout),
-    Route("GET", "/api/datos-consolidados", handle_api_dataset),
     Route("GET", "/api/alertas", handle_api_alerts),
     Route("GET", "/api/pipeline", handle_api_pipeline),
     Route("GET", "/api/usuarios/{id}", handle_api_user_detail),
@@ -1060,9 +1011,6 @@ routes = [
     Route("GET", "/usuarios", handle_users_page),
     Route("GET", "/alertas", handle_alerts_page),
     Route("GET", "/pipeline", handle_pipeline_page),
-    Route("GET", "/datos-consolidados", handle_dataset_page),
-    Route("GET", "/datos-consolidados/licitaciones/{id}", handle_licitacion_detail),
-    Route("GET", "/datos-consolidados/adjudicaciones/{id}", handle_adjudicacion_detail),
     Route("GET", "/oportunidades/{id}", handle_opportunity_detail),
     Route("GET", "/", handle_catalog_page),
 ]

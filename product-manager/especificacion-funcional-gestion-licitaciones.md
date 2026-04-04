@@ -155,12 +155,7 @@ Como responsable de producto, quiero que la aplicacion consolide todos los fiche
   - Given que un expediente consolidado queda visible, When se consulta su informacion, Then se conserva el nombre del fichero `.atom` origen de la version vigente.
 
 ### HU-08 Consultar licitaciones, lotes y adjudicaciones
-Como empresa o profesional TI, quiero consultar licitaciones, lotes y adjudicaciones con trazabilidad al origen para revisar la oportunidad sin perder contexto del dato oficial.
-
-- Criterios de aceptacion:
-  - Given que el usuario entra en la aplicacion, When navega al modulo de datos consolidados, Then existen las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
-  - Given que se consulta una licitacion o contrato, When se abre su detalle, Then se muestra el nombre del fichero `.atom` origen.
-  - Given que la muestra funcional esta disponible, When `qa-teams` la contrasta, Then la informacion visible se corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` para las tres pestañas definidas.
+Esta historia fue retirada del alcance visible en `main`. La experiencia consolidada de licitaciones, lotes y adjudicaciones ya no forma parte de la navegacion ni de las rutas servidas por la aplicacion.
 
 ### HU-09 Configurar alertas tempranas
 Como empresa o profesional TI, quiero crear alertas con criterios de interes para enterarme antes de nuevas oportunidades relevantes.
@@ -200,8 +195,8 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
 - Criterios de aceptacion:
   - Given un usuario con rol `Administrador`, When accede a la aplicacion, Then puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles.
   - Given un usuario con rol `Manager`, When accede a sus superficies de trabajo, Then puede gestionar sus alertas propias y su pipeline propio sin acceder a administracion global.
-  - Given un usuario con rol `Colaborador`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
-  - Given un usuario con rol `Invitado`, When navega por catalogo, detalle, filtros o vistas consolidadas, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given un usuario con rol `Colaborador`, When navega por catalogo, detalle o filtros, Then puede consultar la informacion pero no crear ni editar entidades.
+  - Given un usuario con rol `Invitado`, When navega por catalogo, detalle o filtros, Then puede consultar la informacion pero no crear ni editar entidades.
   - Given que una superficie futura como pipeline aun no esta disponible, When se implementa esta primera iteracion, Then la matriz de permisos deja preparada su extension sin bloquear la entrega actual.
   - Given que un usuario intenta ejecutar una accion no permitida para su rol, When el sistema procesa la solicitud, Then la accion queda bloqueada de forma consistente y el control no se presenta como operativo.
 
@@ -345,23 +340,7 @@ Como responsable de producto y operacion, quiero que las acciones del sistema se
   - Existe una base consolidada y trazable de expedientes.
 
 ### CU-08 Consultar licitaciones, lotes y adjudicaciones consolidadas
-- Actor principal:
-  - Usuario registrado o invitado con acceso a consulta.
-- Objetivo:
-  - Revisar la informacion consolidada en vistas funcionales contrastables.
-- Precondiciones:
-  - La base consolidada ya esta disponible.
-- Disparador:
-  - El usuario entra en el modulo de datos consolidados.
-- Happy path:
-  1. El usuario accede a las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
-  2. El sistema muestra la informacion correspondiente.
-  3. El usuario abre el detalle de una licitacion o contrato.
-  4. El sistema muestra el fichero origen.
-- Flujo alternativo o error:
-  - Si un campo no viene informado en origen, el sistema mantiene la fila o detalle y lo marca como no informado en lugar de ocultarlo.
-- Postcondiciones:
-  - El usuario puede revisar el dato consolidado con trazabilidad funcional.
+- Esta capacidad fue retirada del alcance visible en `main` y se conserva solo como referencia historica.
 
 ### CU-09 Navegar entre modulos principales
 - Actor principal:

@@ -102,27 +102,9 @@ Preguntas abiertas que `developer-teams` debe aclarar si bloquean:
 - Que campo o combinacion de campos garantiza mejor la unicidad funcional del expediente cuando falte `ContractFolderID`.
 - Si la fecha oficial mas fiable para priorizar versiones es `atom:updated` o si debe existir criterio complementario en caso de empate.
 
-## Issue creada: Exponer en la aplicacion las vistas del Excel de licitaciones TI Canarias
+## Issue historica: Exponer en la aplicacion las vistas del Excel de licitaciones TI Canarias
 
-Titulo sugerido: `[product-manager] PB-012 Exponer en la aplicacion las vistas del Excel de licitaciones TI Canarias`
-
-Backlog: PB-012 Exposicion funcional en la aplicacion del dataset de licitaciones TI Canarias
-Historia de usuario: HU-12 Consultar licitaciones, lotes y adjudicaciones con trazabilidad al fichero origen
-Caso de uso: CU-12 Revisar la informacion consolidada en pestañas y detalle con fichero origen visible
-Criterios de aceptacion:
-1. La aplicacion muestra una pestaña `Licitaciones TI Canarias`.
-2. La aplicacion muestra una pestaña `Detalle Lotes`.
-3. La aplicacion muestra una pestaña `Adjudicaciones`.
-4. El detalle de una licitacion o contrato muestra de forma visible el nombre del fichero `.atom` origen.
-5. La informacion visible en la aplicacion para la muestra actual corresponde funcionalmente con `data/licitaciones_ti_canarias.xlsx` en esas tres pestañas.
-6. Si algun campo esperado no viene informado en origen, la aplicacion lo muestra como dato no informado o equivalente claro.
-Dependencias: PB-011 y PB-002
-Estado operativo: cerrado
-
-Contexto funcional:
-- El Excel `data/licitaciones_ti_canarias.xlsx` actua como referencia funcional de salida para esta iteracion.
-- QA debe poder comparar una muestra representativa entre aplicacion y Excel.
-- La trazabilidad del dato exige que el detalle muestre el fichero `.atom` origen de la version consolidada.
+Esta issue se conserva solo como trazabilidad historica. La superficie de `PB-012` ya no forma parte de `main` y no debe tratarse como capacidad vigente.
 
 Tareas sugeridas:
 - Mapear a la interfaz las columnas y agrupaciones funcionales relevantes del Excel de referencia.
@@ -190,8 +172,8 @@ Criterios de aceptacion:
 1. El sistema distingue al menos los roles `Administrador`, `Manager`, `Colaborador` e `Invitado`.
 2. `Administrador` puede consultar licitaciones, gestionar alertas, consultar KPIs y administrar roles o permisos sobre las superficies ya disponibles, ademas de cualquier accion visible para los demas roles.
 3. `Manager` puede consultar licitaciones, crear y editar sus alertas propias, operar su pipeline propio y consultar KPIs solo si la vista no expone informacion sensible de negocio o de otros usuarios.
-4. `Colaborador` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
-5. `Invitado` puede consultar catalogo, detalle, filtros y vistas consolidadas, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
+4. `Colaborador` puede consultar catalogo, detalle y filtros, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
+5. `Invitado` puede consultar catalogo, detalle y filtros, pero no puede crear ni modificar alertas, roles ni configuraciones de producto.
 6. Si una superficie futura como pipeline aun no esta disponible, la primera iteracion de permisos no queda bloqueada por ello y deja preparada la extension de la misma matriz de permisos.
 7. Si un usuario intenta ejecutar una accion no permitida para su rol, el sistema bloquea la accion de forma consistente y no expone controles operativos como si estuvieran disponibles.
 8. La navegacion y las superficies del producto muestran u ocultan acciones segun rol sin degradar la experiencia de consulta.

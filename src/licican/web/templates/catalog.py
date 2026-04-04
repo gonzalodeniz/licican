@@ -100,7 +100,6 @@ def render_catalog(catalog: dict[str, object], base_path: str = "", access_conte
         catalog_panel = f'<section class="note" id="catalog-empty-state">{escape(message)}</section>'
     content = f"""
       <section class="catalog-view">
-      <p class="muted">Incluye las vistas de <strong>Licitaciones TI Canarias</strong>, <strong>Detalle Lotes</strong> y <strong>Adjudicaciones</strong> en datos consolidados.</p>
       {filter_form}
       {catalog_panel}
       <p class="note">Referencia funcional activa: <code>{escape(catalog["referencia_funcional"])}</code>. Cada registro mantiene visible su fuente oficial, enlace oficial, fecha de publicación y estado oficial para facilitar verificación por <code>qa-teams</code>.</p>

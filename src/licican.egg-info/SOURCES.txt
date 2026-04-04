@@ -4,7 +4,6 @@ src/licican/__init__.py
 src/licican/alerts.py
 src/licican/app.py
 src/licican/atom_consolidation.py
-src/licican/canarias_dataset.py
 src/licican/opportunity_catalog.py
 src/licican/postgres_catalog.py
 src/licican/real_source_prioritization.py

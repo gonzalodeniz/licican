@@ -350,7 +350,7 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("302 Found", status)
         self.assertEqual("/licican/", headers["Location"])
         self.assertEqual("200 OK", page_status)
-        self.assertIn("KPIs operativos visibles por rol", page_body.decode("utf-8"))
+        self.assertIn("KPIs iniciales de cobertura, adopción y uso", page_body.decode("utf-8"))
         self.assertIsNotNone(auth_state["marta"]["ultimo_login"])
         self.assertEqual("activo", auth_state["admin"]["estado"])
         self.assertTrue(auth_state["admin"]["activo"])

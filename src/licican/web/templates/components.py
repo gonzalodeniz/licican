@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from html import escape
 
-from licican.web.responses import build_url
-
-
 def render_table(
     headers: list[str],
     rows: list[str],
@@ -65,13 +62,3 @@ def render_status_note(message: str | None, tone: str = "ok") -> str:
         return ""
     class_name = "note" if tone == "ok" else "note note-warning"
     return f'<section class="{class_name}">{escape(message)}</section>'
-
-
-def render_tab_nav(base_path: str, current_view: str, tabs: list[tuple[str, str]]) -> str:
-    """Renderiza una navegación por pestañas."""
-    links = []
-    for view, label in tabs:
-        class_name = "tab-link active" if current_view == view else "tab-link"
-        href = build_url(base_path, f"/datos-consolidados?vista={view}")
-        links.append(f'<a class="{class_name}" href="{escape(href)}">{escape(label)}</a>')
-    return f'<nav class="tab-nav" aria-label="Pestañas de datos consolidados">{"".join(links)}</nav>'

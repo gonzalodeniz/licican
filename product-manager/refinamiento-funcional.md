@@ -24,7 +24,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-003` ya fue revalidado por `qa-teams` en la issue #5 el 2026-03-20, integrado en `main` por `developer-teams` el 2026-03-21 y cerrado administrativamente por `product-manager`.
 - `PB-004` ya fue validado por `qa-teams` en la issue #6 el 2026-03-25, integrado en `main` por `developer-teams` el 2026-03-26 y debe tratarse ya como alcance vigente.
 - `PB-011` ya fue validado por `qa-teams` en la issue #11 el 2026-03-27, integrado en `main` por `developer-teams` el 2026-03-28 y cerrado administrativamente por `product-manager` ese mismo dia.
-- `PB-012` ya fue validado por `qa-teams` en la issue #12 el 2026-03-29, integrado en `main` por `developer-teams` el 2026-03-30 y debe tratarse ya como alcance cerrado.
+- `PB-012` ya fue validado por `qa-teams` en la issue #12 el 2026-03-29, integrado en `main` por `developer-teams` el 2026-03-30 y ahora se conserva solo como antecedente historico tras la retirada de su superficie.
 - `PB-005` ya fue validado por `qa-teams` en la issue #7 el 2026-03-31 y la issue ya se encuentra cerrada administrativamente.
 - `PB-013` ya quedo reconciliado como trabajo cerrado en GitHub y no debe seguir apareciendo como siguiente implementacion abierta.
 - `PB-015` ya quedo validado por `qa-teams` en la issue #16, integrado en `main` por `developer-teams` y cerrado administrativamente por `product-manager` el 2026-04-03.
@@ -33,7 +33,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - Queda definida la regla funcional para expedientes mixtos donde TI no es el unico componente.
 - Queda definido el tratamiento minimo de oportunidades anuladas, desiertas, desistidas o modificadas.
 - Queda identificado como deuda de trazabilidad el formato incompleto de varios issues abiertos, que debe corregirse para cumplir las reglas del repositorio.
-- Queda despejada la dependencia funcional entre catalogo y ficha: el catalogo base, la ficha, el filtrado, las alertas, la priorizacion de fuentes reales, la consolidacion `.atom` y la validacion funcional de `PB-012` ya estan resueltos; la siguiente capa accionable queda en la formalizacion operativa de permisos con `PB-013`.
+- Queda despejada la dependencia funcional entre catalogo y ficha: el catalogo base, la ficha, el filtrado, las alertas, la priorizacion de fuentes reales y la consolidacion `.atom` siguen resueltos; `PB-012` queda como antecedente historico y la siguiente capa accionable queda en la formalizacion operativa de permisos con `PB-013`.
 - Queda definido que una alerta del MVP necesita al menos un criterio funcional informado y no puede guardarse vacia.
 - Queda definido que el alta inicial en pipeline crea siempre el estado `Nueva`.
 - Queda definido que `PB-008` puede avanzar como definicion funcional de KPIs aunque la instrumentacion completa llegue en una iteracion posterior; la validacion funcional y la integracion ya estan completadas y solo queda el cierre administrativo.
@@ -50,16 +50,16 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La secuencia de trabajo ya no tiene bloqueos funcionales ni de validacion asociados a `PB-009` ni a `PB-004`.
 - `qa-teams` valido la entrega integrada en `main` de `PB-009` el 2026-03-24 y `product-manager` cerro la issue #9 el 2026-03-25.
 - `qa-teams` valido `PB-004` el 2026-03-25 y `developer-teams` dejo constancia de integracion y borrado de rama el 2026-03-26.
-- `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama.
+- `qa-teams` valido `PB-012` el 2026-03-29 sobre la rama `developer-teams/issue-12-pb-012-vistas-excel`, y `developer-teams` ya dejo despues la evidencia requerida de fusion en `main` y borrado de rama; la superficie fue retirada de `main` en esta revision documental.
 - `qa-teams` valido `PB-005` el 2026-03-31 sobre la rama `developer-teams/issue-7-pipeline-seguimiento`; la issue ya se encuentra cerrada administrativamente en GitHub.
-- Con `PB-011`, `PB-012`, `PB-005`, `PB-013`, `PB-015`, `PB-016` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es consolidar el cierre administrativo de `PB-008` y el orden de las issues tecnicas abiertas.
+- Con `PB-011`, `PB-012`, `PB-005`, `PB-013`, `PB-015`, `PB-016` y la issue tecnica `#14` ya cerradas, la siguiente prioridad operativa inmediata es consolidar el cierre administrativo de `PB-008` y el orden de las issues tecnicas abiertas; `PB-012` queda solo como historico sin superficie activa.
 - `T-002` ya quedo validado por `qa-teams`, integrado en `main` por `developer-teams` y cerrado administrativamente por `product-manager`.
 - `PB-015` ya no figura como pieza funcional abierta; `PB-014` ya quedo cerrada tras su integracion.
 - `PB-016` deja de figurar como siguiente pieza abierta de gobierno de usuarios y pasa a baseline funcional vigente.
 - `PB-010` deja de ser una pieza funcional abierta y pasa a historial cerrado de navegacion transversal.
 - `PB-013` deja de ser hueco ejecutable pendiente y pasa a baseline funcional ya entregada.
 - Los informes de `quality-auditor` y `security-auditor` del 2026-03-28 quedan aceptados como entrada formal de priorizacion; falta que `developer-teams` materialice sus hallazgos accionables en issues tecnicas separadas para poder ordenarlas frente a `PB-008`.
-- Producto debe reservar capacidad visible para esos hallazgos antes de comprometer nueva expansion funcional posterior a `PB-012`.
+- Producto debe reservar capacidad visible para esos hallazgos antes de comprometer nueva expansion funcional posterior al conjunto historico de capacidades ya validadas.
 
 ## Decisiones funcionales vigentes
 - El MVP de negocio se compone de dos escalones:
@@ -75,7 +75,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La relevancia TI debe poder explicarse y auditarse sin depender de interpretaciones tecnicas implicitas.
 - La regla TI ya puede validarse de forma observable antes de construir el catalogo, pero su casuistica seguira refinandose con ejemplos reales.
 - El pipeline minimo sigue limitado a los estados `Nueva`, `Evaluando`, `Preparando oferta`, `Presentada` y `Descartada`.
-- La primera iteracion de permisos de `PB-013` ya gobierna catalogo, detalle, filtros, vistas consolidadas, alertas y administracion visible; pipeline se incorpora despues sin redefinir la matriz funcional.
+- La primera iteracion de permisos de `PB-013` ya gobierna catalogo, detalle, filtros, alertas y administracion visible; pipeline se incorpora despues sin redefinir la matriz funcional.
 - La primera iteracion de alertas queda limitada a registrar coincidencias internas; la notificacion saliente se evaluara en una fase posterior.
 - Una alerta vacia no es valida: debe incluir al menos un criterio funcional entre palabra clave, presupuesto, procedimiento o ubicacion.
 - El pipeline MVP queda limitado a gestion individual por usuario; la colaboracion por empresa no forma parte del alcance actual.
@@ -89,7 +89,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - La siguiente iteracion operativa considera TI por CPVs con prefijo `72`, `48` o `302`.
 - Si un expediente aparece repetido entre snapshots `.atom`, la aplicacion debe conservar una unica version funcional con el dato oficial mas reciente disponible.
 - El detalle de licitacion o contrato debe hacer visible el nombre del fichero `.atom` origen de la version vigente.
-- La superficie visible de la iteracion debe alinearse funcionalmente con las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones` del Excel `data/licitaciones_ti_canarias.xlsx`.
+- La superficie visible de esa iteracion se conserva solo como referencia historica y no debe interpretarse como capacidad activa en `main`.
 - La navegacion principal de la aplicacion debe resolverse desde una estructura comun con menu lateral izquierdo de iconos cuando el ancho disponible lo permita.
 - La adaptacion responsive es un requisito funcional de producto: la interfaz debe conservar acceso a opciones principales y legibilidad del contenido al cambiar el ancho de la ventana.
 - Las opciones principales aun no operativas no deben aparecer como rutas plenamente disponibles sin senalizacion explicita.
@@ -210,7 +210,7 @@ La prioridad funcional vigente se mantiene en la operativizacion del dato real d
 - `PB-009` ya quedo validado por `qa-teams` sobre la entrega integrada en `main` y queda cerrado administrativamente en la issue #9 para mantener sincronizados backlog e historial operativo.
 - `PB-004` queda validado por `qa-teams`, integrado en `main` y cerrado administrativamente.
 - `PB-011` queda validado por `qa-teams`, integrado en `main` y cerrado administrativamente.
-- `PB-012` completa esa iteracion haciendo visible en aplicacion la salida alineada con el Excel y la trazabilidad al fichero origen, y queda cerrada administrativamente.
+- `PB-012` completo esa iteracion haciendo visible en aplicacion la salida alineada con el Excel y la trazabilidad al fichero origen, y hoy se conserva solo como referencia historica.
 - `PB-010` queda como iteracion cerrada de base de interfaz posterior a la consolidacion visible del dato.
 - `PB-013` queda absorbida como capacidad vigente de la matriz de permisos sobre las superficies ya disponibles, dejando pipeline como extension posterior.
 - `PB-005` deja de ser modulo posterior pendiente y pasa a entrega ya cerrada administrativamente.

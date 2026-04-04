@@ -283,31 +283,8 @@
   - RB-40 La consolidacion debe conservar una unica version funcional por expediente y mantener trazabilidad al fichero origen vigente.
 
 ## CU-12 Revisar la informacion consolidada en pestañas y detalle con fichero origen visible
-- Backlog relacionado: PB-012
-- Historias relacionadas: HU-12
-- Actor principal: Usuario registrado de Licican.
-- Objetivo: Consultar la informacion consolidada de licitaciones, lotes y adjudicaciones desde una superficie verificable y con trazabilidad al snapshot origen.
-- Disparador: El usuario accede al modulo de oportunidades consolidado desde fuentes `.atom`.
-- Precondiciones:
-  - El dataset consolidado de `PB-011` esta disponible.
-  - Existe una referencia funcional de salida en `data/licitaciones_ti_canarias.xlsx`.
-- Flujo principal:
-  1. El usuario abre la vista principal de licitaciones TI Canarias.
-  2. El sistema muestra la pestaña `Licitaciones TI Canarias` con la informacion principal de los expedientes.
-  3. El usuario navega a `Detalle Lotes` o `Adjudicaciones` segun su necesidad.
-  4. El usuario abre el detalle de una licitacion o contrato.
-  5. El sistema muestra el nombre del fichero `.atom` origen de la version consolidada del dato.
-- Flujos alternativos:
-  - A1. Si una licitacion no tiene lotes o adjudicaciones, la superficie correspondiente muestra un estado vacio claro.
-  - A2. Si algun campo esperado no viene informado en origen, la aplicacion lo marca como no informado sin ocultar el resto del registro.
-  - A3. Si `qa-teams` compara una muestra con el Excel de referencia, puede localizar la correspondencia funcional en las tres pestañas principales.
-- Postcondiciones:
-  - El usuario ha revisado informacion estructurada y trazable sobre licitaciones, lotes y adjudicaciones.
-- Reglas de negocio relacionadas:
-  - RB-41 La aplicacion debe ofrecer las pestañas `Licitaciones TI Canarias`, `Detalle Lotes` y `Adjudicaciones`.
-  - RB-42 El detalle de licitacion o contrato debe mostrar el nombre del fichero `.atom` origen de la version consolidada.
-  - RB-43 La salida visible debe ser funcionalmente contrastable con `data/licitaciones_ti_canarias.xlsx` para la muestra de datos vigente.
-  - RB-44 Los datos no informados en origen deben quedar senalizados de forma clara.
+- Estado: retirado del alcance visible en `main`.
+- Nota funcional: la superficie de datos consolidados fue eliminada de la aplicacion y ya no forma parte de la navegacion ni de las rutas servidas. Se conserva solo como referencia historica de producto.
 
 ## CU-13 Aplicar permisos segun rol en consulta y gestion
 - Backlog relacionado: PB-013
@@ -326,7 +303,7 @@
   5. El sistema procesa la accion manteniendo la trazabilidad de permisos aplicada.
 - Flujos alternativos:
   - A1. Si el usuario intenta ejecutar una accion no permitida, el sistema la bloquea y no la presenta como operativa.
-  - A2. Si el rol es `Invitado`, el sistema permite consulta de catalogo, detalle, filtros y vistas consolidadas, pero no muestra acciones de alta o edicion.
+  - A2. Si el rol es `Invitado`, el sistema permite consulta de catalogo, detalle y filtros, pero no muestra acciones de alta o edicion.
   - A3. Si el rol es `Colaborador`, el sistema limita la gestion a sus elementos propios en las superficies ya disponibles y excluye administracion global.
   - A4. Si el rol es `Manager`, el sistema permite gestion operativa sobre alertas y pipeline propios, ademas de la consulta de las superficies ya disponibles.
   - A5. Si una superficie futura como pipeline aun no esta expuesta, la aplicacion conserva la regla funcional definida sin bloquear la iteracion de permisos sobre las superficies vigentes.
