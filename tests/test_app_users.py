@@ -115,6 +115,8 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn('Aplicar filtros', table_panel_html)
         self.assertNotIn('Limpiar filtros</a>', table_panel_html)
         self.assertIn('class="users-table-footer"', table_panel_html)
+        self.assertIn('class="pagination-bar"', table_panel_html)
+        self.assertIn('class="pagination-status"', table_panel_html)
         self.assertIn('Pagina 1 de 1', table_panel_html)
         self.assertIn('Mostrando 1-4 de 4', table_panel_html)
         self.assertIn('id="users-page-size"', table_panel_html)

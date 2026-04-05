@@ -1,11 +1,10 @@
 .pagination-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 12px;
   align-items: center;
   margin-top: 4px;
   padding: 14px 16px;
-  border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface-subtle);
   box-shadow: var(--surface-shadow);
@@ -43,6 +42,7 @@
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .pagination-action {

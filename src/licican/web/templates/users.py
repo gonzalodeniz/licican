@@ -642,10 +642,6 @@ def _render_users_table_header(
 def _render_users_table_footer(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
     return f"""
       <div class="users-table-footer">
-        <div class="users-table-summary">
-          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-        </div>
         {_render_pagination(base_path, filters, pagination)}
       </div>
     """
@@ -962,6 +958,12 @@ def _format_user_datetime(value: object | None) -> str:
 
 def _render_pagination(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
     hidden_fields = "".join(f'<input type="hidden" name="{escape(str(key))}" value="{escape(str(value))}" />' for key, value in filters.items())
+    summary_html = f"""
+        <div class="pagination-status">
+          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+        </div>
+    """
     prev_link = ""
     if pagination["pagina_anterior"] is not None:
         prev_link = render_icon_button(
@@ -995,6 +997,7 @@ def _render_pagination(base_path: str, filters: dict[str, object], pagination: d
         """
     return f'''
       <div class="pagination-bar">
+        {summary_html}
         <form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/usuarios"))}">
           {hidden_fields}
           <label for="users-page-size">Resultados por pagina</label>
