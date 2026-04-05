@@ -31,6 +31,13 @@ def render_users(
     user_rows = [_render_user_row(base_path, user) for user in payload["usuarios"]]
     users_table = _render_users_table(user_rows)
     selected_user_panel = _render_selected_user_section(base_path, selected_user)
+    create_toggle_block = ""
+    if not selected_user_panel:
+        create_toggle_block = """
+        <div class="users-create-toggle">
+          <button type="button" id="toggle-users-create" aria-controls="users-create-panel" aria-expanded="false">Nuevo usuario</button>
+        </div>
+        """
     selected_user_block = ""
     if selected_user_panel:
         selected_user_block = f"""
@@ -55,9 +62,7 @@ def render_users(
 
     content = f"""
         <section class="users-view" aria-label="Gestion de usuarios" data-users-index-url="{escape(build_url(base_path, '/usuarios'))}">
-        <div class="users-create-toggle">
-          <button type="button" id="toggle-users-create" aria-controls="users-create-panel" aria-expanded="false">Nuevo usuario</button>
-        </div>
+        {create_toggle_block}
         <div class="users-toast-region" id="users-toast-region" aria-live="polite" aria-atomic="true">
           {_status_toast_div(validation_error, "error")}
           {_status_toast_div(status_message, "success")}

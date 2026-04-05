@@ -279,6 +279,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Laura Gonzalez", html)
         self.assertIn('id="editar_username"', html)
         self.assertIn('name="username"', html)
+        self.assertNotIn('id="toggle-users-create"', html)
         username_index = html.index('id="editar_username"')
         nombre_index = html.index('id="editar_nombre"')
         self.assertLess(username_index, nombre_index)
