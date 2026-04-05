@@ -81,8 +81,8 @@ def render_users(
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "deshabilitado" else '') + f'>{escape(item)}</option>' for item in _state_options_for_form())}</select></div>
               </div>
               <div class="filter-actions">
-                <button type="button" id="cancel-users-create">Cancelar</button>
                 <button type="button" id="open-create-password-modal" aria-controls="create-password-modal" aria-expanded="false">Crear usuario</button>
+                <button type="button" id="cancel-users-create">Cancelar</button>
               </div>
             </form>
           </div>

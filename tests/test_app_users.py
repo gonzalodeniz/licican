@@ -100,6 +100,11 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertLess(create_panel_html.index('id="nuevo_username"'), create_panel_html.index('id="nuevo_nombre_completo"'))
         self.assertIn('id="open-create-password-modal"', create_panel_html)
         self.assertIn('id="cancel-users-create"', create_panel_html)
+        self.assertIn('Crear usuario', create_panel_html)
+        self.assertIn('Cancelar', create_panel_html)
+        self.assertIn('M20 6 9 17l-5-5', create_panel_html)
+        self.assertIn('M18 6 6 18', create_panel_html)
+        self.assertLess(create_panel_html.index('id="open-create-password-modal"'), create_panel_html.index('id="cancel-users-create"'))
 
         table_panel_html = html[table_panel_index:]
         self.assertIn('name="busqueda"', table_panel_html)
