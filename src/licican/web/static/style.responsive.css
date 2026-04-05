@@ -43,10 +43,16 @@
 
   .pagination-bar {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pagination-nav {
+    justify-content: flex-start;
   }
 
   .pagination-jump {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .users-view .panel-body {
@@ -105,6 +111,14 @@
     width: 38px;
     min-width: 38px;
     margin-left: auto;
+  }
+
+  .pagination-pages {
+    flex-wrap: wrap;
+  }
+
+  .pagination-jump {
+    gap: 6px;
   }
 
   .catalog-view .panel-body,

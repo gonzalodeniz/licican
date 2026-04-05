@@ -964,49 +964,116 @@ def _render_pagination(base_path: str, filters: dict[str, object], pagination: d
           <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
         </div>
     """
-    prev_link = ""
-    if pagination["pagina_anterior"] is not None:
-        prev_link = render_icon_button(
-            label="Pagina anterior",
-            icon_svg=render_inline_svg_icon("chevron-left"),
-            href=_page_url(base_path, filters, int(pagination["pagina_anterior"]), int(pagination["tamano_pagina"])),
-            css_class="pagination-action pagination-action--prev",
-            tooltip="Pagina anterior",
-            aria_label="Pagina anterior",
-        )
-    next_link = ""
-    if pagination["pagina_siguiente"] is not None:
-        next_link = render_icon_button(
-            label="Pagina siguiente",
-            icon_svg=render_inline_svg_icon("chevron-right"),
-            href=_page_url(base_path, filters, int(pagination["pagina_siguiente"]), int(pagination["tamano_pagina"])),
-            css_class="pagination-action pagination-action--next",
-            tooltip="Pagina siguiente",
-            aria_label="Pagina siguiente",
-        )
     page_size_options = "".join(
         f'<option value="{value}"' + (" selected" if int(pagination["tamano_pagina"]) == value else "") + f">{value}</option>"
         for value in (5, 10, 25, 50)
     )
-    page_jump = ""
-    if int(pagination["total_paginas"]) > 1:
-        page_jump = f"""
-          <label for="users-page">Ir a la pagina</label>
-          <input id="users-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" />
-          <button type="submit">Ir</button>
-        """
+    page_jump = f"""
+      <label for="users-page" class="sr-only">Ir a la pagina</label>
+      <input id="users-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" placeholder="Pag #" value="" />
+      <button type="submit" class="pagination-go">Ir</button>
+    """
     return f'''
       <div class="pagination-bar">
         {summary_html}
+        {_render_pagination_nav(base_path, filters, pagination)}
         <form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/usuarios"))}">
           {hidden_fields}
-          <label for="users-page-size">Resultados por pagina</label>
+          <label for="users-page-size">Resultados</label>
           <select id="users-page-size" name="page_size" onchange="this.form.submit()">{page_size_options}</select>
           {page_jump}
         </form>
-        <div class="pagination-actions">{prev_link}{next_link}</div>
       </div>
     '''
+
+
+def _render_pagination_nav(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
+    current_page = int(pagination["pagina_actual"])
+    total_pages = int(pagination["total_paginas"])
+    page_size = int(pagination["tamano_pagina"])
+
+    prev_control = _render_pagination_arrow(
+        base_path,
+        filters,
+        target_page=int(pagination["pagina_anterior"]) if pagination["pagina_anterior"] is not None else None,
+        page_size=page_size,
+        label="Pagina anterior",
+        icon_name="chevron-left",
+        css_class="pagination-action pagination-action--prev",
+    )
+    next_control = _render_pagination_arrow(
+        base_path,
+        filters,
+        target_page=int(pagination["pagina_siguiente"]) if pagination["pagina_siguiente"] is not None else None,
+        page_size=page_size,
+        label="Pagina siguiente",
+        icon_name="chevron-right",
+        css_class="pagination-action pagination-action--next",
+    )
+    page_links = "".join(_render_pagination_page_item(base_path, filters, page, current_page, page_size) for page in _pagination_sequence(total_pages, current_page))
+    return f'''
+      <nav class="pagination-nav" aria-label="Paginacion de usuarios">
+        {prev_control}
+        <div class="pagination-pages">{page_links}</div>
+        {next_control}
+      </nav>
+    '''
+
+
+def _render_pagination_arrow(
+    base_path: str,
+    filters: dict[str, object],
+    *,
+    target_page: int | None,
+    page_size: int,
+    label: str,
+    icon_name: str,
+    css_class: str,
+) -> str:
+    if target_page is None:
+        return f'<span class="{escape(css_class)} is-disabled" aria-hidden="true">{render_inline_svg_icon(icon_name)}</span>'
+    return render_icon_button(
+        label=label,
+        icon_svg=render_inline_svg_icon(icon_name),
+        href=_page_url(base_path, filters, target_page, page_size),
+        css_class=css_class,
+        tooltip=label,
+        aria_label=label,
+    )
+
+
+def _render_pagination_page_item(base_path: str, filters: dict[str, object], page: int | str, current_page: int, page_size: int) -> str:
+    if page == "...":
+        return '<span class="pagination-page pagination-page--ellipsis" aria-hidden="true">...</span>'
+    assert isinstance(page, int)
+    if page == current_page:
+        return f'<span class="pagination-page is-current" aria-current="page">{page}</span>'
+    return f'<a class="pagination-page" href="{escape(_page_url(base_path, filters, page, page_size))}">{page}</a>'
+
+
+def _pagination_sequence(total_pages: int, current_page: int) -> list[int | str]:
+    if total_pages <= 7:
+        return list(range(1, total_pages + 1))
+
+    pages: list[int | str] = [1]
+    if current_page > 3:
+        pages.append("...")
+
+    start = max(2, current_page - 1)
+    end = min(total_pages - 1, current_page + 1)
+    if current_page <= 3:
+        end = 4
+    if current_page >= total_pages - 2:
+        start = total_pages - 3
+
+    for page in range(start, end + 1):
+        if page > 1 and page < total_pages:
+            pages.append(page)
+
+    if current_page < total_pages - 2:
+        pages.append("...")
+    pages.append(total_pages)
+    return pages
 
 
 def _page_url(base_path: str, filters: dict[str, object], page: int, page_size: int) -> str:
