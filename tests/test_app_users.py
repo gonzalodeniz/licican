@@ -116,6 +116,39 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('data-users-filter-search', html_with_filters.decode("utf-8"))
         self.assertIn('data-users-filter-role', html_with_filters.decode("utf-8"))
 
+    def test_users_page_shows_floating_success_toast_from_query_message(self) -> None:
+        with self._patch_users_db():
+            status, _, body = invoke_app("/usuarios", query_string="mensaje=Usuario+actualizado")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertIn('id="users-toast-region"', html)
+        self.assertIn('data-users-toast', html)
+        self.assertIn('users-toast-success', html)
+        self.assertIn('Usuario actualizado', html)
+        self.assertIn('toastLifetimeMs = 5000', html)
+        self.assertNotIn('note-warning', html)
+
+    def test_users_page_shows_floating_error_toast_for_validation_errors(self) -> None:
+        form_data = urlencode(
+            {
+                "nombre": "Eva",
+                "apellidos": "Santos",
+                "email": "ana.lopez@licican.local",
+                "rol_principal": "manager",
+                "estado": "activo",
+            }
+        )
+        with self._patch_users_db():
+            status, _, body = invoke_app("/usuarios", method="POST", body=form_data)
+
+        html = body.decode("utf-8")
+        self.assertEqual("400 Bad Request", status)
+        self.assertIn('id="users-toast-region"', html)
+        self.assertIn('users-toast-error', html)
+        self.assertIn('El email no puede duplicarse entre usuarios.', html)
+        self.assertNotIn('note-warning', html)
+
     def test_users_page_hides_actions_and_personal_data_for_superadmin(self) -> None:
         state = SeededUsersState.seed()
         state.users["superadmin"] = {

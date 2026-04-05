@@ -232,20 +232,22 @@
 
 .users-toast-region {
   position: fixed;
-  top: 22px;
-  right: 22px;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 40;
   display: grid;
   gap: 10px;
-  width: min(360px, calc(100vw - 44px));
+  width: min(640px, calc(100vw - 24px));
   pointer-events: none;
 }
 
 .users-toast {
   padding: 12px 14px;
-  border-radius: 10px;
-  background: #102a43;
-  color: #f8fbff;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: #eef2f7;
+  color: var(--text-main);
   box-shadow: var(--surface-shadow);
   border-left: 4px solid var(--primary);
   opacity: 0;
@@ -259,11 +261,24 @@
 }
 
 .users-toast-success {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
   border-left-color: var(--success-text);
+  color: #14532d;
+}
+
+.users-toast-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: var(--warning-text);
+  color: #7a5b00;
 }
 
 .users-toast-error {
+  background: #fef2f2;
+  border-color: #fecaca;
   border-left-color: var(--danger-text);
+  color: #991b1b;
 }
 
 .catalog-view .table-wrap,

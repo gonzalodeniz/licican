@@ -36,7 +36,7 @@ def render_users(
         selected_user_block = f"""
         <section class="panel" id="users-selected-panel">
           <div class="panel-body">
-            {_status_note_div("La fecha de alta puede generarse automaticamente durante la creacion.", "ok")}
+            {_status_toast_div("La fecha de alta puede generarse automaticamente durante la creacion.", "success")}
             {selected_user_panel}
           </div>
         </section>
@@ -47,8 +47,6 @@ def render_users(
         <section class="panel" id="users-table-panel">
           <div class="panel-body users-table-panel-body">
             {_render_users_table_header(base_path, filters, pagination, available_filters, has_active_filters)}
-            {_status_note_div(validation_error, "warn")}
-            {_status_note_div(status_message, "ok")}
             {_render_pagination(base_path, filters, pagination)}
             {users_table}
           </div>
@@ -60,7 +58,10 @@ def render_users(
         <div class="users-create-toggle">
           <button type="button" id="toggle-users-create" aria-controls="users-create-panel" aria-expanded="false">Nuevo usuario</button>
         </div>
-        <div class="users-toast-region" id="users-toast-region" aria-live="polite" aria-atomic="true"></div>
+        <div class="users-toast-region" id="users-toast-region" aria-live="polite" aria-atomic="true">
+          {_status_toast_div(validation_error, "error")}
+          {_status_toast_div(status_message, "success")}
+        </div>
         <section class="panel" id="users-create-panel" hidden>
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
@@ -106,6 +107,7 @@ def render_users(
           const toastRegion = document.getElementById('users-toast-region');
           let activeDeleteToggle = null;
           let searchSubmitTimer = null;
+          const toastLifetimeMs = 5000;
 
           function submitFilterForm() {{
             if (!filterForm) {{
@@ -122,16 +124,10 @@ def render_users(
             return document.getElementById('delete-toggle-' + userId);
           }}
 
-          function showToast(message, tone) {{
-            if (!toastRegion) {{
+          function activateToast(toast, lifetimeMs) {{
+            if (!toast) {{
               return;
             }}
-
-            const toast = document.createElement('div');
-            toast.className = 'users-toast ' + (tone ? 'users-toast-' + tone : 'users-toast-success');
-            toast.setAttribute('role', 'status');
-            toast.textContent = message;
-            toastRegion.appendChild(toast);
 
             window.setTimeout(function () {{
               toast.classList.add('is-visible');
@@ -143,8 +139,22 @@ def render_users(
                 if (toast.parentNode) {{
                   toast.parentNode.removeChild(toast);
                 }}
-              }}, 180);
-            }}, 2800);
+              }}, 220);
+            }}, lifetimeMs);
+          }}
+
+          function showToast(message, tone) {{
+            if (!toastRegion) {{
+              return;
+            }}
+
+            const toast = document.createElement('div');
+            const normalizedTone = tone === 'warn' ? 'warning' : (tone || 'success');
+            toast.className = 'users-toast users-toast-' + normalizedTone;
+            toast.setAttribute('role', normalizedTone === 'error' ? 'alert' : 'status');
+            toast.textContent = message;
+            toastRegion.appendChild(toast);
+            activateToast(toast, toastLifetimeMs);
           }}
 
           function hideConfirm(userId, restoreFocus) {{
@@ -278,6 +288,12 @@ def render_users(
             }}
           }}
 
+          if (toastRegion) {{
+            toastRegion.querySelectorAll('[data-users-toast]').forEach(function (toast) {{
+              activateToast(toast, toastLifetimeMs);
+            }});
+          }}
+
           window.showConfirm = showConfirm;
           window.hideConfirm = hideConfirm;
           window.deleteUser = deleteUser;
@@ -296,11 +312,12 @@ def render_users(
     )
 
 
-def _status_note_div(message: str | None, tone: str = "ok") -> str:
+def _status_toast_div(message: str | None, tone: str = "success") -> str:
     if message is None:
         return ""
-    class_name = "note" if tone == "ok" else "note note-warning"
-    return f'<div class="{class_name}">{escape(message)}</div>'
+    toast_tone = "warning" if tone == "warn" else tone
+    role = "alert" if toast_tone == "error" else "status"
+    return f'<div class="users-toast users-toast-{escape(toast_tone)}" data-users-toast role="{role}" aria-atomic="true">{escape(message)}</div>'
 
 
 def _render_users_table_header(
