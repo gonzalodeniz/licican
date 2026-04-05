@@ -9,7 +9,7 @@ import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from licican.auth.config import AuthSettings
+from licican.auth.config import AuthSettings, SUPERADMIN_USERNAME
 from licican.config import resolve_database_url
 
 LOGGER = logging.getLogger(__name__)
@@ -432,11 +432,8 @@ def authenticate_user(username: str, password: str, settings: AuthSettings) -> A
 def _authenticate_superadmin(username: str, password: str, settings: AuthSettings) -> AuthenticatedUser | None:
     if not settings.login_superadmin_enabled:
         return None
-    superadmin_name = settings.login_superadmin_name.strip()
-    if not superadmin_name:
-        return None
-    aliases = [superadmin_name]
-    email_alias = _superadmin_email(superadmin_name)
+    aliases = [SUPERADMIN_USERNAME]
+    email_alias = _superadmin_email(SUPERADMIN_USERNAME)
     if email_alias not in aliases:
         aliases.append(email_alias)
     if not any(alias and hmac.compare_digest(username, alias) for alias in aliases):
@@ -444,7 +441,7 @@ def _authenticate_superadmin(username: str, password: str, settings: AuthSetting
     if not hmac.compare_digest(password, settings.login_superadmin_pass):
         raise AuthenticationError("Usuario o contraseña incorrectos.")
     return AuthenticatedUser(
-        username=settings.login_superadmin_name,
+        username=SUPERADMIN_USERNAME,
         rol="superadmin",
         nombre_completo="",
         is_superadmin=True,
@@ -452,26 +449,26 @@ def _authenticate_superadmin(username: str, password: str, settings: AuthSetting
 
 
 def synchronize_superadmin_account(settings: AuthSettings) -> None:
-    superadmin_name = settings.login_superadmin_name.strip()
-    if not superadmin_name:
-        return
-
     current = datetime.now(UTC).replace(tzinfo=None, microsecond=0)
-    superadmin_email = _superadmin_email(superadmin_name)
+    superadmin_username = SUPERADMIN_USERNAME
+    superadmin_email = _superadmin_email(superadmin_username)
     try:
         with psycopg2.connect(resolve_database_url()) as connection:
             with connection.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(AUTH_USER_BOOTSTRAP_SQL)
-                cursor.execute(AUTH_USER_SELECT_SUPERADMIN_SQL, ("superadmin", "superadmin", superadmin_name))
+                cursor.execute(
+                    AUTH_USER_SELECT_SUPERADMIN_SQL,
+                    (SUPERADMIN_USERNAME, SUPERADMIN_USERNAME, superadmin_username),
+                )
                 superadmin_rows = list(cursor.fetchall())
+                cursor.execute(AUTH_USER_SELECT_BY_USERNAME_SQL, (superadmin_username,))
+                conflicting_user = cursor.fetchone()
                 if settings.login_superadmin_enabled:
                     password_hash = bcrypt.hashpw(
                         settings.login_superadmin_pass.encode("utf-8"),
                         bcrypt.gensalt(),
                     ).decode("utf-8")
                     if not superadmin_rows:
-                        cursor.execute(AUTH_USER_SELECT_BY_USERNAME_SQL, (superadmin_name,))
-                        conflicting_user = cursor.fetchone()
                         if conflicting_user is not None:
                             cursor.execute(
                                 AUTH_USER_CLEAR_USERNAME_SQL,
@@ -483,7 +480,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                         cursor.execute(
                             AUTH_USER_INSERT_SQL,
                             (
-                                superadmin_name,
+                                superadmin_username,
                                 _superadmin_display_name(),
                                 _superadmin_surname(),
                                 superadmin_email,
@@ -492,7 +489,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 _superadmin_observations(),
                                 current,
                                 None,
-                                superadmin_name,
+                                superadmin_username,
                                 password_hash,
                                 f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
@@ -509,8 +506,6 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                         canonical_id = canonical["id"]
                         for duplicate in superadmin_rows[1:]:
                             cursor.execute(AUTH_USER_DELETE_SQL, (duplicate["id"],))
-                        cursor.execute(AUTH_USER_SELECT_BY_USERNAME_SQL, (superadmin_name,))
-                        conflicting_user = cursor.fetchone()
                         if conflicting_user is not None and str(conflicting_user["id"]) != str(canonical_id):
                             conflict_is_superadmin = any(str(row["id"]) == str(conflicting_user["id"]) for row in superadmin_rows)
                             if not conflict_is_superadmin:
@@ -532,7 +527,7 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                                 _superadmin_observations(),
                                 canonical.get("fecha_alta") or current,
                                 canonical.get("ultimo_acceso"),
-                                superadmin_name,
+                                superadmin_username,
                                 password_hash,
                                 f"{_superadmin_display_name()} {_superadmin_surname()}".strip(),
                                 "superadmin",
@@ -551,6 +546,15 @@ def synchronize_superadmin_account(settings: AuthSettings) -> None:
                     for duplicate in superadmin_rows[1:]:
                         cursor.execute(AUTH_USER_DELETE_SQL, (duplicate["id"],))
                     cursor.execute(AUTH_USER_DEACTIVATE_SQL, (current, canonical["id"]))
+                else:
+                    if conflicting_user is not None:
+                        cursor.execute(
+                            AUTH_USER_CLEAR_USERNAME_SQL,
+                            (
+                                current,
+                                conflicting_user["id"],
+                            ),
+                        )
     except psycopg2.Error as exc:
         LOGGER.debug("No se pudo sincronizar el usuario superadmin en PostgreSQL.")
         raise AuthenticationError("No se pudo validar la autenticacion.", code="database_error") from exc

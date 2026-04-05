@@ -7,7 +7,7 @@ import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from licican.auth.config import get_auth_settings
+from licican.auth.config import SUPERADMIN_USERNAME, get_auth_settings
 from licican.config import resolve_database_url
 
 
@@ -518,15 +518,18 @@ def _validate_user_fields(
         raise ValueError("El estado indicado no es valido.")
 
     normalized_email = _normalize_email(email)
+    candidate_username = username or normalized_email
+    if candidate_username == SUPERADMIN_USERNAME:
+        raise ValueError("El nombre de usuario superadmin esta reservado para la cuenta de sistema.")
     for existing in users:
         if user_id is not None and existing.id == user_id:
             continue
         if _normalize_email(existing.email) == normalized_email:
             raise ValueError("El email no puede duplicarse entre usuarios.")
         existing_username = _clean_text(existing.username)
-        if username and existing_username and existing_username == username:
+        if candidate_username and existing_username and existing_username == candidate_username:
             raise ValueError("El nombre de usuario no puede duplicarse entre usuarios.")
-        if username and _normalize_email(existing.email) == _normalize_email(username):
+        if candidate_username and _normalize_email(existing.email) == _normalize_email(candidate_username):
             raise ValueError("El nombre de usuario no puede duplicarse con un email existente.")
         if existing_username and _normalize_email(existing_username) == normalized_email:
             raise ValueError("El email no puede duplicarse con un nombre de usuario existente.")
@@ -660,6 +663,7 @@ def create_user(
     nombre: str,
     apellidos: str,
     email: str,
+    username: str | None = None,
     rol_principal: str,
     estado: str = "deshabilitado",
     now: str | datetime | None = None,
@@ -670,7 +674,7 @@ def create_user(
         nombre,
         apellidos,
         email,
-        None,
+        username,
         rol_principal,
         estado,
     )

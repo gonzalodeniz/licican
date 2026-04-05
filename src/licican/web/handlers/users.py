@@ -100,6 +100,7 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
             nombre=str(form_data["nombre"]),
             apellidos=str(form_data["apellidos"]),
             email=str(form_data["email"]),
+            username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
         )

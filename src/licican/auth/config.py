@@ -10,6 +10,7 @@ from licican.config import _ensure_env_loaded
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_SESSION_SECRET_KEY = "cambiar-en-produccion-por-valor-aleatorio-seguro"
+SUPERADMIN_USERNAME = "superadmin"
 
 
 def _parse_bool(raw_value: str | None, default: bool) -> bool:
@@ -22,7 +23,6 @@ def _parse_bool(raw_value: str | None, default: bool) -> bool:
 class AuthSettings:
     login_automatico: bool
     login_superadmin_enabled: bool
-    login_superadmin_name: str
     login_superadmin_pass: str
     login_max_failed_attempts: int
     login_lock_minutes: int
@@ -63,7 +63,6 @@ def get_auth_settings() -> AuthSettings:
     settings = AuthSettings(
         login_automatico=login_automatico,
         login_superadmin_enabled=login_superadmin_enabled,
-        login_superadmin_name=(os.getenv("LOGIN_SUPERADMIN_NAME") or "").strip(),
         login_superadmin_pass=os.getenv("LOGIN_SUPERADMIN_PASS") or "",
         login_max_failed_attempts=max_failed_attempts,
         login_lock_minutes=lock_minutes,

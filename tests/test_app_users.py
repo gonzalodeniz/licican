@@ -102,8 +102,8 @@ class ApplicationUsersTests(unittest.TestCase):
 
     def test_users_page_hides_actions_and_personal_data_for_superadmin(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -113,10 +113,10 @@ class ApplicationUsersTests(unittest.TestCase):
             "ultimo_acceso": None,
             "failed_login_attempts": 0,
             "bloqueado_hasta": None,
-            "username": "admin",
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
         with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
             get_auth_settings.cache_clear()
@@ -125,12 +125,12 @@ class ApplicationUsersTests(unittest.TestCase):
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
-        self.assertIn('id="user-row-admin"', html)
-        self.assertLess(html.index('id="user-row-admin"'), html.index('id="user-row-usr-001"'))
-        admin_row_start = html.index('id="user-row-admin"')
+        self.assertIn('id="user-row-superadmin"', html)
+        self.assertLess(html.index('id="user-row-superadmin"'), html.index('id="user-row-usr-001"'))
+        admin_row_start = html.index('id="user-row-superadmin"')
         admin_row_html = html[admin_row_start:html.index("</tr>", admin_row_start)]
         self.assertIn("badge-rol--superadmin", admin_row_html)
-        self.assertIn('data-label="Usuario">admin</td>', admin_row_html)
+        self.assertIn('data-label="Usuario">superadmin</td>', admin_row_html)
         self.assertIn('data-label="Nombre completo">-</td>', admin_row_html)
         self.assertIn('data-label="Email">-</td>', admin_row_html)
         self.assertNotIn('data-tooltip="Modificar"', admin_row_html)
@@ -140,8 +140,8 @@ class ApplicationUsersTests(unittest.TestCase):
 
     def test_superadmin_detail_page_hides_edit_form_and_actions(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -151,20 +151,20 @@ class ApplicationUsersTests(unittest.TestCase):
             "ultimo_acceso": None,
             "failed_login_attempts": 0,
             "bloqueado_hasta": None,
-            "username": "admin",
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
         with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
             get_auth_settings.cache_clear()
-            status, headers, body = invoke_app("/usuarios/admin")
+            status, headers, body = invoke_app("/usuarios/superadmin")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.", html)
-        self.assertIn('Usuario seleccionado:</strong> admin', html)
+        self.assertIn('Usuario seleccionado:</strong> superadmin', html)
         self.assertNotIn('id="editar_username"', html)
         self.assertNotIn('id="editar_nombre"', html)
         self.assertNotIn('id="editar_email"', html)

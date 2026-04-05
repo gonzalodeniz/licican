@@ -44,8 +44,8 @@ class UsersModuleTests(unittest.TestCase):
 
     def test_build_users_payload_hides_superadmin_when_disabled(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -55,10 +55,10 @@ class UsersModuleTests(unittest.TestCase):
             "ultimo_acceso": None,
             "failed_login_attempts": 0,
             "bloqueado_hasta": None,
-            "username": "admin",
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
         with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "false"}, clear=False):
             get_auth_settings.cache_clear()
@@ -70,12 +70,12 @@ class UsersModuleTests(unittest.TestCase):
             ["ana.lopez@licican.local", "carlos.mendez@licican.local", "laura.gonzalez@licican.local", "mario.perez@licican.local"],
             [item["username"] for item in payload["usuarios"]],
         )
-        self.assertNotIn("admin", [item["id"] for item in payload["usuarios"]])
+        self.assertNotIn("superadmin", [item["id"] for item in payload["usuarios"]])
 
     def test_build_users_payload_shows_superadmin_first_when_enabled(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -85,10 +85,10 @@ class UsersModuleTests(unittest.TestCase):
             "ultimo_acceso": None,
             "failed_login_attempts": 0,
             "bloqueado_hasta": None,
-            "username": "admin",
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
         with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
             get_auth_settings.cache_clear()
@@ -96,10 +96,10 @@ class UsersModuleTests(unittest.TestCase):
 
         self.assertEqual(5, payload["summary"]["usuarios_totales"])
         self.assertEqual("superadmin", payload["usuarios"][0]["rol_principal"])
-        self.assertEqual("admin", payload["usuarios"][0]["username"])
+        self.assertEqual("superadmin", payload["usuarios"][0]["username"])
         self.assertIn("superadmin", payload["filtros_disponibles"]["roles"])
         self.assertEqual(
-            ["admin", "ana.lopez@licican.local", "carlos.mendez@licican.local", "laura.gonzalez@licican.local", "mario.perez@licican.local"],
+            ["superadmin", "ana.lopez@licican.local", "carlos.mendez@licican.local", "laura.gonzalez@licican.local", "mario.perez@licican.local"],
             [item["username"] for item in payload["usuarios"]],
         )
 
@@ -147,6 +147,17 @@ class UsersModuleTests(unittest.TestCase):
                     apellidos="Santos",
                     email="eva.santos@licican.local",
                     rol_principal="superadmin",
+                )
+
+    def test_create_user_rejects_reserved_superadmin_username(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "superadmin esta reservado"):
+                create_user(
+                    nombre="Eva",
+                    apellidos="Santos",
+                    email="eva.santos@licican.local",
+                    username="superadmin",
+                    rol_principal="manager",
                 )
 
     def test_change_state_blocks_removing_last_active_admin(self) -> None:
@@ -226,6 +237,19 @@ class UsersModuleTests(unittest.TestCase):
                     estado="activo",
                 )
 
+    def test_update_user_rejects_reserved_superadmin_username(self) -> None:
+        with self._patch_users_db():
+            with self.assertRaisesRegex(ValueError, "superadmin esta reservado"):
+                update_user(
+                    "usr-002",
+                    nombre="Carlos",
+                    apellidos="Mendez",
+                    email="carlos.mendez@licican.local",
+                    username="superadmin",
+                    rol_principal="manager",
+                    estado="activo",
+                )
+
     def test_update_user_rejects_password_confirmation_mismatch(self) -> None:
         with self._patch_users_db():
             with self.assertRaisesRegex(ValueError, "confirmacion de contrasena no coincide"):
@@ -250,8 +274,8 @@ class UsersModuleTests(unittest.TestCase):
 
     def test_superadmin_cannot_be_updated_deleted_or_disabled(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -261,23 +285,23 @@ class UsersModuleTests(unittest.TestCase):
             "ultimo_acceso": None,
             "failed_login_attempts": 0,
             "bloqueado_hasta": None,
-            "username": "admin",
+            "username": "superadmin",
             "password_hash": bcrypt.hashpw(b"admin12345", bcrypt.gensalt()).decode("utf-8"),
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
         with self._patch_users_db(state):
             with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
                 update_user(
-                    "admin",
+                    "superadmin",
                     nombre="Super",
                     apellidos="Admin",
                     email="super@licican.local",
-                    username="admin",
+                    username="superadmin",
                     rol_principal="superadmin",
                     estado="activo",
                 )
             with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
-                change_user_state("admin", "deshabilitado")
+                change_user_state("superadmin", "deshabilitado")
             with self.assertRaisesRegex(ValueError, "superadmin no puede editarse"):
-                delete_user("admin")
+                delete_user("superadmin")
