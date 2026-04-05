@@ -50,6 +50,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('id="toggle-users-create"', html)
         self.assertIn("Nuevo usuario", html)
         self.assertIn('id="users-create-panel" hidden', html)
+        self.assertIn('id="create-password-modal" hidden', html)
         self.assertIn('id="users-table-panel"', html)
         self.assertNotIn('id="users-filters-panel"', html)
         self.assertIn('id="users-filter-form"', html)
@@ -93,6 +94,12 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('value="manager"', create_panel_html)
         self.assertIn('value="colaborador"', create_panel_html)
         self.assertIn('value="invitado"', create_panel_html)
+        self.assertIn('id="nuevo_username"', create_panel_html)
+        self.assertIn('id="nuevo_nombre_completo"', create_panel_html)
+        self.assertNotIn('id="nuevo_apellidos"', create_panel_html)
+        self.assertLess(create_panel_html.index('id="nuevo_username"'), create_panel_html.index('id="nuevo_nombre_completo"'))
+        self.assertIn('id="open-create-password-modal"', create_panel_html)
+        self.assertIn('id="cancel-users-create"', create_panel_html)
 
         table_panel_html = html[table_panel_index:]
         self.assertIn('name="busqueda"', table_panel_html)
@@ -149,11 +156,13 @@ class ApplicationUsersTests(unittest.TestCase):
     def test_users_page_shows_floating_error_toast_for_validation_errors(self) -> None:
         form_data = urlencode(
             {
-                "nombre": "Eva",
-                "apellidos": "Santos",
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
                 "email": "ana.lopez@licican.local",
                 "rol_principal": "manager",
                 "estado": "activo",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
             }
         )
         with self._patch_users_db():
@@ -265,11 +274,13 @@ class ApplicationUsersTests(unittest.TestCase):
         state = SeededUsersState.seed()
         form_data = urlencode(
             {
-                "nombre": "Eva",
-                "apellidos": "Santos",
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
                 "email": "eva.santos@licican.local",
                 "rol_principal": "manager",
                 "estado": "deshabilitado",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
             }
         )
         with self._patch_users_db(state):
@@ -284,6 +295,26 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("eva.santos@licican.local", html)
         self.assertIn("usr-005", html)
         self.assertIn("deshabilitado", html)
+        self.assertIsNotNone(state.users["usr-005"]["password_hash"])
+
+    def test_user_creation_route_rejects_missing_password(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode(
+            {
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
+                "email": "eva.santos@licican.local",
+                "rol_principal": "manager",
+                "estado": "deshabilitado",
+            }
+        )
+        with self._patch_users_db(state):
+            status, _, body = invoke_app("/usuarios", method="POST", body=form_data)
+
+        html = body.decode("utf-8")
+        self.assertEqual("400 Bad Request", status)
+        self.assertIn("La nueva contrasena no puede estar vacia.", html)
+        self.assertNotIn("usr-005", state.users)
 
     def test_user_detail_page_shows_selected_user_history(self) -> None:
         with self._patch_users_db():

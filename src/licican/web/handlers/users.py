@@ -37,10 +37,13 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
     return {
         "nombre": (form_data.get("nombre") or [""])[0],
         "apellidos": (form_data.get("apellidos") or [""])[0],
+        "nombre_completo": (form_data.get("nombre_completo") or [""])[0],
         "email": (form_data.get("email") or [""])[0],
         "username": (form_data.get("username") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
         "estado": (form_data.get("estado") or ["deshabilitado"])[0],
+        "nueva_contrasena": (form_data.get("nueva_contrasena") or [""])[0],
+        "confirmar_contrasena": (form_data.get("confirmar_contrasena") or [""])[0],
     }
 
 
@@ -97,12 +100,13 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
     form_data = _user_form_values(read_form_data(request.environ))
     try:
         create_user(
-            nombre=str(form_data["nombre"]),
-            apellidos=str(form_data["apellidos"]),
+            nombre_completo=str(form_data["nombre_completo"]),
             email=str(form_data["email"]),
             username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
+            nueva_contrasena=str(form_data["nueva_contrasena"]),
+            confirmar_contrasena=str(form_data["confirmar_contrasena"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, str(exc))
@@ -125,8 +129,8 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
-            nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
-            confirmar_contrasena=(form_data.get("confirmar_contrasena") or [""])[0],
+            nueva_contrasena=str(form_data["nueva_contrasena"]),
+            confirmar_contrasena=str(form_data["confirmar_contrasena"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)

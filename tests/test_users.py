@@ -108,10 +108,12 @@ class UsersModuleTests(unittest.TestCase):
         state = SeededUsersState.seed()
         with self._patch_users_db(state):
             created = create_user(
-                nombre="Eva",
-                apellidos="Santos",
+                nombre_completo="Eva Santos",
+                username="eva.santos",
                 email="eva.santos@licican.local",
                 rol_principal="manager",
+                nueva_contrasena="clave-segura-123",
+                confirmar_contrasena="clave-segura-123",
             )
             reference, users = load_users()
 
@@ -120,6 +122,7 @@ class UsersModuleTests(unittest.TestCase):
         self.assertEqual("deshabilitado", created.estado)
         self.assertEqual(0, created.failed_login_attempts)
         self.assertIsNone(created.bloqueado_hasta)
+        self.assertIsNotNone(created.password_hash)
         self.assertEqual(5, len(users))
         self.assertEqual("eva.santos@licican.local", users[-1].email)
 
@@ -127,38 +130,45 @@ class UsersModuleTests(unittest.TestCase):
         state = SeededUsersState.seed()
         with self._patch_users_db(state):
             create_user(
-                nombre="Eva",
-                apellidos="Santos",
+                nombre_completo="Eva Santos",
+                username="eva.santos",
                 email="eva.santos@licican.local",
                 rol_principal="manager",
+                nueva_contrasena="clave-segura-123",
+                confirmar_contrasena="clave-segura-123",
             )
             with self.assertRaisesRegex(ValueError, "El email no puede duplicarse"):
                 create_user(
-                    nombre="Eva",
-                    apellidos="Santos",
+                    nombre_completo="Eva Santos",
+                    username="eva.santos-2",
                     email="eva.santos@licican.local",
                     rol_principal="manager",
+                    nueva_contrasena="clave-segura-123",
+                    confirmar_contrasena="clave-segura-123",
                 )
 
     def test_create_user_rejects_superadmin_role(self) -> None:
         with self._patch_users_db():
             with self.assertRaisesRegex(ValueError, "superadmin no puede asignarse"):
                 create_user(
-                    nombre="Eva",
-                    apellidos="Santos",
+                    nombre_completo="Eva Santos",
+                    username="eva.santos",
                     email="eva.santos@licican.local",
                     rol_principal="superadmin",
+                    nueva_contrasena="clave-segura-123",
+                    confirmar_contrasena="clave-segura-123",
                 )
 
     def test_create_user_rejects_reserved_superadmin_username(self) -> None:
         with self._patch_users_db():
             with self.assertRaisesRegex(ValueError, "superadmin esta reservado"):
                 create_user(
-                    nombre="Eva",
-                    apellidos="Santos",
+                    nombre_completo="Eva Santos",
                     email="eva.santos@licican.local",
                     username="superadmin",
                     rol_principal="manager",
+                    nueva_contrasena="clave-segura-123",
+                    confirmar_contrasena="clave-segura-123",
                 )
 
     def test_change_state_blocks_removing_last_active_admin(self) -> None:

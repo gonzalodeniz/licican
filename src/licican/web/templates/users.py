@@ -67,19 +67,23 @@ def render_users(
           {_status_toast_div(validation_error, "error")}
           {_status_toast_div(status_message, "success")}
         </div>
+        {_render_create_password_modal(base_path)}
         {_render_password_modal()}
         <section class="panel" id="users-create-panel" hidden>
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
-            <form method="post" action="{escape(build_url(base_path, '/usuarios'))}">
+            <form method="post" action="{escape(build_url(base_path, '/usuarios'))}" id="users-create-form">
               <div class="filters">
-                <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
-                <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
+                <div><label for="nuevo_username">Usuario</label><input id="nuevo_username" name="username" type="text" required /></div>
+                <div><label for="nuevo_nombre_completo">Nombre completo</label><input id="nuevo_nombre_completo" name="nombre_completo" type="text" required /></div>
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
                 <div><label for="nuevo_rol">Rol</label><select id="nuevo_rol" name="rol_principal">{_render_role_options(_role_options(), include_superadmin=False, capitalize_labels=True)}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "deshabilitado" else '') + f'>{escape(item)}</option>' for item in _state_options_for_form())}</select></div>
               </div>
-              <div class="filter-actions"><button type="submit">Crear usuario</button></div>
+              <div class="filter-actions">
+                <button type="button" id="cancel-users-create">Cancelar</button>
+                <button type="button" id="open-create-password-modal" aria-controls="create-password-modal" aria-expanded="false">Crear usuario</button>
+              </div>
             </form>
           </div>
         </section>
@@ -90,21 +94,54 @@ def render_users(
         (function () {{
           const button = document.getElementById('toggle-users-create');
           const panel = document.getElementById('users-create-panel');
+          const createForm = document.getElementById('users-create-form');
+          const createPasswordModal = document.getElementById('create-password-modal');
+          const createPasswordForm = document.getElementById('create-password-form');
+          const createPasswordUserName = document.getElementById('create-password-modal-user-name');
+          const createPasswordNewInput = document.getElementById('create-password-modal-new');
+          const createPasswordConfirmInput = document.getElementById('create-password-modal-confirm');
+          const createPasswordHiddenUsername = document.getElementById('create-modal-username');
+          const createPasswordHiddenFullName = document.getElementById('create-modal-nombre-completo');
+          const createPasswordHiddenEmail = document.getElementById('create-modal-email');
+          const createPasswordHiddenRole = document.getElementById('create-modal-rol');
+          const createPasswordHiddenState = document.getElementById('create-modal-estado');
+          const createPasswordOpenButton = document.getElementById('open-create-password-modal');
+          const createPanelCancelButton = document.getElementById('cancel-users-create');
           const filterForm = document.getElementById('users-filter-form');
           if (button && panel) {{
+            function closeCreatePanel() {{
+              panel.setAttribute('hidden', '');
+              button.setAttribute('aria-expanded', 'false');
+              if (createForm) {{
+                createForm.reset();
+              }}
+              closeCreatePasswordModal();
+            }}
+
+            function openCreatePanel() {{
+              panel.removeAttribute('hidden');
+              button.setAttribute('aria-expanded', 'true');
+              if (createForm) {{
+                createForm.reset();
+              }}
+              closeCreatePasswordModal();
+            }}
+
             panel.hidden = true;
             button.setAttribute('aria-expanded', 'false');
 
             button.addEventListener('click', function () {{
               const isHidden = panel.hasAttribute('hidden');
               if (isHidden) {{
-                panel.removeAttribute('hidden');
-                button.setAttribute('aria-expanded', 'true');
+                openCreatePanel();
               }} else {{
-                panel.setAttribute('hidden', '');
-                button.setAttribute('aria-expanded', 'false');
+                closeCreatePanel();
               }}
             }});
+
+            if (createPanelCancelButton) {{
+              createPanelCancelButton.addEventListener('click', closeCreatePanel);
+            }}
           }}
 
           const usersView = document.querySelector('.users-view');
@@ -136,6 +173,20 @@ def render_users(
             return document.getElementById('delete-toggle-' + userId);
           }}
 
+          function updatePasswordMatchState(newInput, confirmInput) {{
+            if (!newInput || !confirmInput) {{
+              return;
+            }}
+
+            const newValue = newInput.value;
+            const confirmValue = confirmInput.value;
+            const hasValue = confirmValue.length > 0;
+            const matches = hasValue && newValue === confirmValue;
+
+            confirmInput.classList.toggle('is-password-match', matches);
+            confirmInput.classList.toggle('is-password-mismatch', hasValue && !matches);
+          }}
+
           function setEditSaveState() {{
             if (!editForm || !editSaveButton) {{
               return;
@@ -152,18 +203,94 @@ def render_users(
             editSaveButton.setAttribute('aria-disabled', hasChanges ? 'false' : 'true');
           }}
 
-          function setPasswordMatchState() {{
-            if (!passwordModalNewInput || !passwordModalConfirmInput) {{
+          function setEditPasswordMatchState() {{
+            updatePasswordMatchState(passwordModalNewInput, passwordModalConfirmInput);
+          }}
+
+          function setCreatePasswordMatchState() {{
+            updatePasswordMatchState(createPasswordNewInput, createPasswordConfirmInput);
+          }}
+
+          function closeCreatePasswordModal() {{
+            if (!createPasswordModal) {{
               return;
             }}
 
-            const newValue = passwordModalNewInput.value;
-            const confirmValue = passwordModalConfirmInput.value;
-            const hasValue = confirmValue.length > 0;
-            const matches = hasValue && newValue === confirmValue;
+            createPasswordModal.hidden = true;
+            createPasswordModal.setAttribute('aria-hidden', 'true');
+            if (createPasswordNewInput) {{
+              createPasswordNewInput.value = '';
+            }}
+            if (createPasswordConfirmInput) {{
+              createPasswordConfirmInput.value = '';
+              createPasswordConfirmInput.classList.remove('is-password-match', 'is-password-mismatch');
+            }}
+            if (createPasswordUserName) {{
+              createPasswordUserName.textContent = '';
+            }}
+            if (createPasswordHiddenUsername) {{
+              createPasswordHiddenUsername.value = '';
+            }}
+            if (createPasswordHiddenFullName) {{
+              createPasswordHiddenFullName.value = '';
+            }}
+            if (createPasswordHiddenEmail) {{
+              createPasswordHiddenEmail.value = '';
+            }}
+            if (createPasswordHiddenRole) {{
+              createPasswordHiddenRole.value = '';
+            }}
+            if (createPasswordHiddenState) {{
+              createPasswordHiddenState.value = '';
+            }}
+            if (createPasswordOpenButton) {{
+              createPasswordOpenButton.setAttribute('aria-expanded', 'false');
+            }}
+          }}
 
-            passwordModalConfirmInput.classList.toggle('is-password-match', matches);
-            passwordModalConfirmInput.classList.toggle('is-password-mismatch', hasValue && !matches);
+          function openCreatePasswordModal() {{
+            if (!createForm || !createPasswordModal || !createPasswordForm) {{
+              return;
+            }}
+
+            if (typeof createForm.reportValidity === 'function' && !createForm.reportValidity()) {{
+              return;
+            }}
+
+            const createFormData = new FormData(createForm);
+            const username = String(createFormData.get('username') || '').trim();
+            const fullName = String(createFormData.get('nombre_completo') || '').trim();
+            const email = String(createFormData.get('email') || '').trim();
+            const role = String(createFormData.get('rol_principal') || '').trim();
+            const state = String(createFormData.get('estado') || '').trim();
+
+            if (createPasswordHiddenUsername) {{
+              createPasswordHiddenUsername.value = username;
+            }}
+            if (createPasswordHiddenFullName) {{
+              createPasswordHiddenFullName.value = fullName;
+            }}
+            if (createPasswordHiddenEmail) {{
+              createPasswordHiddenEmail.value = email;
+            }}
+            if (createPasswordHiddenRole) {{
+              createPasswordHiddenRole.value = role;
+            }}
+            if (createPasswordHiddenState) {{
+              createPasswordHiddenState.value = state;
+            }}
+            if (createPasswordUserName) {{
+              createPasswordUserName.textContent = fullName || username;
+            }}
+
+            createPasswordModal.hidden = false;
+            createPasswordModal.setAttribute('aria-hidden', 'false');
+            if (createPasswordOpenButton) {{
+              createPasswordOpenButton.setAttribute('aria-expanded', 'true');
+            }}
+            if (createPasswordNewInput) {{
+              createPasswordNewInput.focus();
+            }}
           }}
 
           function openPasswordModal(button) {{
@@ -390,6 +517,19 @@ def render_users(
             }});
           }}
 
+          if (createPasswordOpenButton) {{
+            createPasswordOpenButton.addEventListener('click', openCreatePasswordModal);
+          }}
+          if (createPasswordModal) {{
+            createPasswordModal.querySelectorAll('[data-create-password-modal-close]').forEach(function (button) {{
+              button.addEventListener('click', closeCreatePasswordModal);
+            }});
+          }}
+          if (createPasswordNewInput && createPasswordConfirmInput) {{
+            createPasswordNewInput.addEventListener('input', setCreatePasswordMatchState);
+            createPasswordConfirmInput.addEventListener('input', setCreatePasswordMatchState);
+          }}
+
           passwordOpenButtons.forEach(function (button) {{
             button.addEventListener('click', function () {{
               openPasswordModal(button);
@@ -401,10 +541,14 @@ def render_users(
             }});
           }}
           if (passwordModalNewInput && passwordModalConfirmInput) {{
-            passwordModalNewInput.addEventListener('input', setPasswordMatchState);
-            passwordModalConfirmInput.addEventListener('input', setPasswordMatchState);
+            passwordModalNewInput.addEventListener('input', setEditPasswordMatchState);
+            passwordModalConfirmInput.addEventListener('input', setEditPasswordMatchState);
           }}
           document.addEventListener('keydown', function (event) {{
+            if (event.key === 'Escape' && createPasswordModal && !createPasswordModal.hidden) {{
+              closeCreatePasswordModal();
+              return;
+            }}
             if (event.key === 'Escape' && passwordModal && !passwordModal.hidden) {{
               closePasswordModal();
             }}
@@ -434,6 +578,31 @@ def _status_toast_div(message: str | None, tone: str = "success") -> str:
     toast_tone = "warning" if tone == "warn" else tone
     role = "alert" if toast_tone == "error" else "status"
     return f'<div class="users-toast users-toast-{escape(toast_tone)}" data-users-toast role="{role}" aria-atomic="true">{escape(message)}</div>'
+
+
+def _render_create_password_modal(base_path: str) -> str:
+    return f"""
+        <div class="users-password-modal users-password-modal--create" id="create-password-modal" hidden aria-hidden="true">
+          <div class="users-password-modal__backdrop" data-create-password-modal-close></div>
+          <div class="users-password-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="create-password-title">
+            <h3 id="create-password-title">Crear usuario</h3>
+            <p class="muted users-password-modal__copy">Usuario: <strong id="create-password-modal-user-name"></strong></p>
+            <form method="post" action="{escape(build_url(base_path, '/usuarios'))}" id="create-password-form">
+              <input type="hidden" id="create-modal-username" name="username" />
+              <input type="hidden" id="create-modal-nombre-completo" name="nombre_completo" />
+              <input type="hidden" id="create-modal-email" name="email" />
+              <input type="hidden" id="create-modal-rol" name="rol_principal" />
+              <input type="hidden" id="create-modal-estado" name="estado" />
+              <input type="password" id="create-password-modal-new" name="nueva_contrasena" minlength="8" autocomplete="new-password" placeholder="Nueva contrasena" required />
+              <input type="password" id="create-password-modal-confirm" name="confirmar_contrasena" minlength="8" autocomplete="new-password" placeholder="Confirmar contrasena" required />
+              <div class="users-password-modal__actions">
+                <button type="submit" class="users-password-modal__action users-password-modal__action--save" aria-label="Crear usuario" data-tooltip="Crear usuario">Crear</button>
+                <button type="button" class="users-password-modal__action users-password-modal__action--cancel" data-create-password-modal-close aria-label="Cancelar alta de usuario" data-tooltip="Cancelar alta de usuario">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+    """
 
 
 def _render_password_modal() -> str:

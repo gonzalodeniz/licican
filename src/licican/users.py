@@ -289,6 +289,18 @@ def _clean_text(value: str | None) -> str | None:
     return cleaned or None
 
 
+def _split_full_name(full_name: str | None, fallback_name: str | None = None, fallback_surnames: str | None = None) -> tuple[str, str]:
+    cleaned_full_name = _clean_text(full_name)
+    if cleaned_full_name:
+        parts = cleaned_full_name.split()
+        if len(parts) == 1:
+            return parts[0], parts[0]
+        return parts[0], " ".join(parts[1:])
+    cleaned_name = _clean_text(fallback_name) or ""
+    cleaned_surnames = _clean_text(fallback_surnames) or ""
+    return cleaned_name, cleaned_surnames
+
+
 def _normalize_email(raw: str) -> str:
     return raw.strip().lower()
 
@@ -660,15 +672,19 @@ def build_users_payload(
 
 def create_user(
     *,
-    nombre: str,
-    apellidos: str,
+    nombre_completo: str | None = None,
+    nombre: str | None = None,
+    apellidos: str | None = None,
     email: str,
     username: str | None = None,
     rol_principal: str,
     estado: str = "deshabilitado",
+    nueva_contrasena: str | None = None,
+    confirmar_contrasena: str | None = None,
     now: str | datetime | None = None,
 ) -> ManagedUser:
     _, users = load_users()
+    nombre, apellidos = _split_full_name(nombre_completo, nombre, apellidos)
     nombre, apellidos, normalized_email, normalized_role, normalized_state, _ = _validate_user_fields(
         users,
         nombre,
@@ -692,8 +708,8 @@ def create_user(
         failed_login_attempts=failed_login_attempts,
         bloqueado_hasta=bloqueado_hasta,
         username=normalized_email,
-        password_hash=None,
-        historial=_default_history("alta", "Alta inicial de la cuenta.", timestamp),
+        password_hash=_hash_password(nueva_contrasena, confirmar_contrasena),
+        historial=_default_history("alta", "Alta inicial de la cuenta con contrasena configurada.", timestamp),
     )
     _persist_user(new_user)
     return new_user
