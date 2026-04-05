@@ -7,7 +7,6 @@ from licican.access import AccessContext
 from licican.web.responses import build_url
 from licican.web.templates.base import page_template
 from licican.web.templates.components import (
-    render_badges,
     render_icon_button,
     render_inline_svg_icon,
     render_role_badge,
@@ -28,6 +27,7 @@ def render_users(
     available_filters = payload["filtros_disponibles"]
     pagination = payload["paginacion"]
     selected_user = payload.get("usuario_seleccionado")
+    has_active_filters = bool(filters)
     user_rows = [_render_user_row(base_path, user) for user in payload["usuarios"]]
     users_table = _render_users_table(user_rows)
     selected_user_panel = _render_selected_user_section(base_path, selected_user)
@@ -46,13 +46,11 @@ def render_users(
         users_table_block = f"""
         <section class="panel" id="users-table-panel">
           <div class="panel-body users-table-panel-body">
-            <div class="pagination-status">
-              <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-              <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-            </div>
+            {_render_users_table_header(base_path, filters, pagination, available_filters, has_active_filters)}
+            {_status_note_div(validation_error, "warn")}
+            {_status_note_div(status_message, "ok")}
             {_render_pagination(base_path, filters, pagination)}
             {users_table}
-            {_render_pagination(base_path, filters, pagination)}
           </div>
         </section>
         """
@@ -78,24 +76,6 @@ def render_users(
             </form>
           </div>
         </section>
-        <section class="panel" id="users-filters-panel">
-          <div class="panel-body">
-            <h2>Filtros</h2>
-            <form method="get" action="{escape(build_url(base_path, '/usuarios'))}">
-              <div class="filters">
-                <div><label for="busqueda">Busqueda</label><input id="busqueda" name="busqueda" type="text" value="{escape(str(filters.get('busqueda', '')))}" placeholder="Nombre, apellidos, email o identificador" /></div>
-                <div><label for="rol">Rol</label><select id="rol" name="rol"><option value="">Todos</option>{"".join(f'<option value="{escape(item)}"' + (' selected' if filters.get("rol") == item else '') + f'>{escape(item)}</option>' for item in available_filters["roles"])}</select></div>
-              </div>
-              <div class="filter-actions">
-                <button type="submit">Aplicar filtros</button>
-                <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Limpiar filtros</a>
-              </div>
-            </form>
-            {_filter_badges(filters)}
-            {_status_note_div(validation_error, "warn")}
-            {_status_note_div(status_message, "ok")}
-          </div>
-        </section>
         {selected_user_block}
         {users_table_block}
       </section>
@@ -103,6 +83,7 @@ def render_users(
         (function () {{
           const button = document.getElementById('toggle-users-create');
           const panel = document.getElementById('users-create-panel');
+          const filterForm = document.getElementById('users-filter-form');
           if (!button || !panel) {{
             return;
           }}
@@ -124,6 +105,18 @@ def render_users(
           const usersView = document.querySelector('.users-view');
           const toastRegion = document.getElementById('users-toast-region');
           let activeDeleteToggle = null;
+          let searchSubmitTimer = null;
+
+          function submitFilterForm() {{
+            if (!filterForm) {{
+              return;
+            }}
+            if (typeof filterForm.requestSubmit === 'function') {{
+              filterForm.requestSubmit();
+              return;
+            }}
+            filterForm.submit();
+          }}
 
           function getDeleteToggle(userId) {{
             return document.getElementById('delete-toggle-' + userId);
@@ -265,6 +258,26 @@ def render_users(
             }}
           }}
 
+          if (filterForm) {{
+            const searchInput = filterForm.querySelector('[data-users-filter-search]');
+            const roleSelect = filterForm.querySelector('[data-users-filter-role]');
+            if (searchInput) {{
+              searchInput.addEventListener('input', function () {{
+                window.clearTimeout(searchSubmitTimer);
+                searchSubmitTimer = window.setTimeout(submitFilterForm, 220);
+              }});
+              searchInput.addEventListener('keydown', function (event) {{
+                if (event.key === 'Enter') {{
+                  event.preventDefault();
+                  submitFilterForm();
+                }}
+              }});
+            }}
+            if (roleSelect) {{
+              roleSelect.addEventListener('change', submitFilterForm);
+            }}
+          }}
+
           window.showConfirm = showConfirm;
           window.hideConfirm = hideConfirm;
           window.deleteUser = deleteUser;
@@ -283,21 +296,82 @@ def render_users(
     )
 
 
-def _filter_badges(filters: dict[str, object]) -> str:
-    if not filters:
-        return ""
-    labels = {
-        "busqueda": "Busqueda",
-        "rol": "Rol",
-    }
-    return f'<div class="active-filters"><p><strong>Filtros activos</strong></p><div>{render_badges([(labels[key], str(value)) for key, value in filters.items() if key in labels])}</div></div>'
-
-
 def _status_note_div(message: str | None, tone: str = "ok") -> str:
     if message is None:
         return ""
     class_name = "note" if tone == "ok" else "note note-warning"
     return f'<div class="{class_name}">{escape(message)}</div>'
+
+
+def _render_users_table_header(
+    base_path: str,
+    filters: dict[str, object],
+    pagination: dict[str, object],
+    available_filters: dict[str, list[str]],
+    has_active_filters: bool,
+) -> str:
+    return f"""
+      <div class="users-table-header__shell">
+        <div class="users-table-summary">
+          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
+          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
+        </div>
+        {_render_users_filter_bar(base_path, filters, available_filters, pagination, has_active_filters)}
+      </div>
+    """
+
+
+def _render_users_filter_bar(
+    base_path: str,
+    filters: dict[str, object],
+    available_filters: dict[str, list[str]],
+    pagination: dict[str, object],
+    has_active_filters: bool,
+) -> str:
+    search_value = escape(str(filters.get("busqueda", "")))
+    role_value = str(filters.get("rol", ""))
+    role_options = "".join(
+        f'<option value="{escape(item)}"' + (" selected" if role_value == item else "") + f'>{escape(item)}</option>'
+        for item in available_filters["roles"]
+    )
+    clear_link = ""
+    if has_active_filters:
+        clear_link = render_icon_button(
+            label="Limpiar filtros",
+            icon_svg=render_inline_svg_icon("cancel"),
+            href=build_url(base_path, "/usuarios"),
+            css_class="users-filter-clear",
+            tooltip="Limpiar filtros",
+            aria_label="Limpiar filtros",
+        )
+    return f"""
+      <form id="users-filter-form" class="users-filter-bar" method="get" action="{escape(build_url(base_path, '/usuarios'))}" role="search">
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="page_size" value="{escape(str(pagination["tamano_pagina"]))}" />
+        <div class="users-filter-search">
+          <label class="sr-only" for="busqueda">Busqueda</label>
+          <span class="users-filter-icon" aria-hidden="true">{render_inline_svg_icon("search")}</span>
+          <input
+            id="busqueda"
+            name="busqueda"
+            type="text"
+            value="{search_value}"
+            placeholder="Nombre, apellidos, email o identificador"
+            aria-label="Buscar usuario"
+            data-users-filter-search
+          />
+        </div>
+        <div class="users-filter-role">
+          <label class="sr-only" for="rol">Rol</label>
+          <span class="users-filter-prefix" aria-hidden="true">Rol:</span>
+          <select id="rol" name="rol" aria-label="Filtrar por rol" data-users-filter-role>
+            <option value="">Rol: todos</option>
+            {role_options}
+          </select>
+        </div>
+        {clear_link}
+      </form>
+    """
 
 
 def _render_users_table(user_rows: list[str]) -> str:
@@ -547,10 +621,6 @@ def _render_pagination(base_path: str, filters: dict[str, object], pagination: d
     )
     return f'''
       <div class="pagination-bar">
-        <div class="pagination-status">
-          <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
-          <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
-        </div>
         <div class="pagination-actions">{prev_link}{next_link}</div>
         <form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/usuarios"))}">
           {hidden_fields}

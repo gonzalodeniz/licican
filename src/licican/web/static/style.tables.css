@@ -1,6 +1,6 @@
 .pagination-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   margin-top: 4px;
@@ -14,6 +14,28 @@
 .pagination-status {
   display: grid;
   gap: 2px;
+}
+
+.users-table-header__shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.users-table-summary {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  justify-items: start;
+}
+
+.users-table-summary strong {
+  font-size: 0.96rem;
+}
+
+.users-table-summary .muted {
+  font-size: 0.88rem;
 }
 
 .pagination-actions {
@@ -343,4 +365,3 @@ th:last-child {
 form .filters + .filter-actions {
   margin-top: 12px;
 }
-

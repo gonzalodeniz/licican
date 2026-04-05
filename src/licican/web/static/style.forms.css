@@ -131,6 +131,118 @@ button,
   background: #f3f4f6;
 }
 
+.users-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border, #d9e2ec);
+  border-radius: var(--radius-card, 8px);
+  background: var(--surface-subtle, #f8fafc);
+  box-shadow: var(--surface-shadow-soft, 0 10px 22px rgb(15 23 42 / 0.05), 0 1px 4px rgb(15 23 42 / 0.03));
+}
+
+.users-filter-search {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.users-filter-search input,
+.users-filter-role select {
+  min-height: 42px;
+  height: 42px;
+  border: 1px solid var(--border-strong, #c7d3df);
+  border-radius: 6px;
+  background: var(--surface, #ffffff);
+  color: var(--text-main, #1f2937);
+  font: inherit;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.users-filter-search input {
+  width: 100%;
+  padding: 0 14px 0 42px;
+}
+
+.users-filter-search input::placeholder {
+  color: #8a94a6;
+}
+
+.users-filter-search input:focus,
+.users-filter-role select:focus {
+  border-color: var(--primary, #1f5e89);
+  box-shadow: 0 0 0 3px rgb(31 94 137 / 0.12);
+}
+
+.users-filter-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8896a7;
+  pointer-events: none;
+}
+
+.users-filter-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.users-filter-role {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 0 0 clamp(180px, 30%, 260px);
+}
+
+.users-filter-prefix {
+  display: none;
+}
+
+.users-filter-role select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 38px 0 14px;
+  text-align: center;
+  text-align-last: center;
+}
+
+.users-filter-clear {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: #718096;
+  box-shadow: none;
+}
+
+.users-filter-clear:hover {
+  background: #f4f7fa;
+  border-color: #b7c4d1;
+  color: #d04444;
+}
+
+.users-filter-clear::after,
+.users-filter-clear::before {
+  display: none;
+}
+
 .btn-icon--edit:hover {
   color: #2563eb;
 }
@@ -397,4 +509,3 @@ button:hover {
   background: #fef3c7;
   color: #92400e;
 }
-

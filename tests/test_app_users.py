@@ -49,8 +49,9 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('id="toggle-users-create"', html)
         self.assertIn("Nuevo usuario", html)
         self.assertIn('id="users-create-panel" hidden', html)
-        self.assertIn('id="users-filters-panel"', html)
         self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-filters-panel"', html)
+        self.assertIn('id="users-filter-form"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
         self.assertIn('class="actions-cell"', html)
         self.assertIn('class="btn-icon btn-icon--edit"', html)
@@ -79,26 +80,40 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Cerrar sesión", html)
 
         create_panel_index = html.index('id="users-create-panel"')
-        filters_panel_index = html.index('id="users-filters-panel"')
         table_panel_index = html.index('id="users-table-panel"')
         toggle_button_index = html.index('id="toggle-users-create"')
         self.assertLess(toggle_button_index, create_panel_index)
-        self.assertLess(create_panel_index, filters_panel_index)
+        self.assertLess(create_panel_index, table_panel_index)
 
-        create_panel_html = html[create_panel_index:filters_panel_index]
+        create_panel_html = html[create_panel_index:table_panel_index]
         self.assertNotIn('value="superadmin"', create_panel_html)
         self.assertIn('value="administrador"', create_panel_html)
         self.assertIn('value="manager"', create_panel_html)
         self.assertIn('value="colaborador"', create_panel_html)
         self.assertIn('value="invitado"', create_panel_html)
 
-        filters_panel_html = html[filters_panel_index:table_panel_index]
-        self.assertIn('name="busqueda"', filters_panel_html)
-        self.assertIn('name="rol"', filters_panel_html)
-        self.assertNotIn('name="estado"', filters_panel_html)
-        self.assertNotIn('name="superficie"', filters_panel_html)
-        self.assertNotIn('Area / modulo / superficie', filters_panel_html)
+        table_panel_html = html[table_panel_index:]
+        self.assertIn('name="busqueda"', table_panel_html)
+        self.assertIn('name="rol"', table_panel_html)
+        self.assertIn('data-users-filter-search', table_panel_html)
+        self.assertIn('data-users-filter-role', table_panel_html)
+        self.assertNotIn('name="superficie"', table_panel_html)
+        self.assertNotIn('Area / modulo / superficie', table_panel_html)
+        self.assertNotIn('Aplicar filtros', table_panel_html)
+        self.assertNotIn('Limpiar filtros</a>', table_panel_html)
         self.assertIn("panel.hidden = true", html)
+
+    def test_users_page_shows_inline_clear_filter_action_only_when_filters_exist(self) -> None:
+        with self._patch_users_db():
+            status_without_filters, _, html_without_filters = invoke_app("/usuarios")
+            status_with_filters, _, html_with_filters = invoke_app("/usuarios", query_string="busqueda=ana&rol=administrador")
+
+        self.assertEqual("200 OK", status_without_filters)
+        self.assertEqual("200 OK", status_with_filters)
+        self.assertNotIn('data-tooltip="Limpiar filtros"', html_without_filters.decode("utf-8"))
+        self.assertIn('data-tooltip="Limpiar filtros"', html_with_filters.decode("utf-8"))
+        self.assertIn('data-users-filter-search', html_with_filters.decode("utf-8"))
+        self.assertIn('data-users-filter-role', html_with_filters.decode("utf-8"))
 
     def test_users_page_hides_actions_and_personal_data_for_superadmin(self) -> None:
         state = SeededUsersState.seed()
