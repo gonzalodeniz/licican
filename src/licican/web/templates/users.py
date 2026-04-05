@@ -54,8 +54,8 @@ def render_users(
         <section class="panel" id="users-table-panel">
           <div class="panel-body users-table-panel-body">
             {_render_users_table_header(base_path, filters, pagination, available_filters, has_active_filters)}
-            {_render_pagination(base_path, filters, pagination)}
             {users_table}
+            {_render_users_table_footer(base_path, filters, pagination)}
           </div>
         </section>
         """
@@ -634,11 +634,19 @@ def _render_users_table_header(
 ) -> str:
     return f"""
       <div class="users-table-header__shell">
+        {_render_users_filter_bar(base_path, filters, available_filters, pagination, has_active_filters)}
+      </div>
+    """
+
+
+def _render_users_table_footer(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
+    return f"""
+      <div class="users-table-footer">
         <div class="users-table-summary">
           <strong>Pagina {pagination["pagina_actual"]} de {pagination["total_paginas"]}</strong>
           <span class="muted">Mostrando {pagination["resultado_desde"]}-{pagination["resultado_hasta"]} de {pagination["total_resultados"]}</span>
         </div>
-        {_render_users_filter_bar(base_path, filters, available_filters, pagination, has_active_filters)}
+        {_render_pagination(base_path, filters, pagination)}
       </div>
     """
 
@@ -953,30 +961,47 @@ def _format_user_datetime(value: object | None) -> str:
 
 
 def _render_pagination(base_path: str, filters: dict[str, object], pagination: dict[str, object]) -> str:
-    if int(pagination["total_paginas"]) <= 1:
-        return ""
     hidden_fields = "".join(f'<input type="hidden" name="{escape(str(key))}" value="{escape(str(value))}" />' for key, value in filters.items())
     prev_link = ""
     if pagination["pagina_anterior"] is not None:
-        prev_link = f'<a class="button-link" href="{escape(_page_url(base_path, filters, int(pagination["pagina_anterior"]), int(pagination["tamano_pagina"])))}">Pagina anterior</a>'
+        prev_link = render_icon_button(
+            label="Pagina anterior",
+            icon_svg=render_inline_svg_icon("chevron-left"),
+            href=_page_url(base_path, filters, int(pagination["pagina_anterior"]), int(pagination["tamano_pagina"])),
+            css_class="pagination-action pagination-action--prev",
+            tooltip="Pagina anterior",
+            aria_label="Pagina anterior",
+        )
     next_link = ""
     if pagination["pagina_siguiente"] is not None:
-        next_link = f'<a class="button-link" href="{escape(_page_url(base_path, filters, int(pagination["pagina_siguiente"]), int(pagination["tamano_pagina"])))}">Pagina siguiente</a>'
+        next_link = render_icon_button(
+            label="Pagina siguiente",
+            icon_svg=render_inline_svg_icon("chevron-right"),
+            href=_page_url(base_path, filters, int(pagination["pagina_siguiente"]), int(pagination["tamano_pagina"])),
+            css_class="pagination-action pagination-action--next",
+            tooltip="Pagina siguiente",
+            aria_label="Pagina siguiente",
+        )
     page_size_options = "".join(
         f'<option value="{value}"' + (" selected" if int(pagination["tamano_pagina"]) == value else "") + f">{value}</option>"
         for value in (5, 10, 25, 50)
     )
+    page_jump = ""
+    if int(pagination["total_paginas"]) > 1:
+        page_jump = f"""
+          <label for="users-page">Ir a la pagina</label>
+          <input id="users-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" />
+          <button type="submit">Ir</button>
+        """
     return f'''
       <div class="pagination-bar">
-        <div class="pagination-actions">{prev_link}{next_link}</div>
         <form class="pagination-jump" method="get" action="{escape(build_url(base_path, "/usuarios"))}">
           {hidden_fields}
           <label for="users-page-size">Resultados por pagina</label>
           <select id="users-page-size" name="page_size" onchange="this.form.submit()">{page_size_options}</select>
-          <label for="users-page">Ir a la pagina</label>
-          <input id="users-page" name="page" type="number" min="1" max="{pagination["total_paginas"]}" value="{pagination["pagina_actual"]}" />
-          <button type="submit">Ir</button>
+          {page_jump}
         </form>
+        <div class="pagination-actions">{prev_link}{next_link}</div>
       </div>
     '''
 

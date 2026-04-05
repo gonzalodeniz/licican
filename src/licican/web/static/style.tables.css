@@ -1,6 +1,6 @@
 .pagination-bar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   margin-top: 4px;
@@ -42,6 +42,29 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: flex-end;
+}
+
+.pagination-action {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.pagination-action:hover {
+  background: rgb(31 94 137 / 0.06);
+  border-color: var(--primary-hover, var(--primary));
+  color: var(--primary-hover, var(--primary));
+}
+
+.pagination-action:focus-visible {
+  outline: 2px solid rgb(31 94 137 / 0.18);
+  outline-offset: 2px;
 }
 
 .pagination-jump {
@@ -62,6 +85,14 @@
   width: 88px;
 }
 
+#users-page-size {
+  width: 5.5em;
+  min-width: 5.5em;
+  max-width: 5.5em;
+  padding-left: 10px;
+  padding-right: 28px;
+}
+
 .table-wrap {
   overflow-x: auto;
   border-top: 1px solid var(--border);
@@ -70,6 +101,11 @@
 
 .users-table-wrap {
   overflow-x: hidden;
+  margin-bottom: 18px;
+}
+
+.users-table-footer {
+  margin-top: 18px;
 }
 
 .catalog-table-wrap,

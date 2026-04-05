@@ -114,6 +114,12 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn('Area / modulo / superficie', table_panel_html)
         self.assertNotIn('Aplicar filtros', table_panel_html)
         self.assertNotIn('Limpiar filtros</a>', table_panel_html)
+        self.assertIn('class="users-table-footer"', table_panel_html)
+        self.assertIn('Pagina 1 de 1', table_panel_html)
+        self.assertIn('Mostrando 1-4 de 4', table_panel_html)
+        self.assertIn('id="users-page-size"', table_panel_html)
+        self.assertIn('Resultados por pagina', table_panel_html)
+        self.assertLess(table_panel_html.index('class="table-wrap users-table-wrap"'), table_panel_html.index('class="users-table-footer"'))
         self.assertIn("panel.hidden = true", html)
 
     def test_users_page_shows_inline_clear_filter_action_only_when_filters_exist(self) -> None:
