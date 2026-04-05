@@ -76,7 +76,7 @@ def render_users(
                 <div><label for="nuevo_nombre">Nombre</label><input id="nuevo_nombre" name="nombre" type="text" required /></div>
                 <div><label for="nuevo_apellidos">Apellidos</label><input id="nuevo_apellidos" name="apellidos" type="text" required /></div>
                 <div><label for="nuevo_email">Email</label><input id="nuevo_email" name="email" type="email" required /></div>
-                <div><label for="nuevo_rol">Rol</label><select id="nuevo_rol" name="rol_principal">{"".join(f'<option value="{escape(item)}">{escape(item.title())}</option>' for item in _form_role_options(available_filters["roles"]))}</select></div>
+                <div><label for="nuevo_rol">Rol</label><select id="nuevo_rol" name="rol_principal">{_render_role_options(_role_options(), include_superadmin=False, capitalize_labels=True)}</select></div>
                 <div><label for="nuevo_estado">Estado</label><select id="nuevo_estado" name="estado">{"".join(f'<option value="{escape(item)}"' + (' selected' if item == "deshabilitado" else '') + f'>{escape(item)}</option>' for item in _state_options_for_form())}</select></div>
               </div>
               <div class="filter-actions"><button type="submit">Crear usuario</button></div>
@@ -766,6 +766,14 @@ def _role_options() -> list[str]:
 
 def _form_role_options(roles: list[str]) -> list[str]:
     return [role for role in roles if role != "superadmin"]
+
+
+def _render_role_options(roles: list[str], *, include_superadmin: bool = False, capitalize_labels: bool = False) -> str:
+    visible_roles = roles if include_superadmin else [role for role in roles if role != "superadmin"]
+    return "".join(
+        f'<option value="{escape(role)}">{escape(role.title() if capitalize_labels else role)}</option>'
+        for role in visible_roles
+    )
 
 
 def _format_user_datetime(value: object | None) -> str:

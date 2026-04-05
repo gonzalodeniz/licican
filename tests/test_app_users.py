@@ -117,6 +117,22 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('data-users-filter-search', html_with_filters.decode("utf-8"))
         self.assertIn('data-users-filter-role', html_with_filters.decode("utf-8"))
 
+    def test_users_create_form_role_select_includes_invitado_even_without_existing_users(self) -> None:
+        state = SeededUsersState.seed()
+        state.users.pop("usr-004", None)
+        state.history.pop("usr-004", None)
+
+        with self._patch_users_db(state):
+            status, _, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        create_panel_index = html.index('id="users-create-panel"')
+        table_panel_index = html.index('id="users-table-panel"')
+        create_panel_html = html[create_panel_index:table_panel_index]
+        self.assertIn('value="invitado"', create_panel_html)
+        self.assertIn('>Invitado<', create_panel_html)
+
     def test_users_page_shows_floating_success_toast_from_query_message(self) -> None:
         with self._patch_users_db():
             status, _, body = invoke_app("/usuarios", query_string="mensaje=Usuario+actualizado")
