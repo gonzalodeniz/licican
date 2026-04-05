@@ -40,6 +40,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("<th>Rol</th>", html)
         self.assertIn("badge-rol--administrador", html)
         self.assertIn("badge-rol--gestor", html)
+        self.assertIn(">Manager<", html)
         self.assertIn("badge-rol--colaborador", html)
         self.assertIn("badge-rol--usuario", html)
         self.assertIn("Ana Lopez", html)

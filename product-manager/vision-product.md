@@ -19,7 +19,7 @@ Un agregador inteligente que centraliza la contratación pública TI en un solo 
 - **Filtros Inteligentes TI:** Categorización automática mediante análisis de texto (CPVs y palabras clave) para separar lo que es "TI" (software, soporte, licencias, hardware, redes) del resto de contratos.
 - **Alertas Tempranas:** Notificaciones configurables por palabras clave, rango de presupuesto, tipo de procedimiento (abierto, simplificado, menor) y ubicación (isla o municipio).
 - **Extracción de Datos Críticos:** Resumen automático de las variables más importantes: presupuesto base de licitación, plazos de ejecución, criterios de adjudicación, solvencia técnica exigida y fecha límite.
-- **Gestor de Oportunidades (Pipeline):** Un tablero integrado para que el usuario guarde las licitaciones de interés, asigne estados como "Evaluando", "Preparando oferta" o "Presentada" y controle el calendario.
+- **Gestión de Oportunidades (Pipeline):** Un tablero integrado para que el usuario guarde las licitaciones de interés, asigne estados como "Evaluando", "Preparando oferta" o "Presentada" y controle el calendario.
 
 ## 6. Métricas de Éxito Clave (KPIs)
 - **Cobertura de datos:** Porcentaje de administraciones locales canarias rastreadas sin errores ni interrupciones.

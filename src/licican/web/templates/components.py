@@ -114,8 +114,8 @@ def render_icon_button(
 _ROLE_BADGE_LABEL_ALIASES: dict[str, str] = {
     "administrador-funcional": "administrador funcional",
     "administrador-de-plataforma": "administrador",
-    "manager": "gestor",
-    "gestor": "gestor",
+    "manager": "Manager",
+    "gestor": "Manager",
     "colaborador": "colaborador",
     "invitado": "usuario",
     "usuario": "usuario",

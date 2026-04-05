@@ -47,6 +47,8 @@ class TemplateSmokeTests(unittest.TestCase):
         self.assertIn("note-warning", render_status_note("Error", "warn"))
         self.assertIn("<table>", render_table(["A"], ["<tr><td>x</td></tr>"]))
         self.assertIn("badge-rol--gestor", render_role_badge("manager"))
+        self.assertIn("Manager", render_role_badge("manager"))
+        self.assertIn("Manager", render_role_badge("gestor"))
         self.assertIn("badge-rol--administrador-funcional", render_role_badge("Administrador funcional"))
         self.assertEqual("administracion-funcional", slugify("Administración Funcional"))
 
