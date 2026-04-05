@@ -219,6 +219,173 @@ button,
   text-align-last: center;
 }
 
+.users-edit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.users-edit-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong, #c7d3df);
+  border-radius: 10px;
+  background: var(--surface, #ffffff);
+  color: var(--text-soft, #5b6777);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.users-edit-action:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.15);
+}
+
+.users-edit-action:hover {
+  background: #f6f9fc;
+  color: var(--text-main, #1f2937);
+}
+
+.users-edit-action svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.users-edit-action__label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.users-edit-action--save:hover {
+  color: var(--primary, #1f5e89);
+}
+
+.users-edit-action--cancel:hover {
+  color: var(--danger-text, #b91c1c);
+}
+
+.users-edit-action--password:hover {
+  color: var(--success-text, #0f766e);
+}
+
+.users-password-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.users-password-modal[hidden] {
+  display: none;
+}
+
+.users-password-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 23 42 / 0.34);
+  backdrop-filter: blur(2px);
+}
+
+.users-password-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  padding: 20px;
+  border: 1px solid var(--border-strong, #c7d3df);
+  border-radius: 16px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 22px 60px rgb(15 23 42 / 0.18);
+}
+
+.users-password-modal__dialog h3 {
+  margin: 0 0 14px;
+  color: var(--text-main, #1f2937);
+}
+
+.users-password-modal__dialog form {
+  display: grid;
+  gap: 12px;
+}
+
+.users-password-modal__dialog input[type="password"] {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong, #c7d3df);
+  border-radius: var(--radius-control, 8px);
+  background: var(--surface, #ffffff);
+  color: var(--text-main, #1f2937);
+  font: inherit;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.users-password-modal__dialog input[type="password"]::placeholder {
+  color: #8a94a6;
+}
+
+.users-password-modal__dialog input[type="password"]:focus {
+  border-color: var(--primary, #1f5e89);
+  box-shadow: 0 0 0 3px rgb(31 94 137 / 0.12);
+}
+
+.users-password-modal__dialog input[type="password"].is-password-match {
+  background: #ecfdf3;
+  border-color: #86efac;
+}
+
+.users-password-modal__dialog input[type="password"].is-password-mismatch {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.users-password-modal__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.users-password-modal__action {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong, #c7d3df);
+  border-radius: var(--radius-control, 8px);
+  background: var(--surface, #ffffff);
+  color: var(--text-main, #1f2937);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.users-password-modal__action:hover {
+  background: #f6f9fc;
+}
+
+.users-password-modal__action--save:hover {
+  color: var(--primary, #1f5e89);
+}
+
+.users-password-modal__action--cancel:hover {
+  color: var(--danger-text, #b91c1c);
+}
+
 .users-filter-clear {
   width: 38px;
   min-width: 38px;
@@ -253,6 +420,10 @@ button,
 
 .btn-icon--restore:hover {
   color: #16a34a;
+}
+
+.btn-icon--password:hover {
+  color: #0f766e;
 }
 
 .btn-icon--delete:hover {

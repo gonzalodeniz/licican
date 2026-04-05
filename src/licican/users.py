@@ -759,6 +759,43 @@ def update_user(
     raise KeyError(user_id)
 
 
+def update_user_password(
+    user_id: str,
+    *,
+    nueva_contrasena: str | None = None,
+    confirmar_contrasena: str | None = None,
+    now: str | datetime | None = None,
+) -> ManagedUser:
+    _, users = load_users()
+    for current in users:
+        if current.id != user_id:
+            continue
+        if _is_superadmin_user(current):
+            raise _superadmin_mutation_error()
+        timestamp = _parse_timestamp(now)
+        updated = ManagedUser(
+            id=current.id,
+            nombre=current.nombre,
+            apellidos=current.apellidos,
+            email=current.email,
+            rol_principal=current.rol_principal,
+            estado=current.estado,
+            fecha_alta=current.fecha_alta,
+            ultimo_acceso=current.ultimo_acceso,
+            username=current.username,
+            password_hash=_hash_password(nueva_contrasena, confirmar_contrasena),
+            historial=(
+                *current.historial,
+                _event("cambio_contrasena", "Contrasena actualizada.", timestamp),
+            ),
+            failed_login_attempts=current.failed_login_attempts,
+            bloqueado_hasta=current.bloqueado_hasta,
+        )
+        _replace_user_record(updated)
+        return updated
+    raise KeyError(user_id)
+
+
 def change_user_state(
     user_id: str,
     state: str,

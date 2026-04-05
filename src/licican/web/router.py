@@ -51,6 +51,7 @@ from licican.web.handlers.retention import (
 from licican.web.handlers.users import (
     handle_api_user_detail,
     handle_api_users,
+    handle_change_user_password,
     handle_change_user_state,
     handle_create_user,
     handle_delete_user,
@@ -159,6 +160,7 @@ routes = [
     Route("POST", "/conservacion/aplicar", handle_apply_retention_policy),
     Route("POST", "/usuarios", handle_create_user),
     Route("POST", "/usuarios/{id}", handle_update_user),
+    Route("POST", "/usuarios/{id}/contrasena", handle_change_user_password),
     Route("POST", "/usuarios/{id}/estado", handle_change_user_state),
     Route("POST", "/usuarios/{id}/borrar", handle_delete_user),
     Route("GET", "/api/oportunidades/{id}", handle_api_opportunity_detail),

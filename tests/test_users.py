@@ -14,6 +14,7 @@ from licican.users import (
     create_user,
     delete_user,
     load_users,
+    update_user_password,
     update_user,
 )
 from tests.shared.users_db import SeededUsersState, fake_users_connect
@@ -221,8 +222,24 @@ class UsersModuleTests(unittest.TestCase):
         self.assertNotEqual(previous_hash, updated.password_hash)
         self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(updated.password_hash).encode("utf-8")))
         self.assertTrue(bcrypt.checkpw("nueva-clave-123".encode("utf-8"), str(state.users["usr-002"]["password_hash"]).encode("utf-8")))
-        self.assertEqual("carlos-login", updated.username)
-        self.assertEqual("carlos-login", state.users["usr-002"]["username"])
+
+    def test_update_user_password_allows_changing_password_without_editing_other_fields(self) -> None:
+        state = SeededUsersState.seed()
+        previous_hash = str(state.users["usr-002"]["password_hash"])
+
+        with self._patch_users_db(state):
+            updated = update_user_password(
+                "usr-002",
+                nueva_contrasena="nueva-clave-789",
+                confirmar_contrasena="nueva-clave-789",
+            )
+
+        self.assertEqual("Carlos", updated.nombre)
+        self.assertEqual("manager", updated.rol_principal)
+        self.assertNotEqual(previous_hash, updated.password_hash)
+        self.assertTrue(bcrypt.checkpw("nueva-clave-789".encode("utf-8"), str(updated.password_hash).encode("utf-8")))
+        self.assertEqual("carlos.mendez@licican.local", updated.username)
+        self.assertEqual("carlos.mendez@licican.local", state.users["usr-002"]["username"])
 
     def test_update_user_rejects_superadmin_role_assignment(self) -> None:
         with self._patch_users_db():

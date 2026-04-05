@@ -67,6 +67,7 @@ def render_users(
           {_status_toast_div(validation_error, "error")}
           {_status_toast_div(status_message, "success")}
         </div>
+        {_render_password_modal()}
         <section class="panel" id="users-create-panel" hidden>
           <div class="panel-body">
             <h2>Nuevo usuario</h2>
@@ -90,26 +91,32 @@ def render_users(
           const button = document.getElementById('toggle-users-create');
           const panel = document.getElementById('users-create-panel');
           const filterForm = document.getElementById('users-filter-form');
-          if (!button || !panel) {{
-            return;
+          if (button && panel) {{
+            panel.hidden = true;
+            button.setAttribute('aria-expanded', 'false');
+
+            button.addEventListener('click', function () {{
+              const isHidden = panel.hasAttribute('hidden');
+              if (isHidden) {{
+                panel.removeAttribute('hidden');
+                button.setAttribute('aria-expanded', 'true');
+              }} else {{
+                panel.setAttribute('hidden', '');
+                button.setAttribute('aria-expanded', 'false');
+              }}
+            }});
           }}
-
-          panel.hidden = true;
-          button.setAttribute('aria-expanded', 'false');
-
-          button.addEventListener('click', function () {{
-            const isHidden = panel.hasAttribute('hidden');
-            if (isHidden) {{
-              panel.removeAttribute('hidden');
-              button.setAttribute('aria-expanded', 'true');
-            }} else {{
-              panel.setAttribute('hidden', '');
-              button.setAttribute('aria-expanded', 'false');
-            }}
-          }});
 
           const usersView = document.querySelector('.users-view');
           const toastRegion = document.getElementById('users-toast-region');
+          const passwordModal = document.getElementById('password-change-modal');
+          const passwordOpenButtons = document.querySelectorAll('[data-password-open]');
+          const passwordModalForm = document.getElementById('password-change-form');
+          const passwordModalUserName = document.getElementById('password-modal-user-name');
+          const passwordModalNewInput = document.getElementById('password-modal-new');
+          const passwordModalConfirmInput = document.getElementById('password-modal-confirm');
+          const editForm = document.getElementById('users-edit-form');
+          const editSaveButton = document.getElementById('users-edit-save');
           let activeDeleteToggle = null;
           let searchSubmitTimer = null;
           const toastLifetimeMs = 5000;
@@ -127,6 +134,79 @@ def render_users(
 
           function getDeleteToggle(userId) {{
             return document.getElementById('delete-toggle-' + userId);
+          }}
+
+          function setEditSaveState() {{
+            if (!editForm || !editSaveButton) {{
+              return;
+            }}
+
+            const controls = Array.from(editForm.querySelectorAll('input[name], select[name], textarea[name]')).filter(function (control) {{
+              return !control.disabled && control.type !== 'hidden' && control.type !== 'button' && control.type !== 'submit' && control.type !== 'reset';
+            }});
+            const hasChanges = controls.some(function (control) {{
+              return control.value !== control.defaultValue;
+            }});
+
+            editSaveButton.disabled = !hasChanges;
+            editSaveButton.setAttribute('aria-disabled', hasChanges ? 'false' : 'true');
+          }}
+
+          function setPasswordMatchState() {{
+            if (!passwordModalNewInput || !passwordModalConfirmInput) {{
+              return;
+            }}
+
+            const newValue = passwordModalNewInput.value;
+            const confirmValue = passwordModalConfirmInput.value;
+            const hasValue = confirmValue.length > 0;
+            const matches = hasValue && newValue === confirmValue;
+
+            passwordModalConfirmInput.classList.toggle('is-password-match', matches);
+            passwordModalConfirmInput.classList.toggle('is-password-mismatch', hasValue && !matches);
+          }}
+
+          function openPasswordModal(button) {{
+            if (!passwordModal) {{
+              return;
+            }}
+
+            if (button && passwordModalForm) {{
+              passwordModalForm.action = button.dataset.passwordUrl || '';
+            }}
+            if (button && passwordModalUserName) {{
+              passwordModalUserName.textContent = button.dataset.userName || '';
+            }}
+            passwordModal.hidden = false;
+            passwordModal.setAttribute('aria-hidden', 'false');
+            if (button) {{
+              button.setAttribute('aria-expanded', 'true');
+            }}
+            if (passwordModalNewInput) {{
+              passwordModalNewInput.focus();
+            }}
+          }}
+
+          function closePasswordModal() {{
+            if (!passwordModal) {{
+              return;
+            }}
+
+            passwordModal.hidden = true;
+            passwordModal.setAttribute('aria-hidden', 'true');
+            passwordOpenButtons.forEach(function (button) {{
+              button.setAttribute('aria-expanded', 'false');
+            }});
+            if (passwordModalNewInput) {{
+              passwordModalNewInput.value = '';
+            }}
+            if (passwordModalConfirmInput) {{
+              passwordModalConfirmInput.value = '';
+              passwordModalConfirmInput.classList.remove('is-password-match', 'is-password-mismatch');
+            }}
+            if (passwordModalUserName) {{
+              passwordModalUserName.textContent = '';
+            }}
           }}
 
           function activateToast(toast, lifetimeMs) {{
@@ -299,6 +379,37 @@ def render_users(
             }});
           }}
 
+          if (editForm && editSaveButton) {{
+            setEditSaveState();
+            editForm.querySelectorAll('input[name], select[name], textarea[name]').forEach(function (control) {{
+              if (control.disabled || control.type === 'hidden' || control.type === 'button' || control.type === 'submit' || control.type === 'reset') {{
+                return;
+              }}
+              control.addEventListener('input', setEditSaveState);
+              control.addEventListener('change', setEditSaveState);
+            }});
+          }}
+
+          passwordOpenButtons.forEach(function (button) {{
+            button.addEventListener('click', function () {{
+              openPasswordModal(button);
+            }});
+          }});
+          if (passwordModal) {{
+            passwordModal.querySelectorAll('[data-password-modal-close]').forEach(function (button) {{
+              button.addEventListener('click', closePasswordModal);
+            }});
+          }}
+          if (passwordModalNewInput && passwordModalConfirmInput) {{
+            passwordModalNewInput.addEventListener('input', setPasswordMatchState);
+            passwordModalConfirmInput.addEventListener('input', setPasswordMatchState);
+          }}
+          document.addEventListener('keydown', function (event) {{
+            if (event.key === 'Escape' && passwordModal && !passwordModal.hidden) {{
+              closePasswordModal();
+            }}
+          }});
+
           window.showConfirm = showConfirm;
           window.hideConfirm = hideConfirm;
           window.deleteUser = deleteUser;
@@ -323,6 +434,26 @@ def _status_toast_div(message: str | None, tone: str = "success") -> str:
     toast_tone = "warning" if tone == "warn" else tone
     role = "alert" if toast_tone == "error" else "status"
     return f'<div class="users-toast users-toast-{escape(toast_tone)}" data-users-toast role="{role}" aria-atomic="true">{escape(message)}</div>'
+
+
+def _render_password_modal() -> str:
+    return """
+        <div class="users-password-modal" id="password-change-modal" hidden aria-hidden="true">
+          <div class="users-password-modal__backdrop" data-password-modal-close></div>
+          <div class="users-password-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="password-change-title">
+            <h3 id="password-change-title">Cambiar contrasena</h3>
+            <p class="muted users-password-modal__copy">Usuario: <strong id="password-modal-user-name"></strong></p>
+            <form method="post" action="" id="password-change-form">
+              <input type="password" id="password-modal-new" name="nueva_contrasena" minlength="8" autocomplete="new-password" placeholder="Nueva contrasena" required />
+              <input type="password" id="password-modal-confirm" name="confirmar_contrasena" minlength="8" autocomplete="new-password" placeholder="Confirmar contrasena" required />
+              <div class="users-password-modal__actions">
+                <button type="submit" class="users-password-modal__action users-password-modal__action--save" aria-label="Modificar contrasena" data-tooltip="Modificar contrasena">Modificar</button>
+                <button type="button" class="users-password-modal__action users-password-modal__action--cancel" data-password-modal-close aria-label="Cancelar cambio de contrasena" data-tooltip="Cancelar cambio de contrasena">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+    """
 
 
 def _render_users_table_header(
@@ -459,7 +590,7 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
         <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
-        <form method="post" action="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}"))}">
+        <form method="post" action="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}"))}" id="users-edit-form">
           <div class="filters">
             <div><label for="editar_username">Usuario</label><input id="editar_username" name="username" type="text" value="{escape(str(selected_user.get("username") or selected_user["email"]))}" /></div>
             <div><label for="editar_nombre">Nombre</label><input id="editar_nombre" name="nombre" type="text" value="{escape(str(selected_user["nombre"]))}" required /></div>
@@ -467,29 +598,26 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
             <div><label for="editar_email">Email</label><input id="editar_email" name="email" type="email" value="{escape(str(selected_user["email"]))}" required /></div>
             <div><label for="editar_rol">Rol</label><select id="editar_rol" name="rol_principal">{role_options}</select></div>
             <div><label for="editar_estado">Estado</label><select id="editar_estado" name="estado">{state_options}</select></div>
-            <div><label for="editar_nueva_contrasena">Nueva contrasena</label><input id="editar_nueva_contrasena" name="nueva_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
-            <div><label for="editar_confirmar_contrasena">Confirmar nueva contrasena</label><input id="editar_confirmar_contrasena" name="confirmar_contrasena" type="password" minlength="8" autocomplete="new-password" /></div>
           </div>
           <p class="muted">Fecha de alta: {escape(_format_user_datetime(selected_user["fecha_alta"]))}</p>
-          <div class="filter-actions">
-            <button type="submit">Guardar cambios</button>
-            <a class="button-link" href="{escape(build_url(base_path, '/usuarios'))}">Cancelar</a>
+          <div class="users-edit-actions">
+            <button type="submit" class="users-edit-action users-edit-action--save" id="users-edit-save" aria-label="Guardar cambios" data-tooltip="Guardar cambios" disabled aria-disabled="true">
+              {render_inline_svg_icon("confirm")}
+              <span class="users-edit-action__label">Guardar</span>
+            </button>
+            <a class="button-link users-edit-action users-edit-action--cancel" href="{escape(build_url(base_path, '/usuarios'))}" aria-label="Cancelar edición" data-tooltip="Cancelar edición">
+              {render_inline_svg_icon("cancel")}
+              <span class="users-edit-action__label">Cancelar</span>
+            </a>
+            <button type="button" class="users-edit-action users-edit-action--password" id="open-password-modal" data-password-open data-password-url="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}/contrasena"))}" data-user-name="{escape(str(selected_user['nombre_completo']))}" aria-controls="password-change-modal" aria-expanded="false" aria-label="Cambiar contraseña" data-tooltip="Cambiar contraseña">
+              {render_inline_svg_icon("key")}
+              <span class="users-edit-action__label">Contrasena</span>
+            </button>
           </div>
         </form>
-        <div class="inline-actions">
-          <a class="button-link" href="#editar_nueva_contrasena">Cambiar contrasena</a>
-        </div>
-        {_render_selected_user_actions(base_path, selected_user)}
         <h3>Historial de cambios</h3>
         {history_table}
     """
-
-
-def _render_selected_user_actions(base_path: str, selected_user: dict[str, object]) -> str:
-    actions = _build_action_controls(base_path, selected_user)
-    if not actions:
-        return ""
-    return f'<div class="inline-actions">{ "".join(actions) }</div>'
 
 
 def _render_user_row(base_path: str, user: dict[str, object]) -> str:
@@ -522,6 +650,7 @@ def _build_action_controls(base_path: str, user: dict[str, object]) -> list[str]
             aria_label=f"Modificar usuario {_user_login_name(user)}",
         )
     )
+    actions.append(_password_modal_trigger(base_path, user))
     if user["estado"] == "activo":
         actions.append(_action_form(base_path, user["id"], "Deshabilitar", "deshabilitado"))
     else:
@@ -547,6 +676,25 @@ def _user_login_name(user: dict[str, object]) -> str:
     if email:
         return email
     return str(user.get("id") or "")
+
+
+def _password_modal_trigger(base_path: str, user: dict[str, object]) -> str:
+    raw_user_id = str(user["id"])
+    user_name = escape(str(user["nombre_completo"]))
+    password_url = escape(build_url(base_path, f"/usuarios/{raw_user_id}/contrasena"))
+    return f"""
+      <button
+        type="button"
+        class="btn-icon btn-icon--password"
+        data-password-open
+        data-password-url="{password_url}"
+        data-user-name="{user_name}"
+        aria-controls="password-change-modal"
+        aria-expanded="false"
+        aria-label="Cambiar contrasena"
+        data-tooltip="Cambiar contrasena"
+      >{render_inline_svg_icon("key")}</button>
+    """
 
 
 def _action_form(base_path: str, user_id: str, label: str, state: str | None, query_href: str | None = None) -> str:
