@@ -49,6 +49,7 @@ class TemplateSmokeTests(unittest.TestCase):
         self.assertIn("badge-rol--gestor", render_role_badge("manager"))
         self.assertIn("Manager", render_role_badge("manager"))
         self.assertIn("Manager", render_role_badge("gestor"))
+        self.assertIn("Invitado", render_role_badge("invitado"))
         self.assertIn("badge-rol--administrador-funcional", render_role_badge("Administrador funcional"))
         self.assertEqual("administracion-funcional", slugify("Administración Funcional"))
 

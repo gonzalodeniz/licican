@@ -117,8 +117,8 @@ _ROLE_BADGE_LABEL_ALIASES: dict[str, str] = {
     "manager": "Manager",
     "gestor": "Manager",
     "colaborador": "colaborador",
-    "invitado": "usuario",
-    "usuario": "usuario",
+    "invitado": "Invitado",
+    "usuario": "Invitado",
     "superadmin": "superadmin",
     "administrador": "administrador",
 }
