@@ -328,6 +328,37 @@ def _is_superadmin_user(user: ManagedUser) -> bool:
     return _normalize_role(user.rol_principal) == "superadmin"
 
 
+def _is_superadmin_visible_in_listing() -> bool:
+    return get_auth_settings().login_superadmin_enabled
+
+
+def _listing_login_name(user: ManagedUser) -> str:
+    username = _clean_text(user.username)
+    if username:
+        return username
+    email = _clean_text(user.email)
+    if email:
+        return email
+    return user.id
+
+
+def _listing_sort_key(user: ManagedUser) -> tuple[int, str, str]:
+    superadmin_enabled = _is_superadmin_visible_in_listing()
+    is_superadmin = _is_superadmin_user(user)
+    return (
+        0 if superadmin_enabled and is_superadmin else 1,
+        _listing_login_name(user).lower(),
+        user.id.lower(),
+    )
+
+
+def _visible_users_for_listing(users: list[ManagedUser]) -> list[ManagedUser]:
+    if _is_superadmin_visible_in_listing():
+        return sorted(users, key=_listing_sort_key)
+    filtered = [user for user in users if not _is_superadmin_user(user)]
+    return sorted(filtered, key=_listing_sort_key)
+
+
 def _superadmin_mutation_error() -> ValueError:
     return ValueError("La cuenta superadmin no puede editarse, deshabilitarse ni borrarse desde la interfaz. Solo se gestiona mediante el fichero .env.")
 
@@ -546,13 +577,21 @@ def filter_users(users: list[ManagedUser], filters: UserFilters) -> list[Managed
         result = [user for user in result if user.estado == normalized.estado]
     if normalized.rol:
         result = [user for user in result if user.rol_principal == normalized.rol]
-    return sorted(result, key=lambda user: (user.apellidos.lower(), user.nombre.lower(), user.email.lower()))
+    return _visible_users_for_listing(result)
 
 
 def available_filter_options(users: list[ManagedUser]) -> dict[str, list[str]]:
+    visible_roles = []
+    for role in USER_ROLES:
+        if role == "superadmin" and not _is_superadmin_visible_in_listing():
+            continue
+        if any(user.rol_principal == role for user in users):
+            visible_roles.append(role)
+    if not visible_roles and _is_superadmin_visible_in_listing() and any(_is_superadmin_user(user) for user in users):
+        visible_roles.append("superadmin")
     return {
         "estados": list(USER_STATUSES),
-        "roles": list(USER_ROLES),
+        "roles": visible_roles or [role for role in USER_ROLES if role != "superadmin"],
     }
 
 
@@ -598,17 +637,18 @@ def build_users_payload(
     selected_user_id: str | None = None,
 ) -> dict[str, object]:
     reference, users = load_users()
+    visible_users = _visible_users_for_listing(users)
     active_filters = (filters or UserFilters()).normalized()
-    filtered = filter_users(users, active_filters)
+    filtered = filter_users(visible_users, active_filters)
     pagination = paginate_users(filtered, page, page_size)
     selected_user = None
     if selected_user_id:
-        selected_user = next((user for user in users if user.id == selected_user_id), None)
+        selected_user = next((user for user in visible_users if user.id == selected_user_id), None)
     return {
         "referencia_funcional": reference,
-        "summary": summarize_users(users),
+        "summary": summarize_users(visible_users),
         "filtros_activos": active_filters.active_filters(),
-        "filtros_disponibles": available_filter_options(users),
+        "filtros_disponibles": available_filter_options(visible_users),
         "paginacion": {key: value for key, value in pagination.items() if key != "items"},
         "usuarios": pagination["items"],
         "usuario_seleccionado": None if selected_user is None else selected_user.to_payload(),

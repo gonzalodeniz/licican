@@ -118,13 +118,15 @@ class ApplicationUsersTests(unittest.TestCase):
         }
         state.history["admin"] = []
 
-        with self._patch_users_db(state):
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
+            get_auth_settings.cache_clear()
             status, headers, body = invoke_app("/usuarios")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn('id="user-row-admin"', html)
+        self.assertLess(html.index('id="user-row-admin"'), html.index('id="user-row-usr-001"'))
         admin_row_start = html.index('id="user-row-admin"')
         admin_row_html = html[admin_row_start:html.index("</tr>", admin_row_start)]
         self.assertIn("badge-rol--superadmin", admin_row_html)
@@ -154,7 +156,8 @@ class ApplicationUsersTests(unittest.TestCase):
         }
         state.history["admin"] = []
 
-        with self._patch_users_db(state):
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
+            get_auth_settings.cache_clear()
             status, headers, body = invoke_app("/usuarios/admin")
 
         html = body.decode("utf-8")

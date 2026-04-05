@@ -42,6 +42,67 @@ class UsersModuleTests(unittest.TestCase):
         self.assertEqual("usr-003", users[0].id)
         self.assertEqual("Laura Gonzalez", users[0].nombre_completo)
 
+    def test_build_users_payload_hides_superadmin_when_disabled(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
+            "username": "admin",
+            "password_hash": "hash-admin",
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "false"}, clear=False):
+            get_auth_settings.cache_clear()
+            payload = build_users_payload()
+
+        self.assertEqual(4, payload["summary"]["usuarios_totales"])
+        self.assertNotIn("superadmin", payload["filtros_disponibles"]["roles"])
+        self.assertEqual(
+            ["ana.lopez@licican.local", "carlos.mendez@licican.local", "laura.gonzalez@licican.local", "mario.perez@licican.local"],
+            [item["username"] for item in payload["usuarios"]],
+        )
+        self.assertNotIn("admin", [item["id"] for item in payload["usuarios"]])
+
+    def test_build_users_payload_shows_superadmin_first_when_enabled(self) -> None:
+        state = SeededUsersState.seed()
+        state.users["admin"] = {
+            "id": "admin",
+            "nombre": "",
+            "apellidos": "",
+            "email": "",
+            "rol_principal": "superadmin",
+            "estado": "activo",
+            "fecha_alta": state.users["usr-001"]["fecha_alta"],
+            "ultimo_acceso": None,
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
+            "username": "admin",
+            "password_hash": "hash-admin",
+        }
+        state.history["admin"] = []
+
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
+            get_auth_settings.cache_clear()
+            payload = build_users_payload()
+
+        self.assertEqual(5, payload["summary"]["usuarios_totales"])
+        self.assertEqual("superadmin", payload["usuarios"][0]["rol_principal"])
+        self.assertEqual("admin", payload["usuarios"][0]["username"])
+        self.assertIn("superadmin", payload["filtros_disponibles"]["roles"])
+        self.assertEqual(
+            ["admin", "ana.lopez@licican.local", "carlos.mendez@licican.local", "laura.gonzalez@licican.local", "mario.perez@licican.local"],
+            [item["username"] for item in payload["usuarios"]],
+        )
+
     def test_create_user_persists_new_disabled_account(self) -> None:
         state = SeededUsersState.seed()
         with self._patch_users_db(state):
