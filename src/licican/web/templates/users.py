@@ -564,7 +564,7 @@ def render_users(
         "Licican | Gestion de usuarios",
         "Gestion de usuarios",
         "PB-016 - Gobierno administrativo de cuentas",
-        "Permite administrar cuentas, roles y accesos desde un backoffice institucional con trazabilidad visible.",
+        "Permite crear, modificar o eliminar cuentas, cambiar su estado y contraseñas.",
         content,
         current_path="/usuarios",
         base_path=base_path,
@@ -739,7 +739,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     if is_superadmin:
         return f"""
         <h2>Detalle y edicion</h2>
-        <p><strong>Usuario seleccionado:</strong> {escape(login_name)}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <section class="note note-warning">
@@ -760,7 +759,6 @@ def _render_selected_user_section(base_path: str, selected_user: dict[str, objec
     )
     return f"""
         <h2>Detalle y edicion</h2>
-        <p><strong>Usuario seleccionado:</strong> {escape(str(selected_user["nombre_completo"]))}</p>
         <p><strong>Estado actual:</strong> {render_state_badge(selected_user["estado"])}</p>
         <p><strong>Ultimo acceso:</strong> {escape(_format_user_datetime(selected_user["ultimo_acceso"]))}</p>
         <form method="post" action="{escape(build_url(base_path, f"/usuarios/{selected_user['id']}"))}" id="users-edit-form">
