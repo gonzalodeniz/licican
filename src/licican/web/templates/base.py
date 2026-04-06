@@ -184,9 +184,7 @@ def _navigation_html(base_path: str, current_path: str, access_context: AccessCo
     footer_html = _navigation_footer_html(base_path, access_context)
     return f"""
       <aside id="side-nav" class="side-nav" aria-label="Navegacion principal">
-        <p class="nav-kicker">PB-010</p>
         <h2 class="nav-title">Licican</h2>
-        <p class="nav-copy">Base de navegacion comun para catalogo, alertas y crecimiento de modulos sin rutas huerfanas.</p>
         {_context_html(base_path, access_context)}
         <div class="nav-section">
           <p class="nav-section-title">Modulos</p>
