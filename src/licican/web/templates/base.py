@@ -63,16 +63,12 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-
-            {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
         ],
         ROLE_SUPERADMIN: [
             {"label": "Dashboard", "description": "Resumen general de actividad", "icon": "DB", "path": "/dashboard", "upcoming": False},
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-
-            {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
         ],
         ROLE_MANAGER: [
             {"label": "Dashboard", "description": "Resumen general de actividad", "icon": "DB", "path": "/dashboard", "upcoming": False},
@@ -190,6 +186,11 @@ _ADMIN_SUBITEMS: list[tuple[str, str, str]] = [
         "Clasificacion TI",
         "/clasificacion-ti",
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/></svg>',
+    ),
+    (
+        "Conservacion",
+        "/conservacion",
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>',
     ),
 ]
 

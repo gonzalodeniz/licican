@@ -42,7 +42,7 @@ class ApplicationGovernanceTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Panel de control de conservacion y archivado", html)
-        self.assertIn('class="nav-link active" href="/licican/conservacion"', html)
+        self.assertIn('class="nav-sublink active" href="/licican/conservacion"', html)
 
     def test_retention_page_denied_to_reader_role(self) -> None:
         reader_cookie = _session_cookie(role="lector", username="lector-1", nombre_completo="Lector Demo")
