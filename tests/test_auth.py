@@ -11,6 +11,7 @@ from unittest.mock import patch
 import bcrypt
 import psycopg2
 
+import licican.auth.service as auth_service
 from licican.auth.config import get_auth_settings
 from licican.auth.rate_limiter import rate_limiter
 from licican.auth.service import (
@@ -19,6 +20,9 @@ from licican.auth.service import (
     AUTH_USER_DEACTIVATE_SQL,
     AUTH_USER_INSERT_SQL,
     AUTH_USER_LAST_LOGIN_SQL,
+    AUTH_USER_RECORD_FAILED_LOGIN_SQL,
+    AUTH_USER_RECORD_SUCCESSFUL_LOGIN_SQL,
+    AUTH_USER_RESET_LOGIN_STATE_SQL,
     AUTH_USER_SELECT_SQL,
     AUTH_USER_SELECT_BY_USERNAME_SQL,
     AUTH_USER_SELECT_SUPERADMIN_SQL,
@@ -117,12 +121,13 @@ class _FakeAuthCursor:
                 observaciones_internas,
                 fecha_alta,
                 ultimo_acceso,
-                invitacion_pendiente,
                 username,
                 password_hash,
                 nombre_completo,
                 rol,
                 activo,
+                failed_login_attempts,
+                bloqueado_hasta,
                 ultimo_login,
                 created_at,
                 updated_at,
@@ -137,7 +142,8 @@ class _FakeAuthCursor:
                 "observaciones_internas": str(observaciones_internas),
                 "fecha_alta": fecha_alta,
                 "ultimo_acceso": ultimo_acceso,
-                "invitacion_pendiente": bool(invitacion_pendiente),
+                "failed_login_attempts": int(failed_login_attempts),
+                "bloqueado_hasta": bloqueado_hasta,
                 "username": str(username),
                 "password_hash": str(password_hash),
                 "nombre_completo": str(nombre_completo),
@@ -165,12 +171,13 @@ class _FakeAuthCursor:
                 observaciones_internas,
                 fecha_alta,
                 ultimo_acceso,
-                invitacion_pendiente,
                 username,
                 password_hash,
                 nombre_completo,
                 rol,
                 activo,
+                failed_login_attempts,
+                bloqueado_hasta,
                 ultimo_login,
                 updated_at,
                 user_id,
@@ -188,7 +195,8 @@ class _FakeAuthCursor:
                             "observaciones_internas": str(observaciones_internas),
                             "fecha_alta": fecha_alta,
                             "ultimo_acceso": ultimo_acceso,
-                            "invitacion_pendiente": bool(invitacion_pendiente),
+                            "failed_login_attempts": int(failed_login_attempts),
+                            "bloqueado_hasta": bloqueado_hasta,
                             "username": str(username),
                             "password_hash": str(password_hash),
                             "nombre_completo": str(nombre_completo),
@@ -210,9 +218,45 @@ class _FakeAuthCursor:
             updated_at, user_id = params
             for record in self.state.values():
                 if record["id"] == user_id:
-                    record["estado"] = "inactivo"
+                    record["estado"] = "deshabilitado"
                     record["activo"] = False
-                    record["invitacion_pendiente"] = False
+                    record["failed_login_attempts"] = 0
+                    record["bloqueado_hasta"] = None
+                    record["updated_at"] = updated_at
+                    return
+            raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
+        if normalized == AUTH_USER_RESET_LOGIN_STATE_SQL.strip():
+            updated_at, user_id = params
+            for record in self.state.values():
+                if record["id"] == user_id:
+                    record["estado"] = "activo"
+                    record["activo"] = True
+                    record["failed_login_attempts"] = 0
+                    record["bloqueado_hasta"] = None
+                    record["updated_at"] = updated_at
+                    return
+            raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
+        if normalized == AUTH_USER_RECORD_FAILED_LOGIN_SQL.strip():
+            estado, activo, failed_login_attempts, bloqueado_hasta, updated_at, user_id = params
+            for record in self.state.values():
+                if record["id"] == user_id:
+                    record["estado"] = str(estado)
+                    record["activo"] = bool(activo)
+                    record["failed_login_attempts"] = int(failed_login_attempts)
+                    record["bloqueado_hasta"] = bloqueado_hasta
+                    record["updated_at"] = updated_at
+                    return
+            raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
+        if normalized == AUTH_USER_RECORD_SUCCESSFUL_LOGIN_SQL.strip():
+            last_login, last_access, updated_at, user_id = params
+            for record in self.state.values():
+                if record["id"] == user_id:
+                    record["estado"] = "activo"
+                    record["activo"] = True
+                    record["failed_login_attempts"] = 0
+                    record["bloqueado_hasta"] = None
+                    record["ultimo_login"] = last_login
+                    record["ultimo_acceso"] = last_access
                     record["updated_at"] = updated_at
                     return
             raise AssertionError(f"Usuario no encontrado en test auth: {user_id}")
@@ -257,24 +301,31 @@ def _build_user_record(
     password: str,
     nombre_completo: str,
     rol: str = "consultor",
+    estado: str | None = None,
     activo: bool = True,
+    failed_login_attempts: int = 0,
+    bloqueado_hasta: datetime | None = None,
 ) -> dict[str, object]:
     nombre, _, apellidos = nombre_completo.partition(" ")
     if not apellidos:
         apellidos = "Licican"
     email = email or (username if "@" in username else f"{username}@licican.local")
     current = datetime.now(UTC).replace(microsecond=0)
+    state = estado or ("activo" if activo else "deshabilitado")
+    if state == "bloqueado":
+        activo = False
     return {
         "id": user_id,
         "nombre": nombre,
         "apellidos": apellidos,
         "email": email,
         "rol_principal": rol,
-        "estado": "activo" if activo else "inactivo",
+        "estado": state,
         "observaciones_internas": "",
         "fecha_alta": current,
         "ultimo_acceso": None,
-        "invitacion_pendiente": False,
+        "failed_login_attempts": failed_login_attempts,
+        "bloqueado_hasta": bloqueado_hasta,
         "username": username,
         "password_hash": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
         "nombre_completo": nombre_completo,
@@ -300,7 +351,6 @@ class AuthenticationTests(unittest.TestCase):
             "BASE_PATH": "/licican",
             "LOGIN_AUTOMATICO": "false",
             "LOGIN_SUPERADMIN_ENABLED": "true",
-            "LOGIN_SUPERADMIN_NAME": "admin",
             "LOGIN_SUPERADMIN_PASS": "admin12345",
             "SESSION_SECRET_KEY": "test-session-secret",
             "SESSION_TIMEOUT_MINUTES": "30",
@@ -325,7 +375,7 @@ class AuthenticationTests(unittest.TestCase):
             login_status, headers, _ = browser.request(
                 "/login",
                 method="POST",
-                body=f"username=admin&password=admin12345&csrf_token={csrf_token}",
+                body=f"username=superadmin&password=admin12345&csrf_token={csrf_token}",
             )
             page_status, _, page_body = browser.request("/")
 
@@ -334,15 +384,15 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("/licican/", headers["Location"])
         self.assertEqual("200 OK", page_status)
         self.assertIn("Cerrar sesión", page_body.decode("utf-8"))
-        self.assertIn("admin", auth_state)
-        self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
-        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
-        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
-        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
-        self.assertTrue(auth_state["admin"]["activo"])
-        self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+        self.assertIn("superadmin", auth_state)
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
+        self.assertEqual("superadmin", auth_state["superadmin"]["rol_principal"])
+        self.assertEqual("superadmin@licitan.local", auth_state["superadmin"]["email"])
+        self.assertEqual("Superadministrador", auth_state["superadmin"]["nombre"])
+        self.assertEqual("Licican", auth_state["superadmin"]["apellidos"])
+        self.assertEqual("Superadministrador Licican", auth_state["superadmin"]["nombre_completo"])
+        self.assertTrue(auth_state["superadmin"]["activo"])
+        self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["superadmin"]["password_hash"].encode("utf-8")))
 
     def test_login_with_superadmin_works_when_postgresql_sync_fails(self) -> None:
         browser = _BrowserSession()
@@ -359,7 +409,7 @@ class AuthenticationTests(unittest.TestCase):
             login_status, headers, _ = browser.request(
                 "/login",
                 method="POST",
-                body=f"username=admin&password=admin12345&csrf_token={csrf_token}",
+                body=f"username=superadmin&password=admin12345&csrf_token={csrf_token}",
             )
 
         self.assertEqual("302 Found", login_status)
@@ -375,7 +425,7 @@ class AuthenticationTests(unittest.TestCase):
             status, _, response_body = browser.request(
                 "/login",
                 method="POST",
-                body=f"username=admin&password=admin12345&csrf_token={csrf_token}",
+                body=f"username=superadmin&password=admin12345&csrf_token={csrf_token}",
             )
 
         self.assertEqual("401 Unauthorized", status)
@@ -384,9 +434,9 @@ class AuthenticationTests(unittest.TestCase):
     def test_login_with_database_user_creates_session(self) -> None:
         browser = _BrowserSession()
         auth_state = {
-            "admin": _build_user_record(
+            "superadmin": _build_user_record(
                 user_id=9,
-                username="admin",
+                username="superadmin",
                 email="admin@licican.local",
                 password="anterior123",
                 nombre_completo="Superadministrador",
@@ -419,9 +469,9 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual("200 OK", page_status)
         self.assertIn("KPIs iniciales de cobertura, adopción y uso", page_body.decode("utf-8"))
         self.assertIsNotNone(auth_state["marta"]["ultimo_login"])
-        self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertTrue(auth_state["admin"]["activo"])
-        self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
+        self.assertTrue(auth_state["superadmin"]["activo"])
+        self.assertTrue(bcrypt.checkpw("admin12345".encode("utf-8"), auth_state["superadmin"]["password_hash"].encode("utf-8")))
 
     def test_login_with_database_email_creates_session(self) -> None:
         browser = _BrowserSession()
@@ -466,7 +516,7 @@ class AuthenticationTests(unittest.TestCase):
 
         self.assertEqual("302 Found", status)
         self.assertEqual("/licican/", headers["Location"])
-        self.assertIn("admin", auth_state)
+        self.assertIn("superadmin", auth_state)
 
     def test_login_with_inactive_user_is_rejected(self) -> None:
         browser = _BrowserSession()
@@ -491,14 +541,14 @@ class AuthenticationTests(unittest.TestCase):
             )
 
         self.assertEqual("401 Unauthorized", status)
-        self.assertIn("Usuario desactivado. Contacte al administrador.", response_body.decode("utf-8"))
-        self.assertEqual("inactivo", auth_state["soporte"]["estado"])
+        self.assertIn("Usuario deshabilitado. Contacte al administrador.", response_body.decode("utf-8"))
+        self.assertEqual("deshabilitado", auth_state["soporte"]["estado"])
 
     def test_superadmin_disabled_marks_database_user_inactive(self) -> None:
         auth_state = {
-            "admin": _build_user_record(
+            "superadmin": _build_user_record(
                 user_id=7,
-                username="admin",
+                username="superadmin",
                 password="admin12345",
                 nombre_completo="Superadministrador",
                 rol="superadmin",
@@ -510,14 +560,108 @@ class AuthenticationTests(unittest.TestCase):
             stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
             synchronize_superadmin_account(get_auth_settings())
 
-        self.assertFalse(auth_state["admin"]["activo"])
-        self.assertEqual("inactivo", auth_state["admin"]["estado"])
+        self.assertFalse(auth_state["superadmin"]["activo"])
+        self.assertEqual("deshabilitado", auth_state["superadmin"]["estado"])
+
+    def test_login_blocks_user_after_repeated_failures_and_unlocks_automatically(self) -> None:
+        browser = _BrowserSession()
+        auth_state = {
+            "marta": _build_user_record(
+                user_id=1,
+                username="marta",
+                password="secreto123",
+                nombre_completo="Marta Pérez",
+                rol="gestor",
+                estado="activo",
+                activo=True,
+                failed_login_attempts=0,
+                bloqueado_hasta=None,
+            )
+        }
+        unlock_start = datetime(2026, 4, 4, 12, 0, 0)
+        with ExitStack() as stack:
+            stack.enter_context(
+                self._manual_env(
+                    LOGIN_SUPERADMIN_ENABLED="false",
+                    LOGIN_MAX_FAILED_ATTEMPTS="2",
+                    LOGIN_LOCK_MINUTES="1",
+                )
+            )
+            stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
+            stack.enter_context(
+                patch(
+                    "licican.auth.service._now_utc",
+                    side_effect=[
+                        unlock_start,
+                        unlock_start,
+                        unlock_start + timedelta(seconds=10),
+                        unlock_start + timedelta(seconds=61),
+                    ],
+                )
+            )
+            _, _, body = browser.request("/login")
+            csrf_token = self._extract_csrf(body.decode("utf-8"))
+            first_status, _, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta&password=incorrecta&csrf_token={csrf_token}",
+            )
+            second_status, _, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta&password=incorrecta&csrf_token={csrf_token}",
+            )
+            blocked_status, _, blocked_body = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta&password=secreto123&csrf_token={csrf_token}",
+            )
+            final_status, headers, _ = browser.request(
+                "/login",
+                method="POST",
+                body=f"username=marta&password=secreto123&csrf_token={csrf_token}",
+            )
+
+        self.assertEqual("401 Unauthorized", first_status)
+        self.assertEqual("401 Unauthorized", second_status)
+        self.assertEqual("429 Too Many Requests", blocked_status)
+        self.assertIn("Usuario bloqueado temporalmente", blocked_body.decode("utf-8"))
+        self.assertEqual("302 Found", final_status)
+        self.assertEqual("/licican/", headers["Location"])
+        self.assertEqual("activo", auth_state["marta"]["estado"])
+        self.assertEqual(0, auth_state["marta"]["failed_login_attempts"])
+        self.assertIsNone(auth_state["marta"]["bloqueado_hasta"])
+
+    def test_superadmin_failed_login_does_not_lock_account(self) -> None:
+        auth_state = {
+            "superadmin": _build_user_record(
+                user_id=11,
+                username="superadmin",
+                password="correcta123",
+                nombre_completo="Superadministrador",
+                rol="superadmin",
+                estado="activo",
+                activo=True,
+                failed_login_attempts=0,
+                bloqueado_hasta=None,
+            )
+        }
+        cursor = _FakeAuthCursor(auth_state)
+        row = deepcopy(auth_state["superadmin"])
+        settings = get_auth_settings()
+        current = datetime(2026, 4, 4, 12, 0, 0)
+
+        auth_service._record_failed_login(cursor, row, current, settings)
+
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
+        self.assertEqual(0, auth_state["superadmin"]["failed_login_attempts"])
+        self.assertIsNone(auth_state["superadmin"]["bloqueado_hasta"])
 
     def test_superadmin_enabled_reactivates_user_and_updates_password(self) -> None:
         auth_state = {
-            "admin": _build_user_record(
+            "superadmin": _build_user_record(
                 user_id=7,
-                username="admin",
+                username="superadmin",
                 password="vieja12345",
                 nombre_completo="Superadministrador",
                 rol="superadmin",
@@ -529,20 +673,20 @@ class AuthenticationTests(unittest.TestCase):
             stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
             synchronize_superadmin_account(get_auth_settings())
 
-        self.assertTrue(auth_state["admin"]["activo"])
-        self.assertEqual("activo", auth_state["admin"]["estado"])
-        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
-        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
-        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
-        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
-        self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["admin"]["password_hash"].encode("utf-8")))
+        self.assertTrue(auth_state["superadmin"]["activo"])
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
+        self.assertEqual("superadmin", auth_state["superadmin"]["rol_principal"])
+        self.assertEqual("Superadministrador", auth_state["superadmin"]["nombre"])
+        self.assertEqual("Licican", auth_state["superadmin"]["apellidos"])
+        self.assertEqual("superadmin@licitan.local", auth_state["superadmin"]["email"])
+        self.assertEqual("Superadministrador Licican", auth_state["superadmin"]["nombre_completo"])
+        self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["superadmin"]["password_hash"].encode("utf-8")))
 
-    def test_superadmin_sync_updates_username_and_removes_duplicates(self) -> None:
+    def test_superadmin_sync_keeps_canonical_username_and_clears_conflicts(self) -> None:
         auth_state = {
-            "admin": _build_user_record(
+            "legacy-superadmin": _build_user_record(
                 user_id=7,
-                username="admin",
+                username="legacy-superadmin",
                 password="vieja12345",
                 nombre_completo="Superadministrador",
                 rol="superadmin",
@@ -556,6 +700,14 @@ class AuthenticationTests(unittest.TestCase):
                 rol="superadmin",
                 activo=True,
             ),
+            "superadmin": _build_user_record(
+                user_id=9,
+                username="superadmin",
+                password="otra12345",
+                nombre_completo="Usuario conflictivo",
+                rol="gestor",
+                activo=True,
+            ),
             "marta": _build_user_record(
                 user_id=1,
                 username="marta",
@@ -565,21 +717,22 @@ class AuthenticationTests(unittest.TestCase):
             ),
         }
         with ExitStack() as stack:
-            stack.enter_context(self._manual_env(LOGIN_SUPERADMIN_NAME="superadmin-nuevo", LOGIN_SUPERADMIN_PASS="nueva12345"))
+            stack.enter_context(self._manual_env(LOGIN_SUPERADMIN_PASS="nueva12345"))
             stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
             synchronize_superadmin_account(get_auth_settings())
 
         superadmin_rows = [user for user in auth_state.values() if user["rol_principal"] == "superadmin"]
         self.assertEqual(1, len(superadmin_rows))
-        self.assertIn("superadmin-nuevo", auth_state)
-        self.assertNotIn("admin", auth_state)
+        self.assertIn("superadmin", auth_state)
+        self.assertNotIn("legacy-superadmin", auth_state)
         self.assertNotIn("admin-duplicado", auth_state)
-        self.assertEqual("superadmin-nuevo", auth_state["superadmin-nuevo"]["username"])
-        self.assertEqual("Superadministrador", auth_state["superadmin-nuevo"]["nombre"])
-        self.assertEqual("Licican", auth_state["superadmin-nuevo"]["apellidos"])
-        self.assertEqual("superadmin@licitan.local", auth_state["superadmin-nuevo"]["email"])
-        self.assertEqual("activo", auth_state["superadmin-nuevo"]["estado"])
-        self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["superadmin-nuevo"]["password_hash"].encode("utf-8")))
+        self.assertEqual("superadmin", auth_state["superadmin"]["username"])
+        self.assertEqual("Superadministrador", auth_state["superadmin"]["nombre"])
+        self.assertEqual("Licican", auth_state["superadmin"]["apellidos"])
+        self.assertEqual("superadmin@licitan.local", auth_state["superadmin"]["email"])
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
+        self.assertTrue(bcrypt.checkpw("nueva12345".encode("utf-8"), auth_state["superadmin"]["password_hash"].encode("utf-8")))
+        self.assertTrue(any(str(record["id"]) == "9" and record["username"] is None for record in auth_state.values()))
 
     def test_login_with_invalid_credentials_returns_generic_message(self) -> None:
         browser = _BrowserSession()
@@ -612,13 +765,13 @@ class AuthenticationTests(unittest.TestCase):
             stack.enter_context(patch("licican.auth.service.psycopg2.connect", side_effect=lambda *args, **kwargs: _fake_auth_connect(auth_state)))
             synchronize_superadmin_account(get_auth_settings())
 
-        self.assertIn("admin", auth_state)
-        self.assertEqual("Superadministrador", auth_state["admin"]["nombre"])
-        self.assertEqual("Licican", auth_state["admin"]["apellidos"])
-        self.assertEqual("superadmin@licitan.local", auth_state["admin"]["email"])
-        self.assertEqual("Superadministrador Licican", auth_state["admin"]["nombre_completo"])
-        self.assertEqual("superadmin", auth_state["admin"]["rol_principal"])
-        self.assertEqual("activo", auth_state["admin"]["estado"])
+        self.assertIn("superadmin", auth_state)
+        self.assertEqual("Superadministrador", auth_state["superadmin"]["nombre"])
+        self.assertEqual("Licican", auth_state["superadmin"]["apellidos"])
+        self.assertEqual("superadmin@licitan.local", auth_state["superadmin"]["email"])
+        self.assertEqual("Superadministrador Licican", auth_state["superadmin"]["nombre_completo"])
+        self.assertEqual("superadmin", auth_state["superadmin"]["rol_principal"])
+        self.assertEqual("activo", auth_state["superadmin"]["estado"])
 
     def test_login_with_database_error_returns_generic_message(self) -> None:
         browser = _BrowserSession()

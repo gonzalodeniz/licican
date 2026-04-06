@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from licican.access import has_capability
-from licican.users import UserFilters, UsersDatabaseError, build_users_payload, change_user_state, create_user, delete_user, update_user
+from licican.users import UserFilters, UsersDatabaseError, build_users_payload, change_user_state, create_user, delete_user, update_user, update_user_password
 from licican.web.http import (
     Request,
     deny_html,
@@ -37,10 +37,13 @@ def _user_form_values(form_data: dict[str, list[str]]) -> dict[str, object]:
     return {
         "nombre": (form_data.get("nombre") or [""])[0],
         "apellidos": (form_data.get("apellidos") or [""])[0],
+        "nombre_completo": (form_data.get("nombre_completo") or [""])[0],
         "email": (form_data.get("email") or [""])[0],
         "username": (form_data.get("username") or [""])[0],
         "rol_principal": (form_data.get("rol_principal") or [""])[0],
-        "estado": (form_data.get("estado") or ["pendiente"])[0],
+        "estado": (form_data.get("estado") or ["deshabilitado"])[0],
+        "nueva_contrasena": (form_data.get("nueva_contrasena") or [""])[0],
+        "confirmar_contrasena": (form_data.get("confirmar_contrasena") or [""])[0],
     }
 
 
@@ -97,11 +100,13 @@ def handle_create_user(request: Request, start_response) -> list[bytes]:
     form_data = _user_form_values(read_form_data(request.environ))
     try:
         create_user(
-            nombre=str(form_data["nombre"]),
-            apellidos=str(form_data["apellidos"]),
+            nombre_completo=str(form_data["nombre_completo"]),
             email=str(form_data["email"]),
+            username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
+            nueva_contrasena=str(form_data["nueva_contrasena"]),
+            confirmar_contrasena=str(form_data["confirmar_contrasena"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, str(exc))
@@ -124,8 +129,8 @@ def handle_update_user(request: Request, start_response, id: str) -> list[bytes]
             username=str(form_data["username"]),
             rol_principal=str(form_data["rol_principal"]),
             estado=str(form_data["estado"]),
-            nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
-            confirmar_contrasena=(form_data.get("confirmar_contrasena") or [""])[0],
+            nueva_contrasena=str(form_data["nueva_contrasena"]),
+            confirmar_contrasena=str(form_data["confirmar_contrasena"]),
         )
     except ValueError as exc:
         return _users_error_response(request, start_response, f"No se ha actualizado {id}. {exc}", selected_user_id=id)
@@ -152,6 +157,26 @@ def handle_change_user_state(request: Request, start_response, id: str) -> list[
         content = users_data_error_html(request.base_path, str(exc))
         return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
     return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Estado+de+usuario+actualizado")
+
+
+def handle_change_user_password(request: Request, start_response, id: str) -> list[bytes]:
+    if not has_capability(request.access_context, "manage_users"):
+        return deny_html(request, start_response, "manage_users")
+    form_data = read_form_data(request.environ)
+    try:
+        update_user_password(
+            id,
+            nueva_contrasena=(form_data.get("nueva_contrasena") or [""])[0],
+            confirmar_contrasena=(form_data.get("confirmar_contrasena") or [""])[0],
+        )
+    except ValueError as exc:
+        return _users_error_response(request, start_response, f"No se ha actualizado la contrasena de {id}. {exc}", selected_user_id=id if request.path != "/usuarios" else None)
+    except KeyError:
+        return not_found(start_response)
+    except UsersDatabaseError as exc:
+        content = users_data_error_html(request.base_path, str(exc))
+        return send_response(start_response, "503 Service Unavailable", "text/html; charset=utf-8", b"".join(html_body(content)))
+    return send_redirect(start_response, build_url(request.base_path, "/usuarios") + "?mensaje=Contrasena+de+usuario+actualizada")
 
 
 def handle_delete_user(request: Request, start_response, id: str) -> list[bytes]:

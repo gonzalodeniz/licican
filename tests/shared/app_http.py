@@ -8,6 +8,7 @@ from itsdangerous import URLSafeSerializer
 from unittest.mock import patch
 
 from licican.app import application
+from licican.auth.config import SUPERADMIN_USERNAME
 
 
 def session_cookie(*, role: str, username: str, nombre_completo: str | None = None) -> str:
@@ -16,7 +17,7 @@ def session_cookie(*, role: str, username: str, nombre_completo: str | None = No
         "username": username,
         "rol": role,
         "nombre_completo": nombre_completo or username,
-        "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
+        "is_superadmin": (role == "superadmin" and username == SUPERADMIN_USERNAME) or (role == "administrador" and username == "admin-1"),
         "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "csrf_token": "csrf-test-token",
         "auto_login_active": False,
@@ -56,8 +57,6 @@ def invoke_app(
         env_overrides["LOGIN_AUTOMATICO"] = "true"
     if "LOGIN_SUPERADMIN_ENABLED" not in os.environ:
         env_overrides["LOGIN_SUPERADMIN_ENABLED"] = "true"
-    if "LOGIN_SUPERADMIN_NAME" not in os.environ:
-        env_overrides["LOGIN_SUPERADMIN_NAME"] = "admin"
     if "LOGIN_SUPERADMIN_PASS" not in os.environ:
         env_overrides["LOGIN_SUPERADMIN_PASS"] = "admin12345"
     env_overrides["SESSION_SECRET_KEY"] = "test-session-secret"
@@ -74,7 +73,7 @@ def invoke_app(
             "username": username,
             "rol": role,
             "nombre_completo": username,
-            "is_superadmin": role in {"administrador", "superadmin"} and username == "admin-1",
+            "is_superadmin": (role == "superadmin" and username == SUPERADMIN_USERNAME) or (role == "administrador" and username == "admin-1"),
             "last_activity": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
             "csrf_token": "csrf-test-token",
             "auto_login_active": False,

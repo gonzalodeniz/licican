@@ -11,6 +11,7 @@ from licican.alerts import filter_alerts_by_user
 from licican.auth.config import get_auth_settings
 from licican.auth.csrf import ensure_csrf_token
 from licican.auth.service import AuthenticationError, synchronize_superadmin_account
+from licican.auth.config import SUPERADMIN_USERNAME
 from licican.auth.session import SessionState, now_iso
 from licican.config import normalize_base_path, resolve_pipeline_path
 from licican.pipeline import build_pipeline_payload
@@ -80,11 +81,11 @@ def activate_superadmin_session(request: Request) -> Request:
     try:
         synchronize_superadmin_account(settings)
     except AuthenticationError:
-        LOGGER.warning("No se pudo sincronizar el superadmin al activar la sesion automatica.")
+        LOGGER.debug("No se pudo sincronizar el superadmin al activar la sesion automatica.")
     request.session.clear()
     request.session.update(
         {
-            "username": settings.login_superadmin_name,
+            "username": SUPERADMIN_USERNAME,
             "rol": "superadmin",
             "nombre_completo": "",
             "is_superadmin": True,

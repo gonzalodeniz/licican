@@ -204,19 +204,20 @@ CREATE TABLE IF NOT EXISTS usuario (
     estado                  TEXT        NOT NULL,
     fecha_alta              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ultimo_acceso           TIMESTAMPTZ,
-    invitacion_pendiente     BOOLEAN     NOT NULL DEFAULT FALSE,
     username                TEXT,
     password_hash           TEXT,
     nombre_completo         TEXT,
     rol                     TEXT        NOT NULL DEFAULT 'consultor',
     activo                  BOOLEAN     NOT NULL DEFAULT TRUE,
+    failed_login_attempts    INTEGER     NOT NULL DEFAULT 0,
+    bloqueado_hasta         TIMESTAMPTZ,
     ultimo_login            TIMESTAMPTZ,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT usuario_pk PRIMARY KEY (id),
     CONSTRAINT usuario_email_uk UNIQUE (email),
-    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'inactivo', 'pendiente', 'bloqueado', 'baja logica')),
+    CONSTRAINT usuario_estado_ck CHECK (estado IN ('activo', 'deshabilitado', 'bloqueado')),
     CONSTRAINT usuario_nombre_ck CHECK (btrim(nombre) <> ''),
     CONSTRAINT usuario_apellidos_ck CHECK (btrim(apellidos) <> ''),
     CONSTRAINT usuario_email_ck CHECK (btrim(email) <> ''),
@@ -249,12 +250,12 @@ CREATE TABLE IF NOT EXISTS usuario_historial (
 
 CREATE INDEX idx_usuario_historial_usuario_fecha ON usuario_historial (usuario_id, fecha DESC, id DESC);
 
-INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, invitacion_pendiente)
+INSERT INTO usuario (id, nombre, apellidos, email, rol_principal, estado, fecha_alta, ultimo_acceso, failed_login_attempts, bloqueado_hasta)
 VALUES
-    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', FALSE),
-    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', FALSE),
-    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'pendiente', '2026-04-02T08:30:00Z', NULL, TRUE),
-    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'inactivo', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', FALSE)
+    ('usr-001', 'Ana', 'Lopez', 'ana.lopez@licican.local', 'administrador', 'activo', '2026-04-01T09:00:00Z', '2026-04-02T08:10:00Z', 0, NULL),
+    ('usr-002', 'Carlos', 'Mendez', 'carlos.mendez@licican.local', 'manager', 'activo', '2026-04-01T10:15:00Z', '2026-04-02T07:50:00Z', 0, NULL),
+    ('usr-003', 'Laura', 'Gonzalez', 'laura.gonzalez@licican.local', 'colaborador', 'deshabilitado', '2026-04-02T08:30:00Z', NULL, 0, NULL),
+    ('usr-004', 'Mario', 'Perez', 'mario.perez@licican.local', 'invitado', 'deshabilitado', '2026-03-30T11:00:00Z', '2026-03-31T15:15:00Z', 0, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO usuario_historial (usuario_id, accion, fecha, detalle)
@@ -262,7 +263,7 @@ VALUES
     ('usr-001', 'alta', '2026-04-01T09:00:00Z', 'Alta inicial de la cuenta administrativa.'),
     ('usr-001', 'acceso', '2026-04-02T08:10:00Z', 'Acceso de verificacion en el entorno de producto.'),
     ('usr-002', 'alta', '2026-04-01T10:15:00Z', 'Alta de administracion funcional.'),
-    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Invitacion inicial enviada.'),
+    ('usr-003', 'alta', '2026-04-02T08:30:00Z', 'Alta inicial de la cuenta.'),
     ('usr-004', 'alta', '2026-03-30T11:00:00Z', 'Alta inicial de invitado.'),
     ('usr-004', 'desactivacion', '2026-04-01T12:00:00Z', 'Cuenta desactivada temporalmente.')
 ON CONFLICT (usuario_id, fecha, accion, detalle) DO NOTHING;
@@ -273,15 +274,16 @@ COMMENT ON COLUMN usuario.nombre IS 'Nombre de pila del usuario';
 COMMENT ON COLUMN usuario.apellidos IS 'Apellidos del usuario';
 COMMENT ON COLUMN usuario.email IS 'Correo electrónico único de la cuenta';
 COMMENT ON COLUMN usuario.rol_principal IS 'Rol funcional principal asignado';
-COMMENT ON COLUMN usuario.estado IS 'Estado operativo de la cuenta: activo, inactivo, pendiente, bloqueado o baja logica';
+COMMENT ON COLUMN usuario.estado IS 'Estado operativo de la cuenta: activo, deshabilitado o bloqueado';
 COMMENT ON COLUMN usuario.fecha_alta IS 'Fecha de alta administrativa de la cuenta';
 COMMENT ON COLUMN usuario.ultimo_acceso IS 'Último acceso registrado por la plataforma';
-COMMENT ON COLUMN usuario.invitacion_pendiente IS 'Indica si la cuenta aún debe activar la invitación';
 COMMENT ON COLUMN usuario.username IS 'Identificador de inicio de sesión';
 COMMENT ON COLUMN usuario.password_hash IS 'Hash bcrypt de la contraseña de acceso';
 COMMENT ON COLUMN usuario.nombre_completo IS 'Nombre completo usado en la sesión autenticada';
 COMMENT ON COLUMN usuario.rol IS 'Rol de autenticación: administrador, consultor o gestor';
 COMMENT ON COLUMN usuario.activo IS 'Indica si la cuenta puede autenticarse';
+COMMENT ON COLUMN usuario.failed_login_attempts IS 'Número de fallos consecutivos de inicio de sesión';
+COMMENT ON COLUMN usuario.bloqueado_hasta IS 'Momento UTC hasta el que la cuenta permanece bloqueada';
 COMMENT ON COLUMN usuario.ultimo_login IS 'Último acceso autenticado registrado';
 COMMENT ON COLUMN usuario.created_at IS 'Fecha de creación de la cuenta de autenticación';
 COMMENT ON COLUMN usuario.updated_at IS 'Fecha de última actualización de la cuenta de autenticación';

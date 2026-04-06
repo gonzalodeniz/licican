@@ -50,9 +50,9 @@ def render_state_badge(value: object) -> str:
     normalized = str(value).strip().lower()
 
     tone = "neutral"
-    if normalized in {"resuelta", "adjudicada", "activa", "mvp", "global"}:
+    if normalized in {"resuelta", "adjudicada", "activa", "activo", "mvp", "global"}:
         tone = "success"
-    elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva", "bloqueado"}:
+    elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva", "deshabilitado", "bloqueado"}:
         tone = "danger"
     elif normalized in {"nueva", "evaluando", "preparando oferta", "presentada", "posterior", "por definir", "propio", "pendiente", "invitado / pendiente de activacion"}:
         tone = "warning"
@@ -114,11 +114,11 @@ def render_icon_button(
 _ROLE_BADGE_LABEL_ALIASES: dict[str, str] = {
     "administrador-funcional": "administrador funcional",
     "administrador-de-plataforma": "administrador",
-    "manager": "gestor",
-    "gestor": "gestor",
+    "manager": "Manager",
+    "gestor": "Manager",
     "colaborador": "colaborador",
-    "invitado": "usuario",
-    "usuario": "usuario",
+    "invitado": "Invitado",
+    "usuario": "Invitado",
     "superadmin": "superadmin",
     "administrador": "administrador",
 }
@@ -145,9 +145,14 @@ def _role_badge_label(normalized_slug: str, raw_value: str) -> str:
 def render_inline_svg_icon(name: str) -> str:
     """Devuelve un SVG inline minimo para una accion de interfaz."""
     icons = {
+        "search": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+        "confirm": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
         "edit": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>',
         "ban": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M7.5 7.5 16.5 16.5"/></svg>',
         "restore": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 17v-5h5"/></svg>',
+        "key": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><circle cx="7.5" cy="15.5" r="3.5"/><path d="M10.5 15.5H21"/><path d="M18 12.5v3"/><path d="M15 13.5v2"/></svg>',
+        "chevron-left": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>',
+        "chevron-right": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>',
         "trash": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>',
         "more": '<svg viewBox="0 0 24 24" fill="currentColor" focusable="false" aria-hidden="true"><circle cx="5" cy="12" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="19" cy="12" r="1.75"/></svg>',
         "cancel": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',

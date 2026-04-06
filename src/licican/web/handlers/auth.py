@@ -55,9 +55,10 @@ def handle_login_submit(request: Request, start_response) -> list[bytes]:
         if exc.code != "database_error":
             rate_limiter.register_failure(current_client_ip)
         request.session_state.should_persist = True
+        status = "429 Too Many Requests" if exc.code == "locked_user" else "401 Unauthorized"
         return send_response(
             start_response,
-            "401 Unauthorized",
+            status,
             "text/html; charset=utf-8",
             b"".join(
                 html_body(

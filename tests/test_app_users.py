@@ -5,17 +5,22 @@ import unittest
 from urllib.parse import urlencode
 from unittest.mock import patch
 
+import psycopg2
+
+from licican.auth.config import get_auth_settings
 from tests.shared.app_http import invoke_app, session_cookie as _session_cookie
 from tests.shared.users_db import SeededUsersState, fake_users_connect
 
 
 class ApplicationUsersTests(unittest.TestCase):
     def setUp(self) -> None:
+        get_auth_settings.cache_clear()
         self._env_patch = patch.dict(os.environ, {"DB_PASSWORD": "test-password"}, clear=False)
         self._env_patch.start()
 
     def tearDown(self) -> None:
         self._env_patch.stop()
+        get_auth_settings.cache_clear()
 
     def _patch_users_db(self, state: SeededUsersState | None = None):
         current_state = state or SeededUsersState.seed()
@@ -32,11 +37,13 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn("Usuarios totales", html)
         self.assertNotIn("Gestion administrativa de cuentas", html)
         self.assertIn("<th>Usuario</th>", html)
-        self.assertIn('value="superadmin"', html)
+        self.assertIn("<th>Rol</th>", html)
         self.assertIn("badge-rol--administrador", html)
         self.assertIn("badge-rol--gestor", html)
+        self.assertIn(">Manager<", html)
         self.assertIn("badge-rol--colaborador", html)
         self.assertIn("badge-rol--usuario", html)
+        self.assertIn(">Invitado<", html)
         self.assertIn("Ana Lopez", html)
         self.assertIn("ana.lopez@licican.local", html)
         self.assertIn("02-04-2026 08:10", html)
@@ -44,19 +51,22 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('id="toggle-users-create"', html)
         self.assertIn("Nuevo usuario", html)
         self.assertIn('id="users-create-panel" hidden', html)
-        self.assertIn('id="users-filters-panel"', html)
+        self.assertIn('id="create-password-modal" hidden', html)
         self.assertIn('id="users-table-panel"', html)
+        self.assertNotIn('id="users-filters-panel"', html)
+        self.assertIn('id="users-filter-form"', html)
         self.assertIn('class="table-wrap users-table-wrap"', html)
         self.assertIn('class="actions-cell"', html)
         self.assertIn('class="btn-icon btn-icon--edit"', html)
+        self.assertIn('class="btn-icon btn-icon--password"', html)
         self.assertIn('class="btn-icon btn-icon--ban"', html)
         self.assertIn('class="btn-icon btn-icon--restore"', html)
         self.assertIn('class="btn-icon btn-icon--delete delete-toggle-trigger"', html)
         self.assertIn('data-tooltip="Modificar"', html)
+        self.assertIn('data-tooltip="Cambiar contrasena"', html)
         self.assertIn('data-tooltip="Deshabilitar"', html)
         self.assertIn('data-tooltip="Reactivar"', html)
         self.assertIn('data-tooltip="Eliminar"', html)
-        self.assertNotIn("Cambiar contrasena", html)
         self.assertIn('class="btn-icon btn-icon--delete delete-toggle-confirm"', html)
         self.assertIn('data-tooltip="Eliminar"', html)
         self.assertIn("data-delete-toggle", html)
@@ -68,29 +78,124 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn("Reiniciar acceso", html)
         self.assertNotIn("Baja logica", html)
         self.assertNotIn('id="users-selected-panel"', html)
+        self.assertIn('>Rol<', html)
         self.assertIn('href="/licican/usuarios"', html)
         self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
         self.assertIn("Cerrar sesión", html)
 
         create_panel_index = html.index('id="users-create-panel"')
-        filters_panel_index = html.index('id="users-filters-panel"')
         table_panel_index = html.index('id="users-table-panel"')
         toggle_button_index = html.index('id="toggle-users-create"')
         self.assertLess(toggle_button_index, create_panel_index)
-        self.assertLess(create_panel_index, filters_panel_index)
+        self.assertLess(create_panel_index, table_panel_index)
 
-        filters_panel_html = html[filters_panel_index:table_panel_index]
-        self.assertIn('name="busqueda"', filters_panel_html)
-        self.assertIn('name="rol"', filters_panel_html)
-        self.assertNotIn('name="estado"', filters_panel_html)
-        self.assertNotIn('name="superficie"', filters_panel_html)
-        self.assertNotIn('Area / modulo / superficie', filters_panel_html)
+        create_panel_html = html[create_panel_index:table_panel_index]
+        self.assertNotIn('value="superadmin"', create_panel_html)
+        self.assertIn('value="administrador"', create_panel_html)
+        self.assertIn('value="manager"', create_panel_html)
+        self.assertIn('value="colaborador"', create_panel_html)
+        self.assertIn('value="invitado"', create_panel_html)
+        self.assertIn('id="nuevo_username"', create_panel_html)
+        self.assertIn('id="nuevo_nombre_completo"', create_panel_html)
+        self.assertNotIn('id="nuevo_apellidos"', create_panel_html)
+        self.assertLess(create_panel_html.index('id="nuevo_username"'), create_panel_html.index('id="nuevo_nombre_completo"'))
+        self.assertIn('id="open-create-password-modal"', create_panel_html)
+        self.assertIn('id="cancel-users-create"', create_panel_html)
+        self.assertIn('Crear usuario', create_panel_html)
+        self.assertIn('Cancelar', create_panel_html)
+        self.assertLess(create_panel_html.index('id="open-create-password-modal"'), create_panel_html.index('id="cancel-users-create"'))
+
+        table_panel_html = html[table_panel_index:]
+        self.assertIn('name="busqueda"', table_panel_html)
+        self.assertIn('name="rol"', table_panel_html)
+        self.assertIn('data-users-filter-search', table_panel_html)
+        self.assertIn('data-users-filter-role', table_panel_html)
+        self.assertNotIn('name="superficie"', table_panel_html)
+        self.assertNotIn('Area / modulo / superficie', table_panel_html)
+        self.assertNotIn('Aplicar filtros', table_panel_html)
+        self.assertNotIn('Limpiar filtros</a>', table_panel_html)
+        self.assertIn('class="users-table-footer"', table_panel_html)
+        self.assertIn('class="pagination-bar"', table_panel_html)
+        self.assertIn('class="pagination-status"', table_panel_html)
+        self.assertIn('class="pagination-nav"', table_panel_html)
+        self.assertIn('class="pagination-pages"', table_panel_html)
+        self.assertIn('class="pagination-page is-current"', table_panel_html)
+        self.assertIn('Pagina 1 de 1', table_panel_html)
+        self.assertIn('Mostrando 1-4 de 4', table_panel_html)
+        self.assertIn('id="users-page-size"', table_panel_html)
+        self.assertIn('Resultados', table_panel_html)
+        self.assertIn('placeholder="Pag #"', table_panel_html)
+        self.assertIn('class="pagination-go"', table_panel_html)
+        self.assertLess(table_panel_html.index('class="table-wrap users-table-wrap"'), table_panel_html.index('class="users-table-footer"'))
         self.assertIn("panel.hidden = true", html)
+
+    def test_users_page_shows_inline_clear_filter_action_only_when_filters_exist(self) -> None:
+        with self._patch_users_db():
+            status_without_filters, _, html_without_filters = invoke_app("/usuarios")
+            status_with_filters, _, html_with_filters = invoke_app("/usuarios", query_string="busqueda=ana&rol=administrador")
+
+        self.assertEqual("200 OK", status_without_filters)
+        self.assertEqual("200 OK", status_with_filters)
+        self.assertNotIn('data-tooltip="Limpiar filtros"', html_without_filters.decode("utf-8"))
+        self.assertIn('data-tooltip="Limpiar filtros"', html_with_filters.decode("utf-8"))
+        self.assertIn('data-users-filter-search', html_with_filters.decode("utf-8"))
+        self.assertIn('data-users-filter-role', html_with_filters.decode("utf-8"))
+
+    def test_users_create_form_role_select_includes_invitado_even_without_existing_users(self) -> None:
+        state = SeededUsersState.seed()
+        state.users.pop("usr-004", None)
+        state.history.pop("usr-004", None)
+
+        with self._patch_users_db(state):
+            status, _, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        create_panel_index = html.index('id="users-create-panel"')
+        table_panel_index = html.index('id="users-table-panel"')
+        create_panel_html = html[create_panel_index:table_panel_index]
+        self.assertIn('value="invitado"', create_panel_html)
+        self.assertIn('>Invitado<', create_panel_html)
+
+    def test_users_page_shows_floating_success_toast_from_query_message(self) -> None:
+        with self._patch_users_db():
+            status, _, body = invoke_app("/usuarios", query_string="mensaje=Usuario+actualizado")
+
+        html = body.decode("utf-8")
+        self.assertEqual("200 OK", status)
+        self.assertIn('id="users-toast-region"', html)
+        self.assertIn('data-users-toast', html)
+        self.assertIn('users-toast-success', html)
+        self.assertIn('Usuario actualizado', html)
+        self.assertIn('toastLifetimeMs = 5000', html)
+        self.assertNotIn('note-warning', html)
+
+    def test_users_page_shows_floating_error_toast_for_validation_errors(self) -> None:
+        form_data = urlencode(
+            {
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
+                "email": "ana.lopez@licican.local",
+                "rol_principal": "manager",
+                "estado": "activo",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
+            }
+        )
+        with self._patch_users_db():
+            status, _, body = invoke_app("/usuarios", method="POST", body=form_data)
+
+        html = body.decode("utf-8")
+        self.assertEqual("400 Bad Request", status)
+        self.assertIn('id="users-toast-region"', html)
+        self.assertIn('users-toast-error', html)
+        self.assertIn('El email no puede duplicarse entre usuarios.', html)
+        self.assertNotIn('note-warning', html)
 
     def test_users_page_hides_actions_and_personal_data_for_superadmin(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -98,23 +203,26 @@ class ApplicationUsersTests(unittest.TestCase):
             "estado": "activo",
             "fecha_alta": state.users["usr-001"]["fecha_alta"],
             "ultimo_acceso": None,
-            "invitacion_pendiente": False,
-            "username": "admin",
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
-        with self._patch_users_db(state):
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
+            get_auth_settings.cache_clear()
             status, headers, body = invoke_app("/usuarios")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
-        self.assertIn('id="user-row-admin"', html)
-        admin_row_start = html.index('id="user-row-admin"')
+        self.assertIn('id="user-row-superadmin"', html)
+        self.assertLess(html.index('id="user-row-superadmin"'), html.index('id="user-row-usr-001"'))
+        admin_row_start = html.index('id="user-row-superadmin"')
         admin_row_html = html[admin_row_start:html.index("</tr>", admin_row_start)]
         self.assertIn("badge-rol--superadmin", admin_row_html)
-        self.assertIn('data-label="Usuario">admin</td>', admin_row_html)
+        self.assertIn('data-label="Usuario">superadmin</td>', admin_row_html)
         self.assertIn('data-label="Nombre completo">-</td>', admin_row_html)
         self.assertIn('data-label="Email">-</td>', admin_row_html)
         self.assertNotIn('data-tooltip="Modificar"', admin_row_html)
@@ -124,8 +232,8 @@ class ApplicationUsersTests(unittest.TestCase):
 
     def test_superadmin_detail_page_hides_edit_form_and_actions(self) -> None:
         state = SeededUsersState.seed()
-        state.users["admin"] = {
-            "id": "admin",
+        state.users["superadmin"] = {
+            "id": "superadmin",
             "nombre": "",
             "apellidos": "",
             "email": "",
@@ -133,20 +241,22 @@ class ApplicationUsersTests(unittest.TestCase):
             "estado": "activo",
             "fecha_alta": state.users["usr-001"]["fecha_alta"],
             "ultimo_acceso": None,
-            "invitacion_pendiente": False,
-            "username": "admin",
+            "failed_login_attempts": 0,
+            "bloqueado_hasta": None,
+            "username": "superadmin",
             "password_hash": "hash-admin",
         }
-        state.history["admin"] = []
+        state.history["superadmin"] = []
 
-        with self._patch_users_db(state):
-            status, headers, body = invoke_app("/usuarios/admin")
+        with self._patch_users_db(state), patch.dict(os.environ, {"LOGIN_SUPERADMIN_ENABLED": "true"}, clear=False):
+            get_auth_settings.cache_clear()
+            status, headers, body = invoke_app("/usuarios/superadmin")
 
         html = body.decode("utf-8")
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.", html)
-        self.assertIn('Usuario seleccionado:</strong> admin', html)
+        self.assertIn('Usuario seleccionado:</strong> superadmin', html)
         self.assertNotIn('id="editar_username"', html)
         self.assertNotIn('id="editar_nombre"', html)
         self.assertNotIn('id="editar_email"', html)
@@ -157,22 +267,37 @@ class ApplicationUsersTests(unittest.TestCase):
 
     def test_users_page_denied_to_reader_role(self) -> None:
         invited_cookie = _session_cookie(role="invitado", username="invitado-1", nombre_completo="Invitado Demo")
-        with patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
+        with self._patch_users_db(), patch.dict(os.environ, {"LOGIN_AUTOMATICO": "false"}, clear=False):
             status, headers, body = invoke_app("/usuarios", cookies=invited_cookie)
 
         self.assertEqual("403 Forbidden", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("Acceso restringido por rol", body.decode("utf-8"))
 
+    def test_users_page_shows_database_unavailable_message_when_postgresql_fails(self) -> None:
+        with patch("licican.users.psycopg2.connect", side_effect=psycopg2.OperationalError("db down")):
+            status, headers, body = invoke_app("/usuarios")
+
+        html = body.decode("utf-8")
+        self.assertEqual("503 Service Unavailable", status)
+        self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
+        self.assertIn("Usuarios temporalmente no disponibles", html)
+        self.assertIn("El modulo de gestion de usuarios requiere acceso a la base de datos configurada.", html)
+        self.assertIn("Base de datos de usuarios no disponible", html)
+        self.assertIn("No se pudo consultar PostgreSQL para gestionar usuarios.", html)
+        self.assertIn("La gestion de usuarios depende de PostgreSQL y no puede renderizarse mientras la conexion no responda.", html)
+
     def test_user_creation_route_redirects_and_persists_account(self) -> None:
         state = SeededUsersState.seed()
         form_data = urlencode(
             {
-                "nombre": "Eva",
-                "apellidos": "Santos",
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
                 "email": "eva.santos@licican.local",
                 "rol_principal": "manager",
-                "estado": "pendiente",
+                "estado": "deshabilitado",
+                "nueva_contrasena": "clave-segura-123",
+                "confirmar_contrasena": "clave-segura-123",
             }
         )
         with self._patch_users_db(state):
@@ -186,7 +311,27 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Eva Santos", html)
         self.assertIn("eva.santos@licican.local", html)
         self.assertIn("usr-005", html)
-        self.assertIn("pendiente", html)
+        self.assertIn("deshabilitado", html)
+        self.assertIsNotNone(state.users["usr-005"]["password_hash"])
+
+    def test_user_creation_route_rejects_missing_password(self) -> None:
+        state = SeededUsersState.seed()
+        form_data = urlencode(
+            {
+                "username": "eva.santos",
+                "nombre_completo": "Eva Santos",
+                "email": "eva.santos@licican.local",
+                "rol_principal": "manager",
+                "estado": "deshabilitado",
+            }
+        )
+        with self._patch_users_db(state):
+            status, _, body = invoke_app("/usuarios", method="POST", body=form_data)
+
+        html = body.decode("utf-8")
+        self.assertEqual("400 Bad Request", status)
+        self.assertIn("La nueva contrasena no puede estar vacia.", html)
+        self.assertNotIn("usr-005", state.users)
 
     def test_user_detail_page_shows_selected_user_history(self) -> None:
         with self._patch_users_db():
@@ -199,31 +344,53 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn("Laura Gonzalez", html)
         self.assertIn('id="editar_username"', html)
         self.assertIn('name="username"', html)
+        self.assertNotIn('id="toggle-users-create"', html)
+        self.assertNotIn('id="editar_nueva_contrasena"', html)
+        self.assertNotIn('id="editar_confirmar_contrasena"', html)
+        self.assertIn('class="users-edit-actions"', html)
+        self.assertIn('class="users-edit-action users-edit-action--save"', html)
+        self.assertIn('id="users-edit-save"', html)
+        self.assertIn('disabled', html)
+        self.assertIn('users-edit-action--cancel', html)
+        self.assertIn('class="users-edit-action users-edit-action--password"', html)
+        self.assertIn('>Guardar<', html)
+        self.assertIn('>Cancelar<', html)
+        self.assertIn('>Contrasena<', html)
+        self.assertIn('id="password-change-modal"', html)
+        self.assertIn('id="password-modal-new"', html)
+        self.assertIn('id="password-modal-confirm"', html)
         username_index = html.index('id="editar_username"')
         nombre_index = html.index('id="editar_nombre"')
         self.assertLess(username_index, nombre_index)
         self.assertIn('id="users-selected-panel"', html)
         self.assertNotIn('id="users-table-panel"', html)
-        self.assertIn("Nueva contrasena", html)
-        self.assertIn("Confirmar nueva contrasena", html)
-        self.assertIn('href="#editar_nueva_contrasena"', html)
-        self.assertIn(">Cancelar</a>", html)
-        self.assertIn('class="btn-icon btn-icon--edit"', html)
-        self.assertIn('class="btn-icon btn-icon--restore"', html)
-        self.assertIn('class="btn-icon btn-icon--delete delete-toggle-trigger"', html)
-        self.assertIn('class="btn-icon btn-icon--delete delete-toggle-confirm"', html)
-        self.assertIn('data-tooltip="Modificar"', html)
-        self.assertIn('data-tooltip="Reactivar"', html)
-        self.assertIn('data-tooltip="Eliminar"', html)
-        self.assertIn('data-tooltip="Eliminar"', html)
-        self.assertIn("data-delete-toggle", html)
-        self.assertIn("showConfirm(this.dataset.userId, this.dataset.userName)", html)
-        self.assertIn("deleteUser(this.closest('.delete-toggle').dataset.userId)", html)
-        self.assertIn("hideConfirm(this.closest('.delete-toggle').dataset.userId)", html)
-        self.assertNotIn("confirm(", html)
+        self.assertIn('id="password-change-modal"', html)
+        self.assertIn('Cambiar contrasena', html)
+        self.assertIn('placeholder="Nueva contrasena"', html)
+        self.assertIn('placeholder="Confirmar contrasena"', html)
         self.assertIn("Fecha de alta: 02-04-2026 08:30", html)
         self.assertIn("02-04-2026 08:30", html)
         self.assertIn("Historial de cambios", html)
+        self.assertNotIn('btn-icon--edit"', html)
+        self.assertNotIn('btn-icon--restore"', html)
+        self.assertNotIn('btn-icon--delete delete-toggle-trigger"', html)
+        self.assertNotIn('btn-icon--delete delete-toggle-confirm"', html)
+
+        edit_role_select_start = html.index('id="editar_rol"')
+        edit_role_select_end = html.index('</select>', edit_role_select_start)
+        edit_role_select_html = html[edit_role_select_start:edit_role_select_end]
+        self.assertNotIn('value="superadmin"', edit_role_select_html)
+        self.assertIn('value="administrador"', edit_role_select_html)
+        self.assertIn('value="manager"', edit_role_select_html)
+        self.assertIn('value="colaborador"', edit_role_select_html)
+        self.assertIn('value="invitado"', edit_role_select_html)
+        self.assertIn('data-tooltip="Guardar cambios"', html)
+        self.assertIn('data-tooltip="Cancelar edición"', html)
+        self.assertIn('data-tooltip="Cambiar contraseña"', html)
+        self.assertIn('data-tooltip="Modificar contrasena"', html)
+        self.assertIn('data-tooltip="Cancelar cambio de contrasena"', html)
+        self.assertIn('setEditSaveState', html)
+        self.assertIn('openPasswordModal', html)
 
     def test_user_update_route_redirects_back_to_list_after_save(self) -> None:
         state = SeededUsersState.seed()
@@ -250,6 +417,27 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertIn('id="users-table-panel"', html)
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn("Laura Gonzalez", html)
+
+    def test_user_password_route_redirects_back_to_list_after_change(self) -> None:
+        state = SeededUsersState.seed()
+        previous_hash = str(state.users["usr-001"]["password_hash"])
+        form_data = urlencode(
+            {
+                "nueva_contrasena": "clave-segura-456",
+                "confirmar_contrasena": "clave-segura-456",
+            }
+        )
+
+        with self._patch_users_db(state):
+            status, headers, _ = invoke_app("/usuarios/usr-001/contrasena", method="POST", body=form_data)
+            page_status, _, page_body = invoke_app("/usuarios", query_string="mensaje=Contrasena+de+usuario+actualizada")
+
+        html = page_body.decode("utf-8")
+        self.assertEqual("303 See Other", status)
+        self.assertEqual("/licican/usuarios?mensaje=Contrasena+de+usuario+actualizada", headers["Location"])
+        self.assertEqual("200 OK", page_status)
+        self.assertIn("Contrasena de usuario actualizada", html)
+        self.assertNotEqual(previous_hash, str(state.users["usr-001"]["password_hash"]))
 
     def test_user_delete_route_redirects_back_to_list_after_delete(self) -> None:
         state = SeededUsersState.seed()
