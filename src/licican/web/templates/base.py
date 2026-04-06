@@ -185,7 +185,6 @@ def _navigation_html(base_path: str, current_path: str, access_context: AccessCo
     return f"""
       <aside id="side-nav" class="side-nav" aria-label="Navegacion principal">
         <h2 class="nav-title">Licican</h2>
-        {_context_html(base_path, access_context)}
         <div class="nav-section">
           <p class="nav-section-title">Modulos</p>
           {list_html}
