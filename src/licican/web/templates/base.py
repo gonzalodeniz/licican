@@ -53,48 +53,37 @@ def _navigation_items(access_context: AccessContext | None = None) -> list[dict[
         return [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "", "upcoming": True},
         ]
 
     by_role = {
         ROLE_ADMINISTRATOR: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-            {"label": "Usuarios", "description": "Cuentas, roles y accesos", "icon": "US", "path": "/usuarios", "upcoming": False},
             {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
             {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
-            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
         ],
         ROLE_SUPERADMIN: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios guardados y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo de oportunidades", "icon": "PL", "path": "/pipeline", "upcoming": False},
-            {"label": "Usuarios", "description": "Cuentas, roles y accesos", "icon": "US", "path": "/usuarios", "upcoming": False},
             {"label": "KPIs", "description": "Cobertura, adopcion y uso visibles", "icon": "KP", "path": "/kpis", "upcoming": False},
             {"label": "Conservacion", "description": "Retencion y archivado operativo", "icon": "RC", "path": "/conservacion", "upcoming": False},
-            {"label": "Permisos", "description": "Roles y restricciones por superficie", "icon": "PM", "path": "/permisos", "upcoming": False},
         ],
         ROLE_MANAGER: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
             {"label": "Alertas", "description": "Criterios propios y coincidencias activas", "icon": "AL", "path": "/alertas", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Pipeline", "description": "Seguimiento operativo propio", "icon": "PL", "path": "/pipeline", "upcoming": False},
             {"label": "KPIs", "description": "Indicadores de cobertura y uso", "icon": "KP", "path": "/kpis", "upcoming": False},
         ],
         ROLE_COLLABORATOR: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
             {"label": "Alertas", "description": "Consulta de criterios y coincidencias", "icon": "AL", "path": "/alertas", "upcoming": False},
             {"label": "Pipeline", "description": "Consulta del seguimiento operativo", "icon": "PL", "path": "/pipeline", "upcoming": False},
         ],
         ROLE_INVITED: [
             {"label": "Catalogo", "description": "Oportunidades, filtros y paginacion", "icon": "CT", "path": "/", "upcoming": False},
-            {"label": "Clasificacion TI", "description": "Reglas auditables y casos frontera", "icon": "TI", "path": "/clasificacion-ti", "upcoming": False},
         ],
     }
     return by_role[access_context.role]
@@ -178,9 +167,41 @@ def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str
     """
 
 
+def _nav_admin_group_html(base_path: str, current_path: str) -> str:
+    subitems = [
+        ("Usuarios", "/usuarios"),
+        ("Permisos", "/permisos"),
+        ("Clasificacion TI", "/clasificacion-ti"),
+    ]
+    is_open = any(_path_matches_navigation(current_path, path) for _, path in subitems)
+    open_attr = " open" if is_open else ""
+    links = "".join(
+        f'<li><a class="nav-sublink{" active" if _path_matches_navigation(current_path, path) else ""}" href="{escape(build_url(base_path, path))}">{escape(label)}</a></li>'
+        for label, path in subitems
+    )
+    return f"""
+      <li>
+        <details class="nav-group"{open_attr}>
+          <summary class="nav-link">
+            <span class="nav-icon" aria-hidden="true">AD</span>
+            <span class="nav-copy-block">
+              <span class="nav-label">Administración</span>
+            </span>
+          </summary>
+          <ul class="nav-sublist">
+            {links}
+          </ul>
+        </details>
+      </li>
+    """
+
+
 def _navigation_html(base_path: str, current_path: str, access_context: AccessContext | None = None) -> str:
-    items = "".join(_navigation_item_html(base_path, current_path, item) for item in _navigation_items(access_context))
-    list_html = f'<ul class="nav-list">{items}</ul>'
+    nav_items = _navigation_items(access_context)
+    items_html = "".join(_navigation_item_html(base_path, current_path, item) for item in nav_items)
+    if access_context is not None and access_context.role in (ROLE_ADMINISTRATOR, ROLE_SUPERADMIN):
+        items_html += _nav_admin_group_html(base_path, current_path)
+    list_html = f'<ul class="nav-list">{items_html}</ul>'
     footer_html = _navigation_footer_html(base_path, access_context)
     return f"""
       <aside id="side-nav" class="side-nav" aria-label="Navegacion principal">

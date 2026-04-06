@@ -200,6 +200,50 @@ main {
   color: #91a8bd;
 }
 
+.nav-group {
+  list-style: none;
+}
+
+.nav-group > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.nav-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav-sublist {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgb(143 194 232 / 0.1);
+  display: grid;
+  gap: 2px;
+}
+
+.nav-sublink {
+  display: block;
+  padding: 7px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #c5d8ea;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.nav-sublink:hover {
+  background: rgb(143 194 232 / 0.14);
+  color: #eef4fa;
+}
+
+.nav-sublink.active {
+  background: rgb(143 194 232 / 0.2);
+  color: #f3f8fc;
+}
+
 .mobile-nav {
   display: none;
   margin-bottom: 16px;
