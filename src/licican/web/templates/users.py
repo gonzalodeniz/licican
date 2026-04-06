@@ -563,7 +563,7 @@ def render_users(
     return page_template(
         "Licican | Gestion de usuarios",
         "Gestion de usuarios",
-        "PB-016 - Gobierno administrativo de cuentas",
+        "",
         "Permite crear, modificar o eliminar cuentas, cambiar su estado y contraseñas.",
         content,
         current_path="/usuarios",
