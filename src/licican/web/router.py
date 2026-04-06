@@ -48,6 +48,7 @@ from licican.web.handlers.retention import (
     handle_retention_page,
     handle_update_retention_policy,
 )
+from licican.web.handlers.dashboard import handle_dashboard_page
 from licican.web.handlers.users import (
     handle_api_user_detail,
     handle_api_users,
@@ -179,6 +180,7 @@ routes = [
     Route("GET", "/alertas", handle_alerts_page),
     Route("GET", "/pipeline", handle_pipeline_page),
     Route("GET", "/oportunidades/{id}", handle_opportunity_detail),
+    Route("GET", "/dashboard", handle_dashboard_page),
     Route("GET", "/", handle_catalog_page),
 ]
 
