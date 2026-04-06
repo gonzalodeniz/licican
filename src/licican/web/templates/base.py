@@ -167,17 +167,33 @@ def _navigation_item_html(base_path: str, current_path: str, item: dict[str, str
     """
 
 
+_CHEVRON_ICON = '<svg class="nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>'
+
+_ADMIN_SUBITEMS: list[tuple[str, str, str]] = [
+    (
+        "Usuarios",
+        "/usuarios",
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    ),
+    (
+        "Permisos",
+        "/permisos",
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    ),
+    (
+        "Clasificacion TI",
+        "/clasificacion-ti",
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/></svg>',
+    ),
+]
+
+
 def _nav_admin_group_html(base_path: str, current_path: str) -> str:
-    subitems = [
-        ("Usuarios", "/usuarios"),
-        ("Permisos", "/permisos"),
-        ("Clasificacion TI", "/clasificacion-ti"),
-    ]
-    is_open = any(_path_matches_navigation(current_path, path) for _, path in subitems)
+    is_open = any(_path_matches_navigation(current_path, path) for _, path, _ in _ADMIN_SUBITEMS)
     open_attr = " open" if is_open else ""
     links = "".join(
-        f'<li><a class="nav-sublink{" active" if _path_matches_navigation(current_path, path) else ""}" href="{escape(build_url(base_path, path))}">{escape(label)}</a></li>'
-        for label, path in subitems
+        f'<li><a class="nav-sublink{" active" if _path_matches_navigation(current_path, path) else ""}" href="{escape(build_url(base_path, path))}"><span class="nav-sublink-icon">{icon}</span><span>{escape(label)}</span></a></li>'
+        for label, path, icon in _ADMIN_SUBITEMS
     )
     return f"""
       <li>
@@ -187,6 +203,7 @@ def _nav_admin_group_html(base_path: str, current_path: str) -> str:
             <span class="nav-copy-block">
               <span class="nav-label">Administración</span>
             </span>
+            {_CHEVRON_ICON}
           </summary>
           <ul class="nav-sublist">
             {links}
