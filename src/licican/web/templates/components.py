@@ -50,7 +50,7 @@ def render_state_badge(value: object) -> str:
     normalized = str(value).strip().lower()
 
     tone = "neutral"
-    if normalized in {"resuelta", "adjudicada", "activa", "mvp", "global"}:
+    if normalized in {"resuelta", "adjudicada", "activa", "activo", "mvp", "global"}:
         tone = "success"
     elif normalized in {"anulada", "desierta", "desistida", "descartada", "inactiva", "deshabilitado", "bloqueado"}:
         tone = "danger"

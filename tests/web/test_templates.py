@@ -7,7 +7,7 @@ from licican.web.templates.alerts import render_alert_form
 from licican.web.templates.base import page_template
 from licican.web.templates.catalog import render_catalog
 from licican.web.templates.classification import render_classification
-from licican.web.templates.components import render_metric, render_role_badge, render_status_note, render_table
+from licican.web.templates.components import render_metric, render_role_badge, render_state_badge, render_status_note, render_table
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.detail import render_opportunity_detail
 from licican.web.templates.kpis import render_kpis
@@ -51,6 +51,7 @@ class TemplateSmokeTests(unittest.TestCase):
         self.assertIn("Manager", render_role_badge("gestor"))
         self.assertIn("Invitado", render_role_badge("invitado"))
         self.assertIn("badge-rol--administrador-funcional", render_role_badge("Administrador funcional"))
+        self.assertIn("status-badge success", render_state_badge("Activo"))
         self.assertEqual("administracion-funcional", slugify("Administración Funcional"))
 
     def test_catalog_template_renders_catalog(self) -> None:
