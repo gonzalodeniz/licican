@@ -10,7 +10,6 @@ from licican.web.templates.classification import render_classification
 from licican.web.templates.components import render_metric, render_role_badge, render_state_badge, render_status_note, render_table
 from licican.web.templates.coverage import render_coverage
 from licican.web.templates.detail import render_opportunity_detail
-from licican.web.templates.kpis import render_kpis
 from licican.web.templates.pipeline import render_pipeline
 from licican.web.templates.prioritization import render_prioritization
 from licican.web.templates.retention import render_retention_control
@@ -117,50 +116,6 @@ class TemplateSmokeTests(unittest.TestCase):
         )
         self.assertIn("Pipeline de seguimiento de oportunidades", html)
         self.assertIn("Actualizar estado", html)
-
-    def test_kpis_template_renders_product_definitions(self) -> None:
-        html = render_kpis(
-            {
-                "rol_activo": "Manager",
-                "alcance": "Operativo para manager.",
-                "modo_captura": "Mixto: cobertura visible automatizada y adopción/uso con primera consolidación manual si falta instrumentación completa.",
-                "resumen": {
-                    "fuentes_mvp": "3/3",
-                    "cobertura_visible": "3 fuentes",
-                    "alertas_activas": "0 alertas",
-                    "pipeline_visible": "0 oportunidades",
-                },
-                "indicadores": [
-                    {
-                        "nombre": "Cobertura de fuentes priorizadas",
-                        "valor_label": "Cobertura actual",
-                        "valor_actual": "3/3",
-                        "definicion": "Porcentaje de fuentes MVP priorizadas que producen datos visibles y trazables en la ventana de evaluacion.",
-                        "formula": "fuentes_MVP_con_datos / fuentes_MVP_priorizadas x 100",
-                        "umbral_inicial": "90 por ciento",
-                        "decision": "Si cae por debajo del umbral, frenar expansion y estabilizar trazabilidad e ingestion.",
-                        "captura": "Automatica sobre la cobertura visible del catalogo y la configuracion del MVP.",
-                        "limitacion": "La medicion actual usa la cobertura visible del producto.",
-                    },
-                    {
-                        "nombre": "Adopcion de alertas activas",
-                        "valor_label": "Usuarios con alerta activa",
-                        "valor_actual": "Sin alertas activas",
-                        "definicion": "Porcentaje de usuarios activos semanales que disponen de al menos una alerta activa.",
-                        "formula": "usuarios_activos_con_alerta_activa / usuarios_activos_semanales x 100",
-                        "umbral_inicial": "30 por ciento",
-                        "decision": "Si baja del umbral, simplificar onboarding y configuracion de alertas.",
-                        "captura": "Consolidacion operativa de alertas activas y usuarios con alerta en la captura actual.",
-                        "limitacion": "La primera captura puede ser manual.",
-                    },
-                ],
-            },
-            base_path="/licican",
-        )
-        self.assertIn("KPIs iniciales de cobertura, adopción y uso", html)
-        self.assertIn("Cobertura de fuentes priorizadas", html)
-        self.assertIn("Umbral inicial", html)
-        self.assertIn("Decisión asociada", html)
 
     def test_retention_template_renders_smoke(self) -> None:
         html = render_retention_control(

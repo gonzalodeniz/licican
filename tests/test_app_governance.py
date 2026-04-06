@@ -16,11 +16,9 @@ class ApplicationGovernanceTests(unittest.TestCase):
         self.assertIn('class="nav-link active" href="/licican/"', html)
         self.assertIn("Menu principal", html)
 
-    def test_admin_can_access_permissions_page_and_collaborator_kpis(self) -> None:
+    def test_admin_can_access_permissions_page(self) -> None:
         with patch.dict(os.environ, {"LICICAN_ROLE": "administrador"}, clear=False):
             admin_status, _, admin_body = invoke_app("/permisos")
-        with patch.dict(os.environ, {"LICICAN_ROLE": "manager", "LICICAN_USER_ID": "manager-1"}, clear=False):
-            kpi_status, _, kpi_body = invoke_app("/kpis")
 
         self.assertEqual("200 OK", admin_status)
         admin_html = admin_body.decode("utf-8")
@@ -28,12 +26,6 @@ class ApplicationGovernanceTests(unittest.TestCase):
         self.assertIn('id="permissions-matrix-panel"', admin_html)
         self.assertIn('class="table-wrap permissions-table-wrap"', admin_html)
         self.assertIn("Matriz funcional de roles y permisos", admin_html)
-        self.assertEqual("200 OK", kpi_status)
-        kpi_html = kpi_body.decode("utf-8")
-        self.assertIn("KPIs iniciales de cobertura, adopción y uso", kpi_html)
-        self.assertIn("Cobertura de fuentes priorizadas", kpi_html)
-        self.assertIn("Umbral inicial", kpi_html)
-        self.assertIn("Decisión asociada", kpi_html)
 
     def test_admin_can_access_retention_page(self) -> None:
         payload = {

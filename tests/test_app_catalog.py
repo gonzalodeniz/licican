@@ -48,7 +48,6 @@ class ApplicationCatalogTests(unittest.TestCase):
         self.assertIn('class="nav-link active" href="/licican/"', html)
         self.assertNotIn("Datos consolidados", html)
         self.assertIn("Alertas", html)
-        self.assertIn('href="/licican/kpis"', html)
         self.assertIn('href="/licican/conservacion"', html)
         self.assertIn('href="/licican/pipeline"', html)
         self.assertIn('href="/licican/permisos"', html)

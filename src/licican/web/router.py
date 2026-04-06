@@ -32,7 +32,7 @@ from licican.web.handlers.catalog import (
     handle_catalog_page,
     handle_classification_page,
     handle_coverage_page,
-    handle_kpis_page,
+
     handle_opportunity_detail,
     handle_permissions_page,
     handle_prioritization_page,
@@ -172,7 +172,7 @@ routes = [
     Route("GET", "/clasificacion-ti", handle_classification_page),
     Route("GET", "/cobertura-fuentes", handle_coverage_page),
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
-    Route("GET", "/kpis", handle_kpis_page),
+
     Route("GET", "/conservacion", handle_retention_page),
     Route("GET", "/permisos", handle_permissions_page),
     Route("GET", "/usuarios/{id}", handle_users_page),
