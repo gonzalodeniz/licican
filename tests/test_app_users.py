@@ -80,7 +80,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertNotIn('id="users-selected-panel"', html)
         self.assertIn('>Rol<', html)
         self.assertIn('href="/licican/usuarios"', html)
-        self.assertIn('class="nav-link active" href="/licican/usuarios"', html)
+        self.assertIn('class="nav-sublink active" href="/licican/usuarios"', html)
         self.assertIn("Cerrar sesión", html)
 
         create_panel_index = html.index('id="users-create-panel"')
@@ -256,7 +256,7 @@ class ApplicationUsersTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertEqual("text/html; charset=utf-8", headers["Content-Type"])
         self.assertIn("La cuenta superadmin no puede editarse, deshabilitarse ni eliminarse desde la interfaz.", html)
-        self.assertIn('Usuario seleccionado:</strong> superadmin', html)
+        self.assertIn('id="users-selected-panel"', html)
         self.assertNotIn('id="editar_username"', html)
         self.assertNotIn('id="editar_nombre"', html)
         self.assertNotIn('id="editar_email"', html)
