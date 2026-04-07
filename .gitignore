@@ -1,5 +1,4 @@
 .env
-.codex/
 __pycache__/
 *.py[cod]
 .git
@@ -8,3 +7,7 @@ __pycache__/
 data/
 data-licitaciones/
 reports/
+
+# Claude y codex
+.codex/
+.mcp.json
