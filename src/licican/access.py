@@ -39,7 +39,6 @@ CAPABILITY_MATRIX = {
             "manage_alerts",
             "view_pipeline",
             "manage_pipeline",
-            "view_kpis",
             "view_permissions",
             "view_retention",
             "manage_retention",
@@ -55,7 +54,6 @@ CAPABILITY_MATRIX = {
             "manage_alerts",
             "view_pipeline",
             "manage_pipeline",
-            "view_kpis",
             "view_permissions",
             "view_retention",
             "manage_retention",
@@ -71,7 +69,6 @@ CAPABILITY_MATRIX = {
             "manage_alerts",
             "view_pipeline",
             "manage_pipeline",
-            "view_kpis",
         }
     ),
     ROLE_COLLABORATOR: frozenset(

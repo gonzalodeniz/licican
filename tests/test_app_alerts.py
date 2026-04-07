@@ -45,7 +45,6 @@ class ApplicationAlertsTests(unittest.TestCase):
         self.assertEqual("200 OK", status)
         self.assertNotIn('href="/licican/alertas"', html)
         self.assertNotIn('href="/licican/pipeline"', html)
-        self.assertNotIn('href="/licican/kpis"', html)
         self.assertEqual("403 Forbidden", alerts_status)
         self.assertEqual("text/html; charset=utf-8", alerts_headers["Content-Type"])
         self.assertIn("Acceso restringido por rol", alerts_body.decode("utf-8"))

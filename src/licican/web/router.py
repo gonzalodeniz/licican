@@ -32,7 +32,7 @@ from licican.web.handlers.catalog import (
     handle_catalog_page,
     handle_classification_page,
     handle_coverage_page,
-    handle_kpis_page,
+
     handle_opportunity_detail,
     handle_permissions_page,
     handle_prioritization_page,
@@ -48,6 +48,7 @@ from licican.web.handlers.retention import (
     handle_retention_page,
     handle_update_retention_policy,
 )
+from licican.web.handlers.dashboard import handle_dashboard_page
 from licican.web.handlers.users import (
     handle_api_user_detail,
     handle_api_users,
@@ -171,7 +172,7 @@ routes = [
     Route("GET", "/clasificacion-ti", handle_classification_page),
     Route("GET", "/cobertura-fuentes", handle_coverage_page),
     Route("GET", "/priorizacion-fuentes-reales", handle_prioritization_page),
-    Route("GET", "/kpis", handle_kpis_page),
+
     Route("GET", "/conservacion", handle_retention_page),
     Route("GET", "/permisos", handle_permissions_page),
     Route("GET", "/usuarios/{id}", handle_users_page),
@@ -179,6 +180,7 @@ routes = [
     Route("GET", "/alertas", handle_alerts_page),
     Route("GET", "/pipeline", handle_pipeline_page),
     Route("GET", "/oportunidades/{id}", handle_opportunity_detail),
+    Route("GET", "/dashboard", handle_dashboard_page),
     Route("GET", "/", handle_catalog_page),
 ]
 

@@ -462,12 +462,12 @@ class AuthenticationTests(unittest.TestCase):
                 method="POST",
                 body=f"username=marta&password=secreto123&csrf_token={csrf_token}",
             )
-            page_status, _, page_body = browser.request("/kpis")
+            page_status, _, page_body = browser.request("/dashboard")
 
         self.assertEqual("302 Found", status)
         self.assertEqual("/licican/", headers["Location"])
         self.assertEqual("200 OK", page_status)
-        self.assertIn("KPIs iniciales de cobertura, adopción y uso", page_body.decode("utf-8"))
+        self.assertIn("Dashboard", page_body.decode("utf-8"))
         self.assertIsNotNone(auth_state["marta"]["ultimo_login"])
         self.assertEqual("activo", auth_state["superadmin"]["estado"])
         self.assertTrue(auth_state["superadmin"]["activo"])
